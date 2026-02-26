@@ -1,0 +1,228 @@
+{
+  "_schema_version": "1.0",
+  "_notes": [
+    "component_type must match ComponentType enum values in enums.py.",
+    "compatible_architectures entries must match RecoveryArchitecture enum values.",
+    "constraint_tags are free-form strings interpreted by the UI and validation engine.",
+    "type_specific holds fields that map to subclass attributes in components.py.",
+    "packed_volume_cm3 should include deployment bag if sold as a system.",
+    "All masses in kg, all lengths in m, all volumes in cm³, costs in USD."
+  ],
+  "components": [
+    {
+      "id": "fruity_chutes_iris_ultra_36",
+      "manufacturer": "Fruity Chutes",
+      "model_name": "Iris Ultra 36\"",
+      "component_type": "parachute",
+      "mass_kg": 0.198,
+      "packed_volume_cm3": 280.0,
+      "unit_cost_usd": 89.00,
+      "compatible_architectures": [
+        "single_deploy",
+        "dual_deploy_single_sep",
+        "dual_deploy_dual_sep"
+      ],
+      "constraint_tags": [],
+      "datasheet_url": "https://fruitychutes.com/iris-ultra-36",
+      "type_specific": {
+        "nominal_diameter_m": 0.914,
+        "drag_coefficient": 1.55,
+        "material": "ripstop_nylon",
+        "deployment_bag_included": true
+      }
+    },
+    {
+      "id": "fruity_chutes_iris_ultra_18",
+      "manufacturer": "Fruity Chutes",
+      "model_name": "Iris Ultra 18\" (Drogue)",
+      "component_type": "drogue",
+      "mass_kg": 0.065,
+      "packed_volume_cm3": 75.0,
+      "unit_cost_usd": 42.00,
+      "compatible_architectures": [
+        "dual_deploy_single_sep",
+        "dual_deploy_dual_sep"
+      ],
+      "constraint_tags": [],
+      "datasheet_url": "",
+      "type_specific": {
+        "nominal_diameter_m": 0.457,
+        "drag_coefficient": 1.50,
+        "material": "ripstop_nylon",
+        "deployment_bag_included": false
+      }
+    },
+    {
+      "id": "rocketman_r7c_24",
+      "manufacturer": "Rocketman",
+      "model_name": "R7C 24\" Compact",
+      "component_type": "parachute",
+      "mass_kg": 0.142,
+      "packed_volume_cm3": 195.0,
+      "unit_cost_usd": 64.00,
+      "compatible_architectures": [
+        "single_deploy",
+        "dual_deploy_single_sep",
+        "dual_deploy_dual_sep"
+      ],
+      "constraint_tags": [],
+      "datasheet_url": "",
+      "type_specific": {
+        "nominal_diameter_m": 0.610,
+        "drag_coefficient": 0.80,
+        "material": "ripstop_nylon",
+        "deployment_bag_included": false
+      }
+    },
+    {
+      "id": "jolly_logic_chute_release_3",
+      "manufacturer": "Jolly Logic",
+      "model_name": "Chute Release 3",
+      "component_type": "mechanical_release",
+      "mass_kg": 0.042,
+      "packed_volume_cm3": 50.0,
+      "unit_cost_usd": 89.95,
+      "compatible_architectures": [
+        "dual_deploy_single_sep"
+      ],
+      "constraint_tags": [
+        "requires_shared_bay",
+        "no_ejection_for_main"
+      ],
+      "datasheet_url": "",
+      "type_specific": {
+        "min_altitude_m": 30.0,
+        "max_altitude_m": 914.4,
+        "max_parachute_diameter_m": 1.22
+      }
+    },
+    {
+      "id": "perfectflite_stratologger_cf",
+      "manufacturer": "PerfectFlite",
+      "model_name": "StratoLoggerCF",
+      "component_type": "altimeter",
+      "mass_kg": 0.022,
+      "packed_volume_cm3": 28.0,
+      "unit_cost_usd": 59.95,
+      "compatible_architectures": [
+        "single_deploy",
+        "dual_deploy_single_sep",
+        "dual_deploy_dual_sep"
+      ],
+      "constraint_tags": [],
+      "datasheet_url": "",
+      "type_specific": {
+        "channel_count": 2,
+        "max_altitude_m": 30000.0,
+        "has_gps": false,
+        "has_logging": true
+      }
+    },
+    {
+      "id": "featherweight_raven4",
+      "manufacturer": "Featherweight Altimeters",
+      "model_name": "Raven 4",
+      "component_type": "altimeter",
+      "mass_kg": 0.018,
+      "packed_volume_cm3": 22.0,
+      "unit_cost_usd": 175.00,
+      "compatible_architectures": [
+        "single_deploy",
+        "dual_deploy_single_sep",
+        "dual_deploy_dual_sep"
+      ],
+      "constraint_tags": [],
+      "datasheet_url": "",
+      "type_specific": {
+        "channel_count": 4,
+        "max_altitude_m": 30000.0,
+        "has_gps": false,
+        "has_logging": true
+      }
+    },
+    {
+      "id": "tubular_nylon_9_16_15ft",
+      "manufacturer": "Generic",
+      "model_name": "9/16\" Tubular Nylon Shock Cord, 15 ft",
+      "component_type": "shock_cord",
+      "mass_kg": 0.180,
+      "packed_volume_cm3": 120.0,
+      "unit_cost_usd": 12.00,
+      "compatible_architectures": [
+        "single_deploy",
+        "dual_deploy_single_sep",
+        "dual_deploy_dual_sep"
+      ],
+      "constraint_tags": [],
+      "datasheet_url": "",
+      "type_specific": {
+        "length_m": 4.57,
+        "material": "tubular_nylon",
+        "tensile_strength_n": 11120.0,
+        "elongation_fraction": 0.12
+      }
+    },
+    {
+      "id": "kevlar_cord_1000lb_10ft",
+      "manufacturer": "Generic",
+      "model_name": "1000 lb Kevlar Shock Cord, 10 ft",
+      "component_type": "shock_cord",
+      "mass_kg": 0.060,
+      "packed_volume_cm3": 35.0,
+      "unit_cost_usd": 18.00,
+      "compatible_architectures": [
+        "single_deploy",
+        "dual_deploy_single_sep",
+        "dual_deploy_dual_sep"
+      ],
+      "constraint_tags": [],
+      "datasheet_url": "",
+      "type_specific": {
+        "length_m": 3.05,
+        "material": "kevlar",
+        "tensile_strength_n": 4448.0,
+        "elongation_fraction": 0.02
+      }
+    },
+    {
+      "id": "quick_link_stainless_5mm",
+      "manufacturer": "Generic",
+      "model_name": "5mm Stainless Steel Quick Link",
+      "component_type": "quick_link",
+      "mass_kg": 0.032,
+      "packed_volume_cm3": 8.0,
+      "unit_cost_usd": 4.50,
+      "compatible_architectures": [
+        "single_deploy",
+        "dual_deploy_single_sep",
+        "dual_deploy_dual_sep"
+      ],
+      "constraint_tags": [],
+      "datasheet_url": "",
+      "type_specific": {
+        "working_load_limit_n": 4900.0,
+        "minimum_breaking_strength_n": 14700.0
+      }
+    },
+    {
+      "id": "eye_nut_316ss_10_32",
+      "manufacturer": "Generic",
+      "model_name": "316 SS Eye Nut, 10-32 thread",
+      "component_type": "eye_nut",
+      "mass_kg": 0.018,
+      "packed_volume_cm3": 5.0,
+      "unit_cost_usd": 3.25,
+      "compatible_architectures": [
+        "single_deploy",
+        "dual_deploy_single_sep",
+        "dual_deploy_dual_sep"
+      ],
+      "constraint_tags": [],
+      "datasheet_url": "",
+      "type_specific": {
+        "working_load_limit_n": 2224.0,
+        "minimum_breaking_strength_n": 8896.0
+      }
+    }
+  ]
+}
