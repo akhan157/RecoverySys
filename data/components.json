@@ -1,0 +1,209 @@
+[
+  {
+    "id": "sc_tubular_nylon_9ft_1in",
+    "name": "1\" Tubular Nylon Shock Cord — 9 ft",
+    "manufacturer": "Generic",
+    "category": "shock_cord",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": 13344,
+    "elongation_percentage": 15,
+    "cord_length_m": 2.74,
+    "packed_volume_cm3": 120,
+    "mass_g": 180,
+    "notes": "1-inch flat tubular nylon webbing. Common for H/I motors."
+  },
+  {
+    "id": "sc_tubular_nylon_15ft_1in",
+    "name": "1\" Tubular Nylon Shock Cord — 15 ft",
+    "manufacturer": "Generic",
+    "category": "shock_cord",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": 13344,
+    "elongation_percentage": 15,
+    "cord_length_m": 4.57,
+    "packed_volume_cm3": 200,
+    "mass_g": 290,
+    "notes": "1-inch flat tubular nylon webbing. Good for J/K motors."
+  },
+  {
+    "id": "sc_tubular_nylon_20ft_1in",
+    "name": "1\" Tubular Nylon Shock Cord — 20 ft",
+    "manufacturer": "Generic",
+    "category": "shock_cord",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": 13344,
+    "elongation_percentage": 15,
+    "cord_length_m": 6.10,
+    "packed_volume_cm3": 270,
+    "mass_g": 390,
+    "notes": "1-inch flat tubular nylon webbing. Recommended for L+ motors."
+  },
+  {
+    "id": "sc_tubular_nylon_20ft_2in",
+    "name": "2\" Tubular Nylon Shock Cord — 20 ft",
+    "manufacturer": "Generic",
+    "category": "shock_cord",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": 26688,
+    "elongation_percentage": 15,
+    "cord_length_m": 6.10,
+    "packed_volume_cm3": 510,
+    "mass_g": 720,
+    "notes": "2-inch flat tubular nylon webbing. High-power L/M motors."
+  },
+  {
+    "id": "sc_bungee_50ft_half",
+    "name": "1/2\" Bungee Cord — 50 ft",
+    "manufacturer": "Generic",
+    "category": "shock_cord",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": 4448,
+    "elongation_percentage": 100,
+    "cord_length_m": 15.24,
+    "packed_volume_cm3": 380,
+    "mass_g": 420,
+    "notes": "High-elongation bungee. Lower peak force but lower tensile strength."
+  },
+  {
+    "id": "ql_steel_316_3000lb",
+    "name": "3/8\" Steel Quick Link — 3000 lb",
+    "manufacturer": "Generic",
+    "category": "quick_link",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": 13344,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 8,
+    "mass_g": 45,
+    "notes": "316 stainless steel. Standard for HPR quick links."
+  },
+  {
+    "id": "ql_steel_316_5000lb",
+    "name": "3/8\" Steel Quick Link — 5000 lb",
+    "manufacturer": "Generic",
+    "category": "quick_link",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": 22241,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 12,
+    "mass_g": 68,
+    "notes": "316 stainless steel heavy-duty. For L/M motor airframes."
+  },
+  {
+    "id": "ql_aluminum_2000lb",
+    "name": "1/4\" Aluminum Quick Link — 2000 lb",
+    "manufacturer": "Generic",
+    "category": "quick_link",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": 8896,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 5,
+    "mass_g": 18,
+    "notes": "Lightweight aluminum. Suitable for smaller H/I airframes only."
+  },
+  {
+    "id": "chute_rocketman_36_nylon",
+    "name": "Rocketman 36\" Nylon Parachute",
+    "manufacturer": "Rocketman",
+    "category": "parachute",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": null,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 280,
+    "mass_g": 170,
+    "notes": "Standard 36-inch nylon. Good main for 1-3 kg rockets."
+  },
+  {
+    "id": "chute_rocketman_48_nylon",
+    "name": "Rocketman 48\" Nylon Parachute",
+    "manufacturer": "Rocketman",
+    "category": "parachute",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": null,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 480,
+    "mass_g": 280,
+    "notes": "Standard 48-inch nylon. Main canopy for 3-7 kg rockets."
+  },
+  {
+    "id": "chute_rocketman_72_nylon",
+    "name": "Rocketman 72\" Nylon Parachute",
+    "manufacturer": "Rocketman",
+    "category": "parachute",
+    "compatible_architectures": ["all"],
+    "tensile_strength_n": null,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 950,
+    "mass_g": 560,
+    "notes": "72-inch nylon. Main canopy for 7-15 kg rockets."
+  },
+  {
+    "id": "chute_drogue_12_toroid",
+    "name": "12\" Toroidal Drogue Parachute",
+    "manufacturer": "Generic",
+    "category": "parachute",
+    "compatible_architectures": [
+      "dual_deploy_single_sep",
+      "dual_deploy_dual_sep"
+    ],
+    "tensile_strength_n": null,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 95,
+    "mass_g": 65,
+    "notes": "12-inch toroidal drogue. Provides stable drogue descent ~25-35 m/s."
+  },
+  {
+    "id": "chute_drogue_18_toroid",
+    "name": "18\" Toroidal Drogue Parachute",
+    "manufacturer": "Generic",
+    "category": "parachute",
+    "compatible_architectures": [
+      "dual_deploy_single_sep",
+      "dual_deploy_dual_sep"
+    ],
+    "tensile_strength_n": null,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 160,
+    "mass_g": 110,
+    "notes": "18-inch toroidal drogue. Good for heavier airframes >5 kg."
+  },
+  {
+    "id": "alt_stratologger_cf",
+    "name": "PerfectFlite StratoLogger CF",
+    "manufacturer": "PerfectFlite",
+    "category": "altimeter",
+    "compatible_architectures": [
+      "dual_deploy_single_sep",
+      "dual_deploy_dual_sep"
+    ],
+    "tensile_strength_n": null,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 18,
+    "mass_g": 15,
+    "notes": "Dual-event altimeter. Widely used for HPR dual deployment."
+  },
+  {
+    "id": "alt_raven4",
+    "name": "Featherweight Raven4",
+    "manufacturer": "Featherweight Altimeters",
+    "category": "altimeter",
+    "compatible_architectures": [
+      "dual_deploy_single_sep",
+      "dual_deploy_dual_sep"
+    ],
+    "tensile_strength_n": null,
+    "elongation_percentage": null,
+    "cord_length_m": null,
+    "packed_volume_cm3": 22,
+    "mass_g": 17,
+    "notes": "4-event altimeter with data logging and GPS option."
+  }
+]
