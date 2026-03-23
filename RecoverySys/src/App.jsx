@@ -111,6 +111,18 @@ export default function App() {
   const [state, dispatch] = useReducer(reducer, null, buildInitialState)
   const debounceRef = useRef(null)
 
+  // ── Parts browser collapse (UI pref, persisted separately) ──────────────────
+  const [browserCollapsed, setBrowserCollapsed] = React.useState(
+    () => localStorage.getItem('recoverysys-browser-collapsed') === 'true'
+  )
+  const toggleBrowser = useCallback(() => {
+    setBrowserCollapsed(prev => {
+      const next = !prev
+      localStorage.setItem('recoverysys-browser-collapsed', String(next))
+      return next
+    })
+  }, [])
+
   // ── Recompute compatibility whenever config or specs change ─────────────────
   useEffect(() => {
     clearTimeout(debounceRef.current)
@@ -243,17 +255,66 @@ export default function App() {
       <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
         {/* Desktop: 3 columns */}
         <div className="hidden md:flex" style={{ flex: 1, overflow: 'hidden' }}>
-          {/* Left: Parts Browser */}
-          <div style={{ width: '280px', flexShrink: 0, borderRight: '1px solid var(--border-default)', overflowY: 'auto', background: 'var(--bg-panel)' }}>
-            <PartsBrowser
-              parts={PARTS}
-              categories={CATEGORIES}
-              activeCategory={state.activeCategory}
-              config={state.config}
-              warnings={state.warnings}
-              onSelectCategory={setCategory}
-              onSelectPart={selectPart}
-            />
+          {/* Left: Parts Browser (collapsible) */}
+          <div style={{
+            width: browserCollapsed ? '24px' : '280px',
+            flexShrink: 0,
+            borderRight: '1px solid var(--border-default)',
+            background: 'var(--bg-panel)',
+            overflow: 'hidden',
+            transition: 'width 200ms ease',
+            position: 'relative',
+            display: 'flex',
+            flexDirection: 'column',
+          }}>
+            {/* Collapse toggle — always visible on right edge */}
+            <button
+              onClick={toggleBrowser}
+              title={browserCollapsed ? 'Expand parts browser' : 'Collapse parts browser'}
+              style={{
+                position: 'absolute',
+                top: '50%',
+                right: 0,
+                transform: 'translateY(-50%)',
+                width: '20px',
+                height: '48px',
+                background: 'var(--bg-panel)',
+                border: '1px solid var(--border-default)',
+                borderRight: 'none',
+                borderRadius: '4px 0 0 4px',
+                cursor: 'pointer',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontSize: '10px',
+                color: 'var(--text-tertiary)',
+                zIndex: 10,
+                flexShrink: 0,
+                padding: 0,
+              }}
+            >
+              {browserCollapsed ? '›' : '‹'}
+            </button>
+
+            {/* Parts browser content — hidden when collapsed */}
+            <div style={{
+              flex: 1,
+              overflowY: 'auto',
+              opacity: browserCollapsed ? 0 : 1,
+              pointerEvents: browserCollapsed ? 'none' : 'auto',
+              transition: 'opacity 150ms ease',
+              width: '280px',   /* keep inner width stable during transition */
+            }}>
+              <PartsBrowser
+                parts={PARTS}
+                categories={CATEGORIES}
+                activeCategory={state.activeCategory}
+                config={state.config}
+                warnings={state.warnings}
+                onSelectCategory={setCategory}
+                onSelectPart={selectPart}
+              />
+            </div>
           </div>
 
           {/* Middle: Config Builder */}
