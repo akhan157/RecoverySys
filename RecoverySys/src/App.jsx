@@ -321,6 +321,7 @@ export default function App() {
             {state.mobileTab === 'simulation' && (
               <SimPanel
                 simulation={state.simulation}
+                simFailed={state.simFailed}
                 simRunning={state.simRunning}
                 exportState={state.exportState}
                 config={state.config}
