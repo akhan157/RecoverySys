@@ -1,0 +1,84 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg-app:          #f5f5f5;
+  --bg-panel:        #ffffff;
+  --bg-hover:        #f7f7f7;
+  --text-primary:    #1a1a1a;
+  --text-secondary:  #555;
+  --text-tertiary:   #888;
+  --text-placeholder:#bbb;
+  --border-default:  #ddd;
+  --border-subtle:   #eee;
+  --ok-fg:           #2a7a2a;
+  --ok-bg:           #e8f4e8;
+  --warn-fg:         #d48800;
+  --warn-bg:         #fff8e1;
+  --warn-border:     #ffe082;
+  --error-fg:        #c0392b;
+  --error-bg:        #fdecea;
+  --cta-bg:          #1a1a1a;
+  --cta-fg:          #ffffff;
+  --neutral-dot:     #ccc;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+}
+
+.mono {
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-weight: 600;
+}
+
+.section-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: var(--text-tertiary);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+}
+
+/* Compat dot pulse animation */
+@keyframes dot-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+
+.dot-pulse {
+  animation: dot-pulse 300ms ease-in-out;
+}
+
+/* Spinner */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+.spinner {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+}
+
+/* Toast slide-in */
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.toast-enter {
+  animation: toast-in 200ms ease-out forwards;
+}
