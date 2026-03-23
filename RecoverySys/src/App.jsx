@@ -43,6 +43,7 @@ function buildInitialState() {
     activeCategory: CATEGORIES[0].id,
     mobileTab:      'parts',
     simulation:     null,
+    simFailed:      false,
     simRunning:     false,
     warnings:       [],
     toasts:         [],
@@ -79,9 +80,14 @@ function reducer(state, action) {
     case 'SET_WARNINGS':
       return { ...state, warnings: action.warnings }
     case 'START_SIM':
-      return { ...state, simRunning: true }
+      return { ...state, simRunning: true, simFailed: false }
     case 'SET_SIM':
-      return { ...state, simulation: action.simulation, simRunning: false }
+      return {
+        ...state,
+        simulation: action.simulation,
+        simFailed: action.simulation === null,
+        simRunning: false,
+      }
     case 'ADD_TOAST': {
       const id = Date.now()
       return { ...state, toasts: [...state.toasts, { id, ...action.toast }] }
@@ -271,6 +277,7 @@ export default function App() {
           <div style={{ width: '380px', flexShrink: 0, overflowY: 'auto', background: 'var(--bg-panel)' }}>
             <SimPanel
               simulation={state.simulation}
+              simFailed={state.simFailed}
               simRunning={state.simRunning}
               exportState={state.exportState}
               config={state.config}

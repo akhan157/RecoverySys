@@ -25,7 +25,7 @@ function canRun(specs, config) {
   )
 }
 
-export default function SimPanel({ simulation, simRunning, exportState, config, specs, onRun, onExport }) {
+export default function SimPanel({ simulation, simFailed, simRunning, exportState, config, specs, onRun, onExport }) {
   const ready = canRun(specs, config)
 
   return (
@@ -71,6 +71,13 @@ export default function SimPanel({ simulation, simRunning, exportState, config, 
       {!ready && !simRunning && (
         <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '-8px' }}>
           Requires: rocket mass, motor impulse, and a main chute.
+        </p>
+      )}
+
+      {/* Degenerate sim error */}
+      {simFailed && !simRunning && (
+        <p style={{ fontSize: '11px', color: '#c0392b', marginTop: '-8px', lineHeight: 1.4 }}>
+          ⚠ Main deploy altitude exceeds estimated apogee — lower the deploy altitude or increase motor impulse.
         </p>
       )}
 
