@@ -5,7 +5,6 @@ export const CATEGORIES = [
   { id: 'chute_protector',  label: 'Chute Protector',       placeholder: 'No chute protector selected' },
   { id: 'quick_links',      label: 'Quick Links',           placeholder: 'No quick links selected' },
   { id: 'chute_device',     label: 'Chute-Mounted Device',  placeholder: 'No chute-mounted device selected' },
-  { id: 'gps_tracker',      label: 'GPS Tracker',           placeholder: 'No GPS tracker selected' },
 ]
 
 export const PARTS = [
@@ -213,35 +212,4 @@ export const PARTS = [
     specs: { weight_g: 14 },
   },
 
-  // ── GPS Trackers ─────────────────────────────────────────────────────────────
-  // Transmit location so you can find the rocket after landing.
-  // voltage_min/max = operating range; weight_g = tracker only (antenna included).
-  {
-    id: 'fw-gps',
-    category: 'gps_tracker',
-    manufacturer: 'Featherweight',
-    name: 'Featherweight GPS',
-    specs: { voltage_min: 3.3, voltage_max: 12.0, weight_g: 30, frequency_mhz: 915 },
-  },
-  {
-    id: 'brb-900',
-    category: 'gps_tracker',
-    manufacturer: 'Big Red Bee',
-    name: 'BRB900 APRS',
-    specs: { voltage_min: 7.0, voltage_max: 12.6, weight_g: 56, frequency_mhz: 915 },
-  },
-  {
-    id: 'et-quasar',
-    category: 'gps_tracker',
-    manufacturer: 'Eggtimer',
-    name: 'Quasar WiFi Tracker',
-    specs: { voltage_min: 3.3, voltage_max: 5.5, weight_g: 25, frequency_mhz: 2400 },
-  },
-  {
-    id: 'altus-micro',
-    category: 'gps_tracker',
-    manufacturer: 'Altus Metrum',
-    name: 'TeleMini v3',
-    specs: { voltage_min: 3.2, voltage_max: 5.5, weight_g: 21, frequency_mhz: 434 },
-  },
 ]

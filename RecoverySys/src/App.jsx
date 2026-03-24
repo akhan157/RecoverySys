@@ -42,7 +42,6 @@ function buildInitialState() {
       chute_protector: rehydrate(saved?.config?.chute_protector),
       quick_links:     rehydrate(saved?.config?.quick_links),
       chute_device:    rehydrate(saved?.config?.chute_device),
-      gps_tracker:     rehydrate(saved?.config?.gps_tracker),
     },
     specs:          { ...DEFAULT_SPECS, ...(saved?.specs ?? {}) },
     activeCategory: CATEGORIES[0].id,

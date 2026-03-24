@@ -170,7 +170,6 @@ export function checkCompatibility({ config, specs }) {
     if (config.chute_protector)                       stacked += 0.5   // nomex folded flat
     if (config.quick_links)                           stacked += 0.5   // small hardware, negligible
     if (config.chute_device)                          stacked += 1.0   // clips to harness, ~1"
-    if (config.gps_tracker)                           stacked += 1.5   // small PCB + antenna
 
     if (stacked > 0) {
       const pct = Math.round((stacked / bay_length) * 100)
@@ -204,8 +203,7 @@ export function checkCompatibility({ config, specs }) {
   // avoids a red error on a completely blank/default state.
   const hasAnyComponent = !!(
     config.main_chute || config.drogue_chute || config.shock_cord ||
-    config.chute_protector || config.quick_links ||
-    config.chute_device || config.gps_tracker
+    config.chute_protector || config.quick_links || config.chute_device
   )
   if (!config.main_chute && hasAnyComponent) {
     warnings.push({
