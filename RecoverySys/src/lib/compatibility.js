@@ -85,26 +85,6 @@ export function checkCompatibility({ config, specs }) {
     }
   }
 
-  // ── Battery vs flight computer ───────────────────────────────────────────────
-  if (config.battery && config.flight_computer) {
-    const batt_v = config.battery.specs.voltage
-    const { min_voltage, max_voltage } = config.flight_computer.specs
-
-    if (batt_v < min_voltage) {
-      warnings.push({
-        level: 'error',
-        slot: 'battery',
-        message: `${config.battery.name} (${batt_v}V) is below ${config.flight_computer.name} minimum (${min_voltage}V)`,
-      })
-    } else if (batt_v > max_voltage) {
-      warnings.push({
-        level: 'error',
-        slot: 'battery',
-        message: `${config.battery.name} (${batt_v}V) exceeds ${config.flight_computer.name} maximum (${max_voltage}V) — will damage altimeter`,
-      })
-    }
-  }
-
   // ── Shock cord strength ──────────────────────────────────────────────────────
   if (config.shock_cord && mass_kg) {
     const { strength_lbs } = config.shock_cord.specs
@@ -157,21 +137,23 @@ export function checkCompatibility({ config, specs }) {
     }
   }
 
-  // ── GPS tracker voltage vs battery ───────────────────────────────────────────
-  if (config.gps_tracker && config.battery) {
-    const batt_v = config.battery.specs.voltage
-    const { voltage_min, voltage_max } = config.gps_tracker.specs
-    if (batt_v < voltage_min) {
+  // ── Chute-mounted device vs main deploy altitude ─────────────────────────────
+  // Devices like the Jolly Logic Chute Release have a max programmable altitude.
+  // Warn if the planned deploy altitude is outside the device's operable range.
+  if (config.chute_device?.specs.deploy_alt_max_ft) {
+    const deploy_ft = parseFloat(specs.main_deploy_alt_ft)
+    const { deploy_alt_min_ft, deploy_alt_max_ft } = config.chute_device.specs
+    if (deploy_ft > deploy_alt_max_ft) {
       warnings.push({
         level: 'error',
-        slot: 'gps_tracker',
-        message: `${config.battery.name} (${batt_v}V) is below ${config.gps_tracker.name} minimum (${voltage_min}V)`,
+        slot: 'chute_device',
+        message: `${config.chute_device.name} max altitude is ${deploy_alt_max_ft.toLocaleString()} ft — deploy altitude ${deploy_ft.toLocaleString()} ft exceeds it`,
       })
-    } else if (batt_v > voltage_max) {
+    } else if (deploy_ft < deploy_alt_min_ft) {
       warnings.push({
-        level: 'error',
-        slot: 'gps_tracker',
-        message: `${config.battery.name} (${batt_v}V) exceeds ${config.gps_tracker.name} maximum (${voltage_max}V) — will damage tracker`,
+        level: 'warn',
+        slot: 'chute_device',
+        message: `${config.chute_device.name} minimum altitude is ${deploy_alt_min_ft} ft — deploy altitude ${deploy_ft} ft is below it`,
       })
     }
   }
@@ -186,10 +168,9 @@ export function checkCompatibility({ config, specs }) {
     if (config.drogue_chute?.specs.packed_length_in)  stacked += config.drogue_chute.specs.packed_length_in
     if (config.shock_cord?.specs.packed_height_in)    stacked += config.shock_cord.specs.packed_height_in
     if (config.chute_protector)                       stacked += 0.5   // nomex folded flat
-    if (config.quick_links)                           stacked += 0.5   // small hardware
-    if (config.flight_computer)                       stacked += 1.5   // altimeter sled
-    if (config.battery)                               stacked += 1.0
-    if (config.gps_tracker)                           stacked += 1.5
+    if (config.quick_links)                           stacked += 0.5   // small hardware, negligible
+    if (config.chute_device)                          stacked += 1.0   // clips to harness, ~1"
+    if (config.gps_tracker)                           stacked += 1.5   // small PCB + antenna
 
     if (stacked > 0) {
       const pct = Math.round((stacked / bay_length) * 100)
@@ -222,9 +203,9 @@ export function checkCompatibility({ config, specs }) {
   // Only warn once the user has configured at least one other component —
   // avoids a red error on a completely blank/default state.
   const hasAnyComponent = !!(
-    config.main_chute || config.drogue_chute ||
-    config.flight_computer || config.battery || config.shock_cord ||
-    config.chute_protector || config.quick_links || config.gps_tracker
+    config.main_chute || config.drogue_chute || config.shock_cord ||
+    config.chute_protector || config.quick_links ||
+    config.chute_device || config.gps_tracker
   )
   if (!config.main_chute && hasAnyComponent) {
     warnings.push({

@@ -1,12 +1,11 @@
 export const CATEGORIES = [
-  { id: 'main_chute',       label: 'Main Chute',       placeholder: 'No main chute selected' },
-  { id: 'drogue_chute',     label: 'Drogue Chute',     placeholder: 'No drogue chute selected' },
-  { id: 'shock_cord',       label: 'Shock Cord',       placeholder: 'No shock cord selected' },
-  { id: 'chute_protector',  label: 'Chute Protector',  placeholder: 'No chute protector selected' },
-  { id: 'quick_links',      label: 'Quick Links',      placeholder: 'No quick links selected' },
-  { id: 'flight_computer',  label: 'Flight Computer',  placeholder: 'No flight computer selected' },
-  { id: 'battery',          label: 'Battery',          placeholder: 'No battery selected' },
-  { id: 'gps_tracker',      label: 'GPS Tracker',      placeholder: 'No GPS tracker selected' },
+  { id: 'main_chute',       label: 'Main Chute',            placeholder: 'No main chute selected' },
+  { id: 'drogue_chute',     label: 'Drogue Chute',          placeholder: 'No drogue chute selected' },
+  { id: 'shock_cord',       label: 'Shock Cord',            placeholder: 'No shock cord selected' },
+  { id: 'chute_protector',  label: 'Chute Protector',       placeholder: 'No chute protector selected' },
+  { id: 'quick_links',      label: 'Quick Links',           placeholder: 'No quick links selected' },
+  { id: 'chute_device',     label: 'Chute-Mounted Device',  placeholder: 'No chute-mounted device selected' },
+  { id: 'gps_tracker',      label: 'GPS Tracker',           placeholder: 'No GPS tracker selected' },
 ]
 
 export const PARTS = [
@@ -84,66 +83,6 @@ export const PARTS = [
     manufacturer: 'Generic',
     name: '2"×60" Streamer',
     specs: { diameter_in: 2, cd: 0.3, weight_g: 25, packed_diam_in: 0.5, packed_length_in: 4.0 },
-  },
-
-  // ── Flight Computers ─────────────────────────────────────────────────────────
-  {
-    id: 'fw-raven4',
-    category: 'flight_computer',
-    manufacturer: 'Featherweight',
-    name: 'Raven 4',
-    specs: { min_voltage: 3.7, max_voltage: 4.2, weight_g: 28, accel_limit_g: 300, dual_deploy: true },
-  },
-  {
-    id: 'pf-stratologger',
-    category: 'flight_computer',
-    manufacturer: 'Perfectflite',
-    name: 'StratoLogger CF',
-    specs: { min_voltage: 3.6, max_voltage: 5.5, weight_g: 21, accel_limit_g: 100, dual_deploy: true },
-  },
-  {
-    id: 'et-quantum',
-    category: 'flight_computer',
-    manufacturer: 'Eggtimer',
-    name: 'Quantum',
-    specs: { min_voltage: 3.6, max_voltage: 5.5, weight_g: 22, accel_limit_g: 100, dual_deploy: true },
-  },
-  {
-    id: 'mw-rrc3',
-    category: 'flight_computer',
-    manufacturer: 'MissileWorks',
-    name: 'RRC3',
-    specs: { min_voltage: 5.5, max_voltage: 12.0, weight_g: 18, accel_limit_g: 100, dual_deploy: true },
-  },
-
-  // ── Batteries ────────────────────────────────────────────────────────────────
-  {
-    id: 'batt-9v-alk',
-    category: 'battery',
-    manufacturer: 'Generic',
-    name: '9V Alkaline',
-    specs: { voltage: 9.0, capacity_mah: 550, weight_g: 45 },
-  },
-  {
-    id: 'batt-7v4-lipo',
-    category: 'battery',
-    manufacturer: 'Generic',
-    name: '7.4V LiPo 150mAh',
-    specs: { voltage: 7.4, capacity_mah: 150, weight_g: 25 },
-  },
-  {
-    id: 'batt-3v7-lipo',
-    category: 'battery',
-    manufacturer: 'Generic',
-    name: '3.7V LiPo 300mAh',
-    specs: { voltage: 3.7, capacity_mah: 300, weight_g: 15 },
-  },
-  {
-    id: 'batt-6v-lr44',
-    category: 'battery',
-    manufacturer: 'Generic',
-    name: '4× LR44 (6V)',
-    specs: { voltage: 6.0, capacity_mah: 150, weight_g: 25 },
   },
 
   // ── Shock Cord ───────────────────────────────────────────────────────────────
@@ -239,6 +178,39 @@ export const PARTS = [
     manufacturer: 'Generic',
     name: '3/8" Zinc Quick Links (×2)',
     specs: { strength_lbs: 2640, size_in: 0.375, weight_g: 85 },
+  },
+
+  // ── Chute-Mounted Devices ────────────────────────────────────────────────────
+  // Self-contained devices that clip to the parachute bridle or shock cord.
+  // All have internal batteries — no separate power source required in the bay.
+  // deploy_alt_min/max_ft = programmable deployment altitude range (release devices only).
+  {
+    id: 'jl-chute-release',
+    category: 'chute_device',
+    manufacturer: 'Jolly Logic',
+    name: 'Chute Release',
+    specs: { weight_g: 28, deploy_alt_min_ft: 100, deploy_alt_max_ft: 5000 },
+  },
+  {
+    id: 'jl-altimeter-two',
+    category: 'chute_device',
+    manufacturer: 'Jolly Logic',
+    name: 'AltimeterTwo',
+    specs: { weight_g: 16 },
+  },
+  {
+    id: 'jl-altimeter-three',
+    category: 'chute_device',
+    manufacturer: 'Jolly Logic',
+    name: 'AltimeterThree',
+    specs: { weight_g: 20 },
+  },
+  {
+    id: 'pf-firefly',
+    category: 'chute_device',
+    manufacturer: 'Perfectflite',
+    name: 'FireFly Altimeter',
+    specs: { weight_g: 14 },
   },
 
   // ── GPS Trackers ─────────────────────────────────────────────────────────────
