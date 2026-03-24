@@ -157,7 +157,7 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
                   display: 'inline-flex',
                   alignItems: 'center',
                   gap: '5px',
-                  padding: '4px 10px',
+                  padding: '5px 12px',
                   background: isActive ? 'var(--accent)' : 'var(--bg-panel)',
                   color: isActive ? 'var(--accent-text)' : 'var(--text-secondary)',
                   border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border-default)'}`,
