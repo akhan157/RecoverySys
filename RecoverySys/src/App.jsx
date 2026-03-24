@@ -209,8 +209,8 @@ export default function App() {
       a.download = 'recoverysys.ork'
       a.click()
       setTimeout(() => URL.revokeObjectURL(url), 10000)
-      dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' })
-      dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Downloaded!', level: 'ok' } })
+      dispatch({ type: 'SET_EXPORT_STATE', state: 'done' })
+      setTimeout(() => dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' }), 3000)
     } catch {
       dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' })
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Export failed — check browser console', level: 'error' } })
@@ -220,6 +220,16 @@ export default function App() {
   const removeToast = useCallback((id) => {
     dispatch({ type: 'REMOVE_TOAST', id })
   }, [])
+
+  // ── Restored-session toast ────────────────────────────────────────────────────
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('recoverysys-config')
+      if (raw && JSON.parse(raw)) {
+        dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Restored your last session.', level: 'ok' } })
+      }
+    } catch { /* no saved config or parse error — silent */ }
+  }, []) // run once on mount
 
   // ── Load share link on mount ─────────────────────────────────────────────────
   useEffect(() => {
@@ -419,7 +429,7 @@ export default function App() {
           }}>
             {[
               { id: 'parts',      label: 'Parts' },
-              { id: 'config',     label: 'Config' },
+              { id: 'config',     label: 'Config',     badge: state.warnings.some(w => w.level === 'error') },
               { id: 'simulation', label: 'Simulation' },
             ].map(tab => (
               <button
@@ -435,9 +445,17 @@ export default function App() {
                   color: state.mobileTab === tab.id ? 'var(--text-primary)' : 'var(--text-tertiary)',
                   borderTop: state.mobileTab === tab.id ? '2px solid var(--text-primary)' : '2px solid transparent',
                   transition: 'color 150ms',
+                  position: 'relative',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '4px',
                 }}
               >
                 {tab.label}
+                {tab.badge && (
+                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--error-fg)', flexShrink: 0 }} />
+                )}
               </button>
             ))}
           </div>

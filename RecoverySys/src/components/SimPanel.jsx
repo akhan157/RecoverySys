@@ -122,7 +122,7 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
               <span className="spinner" style={{ borderTopColor: '#1a1a1a', borderColor: '#ccc' }} />
               Exporting…
             </>
-          ) : 'Export .ork'}
+          ) : exportState === 'done' ? 'Exported ✓' : 'Export .ork'}
         </button>
       </div>
     </div>

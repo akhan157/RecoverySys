@@ -1,5 +1,5 @@
 export const CATEGORIES = [
-  { id: 'main_chute',       label: 'Main Chute',            placeholder: 'No main chute selected' },
+  { id: 'main_chute',       label: 'Main Chute',            placeholder: 'No main chute selected — required' },
   { id: 'drogue_chute',     label: 'Drogue Chute',          placeholder: 'No drogue chute selected' },
   { id: 'shock_cord',       label: 'Shock Cord',            placeholder: 'No shock cord selected' },
   { id: 'chute_protector',  label: 'Chute Protector',       placeholder: 'No chute protector selected' },

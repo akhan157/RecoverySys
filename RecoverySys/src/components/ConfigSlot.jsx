@@ -77,6 +77,7 @@ export default function ConfigSlot({ category, label, placeholder, part, warning
       <button
         onClick={() => onRemove(category)}
         title="Remove"
+        aria-label={`Remove ${part.name}`}
         style={{
           border: 'none',
           background: 'none',
@@ -84,8 +85,14 @@ export default function ConfigSlot({ category, label, placeholder, part, warning
           color: 'var(--text-tertiary)',
           fontSize: '16px',
           lineHeight: 1,
-          padding: '2px 4px',
+          padding: 0,
           flexShrink: 0,
+          minWidth: '44px',
+          minHeight: '44px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          margin: '0 -12px 0 0',
         }}
         onMouseEnter={e => e.currentTarget.style.color = 'var(--error-fg)'}
         onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}

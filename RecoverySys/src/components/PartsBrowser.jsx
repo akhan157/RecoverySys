@@ -39,6 +39,9 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
             const isActive = cat.id === activeCategory
             const selected = config[cat.id]
             const status   = selected ? slotStatus(cat.id, warnings) : 'neutral'
+            const tooltip  = (status === 'warn' || status === 'error')
+              ? warnings.find(w => w.slot === cat.id)?.message
+              : undefined
             return (
               <button
                 key={cat.id}
@@ -60,7 +63,7 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
                 }}
               >
                 <span>{cat.label}</span>
-                <CompatDot status={status} />
+                <CompatDot status={status} tooltip={tooltip} />
               </button>
             )
           })}

@@ -40,7 +40,7 @@ function SpecInput({ label, id, value, unit, placeholder, onChange }) {
 export default function RocketSpecs({ specs, onSetSpec }) {
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div className="section-label">Rocket Specs</div>
+      <div className="section-label">Rocket Specs — optional, improves sim accuracy</div>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         <SpecInput
           id="mass"

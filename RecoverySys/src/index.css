@@ -8,7 +8,7 @@
   --bg-hover:        #f7f7f7;
   --text-primary:    #1a1a1a;
   --text-secondary:  #555;
-  --text-tertiary:   #888;
+  --text-tertiary:   #767676; /* WCAG AA: 4.5:1 on white */
   --text-placeholder:#bbb;
   --border-default:  #ddd;
   --border-subtle:   #eee;
@@ -72,6 +72,12 @@ html, body, #root {
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
   vertical-align: middle;
+}
+
+/* Focus rings — keyboard accessibility */
+button:focus-visible {
+  outline: 2px solid var(--cta-bg);
+  outline-offset: 2px;
 }
 
 /* Toast slide-in */
