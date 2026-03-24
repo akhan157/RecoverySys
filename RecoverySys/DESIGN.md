@@ -17,12 +17,12 @@ The goal is that an L3 rocketeer opens RecoverySys and immediately trusts it bec
 
 | Use | Font | Size | Weight | Color | Notes |
 |-----|------|------|--------|-------|-------|
-| UI labels, body, navigation | `system-ui, -apple-system, sans-serif` | 13px | 400/500 | `#222` | |
-| Numeric values (metrics, specs, inputs) | `JetBrains Mono, ui-monospace, monospace` | 13px | 600 | `#1a1a1a` | ALL flight data in monospace |
-| Section headers / category labels | `system-ui` | 9px | 700 | `#888` | ALL CAPS, letter-spacing: 0.8px |
-| Warning / error messages | `system-ui` | 11px | 400 | `#555` | |
+| UI labels, body, navigation | `Inter, system-ui, -apple-system, sans-serif` | 13px | 400/500 | `var(--text-primary)` | Inter added Slate redesign 2026-03-24 |
+| Numeric values (metrics, specs, inputs) | `JetBrains Mono, ui-monospace, monospace` | 13px | 600 | `var(--text-primary)` | ALL flight data in monospace |
+| Section headers / category labels | `Inter, system-ui` | 10px | 600 | `var(--text-tertiary)` | ALL CAPS, letter-spacing: 0.06em; WCAG AA 5.28:1 |
+| Warning / error messages | `Inter, system-ui` | 11px | 400 | `var(--text-secondary)` | |
 
-**Rule:** Any number that means something physically (altitude, speed, force, grams) uses monospace. UI chrome (labels, buttons) uses system-ui.
+**Rule:** Any number that means something physically (altitude, speed, force, grams) uses monospace. UI chrome (labels, buttons) uses Inter/system-ui.
 
 ---
 
@@ -30,46 +30,58 @@ The goal is that an L3 rocketeer opens RecoverySys and immediately trusts it bec
 
 See `DESIGN.md` (repo root) for the full token reference including dark mode variants.
 
-### Light Mode Tokens
+### Light Mode Tokens (Slate palette — updated 2026-03-24)
 
 | Token | Hex | Use |
 |-------|-----|-----|
-| `--bg-app` | `#f5f5f5` | App background |
-| `--bg-panel` | `#ffffff` | Panel background (sidebar, main, sim panel) |
-| `--bg-hover` | `#f7f7f7` | Row hover |
-| `--text-primary` | `#1a1a1a` | Primary text, filled values |
-| `--text-secondary` | `#555` | Secondary text, descriptions |
-| `--text-tertiary` | `#767676` | Labels, category headers, meta — WCAG AA (4.5:1 on white) |
-| `--text-placeholder` | `#bbb` | Empty state italic text |
-| `--border-default` | `#ddd` | Panel borders, dividers |
-| `--border-subtle` | `#eee` | Row separators |
-| `--ok-fg / --ok-bg` | `#2a7a2a / #e8f4e8` | Green: compatible |
+| `--bg-app` | `#f4f5f7` | App background |
+| `--bg-panel` | `#ffffff` | Left-column panel backgrounds |
+| `--bg-right` | `#edf0f3` | Right column (parts browser + sim panel) |
+| `--bg-hover` | `#edf0f3` | Row hover |
+| `--input-bg` | `#f4f5f7` | Number inputs |
+| `--text-primary` | `#1a1d23` | Primary text, filled values |
+| `--text-secondary` | `#4a5260` | Secondary text, descriptions (6.8:1 on white) |
+| `--text-tertiary` | `#636c7e` | Labels, section headers — WCAG AA (5.28:1 on white) |
+| `--text-placeholder` | `#c8cdd8` | Empty state italic text |
+| `--border-default` | `#dde1e9` | Panel borders, dividers |
+| `--border-subtle` | `#eaecf0` | Row separators |
+| `--accent` | `#374151` | Active pill bg, focus/hover border |
+| `--accent-text` | `#ffffff` | Text on accent background |
+| `--accent-ring` | `rgba(55,65,81,0.12)` | Focus box-shadow, card hover shadow |
+| `--header-bg` | `#1a1d23` | App header background |
+| `--ok-fg / --ok-bg` | `#1a7f37 / #dafbe1` | Green: compatible |
 | `--warn-fg / --warn-bg / --warn-border` | `#d48800 / #fff8e1 / #ffe082` | Amber: warning |
 | `--error-fg / --error-bg` | `#c0392b / #fdecea` | Red: error |
-| `--cta-bg / --cta-fg` | `#1a1a1a / #ffffff` | Primary CTA button |
-| `--neutral-dot` | `#ccc` | Grey: compat not yet evaluated |
+| `--cta-bg / --cta-fg` | `#1a1d23 / #ffffff` | Primary CTA button |
+| `--neutral-dot` | `#c8cdd8` | Grey: compat not yet evaluated |
 
-### Dark Mode Tokens (added 2026-03-24)
+### Dark Mode Tokens (Slate dark — updated 2026-03-24)
 
-Applied via `[data-theme="dark"]` on `<html>`. Toggle stored in `localStorage('theme')`.
+Applied via `[data-theme="dark"]` on `<html>`. Toggle stored in `localStorage('recoverysys-theme')`.
 
-| Token | Dark Value |
-|-------|------------|
-| `--bg-app` | `#0f0f0f` |
-| `--bg-panel` | `#161616` |
-| `--bg-hover` | `#1e1e1e` |
-| `--text-primary` | `#e8e8e8` |
-| `--text-secondary` | `#aaaaaa` |
-| `--text-placeholder` | `#444444` |
-| `--border-default` | `#2a2a2a` |
-| `--border-subtle` | `#222222` |
-| `--ok-fg / --ok-bg` | `#4caf50 / #0d2b0d` |
-| `--warn-fg / --warn-bg` | `#ffb74d / #2b1f00` |
-| `--error-fg / --error-bg` | `#ef5350 / #2b0a0a` |
-| `--cta-bg / --cta-fg` | `#e8e8e8 / #0f0f0f` (**inverted**) |
-| `--neutral-dot` | `#444444` |
+| Token | Dark Value | Contrast on panel |
+|-------|------------|-------------------|
+| `--bg-app` | `#0f1014` | — |
+| `--bg-panel` | `#171a1f` | — |
+| `--bg-right` | `#13161b` | — |
+| `--bg-hover` | `#1e2128` | — |
+| `--input-bg` | `#13161b` | — |
+| `--text-primary` | `#e8eaf0` | high |
+| `--text-secondary` | `#9aa0b0` | 6.84:1 |
+| `--text-tertiary` | `#7b8496` | 4.66:1 (WCAG AA) |
+| `--text-placeholder` | `#353b48` | — |
+| `--border-default` | `#272c38` | — |
+| `--border-subtle` | `#1e2230` | — |
+| `--accent` | `#c9cdd8` | inverted on dark |
+| `--accent-text` | `#1a1d23` | — |
+| `--header-bg` | `#0d0f13` | — |
+| `--ok-fg / --ok-bg` | `#4caf50 / #0d2b0d` | — |
+| `--warn-fg / --warn-bg` | `#ffb74d / #2b1f00` | — |
+| `--error-fg / --error-bg` | `#ef5350 / #2d0a0a` | — |
+| `--cta-bg / --cta-fg` | `#e8eaf0 / #1a1d23` (**inverted**) | — |
+| `--neutral-dot` | `#353b48` | — |
 
-**Rule:** The primary CTA is `#1a1a1a` (dark), not blue. Dark says "instrument." In dark mode it inverts to `#e8e8e8` — always the highest-contrast element.
+**Rule:** The primary CTA is `#1a1d23` (slate-dark), not blue. Dark says "instrument." In dark mode it inverts to `#e8eaf0` — always the highest-contrast element.
 
 ---
 
