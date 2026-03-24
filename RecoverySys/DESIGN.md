@@ -35,7 +35,7 @@ The goal is that an L3 rocketeer opens RecoverySys and immediately trusts it bec
 | `--bg-hover` | `#f7f7f7` | Row hover |
 | `--text-primary` | `#1a1a1a` | Primary text, filled values |
 | `--text-secondary` | `#555` | Secondary text, descriptions |
-| `--text-tertiary` | `#888` | Labels, category headers, meta |
+| `--text-tertiary` | `#767676` | Labels, category headers, meta — WCAG AA (4.5:1 on white) |
 | `--text-placeholder` | `#bbb` | Empty state italic text |
 | `--border-default` | `#ddd` | Panel borders, dividers |
 | `--border-subtle` | `#eee` | Row separators |
@@ -130,7 +130,7 @@ The goal is that an L3 rocketeer opens RecoverySys and immediately trusts it bec
 | Run Simulation | Button shows spinner + "Calculating…" (disabled) → results animate in |
 | Save Config | Shows "Saving…" → "Saved ✓" for 2s |
 | Copy share link | Button label changes to "Copied!" for 2s |
-| Export .ork | Spinner on button only → "Downloaded!" toast 3s |
+| Export .ork | Button shows "Exporting…" → "Exported ✓" for 3s → resets to idle |
 
 ---
 
