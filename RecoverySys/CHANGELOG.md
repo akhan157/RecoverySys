@@ -3,6 +3,32 @@
 All notable changes to RecoverySys are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.0.0] - 2026-03-24
+
+### Added
+- Inter font as body/UI font (previously system-ui only); loaded via `<link>` to avoid render-blocking CSS `@import`
+- Dark mode FOUC prevention — blocking inline script in `<head>` reads `localStorage('recoverysys-theme')` and applies `data-theme="dark"` before first paint
+- RecoverySys/DESIGN.md decisions log — 10 entries covering all major design decisions with date and rationale
+- New CSS tokens: `--bg-right`, `--input-bg`, `--accent`, `--accent-text`, `--accent-tint`, `--accent-ring`, `--header-bg`, `--header-border`, `--radius`
+
+### Changed
+- **Slate palette redesign** — all CSS custom properties updated to the Slate palette: desaturated blue-grey tones replacing warm-grey; dark header `#1a1d23` replaces `#1a1a1a`
+- **2-column desktop layout** — left column (Config Builder + Rocket Specs) / right column (Parts Browser + Sim Panel) with distinct background tones
+- Category pills updated to use `--accent` token for active state
+- Chevron icon (10×10px SVG) replaces `▶` text glyph in manufacturer group headers
+- Dark mode toggle touch target increased to 32×32px
+- RecoverySys/DESIGN.md synced to Slate palette (was warm-grey stale values from pre-redesign)
+- TODOS.md rewritten — phantom FastAPI/Supabase backend items replaced with accurate frontend v2 items (wind model P2, thrust-curve apogee P1, parts catalog tooling P3)
+
+### Fixed
+- `--text-tertiary` WCAG AA compliance: `#8c94a3` (3.05:1) → `#636c7e` (5.28:1 on white) in light mode; `#5a6070` (2.79:1) → `#7b8496` (4.66:1 on `#171a1f`) in dark mode
+- `--chart-label` and `--chart-marker` WCAG AA compliance: same fix applied to chart axis and event-marker labels
+- PartsBrowser `max-height` catalog truncation: `1000px` → `9999px` (Rocketman has 66 parts ≈ 1650px; old value clipped catalog)
+- MfrGroup stale open state on category switch: `key={mfr}` → `key={activeCategory + '-' + mfr}` (manufacturer names appear in multiple categories)
+- PartsBrowser `onMouseLeave` stale closure: reads `e.currentTarget.getAttribute('aria-pressed')` instead of captured `isSelected` variable to prevent stuck hover styles after part selection
+- ConfigSlot empty-state border changed from `1px dashed #ccc` to `1px dashed var(--border-default)` for dark mode compatibility
+- RocketSpecs number inputs updated to use `var(--input-bg)` and `var(--border-default)` CSS tokens (was hardcoded `#fff` / `#ddd`)
+
 ## [1.0.0.0] - 2026-03-24
 
 ### Added
