@@ -78,6 +78,8 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
                 <button
                   key={part.id}
                   onClick={() => onSelectPart(part)}
+                  aria-label={`${part.name} — ${partSpecLine(part)}${isSelected ? ' (selected)' : ''}`}
+                  aria-pressed={isSelected}
                   style={{
                     display: 'flex',
                     flexDirection: 'column',
