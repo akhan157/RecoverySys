@@ -2,14 +2,46 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Repository Status
+## Project: RecoverySys
 
-This repository is currently empty — no source files, build system, or project structure have been committed yet. The working directory contains only a `.git` folder.
+Recovery bay configuration tool for high-power rocketry (HPR). React 18 + Vite SPA. No backend — pure localStorage + URL-encoded share links.
 
-When a project is added, update this file with:
-- Build, lint, and test commands
-- Project architecture and key file locations
-- Any conventions or tooling decisions made for the project
+**Version:** 1.0.0.0 (see `RecoverySys/VERSION`)
+
+### Key locations
+
+| Path | What |
+|------|------|
+| `RecoverySys/src/App.jsx` | Root component — state machine, safeTimeout, share link, session restore |
+| `RecoverySys/src/lib/ork.js` | OpenRocket `.ork` export (JSZip + XML generation) |
+| `RecoverySys/src/lib/simulation.js` | ISA atmospheric model, apogee heuristic, descent/drift calc |
+| `RecoverySys/src/lib/compatibility.js` | Compat rules engine — packing, volume, drogue-without-main |
+| `RecoverySys/src/data/parts.js` | 189-part catalog (chutes, altimeters, misc recovery) |
+| `RecoverySys/src/components/` | ConfigSlot, PartsBrowser, SimPanel, FlightChart, CompatDot |
+| `RecoverySys/src/test/` | Vitest test suite (56 tests) |
+| `RecoverySys/DESIGN.md` | Design system — color tokens, typography, spacing, interaction states |
+| `RecoverySys/TODOS.md` | Deferred v2 work items |
+| `DESIGN.md` | Full design system reference (authoritative) |
+| `TESTING.md` | Test conventions and philosophy |
+
+### Build & run
+
+```bash
+cd RecoverySys
+npm install
+npm run dev        # start dev server at localhost:5173
+npm run build      # production build → dist/
+npm test           # run tests once
+npm run test:watch # watch mode
+```
+
+### Architecture
+
+- **State:** Single `useReducer` in `App.jsx`, persisted to `localStorage` on every change
+- **safeTimeout:** `useRef` accumulates timer IDs; `useEffect` cleanup prevents stale setState after unmount
+- **Share links:** `btoa(encodeURIComponent(JSON.stringify(config)))` → `?c=` URL param
+- **Parts catalog:** Static JS array in `parts.js`; no backend DB
+- **Testing:** Vitest v4 + @testing-library/react + jsdom; fake timers + `flushPromises` pattern for async component tests
 
 ## gstack
 

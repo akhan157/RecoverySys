@@ -139,7 +139,7 @@ The Config panel has two tiers of importance:
 | Loading | Spinner + "…" label | Spinner + "…" label |
 | Success | Text changes: "Saved ✓" / "Copied!" | — |
 
-**TODO (accessibility):** CTA and secondary buttons have no visible focus ring. Add `outline: 2px solid var(--cta-bg); outline-offset: 2px` on `:focus-visible` for CTA buttons, and `outline: 2px solid #1a1a1a; outline-offset: 2px` for secondary buttons.
+**Focus ring (implemented):** `button:focus-visible { outline: 2px solid var(--cta-bg); outline-offset: 2px }` — defined in `src/index.css`.
 
 ### Touch Targets
 Minimum touch target: **44×44px** (iOS HIG / WCAG 2.5.5 AAA).
@@ -149,7 +149,7 @@ Minimum touch target: **44×44px** (iOS HIG / WCAG 2.5.5 AAA).
 | Mobile tab buttons | 44px height, flex: 1 | ✅ |
 | CTA buttons | 36px height | ⚠️ acceptable at desktop, small for mobile |
 | Secondary buttons | 32px height | ⚠️ below minimum for mobile |
-| ConfigSlot `×` remove button | ~26px | ❌ too small — fix to `min-width: 44px; min-height: 44px` |
+| ConfigSlot `×` remove button | 44×44px | ✅ fixed — `min-width: 44px; min-height: 44px` |
 
 ---
 

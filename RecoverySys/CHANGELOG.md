@@ -19,10 +19,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Mobile tab bar with Parts / Config / Sim tabs and error badge
 - DESIGN.md — full design system: color tokens, typography, spacing scale, interaction states, CompatDot system, export and session state machines
 - Vitest test suite — 56 tests covering safeTimeout lifecycle, export state machine, share-link codec (Unicode, malformed input, URL length), ork XML escaping, JSZip blob generation, restored-session toast, export button guard, and mobile error badge
-- `safeTimeout` utility — accumulates timeout IDs in a ref and clears them on unmount, preventing stale `setState` calls after component teardown
+- `safeTimeout` utility — timers are tracked in a ref and cleaned up on unmount, so background state updates never fire after the component is gone
 
 ### Changed
-- Replaced all raw `setTimeout` calls in App.jsx with `safeTimeout` to eliminate unmount-after-timer races
+- All timer callbacks in `App.jsx` now use `safeTimeout`, eliminating a class of unmount-after-timer race conditions
 - Export button disabled when `airframe_od_in` is blank (regression: was silently exporting with `|| 4` fallback)
 - `×` remove buttons on config slots now have 44×44 px touch targets and `aria-label="Remove {name}"`
 - `--text-tertiary` color token raised from `#888` (3.5:1) to `#767676` (4.5:1) to pass WCAG AA contrast
