@@ -295,10 +295,10 @@ SVG, 340×240px, fixed dimensions. Implement chart colors via CSS custom propert
 | `--chart-bg` | `#fafafa` | `#111111` |
 | `--chart-border` | `#eee` | `#222222` |
 | `--chart-grid` | `#e8e8e8` | `#252525` |
-| `--chart-axis` | `#bbbbbb` | `#444444` |
+| `--chart-axis` | `#bbbbbb` | `#555555` |
 | `--chart-path` | `#1a1a1a` | `#ffffff` |
-| `--chart-marker` | `#aaaaaa` | `#555555` |
-| `--chart-label` | `#888888` | `#666666` |
+| `--chart-marker` | `#aaaaaa` | `#777777` |
+| `--chart-label` | `#888888` | `#aaaaaa` |
 
 | Element | Spec |
 |---------|------|

@@ -144,14 +144,14 @@ Use `--chart-*` CSS tokens so the SVG responds to `[data-theme="dark"]` automati
 | `--chart-bg` | `#fafafa` | `#111111` |
 | `--chart-border` | `#eee` | `#222222` |
 | `--chart-grid` | `#e8e8e8` | `#252525` |
-| `--chart-axis` | `#bbbbbb` | `#444444` |
+| `--chart-axis` | `#bbbbbb` | `#555555` |
 | `--chart-path` | `#1a1a1a` | `#ffffff` |
-| `--chart-marker` | `#aaaaaa` | `#555555` |
-| `--chart-label` | `#888888` | `#666666` |
+| `--chart-marker` | `#aaaaaa` | `#777777` |
+| `--chart-label` | `#888888` | `#aaaaaa` |
 - Y-axis: altitude in ft (0 at bottom, apogee at top), labeled every 1000ft
 - X-axis: time in seconds, labeled every 5s
 - Event markers: vertical dashed lines at apogee (t=0), drogue deploy, main deploy (500ft), landing
-- Chart path: `stroke: #1a1a1a`, `stroke-width: 2`, `fill: none`
+- Chart path: `stroke: var(--chart-path)`, `stroke-width: 2`, `fill: none`
 - On first render: draws left-to-right via `stroke-dashoffset`, 800ms, ease-out
 - On re-run (values change): crossfade from old path to new (200ms opacity transition)
 - No-data state: axes visible but path absent; CTA "Run Simulation →" centered
