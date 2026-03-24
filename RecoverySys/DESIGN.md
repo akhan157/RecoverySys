@@ -91,12 +91,12 @@ Applied via `[data-theme="dark"]` on `<html>`. Toggle stored in `localStorage('r
 |---------|--------------|--------|
 | Panels | 0 | `1px solid var(--border-default)` |
 | Config slots (filled) | 0 | `1px solid var(--border-default)`, `border-left: 3px solid var(--ok-fg\|--warn-fg\|--error-fg)` |
-| Config slots (empty) | 0 | `1px dashed #ccc` |
-| Buttons (primary) | 4px | `none` |
-| Buttons (secondary) | 4px | `1px solid #ccc` |
-| Inputs | 0 | `1px solid #ccc` — `1px solid #1a1a1a` on focus |
-| Tooltips | 4px | `1px solid #ddd` |
-| Toasts | 4px | `none` |
+| Config slots (empty) | 0 | `1px dashed var(--border-default)` |
+| Buttons (primary) | `var(--radius)` | `none` |
+| Buttons (secondary) | `var(--radius)` | `1px solid var(--border-default)` |
+| Inputs | 0 | `1px solid var(--border-default)` — `1px solid var(--accent)` on focus |
+| Tooltips | `var(--radius)` | `1px solid var(--border-default)` |
+| Toasts | `var(--radius)` | `none` |
 
 **Rule:** Panels and slots have no border-radius. Buttons have 4px (the minimum concession to usability). No soft shadows on structural elements — shadows only on overlays (tooltips, toasts, dropdowns).
 

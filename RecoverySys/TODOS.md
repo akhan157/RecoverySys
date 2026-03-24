@@ -41,14 +41,3 @@ Last updated: 2026-03-24 by /plan-ceo-review
 
 ---
 
-## v2 — UI & Accessibility
-
-### TODO: Chart label WCAG AA fix
-**What:** Darken `--chart-label` and `--chart-marker` tokens to achieve 4.5:1 contrast on their respective chart backgrounds.
-**Why:** Chart labels (8px JetBrains Mono axis labels, event markers) currently use `--chart-label` which is below 4.5:1 on light mode chart background. Light mode: #8c94a3 on #ffffff = 3.05:1 (fails). Dark mode: #5a6070 on #0f1014 = 3.15:1 (fails).
-**Pros:** Full WCAG AA compliance across the app; matches the --text-tertiary fix shipped in Slate redesign.
-**Cons:** Slightly more prominent axis labels may compete with flight path (currently maximum contrast per spec). Solution: fix labels, keep path at full contrast — it works because labels are smaller.
-**Context:** This was noted during the Slate palette CEO review (2026-03-24) but left out of scope to avoid chart visual regression risk. Chart labels use dedicated `--chart-label` token, so fix is isolated to index.css + DESIGN.md chart token table. Suggested values: light #636c7e (5.28:1), dark #7b8496 (4.66:1 on #0f1014).
-**Effort:** S → with CC+gstack: S
-**Priority:** P2
-**Depends on:** None

@@ -46,8 +46,8 @@
   --chart-grid:       #edf0f3;
   --chart-axis:       #c8cdd8;
   --chart-path:       #1a1d23;
-  --chart-marker:     #8c94a3;
-  --chart-label:      #8c94a3;
+  --chart-marker:     #636c7e;  /* WCAG AA: 5.28:1 on #ffffff chart bg */
+  --chart-label:      #636c7e;
 }
 
 /* ── Dark mode ───────────────────────────────────────────── */
@@ -89,8 +89,8 @@
   --chart-grid:       #1a1d23;
   --chart-axis:       #353b48;
   --chart-path:       #ffffff;
-  --chart-marker:     #5a6070;
-  --chart-label:      #5a6070;
+  --chart-marker:     #7b8496;  /* WCAG AA: 4.66:1 on #0f1014 chart bg */
+  --chart-label:      #7b8496;
 }
 
 /* ── Base ────────────────────────────────────────────────── */
