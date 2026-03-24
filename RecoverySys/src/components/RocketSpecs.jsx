@@ -75,6 +75,14 @@ export default function RocketSpecs({ specs, onSetSpec }) {
           onChange={v => onSetSpec('airframe_od_in', v)}
         />
         <SpecInput
+          id="cd"
+          label="Drag Coeff (Cd)"
+          value={specs.drag_cd}
+          unit=""
+          placeholder="0.50"
+          onChange={v => onSetSpec('drag_cd', v)}
+        />
+        <SpecInput
           id="wind"
           label="Wind Speed"
           value={specs.wind_speed_mph}
@@ -93,8 +101,11 @@ export default function RocketSpecs({ specs, onSetSpec }) {
       </div>
       <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', lineHeight: 1.4 }}>
         {specs.burn_time_s
-          ? 'Apogee via powered+coast integration with drag model (±10–15%). Assumes Cd 0.65, APCP Isp 195s.'
+          ? `Apogee via powered+coast integration with ISA atmosphere (±10–15%). Cd ${specs.drag_cd || '0.50'}, Isp 195s.`
           : 'Enter burn time for ±10–15% apogee accuracy. Without it, fallback heuristic gives ±30%.'}
+      </p>
+      <p style={{ fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.4, marginTop: '-4px' }}>
+        Cd: leave blank for 0.50 (typical HPR kit). Use OpenRocket for your exact value.
       </p>
     </div>
   )

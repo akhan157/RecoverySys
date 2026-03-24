@@ -1,9 +1,18 @@
-const G          = 9.81     // m/s²
-const RHO        = 1.225    // kg/m³ air density at sea level
-const FT_PER_M   = 3.28084
+const G           = 9.81     // m/s²
+const FT_PER_M    = 3.28084
 const FPS_PER_MPS = 3.28084
-const APCP_ISP   = 195      // s — typical APCP specific impulse (Isp)
-const CD_ROCKET  = 0.65     // typical HPR rocket drag coefficient
+const APCP_ISP    = 195      // s — typical APCP specific impulse (Isp)
+const CD_DEFAULT  = 0.50    // typical subsonic HPR rocket drag coefficient
+
+/**
+ * International Standard Atmosphere (ISA) — troposphere only (< 11,000 m).
+ * Returns air density in kg/m³ at a given altitude in metres.
+ * More accurate than a constant 1.225 for flights above ~3,000 ft.
+ */
+function airDensity(alt_m) {
+  const T = 288.15 - 0.0065 * alt_m          // temperature K (lapse rate 6.5 K/km)
+  return 1.225 * Math.pow(T / 288.15, 4.256) // ISA density ratio
+}
 
 /**
  * Compute terminal descent rate in ft/s for a parachute given chute specs
@@ -31,7 +40,7 @@ export function computeDescentRate(chuteSpecs, mass_kg) {
  *
  * Returns apogee_m.
  */
-function integrateAscent(impulse_ns, total_mass_kg, burn_s, area_m2) {
+function integrateAscent(impulse_ns, total_mass_kg, burn_s, area_m2, cd) {
   // Propellant mass via Tsiolkovsky / Isp estimate
   const prop_mass_kg = Math.min(
     impulse_ns / (APCP_ISP * G),
@@ -49,7 +58,8 @@ function integrateAscent(impulse_ns, total_mass_kg, burn_s, area_m2) {
   while (t < burn_s) {
     const step  = Math.min(dt, burn_s - t)
     const m     = total_mass_kg - prop_mass_kg * (t / burn_s)
-    const drag  = 0.5 * RHO * CD_ROCKET * area_m2 * v * Math.abs(v)
+    const rho   = airDensity(alt)
+    const drag  = 0.5 * rho * cd * area_m2 * v * Math.abs(v)
     const a     = (avg_thrust - drag - m * G) / m
     v   += a * step
     alt += v * step
@@ -58,7 +68,8 @@ function integrateAscent(impulse_ns, total_mass_kg, burn_s, area_m2) {
 
   // ── Coast phase ──────────────────────────────────────────────────────────────
   while (v > 0) {
-    const drag = 0.5 * RHO * CD_ROCKET * area_m2 * v * v   // drag always opposes motion
+    const rho  = airDensity(alt)
+    const drag = 0.5 * rho * cd * area_m2 * v * v   // drag always opposes motion
     const a    = -(drag + dry_mass_kg * G) / dry_mass_kg
     v   += a * dt
     alt += v * dt
@@ -81,6 +92,7 @@ export function runSimulation({ specs, config }) {
   const impulse   = parseFloat(specs.motor_total_impulse_ns)
   const burn_s    = parseFloat(specs.burn_time_s)
   const od_in     = parseFloat(specs.airframe_od_in)
+  const cd        = parseFloat(specs.drag_cd) || CD_DEFAULT
   const wind_mph  = parseFloat(specs.wind_speed_mph) || 0
   const deploy_ft = parseFloat(specs.main_deploy_alt_ft) || 500
 
@@ -95,12 +107,12 @@ export function runSimulation({ specs, config }) {
   if (burn_s > 0 && od_in > 0) {
     const radius_m = (od_in * 0.0254) / 2
     const area_m2  = Math.PI * radius_m * radius_m
-    apogee_m      = integrateAscent(impulse, mass_kg, burn_s, area_m2)
+    apogee_m      = integrateAscent(impulse, mass_kg, burn_s, area_m2, cd)
     apogee_method = 'integrated'    // ±10–15%
   } else if (burn_s > 0) {
     // No OD: use a default 4" airframe for drag area
     const area_m2 = Math.PI * (2 * 0.0254) * (2 * 0.0254)
-    apogee_m      = integrateAscent(impulse, mass_kg, burn_s, area_m2)
+    apogee_m      = integrateAscent(impulse, mass_kg, burn_s, area_m2, cd)
     apogee_method = 'integrated-no-od'
   } else {
     // Fallback heuristic when burn time is unknown
