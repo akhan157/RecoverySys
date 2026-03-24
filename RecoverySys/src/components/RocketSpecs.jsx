@@ -19,15 +19,16 @@ function SpecInput({ label, id, value, unit, placeholder, onChange }) {
             fontWeight: 600,
             fontSize: '13px',
             color: 'var(--text-primary)',
-            border: '1px solid #ccc',
+            border: '1px solid var(--border-default)',
             borderRadius: 0,
             padding: '5px 7px',
             width: '100%',
             outline: 'none',
-            background: '#fff',
+            background: 'var(--input-bg)',
+            transition: 'border-color 0.18s ease',
           }}
-          onFocus={e => e.target.style.borderColor = '#1a1a1a'}
-          onBlur={e => e.target.style.borderColor = '#ccc'}
+          onFocus={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)' }}
+          onBlur={e => { e.target.style.borderColor = 'var(--border-default)'; e.target.style.boxShadow = '' }}
         />
         {unit && (
           <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', flexShrink: 0 }}>{unit}</span>
