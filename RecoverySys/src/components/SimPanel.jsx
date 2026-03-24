@@ -34,9 +34,7 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
       {/* Chart */}
       <div>
         <div className="section-label" style={{ marginBottom: '8px' }}>Flight Profile</div>
-        <div style={{ overflowX: 'auto' }}>
-          <FlightChart simulation={simulation} />
-        </div>
+        <FlightChart simulation={simulation} />
       </div>
 
       {/* Run button */}

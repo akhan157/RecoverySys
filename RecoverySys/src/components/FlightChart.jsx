@@ -6,6 +6,17 @@ const PAD = { top: 16, right: 16, bottom: 36, left: 56 }
 const CHART_W = W - PAD.left - PAD.right
 const CHART_H = H - PAD.top  - PAD.bottom
 
+// CSS-variable colors — respond to [data-theme="dark"] automatically
+const C = {
+  grid:    'var(--chart-grid,   #e8e8e8)',
+  axis:    'var(--chart-axis,   #bbbbbb)',
+  path:    'var(--chart-path,   #1a1a1a)',
+  marker:  'var(--chart-marker, #aaaaaa)',
+  label:   'var(--chart-label,  #888888)',
+  bg:      'var(--chart-bg,     #fafafa)',
+  border:  'var(--chart-border, #eeeeee)',
+}
+
 function nice1000(val) {
   return Math.ceil(val / 1000) * 1000
 }
@@ -27,22 +38,22 @@ function Axes({ maxAlt, maxTime }) {
       {/* Grid lines */}
       {yTicks.map(alt => (
         <line key={`gy${alt}`} x1={PAD.left} y1={yS(alt)} x2={PAD.left + CHART_W} y2={yS(alt)}
-          stroke="#eee" strokeWidth="1" />
+          stroke={C.grid} strokeWidth="1" />
       ))}
       {xTicks.map(t => (
         <line key={`gx${t}`} x1={xS(t)} y1={PAD.top} x2={xS(t)} y2={PAD.top + CHART_H}
-          stroke="#eee" strokeWidth="1" />
+          stroke={C.grid} strokeWidth="1" />
       ))}
 
       {/* Y-axis labels */}
       {yTicks.map(alt => (
         <text key={`yl${alt}`} x={PAD.left - 4} y={yS(alt) + 3}
-          textAnchor="end" fontSize="10" fontFamily="ui-monospace, monospace" fill="#888">
+          textAnchor="end" fontSize="10" fontFamily="ui-monospace, monospace" fill={C.label}>
           {alt >= 1000 ? `${alt / 1000}k` : alt}
         </text>
       ))}
       <text x={10} y={PAD.top + CHART_H / 2}
-        textAnchor="middle" fontSize="9" fontFamily="system-ui" fill="#888"
+        textAnchor="middle" fontSize="9" fontFamily="system-ui" fill={C.label}
         transform={`rotate(-90, 10, ${PAD.top + CHART_H / 2})`}>
         ALT (ft)
       </text>
@@ -50,16 +61,16 @@ function Axes({ maxAlt, maxTime }) {
       {/* X-axis labels */}
       {xTicks.map(t => (
         <text key={`xl${t}`} x={xS(t)} y={PAD.top + CHART_H + 14}
-          textAnchor="middle" fontSize="10" fontFamily="ui-monospace, monospace" fill="#888">
+          textAnchor="middle" fontSize="10" fontFamily="ui-monospace, monospace" fill={C.label}>
           {t}s
         </text>
       ))}
 
       {/* Axis lines */}
       <line x1={PAD.left} y1={PAD.top} x2={PAD.left} y2={PAD.top + CHART_H}
-        stroke="#ccc" strokeWidth="1" />
+        stroke={C.axis} strokeWidth="1" />
       <line x1={PAD.left} y1={PAD.top + CHART_H} x2={PAD.left + CHART_W} y2={PAD.top + CHART_H}
-        stroke="#ccc" strokeWidth="1" />
+        stroke={C.axis} strokeWidth="1" />
     </>
   )
 }
@@ -105,13 +116,20 @@ export default function FlightChart({ simulation }) {
     prevSim.current = simulation
   }, [simulation])
 
+  const svgStyle = {
+    display: 'block',
+    width: '100%',
+    height: 'auto',
+    background: C.bg,
+    border: `1px solid ${C.border}`,
+  }
+
   if (!simulation) {
-    // No-data state: axes visible, CTA centered
     return (
-      <svg width={W} height={H} style={{ background: '#fafafa', border: '1px solid #eee', display: 'block' }}>
+      <svg viewBox={`0 0 ${W} ${H}`} style={svgStyle}>
         <Axes maxAlt={5000} maxTime={120} />
         <text x={PAD.left + CHART_W / 2} y={PAD.top + CHART_H / 2 - 4}
-          textAnchor="middle" fontSize="12" fontFamily="system-ui" fill="#bbb">
+          textAnchor="middle" fontSize="12" fontFamily="system-ui" fill={C.label}>
           Run Simulation →
         </text>
       </svg>
@@ -129,7 +147,6 @@ export default function FlightChart({ simulation }) {
 
   const d = buildPath(timeline, maxAlt, maxTime)
 
-  // Event markers
   const events = [
     { t: 0, label: 'APOG' },
   ]
@@ -139,7 +156,7 @@ export default function FlightChart({ simulation }) {
   if (landPt) events.push({ t: landPt.t, label: 'LDG' })
 
   return (
-    <svg width={W} height={H} style={{ background: '#fafafa', border: '1px solid #eee', display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} style={svgStyle}>
       <Axes maxAlt={maxAlt} maxTime={maxTime} />
 
       {/* Event marker lines */}
@@ -148,20 +165,20 @@ export default function FlightChart({ simulation }) {
           <line
             x1={xS(ev.t)} y1={PAD.top}
             x2={xS(ev.t)} y2={PAD.top + CHART_H}
-            stroke="#aaa" strokeWidth="1" strokeDasharray="3,3"
+            stroke={C.marker} strokeWidth="1" strokeDasharray="3,3"
           />
           <text x={xS(ev.t) + 3} y={PAD.top + 10}
-            fontSize="8" fontFamily="ui-monospace, monospace" fill="#aaa">
+            fontSize="8" fontFamily="ui-monospace, monospace" fill={C.marker}>
             {ev.label}
           </text>
         </g>
       ))}
 
-      {/* Flight path */}
+      {/* Flight path — always maximum contrast */}
       <path
         ref={pathRef}
         d={d}
-        stroke="#1a1a1a"
+        stroke={C.path}
         strokeWidth="2"
         fill="none"
         style={{ strokeDasharray: 'none', strokeDashoffset: 0 }}
