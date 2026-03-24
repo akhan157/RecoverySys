@@ -33,6 +33,38 @@ All colors are defined as CSS custom properties in `src/index.css`.
 
 ---
 
+## Dark Mode Tokens
+
+Dark mode is implemented via a `[data-theme="dark"]` attribute on `<html>`. All semantic tokens are redefined; no component code changes needed.
+
+| Token | Light | Dark | Notes |
+|-------|-------|------|-------|
+| `--bg-app` | `#f5f5f5` | `#0f0f0f` | Near-black, not pure black |
+| `--bg-panel` | `#ffffff` | `#161616` | Panel backgrounds |
+| `--bg-hover` | `#f7f7f7` | `#1e1e1e` | Row hover |
+| `--text-primary` | `#1a1a1a` | `#e8e8e8` | Main content text |
+| `--text-secondary` | `#555` | `#aaaaaa` | Supporting text |
+| `--text-tertiary` | `#767676` | `#767676` | Unchanged — passes on both backgrounds |
+| `--text-placeholder` | `#bbb` | `#444444` | Empty slot placeholder text |
+| `--border-default` | `#ddd` | `#2a2a2a` | Panel dividers, input borders |
+| `--border-subtle` | `#eee` | `#222222` | Row dividers |
+| `--ok-fg` | `#2a7a2a` | `#4caf50` | Brighter green — needs more luminance on dark |
+| `--ok-bg` | `#e8f4e8` | `#0d2b0d` | Green tint background |
+| `--warn-fg` | `#d48800` | `#ffb74d` | Warmer amber — high contrast on dark |
+| `--warn-bg` | `#fff8e1` | `#2b1f00` | Amber tint background |
+| `--warn-border` | `#ffe082` | `#8a5a00` | Amber border |
+| `--error-fg` | `#c0392b` | `#ef5350` | Slightly lighter red on dark |
+| `--error-bg` | `#fdecea` | `#2b0a0a` | Red tint background |
+| `--cta-bg` | `#1a1a1a` | `#e8e8e8` | **Inverted** — light button on dark |
+| `--cta-fg` | `#ffffff` | `#0f0f0f` | **Inverted** — dark text on light button |
+| `--neutral-dot` | `#ccc` | `#444444` | Grey CompatDot |
+
+**CTA inversion rule:** The primary CTA is always the highest-contrast element. In light mode that's dark on light (`#1a1a1a` on `#f5f5f5`). In dark mode it flips to light on dark (`#e8e8e8` on `#0f0f0f`). This preserves the instrument feel — the action button is always visually dominant.
+
+**Dark mode toggle:** Implemented via `localStorage.getItem('theme')`. On mount, read the saved preference; if `'dark'`, set `document.documentElement.setAttribute('data-theme', 'dark')`. A toggle button in the header switches and persists the preference.
+
+---
+
 ## Typography
 
 | Context | Font | Size | Weight | Class/token |
@@ -170,6 +202,71 @@ Implementation: In `PartsBrowser`, derive the tooltip from `warnings.filter(w =>
 
 ---
 
+## Manufacturer Group Component (Parts Browser)
+
+The Parts Browser displays parts grouped by manufacturer, with each group collapsible via a disclosure chevron. This replaces the flat 189-part list.
+
+### Group Header
+
+- Height: 34px, padding: `7px 10px`
+- Layout: `flex, align-items: center, gap: 8px`
+- Elements (left to right): chevron icon · manufacturer name · part count · compat dot summary
+- **Chevron:** 10×10px SVG, `--text-tertiary` color, rotates 90° when open (`transform: rotate(90deg)`, 200ms ease)
+- **Manufacturer name:** 12px / 600 / `--text-primary`
+- **Part count:** JetBrains Mono, 10px, `--text-tertiary`
+- **Compat dot summary:** Show the worst-case dot(s) for parts in this group. If any part has `error`, show a red dot. If any has `warn` (and no error), show an amber dot. If all are `ok`, show a green dot. If none are evaluated yet, show a grey dot.
+- Hover: `--bg-hover` background
+
+**Why worst-case status on the group header?** Expert users know their preferred manufacturers. Showing compatibility status at the group level lets them skip entire manufacturers without expanding — e.g., if b2 Rocketry shows a red dot, they know none of those parts will work for the current config.
+
+### Expanded State
+
+- Parts list rendered below the header, no additional indent container
+- Part rows: `padding-left: 28px` (extra 18px vs group header) to create visual hierarchy
+- Part rows have the same structure as current: compat dot · part info · Add/Remove button
+- Animation: `max-height` transition, 200ms ease-out (short duration — accordions should feel snappy)
+
+### Empty Group State
+
+If a manufacturer has zero parts matching the current search filter, hide the group entirely (do not show an empty expanded group).
+
+### Search Interaction
+
+When the search input has text, expand all matching groups automatically and collapse all non-matching groups. The chevron state follows the filter — clearing the search restores previous open/closed state.
+
+---
+
+## Animation Timing
+
+All transitions use CSS custom properties so they can be scaled globally.
+
+| Name | Duration | Easing | Use |
+|------|----------|--------|-----|
+| `micro` | 50–100ms | ease | Hover backgrounds, focus border-color |
+| `short` | 150–250ms | ease-out (enter) / ease-in (exit) | Accordion expand/collapse, CompatDot pulse, toast entrance |
+| `medium` | 300–400ms | ease-in-out | Slot fill/empty transition, chart crossfade on re-run |
+| `long` | 700–900ms | ease-out | Flight chart first-render draw (`strokeDashoffset`) |
+
+**Easing rule:** Entering elements → `ease-out` (fast start, gentle stop). Exiting elements → `ease-in` (gentle start, fast end). Moving elements → `ease-in-out`.
+
+**Dark mode transition:** The theme toggle fades all color tokens with a single `transition: background 200ms ease, color 200ms ease` on `body`. This means the whole app crossfades when switching themes — no jarring flash.
+
+---
+
+## Empty States
+
+| Panel | State | Visual |
+|-------|-------|--------|
+| Parts Browser (no search results) | Zero matches for search query | Centered text: `"No parts match «{query}»"`, 12px / `--text-tertiary`, italic. No icon. |
+| Config slot (optional) | No part selected | Dashed `1px #ccc` border, 56px height, italic `--text-placeholder` text |
+| Config slot (required — main chute) | No part selected | Same + `"— required"` suffix in placeholder |
+| Sim Panel (no simulation run) | Before first run | Flight chart shows axes but no path. CTA: `"Run Simulation →"` centered in chart area, 12px / `--text-placeholder`. |
+| Sim Panel (simulation failed) | Error state | Error box below CTA: red border, 11px error message, no metrics shown |
+
+**Rule:** Empty states in RecoverySys are silent. No illustrations, no onboarding copy, no "get started" CTAs beyond what's already in the UI. The expert audience finds celebratory empty states condescending.
+
+---
+
 ## Session State
 
 - **Saved config exists:** Show toast on load — `"Restored your last session."` (level: `ok`, 3s auto-dismiss)
@@ -189,17 +286,19 @@ The Export button in the Sim Panel follows the same state machine pattern as Sav
 
 ## Flight Chart
 
-SVG, 340×240px, fixed dimensions. Background `#fafafa`, border `1px solid #eee`.
+SVG, 340×240px, fixed dimensions.
 
-| Element | Style |
-|---------|-------|
-| Grid lines | `#eee`, 1px |
-| Axis lines | `#ccc`, 1px |
-| Axis labels | JetBrains Mono, 10px, `#888` |
-| Flight path | `#1a1a1a`, 2px, no fill |
-| Event markers | Dashed `#aaa`, 3px/3px pattern |
-| Event labels | JetBrains Mono, 8px, `#aaa` |
-| Empty state CTA | system-ui, 12px, `#bbb`, centered |
+| Element | Light | Dark |
+|---------|-------|------|
+| Background | `#fafafa` | `#111111` |
+| Border | `1px solid #eee` | `1px solid #222` |
+| Grid lines | `#eee`, 1px | `#1e1e1e`, 1px |
+| Axis lines | `#ccc`, 1px | `#333`, 1px |
+| Axis labels | JetBrains Mono, 10px, `#888` | JetBrains Mono, 10px, `#555` |
+| Flight path | `#1a1a1a`, 2px, no fill | `#e8e8e8`, 2px, no fill |
+| Event markers | Dashed `#aaa`, 3px/3px | Dashed `#444`, 3px/3px |
+| Event labels | JetBrains Mono, 8px, `#aaa` | JetBrains Mono, 8px, `#555` |
+| Empty state CTA | system-ui, 12px, `#bbb`, centered | system-ui, 12px, `#444`, centered |
 
 Animation: first render draws left-to-right (800ms ease-out via `strokeDashoffset`). Re-runs crossfade (200ms).
 
@@ -225,8 +324,17 @@ Animation: slide-up + fade-in (200ms, `toast-in` keyframe).
 
 | Decision | Rationale |
 |----------|-----------|
-| Dark mode | No demand signal; would require full token duplication |
 | Icon library | Text + monospace is sufficient; icons would feel consumer-grade |
-| Animation system beyond existing | Pulse dot + chart draw + toast slide-in covers all cases |
 | "Guided setup" wizard | Expert audience; step-by-step wizard would patronize users |
 | Brand logo/icon | "RECOVERYSYS" wordmark in the header is sufficient for a technical tool |
+| Scroll-driven animations | The three existing animation tiers (chart draw, compat dot, toast) cover all cases |
+
+## Decisions Log
+
+| Date | Decision | Rationale |
+|------|----------|-----------|
+| 2026-03-22 | Initial design system created | `/plan-design-review` — Industrial/Utilitarian aesthetic, engineering instrument direction |
+| 2026-03-24 | Dark mode tokens added | User demand confirmed; full CSS custom property inversion, no component changes |
+| 2026-03-24 | Manufacturer-grouped Parts Browser | 189-part flat list replaced with collapsible manufacturer accordion — less clutter, worst-case compat status visible on group header |
+| 2026-03-24 | Animation timing table formalized | Micro/short/medium/long tiers documented with easing rules |
+| 2026-03-24 | Empty states documented | Silent empty states for all panels — no onboarding copy for expert audience |

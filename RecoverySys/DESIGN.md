@@ -28,6 +28,10 @@ The goal is that an L3 rocketeer opens RecoverySys and immediately trusts it bec
 
 ## Color System
 
+See `DESIGN.md` (repo root) for the full token reference including dark mode variants.
+
+### Light Mode Tokens
+
 | Token | Hex | Use |
 |-------|-----|-----|
 | `--bg-app` | `#f5f5f5` | App background |
@@ -39,18 +43,33 @@ The goal is that an L3 rocketeer opens RecoverySys and immediately trusts it bec
 | `--text-placeholder` | `#bbb` | Empty state italic text |
 | `--border-default` | `#ddd` | Panel borders, dividers |
 | `--border-subtle` | `#eee` | Row separators |
-| `--ok-fg` | `#2a7a2a` | Green: compatible, pass, safe |
-| `--ok-bg` | `#e8f4e8` | Green background (selected rows, ok slots) |
-| `--warn-fg` | `#d48800` | Amber: warning |
-| `--warn-bg` | `#fff8e1` | Amber background (warning box) |
-| `--warn-border` | `#ffe082` | Amber border |
-| `--error-fg` | `#c0392b` | Red: error, fail, unsafe |
-| `--error-bg` | `#fdecea` | Red background (error box) |
-| `--cta-bg` | `#1a1a1a` | Primary CTA button background |
-| `--cta-fg` | `#ffffff` | Primary CTA button text |
-| `--neutral-dot` | `#ccc` | Grey: compatibility not yet evaluated |
+| `--ok-fg / --ok-bg` | `#2a7a2a / #e8f4e8` | Green: compatible |
+| `--warn-fg / --warn-bg / --warn-border` | `#d48800 / #fff8e1 / #ffe082` | Amber: warning |
+| `--error-fg / --error-bg` | `#c0392b / #fdecea` | Red: error |
+| `--cta-bg / --cta-fg` | `#1a1a1a / #ffffff` | Primary CTA button |
+| `--neutral-dot` | `#ccc` | Grey: compat not yet evaluated |
 
-**Rule:** The primary CTA is `#1a1a1a` (dark), not blue. Blue is a SaaS color. Dark says "instrument."
+### Dark Mode Tokens (added 2026-03-24)
+
+Applied via `[data-theme="dark"]` on `<html>`. Toggle stored in `localStorage('theme')`.
+
+| Token | Dark Value |
+|-------|------------|
+| `--bg-app` | `#0f0f0f` |
+| `--bg-panel` | `#161616` |
+| `--bg-hover` | `#1e1e1e` |
+| `--text-primary` | `#e8e8e8` |
+| `--text-secondary` | `#aaaaaa` |
+| `--text-placeholder` | `#444444` |
+| `--border-default` | `#2a2a2a` |
+| `--border-subtle` | `#222222` |
+| `--ok-fg / --ok-bg` | `#4caf50 / #0d2b0d` |
+| `--warn-fg / --warn-bg` | `#ffb74d / #2b1f00` |
+| `--error-fg / --error-bg` | `#ef5350 / #2b0a0a` |
+| `--cta-bg / --cta-fg` | `#e8e8e8 / #0f0f0f` (**inverted**) |
+| `--neutral-dot` | `#444444` |
+
+**Rule:** The primary CTA is `#1a1a1a` (dark), not blue. Dark says "instrument." In dark mode it inverts to `#e8e8e8` — always the highest-contrast element.
 
 ---
 
@@ -108,8 +127,17 @@ The goal is that an L3 rocketeer opens RecoverySys and immediately trusts it bec
 - Mixed: use worst-case color (any ERROR → red box)
 - Absent when no warnings: do NOT show "All systems go" — just hide the box
 
+### Manufacturer Group Header (Parts Browser)
+- Height: 34px, padding: `7px 10px`, `display: flex, align-items: center, gap: 8px`
+- Elements: chevron (10×10px SVG, rotates 90° when open, 200ms ease) · manufacturer name (12px/600/`--text-primary`) · part count (mono 10px `--text-tertiary`) · worst-case compat dot(s)
+- Worst-case dot rule: show `error` dot if any part errors; else `warn` if any warn; else `ok` if evaluated; else `neutral`
+- Accordion animation: `max-height` transition, 200ms ease-out
+- Search: auto-expand matching groups, collapse non-matching groups
+
 ### Flight Profile Chart (SVG)
-- Background: `#fafafa`, border: `1px solid #eee`, font: monospace 10px `#888`
+- Light: background `#fafafa`, border `1px solid #eee`, path `#1a1a1a`
+- Dark: background `#111`, border `1px solid #222`, path `#e8e8e8`
+- Font: monospace 10px — `#888` light / `#555` dark
 - Y-axis: altitude in ft (0 at bottom, apogee at top), labeled every 1000ft
 - X-axis: time in seconds, labeled every 5s
 - Event markers: vertical dashed lines at apogee (t=0), drogue deploy, main deploy (500ft), landing
