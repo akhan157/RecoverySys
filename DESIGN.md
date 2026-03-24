@@ -286,19 +286,30 @@ The Export button in the Sim Panel follows the same state machine pattern as Sav
 
 ## Flight Chart
 
-SVG, 340×240px, fixed dimensions.
+SVG, 340×240px, fixed dimensions. Implement chart colors via CSS custom properties (see `--chart-*` tokens below) so the SVG responds to the `[data-theme="dark"]` switch without any JS.
 
-| Element | Light | Dark |
-|---------|-------|------|
-| Background | `#fafafa` | `#111111` |
-| Border | `1px solid #eee` | `1px solid #222` |
-| Grid lines | `#eee`, 1px | `#1e1e1e`, 1px |
-| Axis lines | `#ccc`, 1px | `#333`, 1px |
-| Axis labels | JetBrains Mono, 10px, `#888` | JetBrains Mono, 10px, `#555` |
-| Flight path | `#1a1a1a`, 2px, no fill | `#e8e8e8`, 2px, no fill |
-| Event markers | Dashed `#aaa`, 3px/3px | Dashed `#444`, 3px/3px |
-| Event labels | JetBrains Mono, 8px, `#aaa` | JetBrains Mono, 8px, `#555` |
-| Empty state CTA | system-ui, 12px, `#bbb`, centered | system-ui, 12px, `#444`, centered |
+**Rule: maximum contrast on the flight path.** The line that traces altitude over time is the most important element in the chart. It must be clearly readable in both modes — `#1a1a1a` on light, `#ffffff` on dark. Never let it blend into the background.
+
+| Token | Light | Dark |
+|-------|-------|------|
+| `--chart-bg` | `#fafafa` | `#111111` |
+| `--chart-border` | `#eee` | `#222222` |
+| `--chart-grid` | `#e8e8e8` | `#252525` |
+| `--chart-axis` | `#bbbbbb` | `#444444` |
+| `--chart-path` | `#1a1a1a` | `#ffffff` |
+| `--chart-marker` | `#aaaaaa` | `#555555` |
+| `--chart-label` | `#888888` | `#666666` |
+
+| Element | Spec |
+|---------|------|
+| Background | `var(--chart-bg)`, border `1px solid var(--chart-border)` |
+| Grid lines | `var(--chart-grid)`, 0.5px, horizontal + vertical |
+| Axis lines | `var(--chart-axis)`, 1px, x-axis + y-axis baselines |
+| **Flight path** | **`var(--chart-path)`, 2px, no fill — always maximum contrast** |
+| Event markers | Dashed `var(--chart-marker)`, 3px/3px dash pattern |
+| Event labels | JetBrains Mono, 8px, `var(--chart-marker)` |
+| Axis labels | JetBrains Mono, 8px, `var(--chart-label)` |
+| Empty state CTA | system-ui, 12px, `var(--chart-label)`, centered |
 
 Animation: first render draws left-to-right (800ms ease-out via `strokeDashoffset`). Re-runs crossfade (200ms).
 

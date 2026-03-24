@@ -135,9 +135,19 @@ Applied via `[data-theme="dark"]` on `<html>`. Toggle stored in `localStorage('t
 - Search: auto-expand matching groups, collapse non-matching groups
 
 ### Flight Profile Chart (SVG)
-- Light: background `#fafafa`, border `1px solid #eee`, path `#1a1a1a`
-- Dark: background `#111`, border `1px solid #222`, path `#e8e8e8`
-- Font: monospace 10px — `#888` light / `#555` dark
+Use `--chart-*` CSS tokens so the SVG responds to `[data-theme="dark"]` automatically.
+
+**Critical:** The flight path (`--chart-path`) must always be maximum contrast — `#1a1a1a` on light, `#ffffff` on dark. Never let it blend into the background.
+
+| Token | Light | Dark |
+|-------|-------|------|
+| `--chart-bg` | `#fafafa` | `#111111` |
+| `--chart-border` | `#eee` | `#222222` |
+| `--chart-grid` | `#e8e8e8` | `#252525` |
+| `--chart-axis` | `#bbbbbb` | `#444444` |
+| `--chart-path` | `#1a1a1a` | `#ffffff` |
+| `--chart-marker` | `#aaaaaa` | `#555555` |
+| `--chart-label` | `#888888` | `#666666` |
 - Y-axis: altitude in ft (0 at bottom, apogee at top), labeled every 1000ft
 - X-axis: time in seconds, labeled every 5s
 - Event markers: vertical dashed lines at apogee (t=0), drogue deploy, main deploy (500ft), landing
