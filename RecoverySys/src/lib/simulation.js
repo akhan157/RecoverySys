@@ -3,6 +3,7 @@ const FT_PER_M    = 3.28084
 const FPS_PER_MPS = 3.28084
 const APCP_ISP    = 195      // s — typical APCP specific impulse (Isp)
 const CD_DEFAULT  = 0.50    // typical subsonic HPR rocket drag coefficient
+const RHO_SL      = 1.225   // kg/m³ — sea-level air density (ISA)
 
 /**
  * International Standard Atmosphere (ISA) — troposphere only (< 11,000 m).
@@ -22,7 +23,7 @@ export function computeDescentRate(chuteSpecs, mass_kg) {
   const { diameter_in, cd } = chuteSpecs
   const radius_m = (diameter_in * 0.0254) / 2
   const area_m2  = Math.PI * radius_m * radius_m
-  const v_mps    = Math.sqrt((2 * mass_kg * G) / (RHO * cd * area_m2))
+  const v_mps    = Math.sqrt((2 * mass_kg * G) / (RHO_SL * cd * area_m2))
   return v_mps * FPS_PER_MPS
 }
 

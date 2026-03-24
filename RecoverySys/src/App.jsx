@@ -15,6 +15,8 @@ const DEFAULT_SPECS = {
   motor_total_impulse_ns: '',
   burn_time_s:            '',
   airframe_od_in:         '',
+  airframe_id_in:         '',
+  bay_length_in:          '',
   drag_cd:                '',
   wind_speed_mph:         '',
   main_deploy_alt_ft:     '500',

@@ -11,47 +11,49 @@ export const CATEGORIES = [
 
 export const PARTS = [
   // ── Main Parachutes ─────────────────────────────────────────────────────────
+  // packed_diam_in  = compressed diameter when stuffed for flight
+  // packed_length_in = compressed length (how much bay height it occupies)
   {
     id: 'fc-36-iris',
     category: 'main_chute',
     manufacturer: 'Fruity Chutes',
     name: '36" Iris Ultra',
-    specs: { diameter_in: 36, cd: 2.2, weight_g: 180, packed_diam_in: 3.5 },
+    specs: { diameter_in: 36, cd: 2.2, weight_g: 180, packed_diam_in: 3.5, packed_length_in: 5.5 },
   },
   {
     id: 'fc-48-iris',
     category: 'main_chute',
     manufacturer: 'Fruity Chutes',
     name: '48" Iris Ultra',
-    specs: { diameter_in: 48, cd: 2.2, weight_g: 280, packed_diam_in: 4.5 },
+    specs: { diameter_in: 48, cd: 2.2, weight_g: 280, packed_diam_in: 4.5, packed_length_in: 7.5 },
   },
   {
     id: 'fc-60-iris',
     category: 'main_chute',
     manufacturer: 'Fruity Chutes',
     name: '60" Iris Ultra',
-    specs: { diameter_in: 60, cd: 2.2, weight_g: 390, packed_diam_in: 5.5 },
+    specs: { diameter_in: 60, cd: 2.2, weight_g: 390, packed_diam_in: 5.5, packed_length_in: 9.0 },
   },
   {
     id: 'rm-36',
     category: 'main_chute',
     manufacturer: 'Rocketman',
     name: '36" Classic',
-    specs: { diameter_in: 36, cd: 1.8, weight_g: 150, packed_diam_in: 3.0 },
+    specs: { diameter_in: 36, cd: 1.8, weight_g: 150, packed_diam_in: 3.0, packed_length_in: 5.0 },
   },
   {
     id: 'rm-48',
     category: 'main_chute',
     manufacturer: 'Rocketman',
     name: '48" Classic',
-    specs: { diameter_in: 48, cd: 1.8, weight_g: 220, packed_diam_in: 4.0 },
+    specs: { diameter_in: 48, cd: 1.8, weight_g: 220, packed_diam_in: 4.0, packed_length_in: 7.0 },
   },
   {
     id: 'rm-72',
     category: 'main_chute',
     manufacturer: 'Rocketman',
     name: '72" Classic',
-    specs: { diameter_in: 72, cd: 1.8, weight_g: 480, packed_diam_in: 6.5 },
+    specs: { diameter_in: 72, cd: 1.8, weight_g: 480, packed_diam_in: 6.5, packed_length_in: 11.0 },
   },
 
   // ── Drogue Parachutes ────────────────────────────────────────────────────────
@@ -60,28 +62,28 @@ export const PARTS = [
     category: 'drogue_chute',
     manufacturer: 'Fruity Chutes',
     name: '12" Drogue',
-    specs: { diameter_in: 12, cd: 1.5, weight_g: 45, packed_diam_in: 1.5 },
+    specs: { diameter_in: 12, cd: 1.5, weight_g: 45, packed_diam_in: 1.5, packed_length_in: 3.0 },
   },
   {
     id: 'fc-18-drogue',
     category: 'drogue_chute',
     manufacturer: 'Fruity Chutes',
     name: '18" Drogue',
-    specs: { diameter_in: 18, cd: 1.5, weight_g: 75, packed_diam_in: 2.0 },
+    specs: { diameter_in: 18, cd: 1.5, weight_g: 75, packed_diam_in: 2.0, packed_length_in: 4.0 },
   },
   {
     id: 'rm-18-drogue',
     category: 'drogue_chute',
     manufacturer: 'Rocketman',
     name: '18" Drogue',
-    specs: { diameter_in: 18, cd: 1.5, weight_g: 70, packed_diam_in: 2.0 },
+    specs: { diameter_in: 18, cd: 1.5, weight_g: 70, packed_diam_in: 2.0, packed_length_in: 4.0 },
   },
   {
     id: 'streamer-2x60',
     category: 'drogue_chute',
     manufacturer: 'Generic',
     name: '2"×60" Streamer',
-    specs: { diameter_in: 2, cd: 0.3, weight_g: 25, packed_diam_in: 0.5 },
+    specs: { diameter_in: 2, cd: 0.3, weight_g: 25, packed_diam_in: 0.5, packed_length_in: 4.0 },
   },
 
   // ── Flight Computers ─────────────────────────────────────────────────────────
@@ -145,33 +147,34 @@ export const PARTS = [
   },
 
   // ── Shock Cord ───────────────────────────────────────────────────────────────
+  // packed_height_in = height of the cord bundle when Z-folded and sitting in the bay
   {
     id: 'sc-tub-half-15',
     category: 'shock_cord',
     manufacturer: 'Generic',
     name: '1/2" Tubular Nylon 15ft',
-    specs: { strength_lbs: 1000, length_ft: 15, weight_g: 120 },
+    specs: { strength_lbs: 1000, length_ft: 15, weight_g: 120, packed_height_in: 2.0 },
   },
   {
     id: 'sc-tub-1-10',
     category: 'shock_cord',
     manufacturer: 'Generic',
     name: '1" Tubular Nylon 10ft',
-    specs: { strength_lbs: 2000, length_ft: 10, weight_g: 150 },
+    specs: { strength_lbs: 2000, length_ft: 10, weight_g: 150, packed_height_in: 2.5 },
   },
   {
     id: 'sc-kev-qtr-15',
     category: 'shock_cord',
     manufacturer: 'Generic',
     name: '1/4" Kevlar 15ft',
-    specs: { strength_lbs: 1500, length_ft: 15, weight_g: 85 },
+    specs: { strength_lbs: 1500, length_ft: 15, weight_g: 85, packed_height_in: 1.5 },
   },
   {
     id: 'sc-kev-qtr-20',
     category: 'shock_cord',
     manufacturer: 'Generic',
     name: '1/4" Kevlar 20ft',
-    specs: { strength_lbs: 1500, length_ft: 20, weight_g: 115 },
+    specs: { strength_lbs: 1500, length_ft: 20, weight_g: 115, packed_height_in: 2.0 },
   },
 
   // ── Chute Protectors ─────────────────────────────────────────────────────────

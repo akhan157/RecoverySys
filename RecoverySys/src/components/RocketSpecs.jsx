@@ -75,6 +75,22 @@ export default function RocketSpecs({ specs, onSetSpec }) {
           onChange={v => onSetSpec('airframe_od_in', v)}
         />
         <SpecInput
+          id="airframe-id"
+          label="Bay ID"
+          value={specs.airframe_id_in}
+          unit="in"
+          placeholder="e.g. 3.9"
+          onChange={v => onSetSpec('airframe_id_in', v)}
+        />
+        <SpecInput
+          id="bay-length"
+          label="Bay Length"
+          value={specs.bay_length_in}
+          unit="in"
+          placeholder="e.g. 18"
+          onChange={v => onSetSpec('bay_length_in', v)}
+        />
+        <SpecInput
           id="cd"
           label="Drag Coeff (Cd)"
           value={specs.drag_cd}

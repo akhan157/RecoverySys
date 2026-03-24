@@ -9,20 +9,22 @@ import { computeDescentRate } from './simulation.js'
 export function checkCompatibility({ config, specs }) {
   const warnings = []
 
-  const mass_g       = parseFloat(specs.rocket_mass_g)
-  const airframe_od  = parseFloat(specs.airframe_od_in)
-  const mass_kg      = mass_g > 0 ? mass_g / 1000 : null
+  const mass_g      = parseFloat(specs.rocket_mass_g)
+  const airframe_od = parseFloat(specs.airframe_od_in)
+  const airframe_id = parseFloat(specs.airframe_id_in) || (airframe_od > 0 ? airframe_od - 0.5 : 0)
+  const bay_length  = parseFloat(specs.bay_length_in)
+  const mass_kg     = mass_g > 0 ? mass_g / 1000 : null
 
   // ── Main chute ──────────────────────────────────────────────────────────────
   if (config.main_chute) {
     const { packed_diam_in, diameter_in, cd } = config.main_chute.specs
 
-    // Packed diameter vs airframe
-    if (airframe_od > 0 && packed_diam_in >= airframe_od - 0.5) {
+    // Packed diameter vs airframe inner bore
+    if (airframe_id > 0 && packed_diam_in >= airframe_id) {
       warnings.push({
         level: 'error',
         slot: 'main_chute',
-        message: `Main chute packed diameter (${packed_diam_in}") is too large for ${airframe_od}" airframe — won't fit bay`,
+        message: `Main chute packed diameter (${packed_diam_in}") exceeds bay inner diameter (${airframe_id.toFixed(2)}") — won't fit`,
       })
     }
 
@@ -55,12 +57,12 @@ export function checkCompatibility({ config, specs }) {
   if (config.drogue_chute) {
     const { packed_diam_in, diameter_in, cd } = config.drogue_chute.specs
 
-    // Packed diameter vs airframe
-    if (airframe_od > 0 && packed_diam_in >= airframe_od - 0.5) {
+    // Packed diameter vs airframe inner bore
+    if (airframe_id > 0 && packed_diam_in >= airframe_id) {
       warnings.push({
         level: 'error',
         slot: 'drogue_chute',
-        message: `Drogue packed diameter (${packed_diam_in}") is too large for ${airframe_od}" airframe`,
+        message: `Drogue packed diameter (${packed_diam_in}") exceeds bay inner diameter (${airframe_id.toFixed(2)}") — won't fit`,
       })
     }
 
@@ -171,6 +173,39 @@ export function checkCompatibility({ config, specs }) {
         slot: 'gps_tracker',
         message: `${config.battery.name} (${batt_v}V) exceeds ${config.gps_tracker.name} maximum (${voltage_max}V) — will damage tracker`,
       })
+    }
+  }
+
+  // ── Bay volume / stacked length ──────────────────────────────────────────────
+  // Sum the estimated packed height of every component in the bay.
+  // Component heights with real data come from parts specs; electronics use
+  // conservative fixed estimates since we don't carry board dimensions.
+  if (bay_length > 0) {
+    let stacked = 0
+    if (config.main_chute?.specs.packed_length_in)    stacked += config.main_chute.specs.packed_length_in
+    if (config.drogue_chute?.specs.packed_length_in)  stacked += config.drogue_chute.specs.packed_length_in
+    if (config.shock_cord?.specs.packed_height_in)    stacked += config.shock_cord.specs.packed_height_in
+    if (config.chute_protector)                       stacked += 0.5   // nomex folded flat
+    if (config.quick_links)                           stacked += 0.5   // small hardware
+    if (config.flight_computer)                       stacked += 1.5   // altimeter sled
+    if (config.battery)                               stacked += 1.0
+    if (config.gps_tracker)                           stacked += 1.5
+
+    if (stacked > 0) {
+      const pct = Math.round((stacked / bay_length) * 100)
+      if (stacked > bay_length) {
+        warnings.push({
+          level: 'error',
+          slot: 'bay_length',
+          message: `Components total ~${stacked.toFixed(1)}" stacked height but bay is only ${bay_length}" — won't close`,
+        })
+      } else if (stacked > bay_length * 0.85) {
+        warnings.push({
+          level: 'warn',
+          slot: 'bay_length',
+          message: `Bay is ${pct}% full (~${stacked.toFixed(1)}" of ${bay_length}") — very tight, consider a longer bay`,
+        })
+      }
     }
   }
 
