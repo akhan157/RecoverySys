@@ -251,7 +251,7 @@ export default function App() {
               background: 'none',
               border: '1px solid rgba(255,255,255,0.15)',
               color: 'rgba(255,255,255,0.7)',
-              width: '30px', height: '24px',
+              width: '32px', height: '32px',
               borderRadius: '4px',
               cursor: 'pointer',
               fontSize: '13px',
