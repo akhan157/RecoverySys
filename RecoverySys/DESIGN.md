@@ -207,3 +207,20 @@ See the Responsive Design section in the full design spec (design-20260322 in gs
 - Each tab's content scrolls independently
 - Compatibility dots visible on Parts tab
 - Warning box appears as a sticky banner above the tab bar when warnings exist
+
+---
+
+## Decisions Log
+
+| Date | Decision | Rationale |
+|------|----------|-----------|
+| 2026-03-22 | Initial design system — Engineering Instrument aesthetic | `/plan-design-review` — Industrial/Utilitarian direction; SaaS aesthetics would erode expert user trust |
+| 2026-03-22 | JetBrains Mono for all numeric values | Monospace makes alignment and precision legible; differentiates physical quantities from UI chrome |
+| 2026-03-22 | No border-radius on panels/slots | Panels are instruments, not cards. 0px radius signals structural, not interactive |
+| 2026-03-22 | CTA button #1a1a1a (slate-dark), not blue | Expert users distrust software that uses consumer-app conventions (blue CTA = email marketing) |
+| 2026-03-24 | Dark mode via `[data-theme="dark"]` on `<html>` | CSS custom property inversion; zero component changes; blocking inline script prevents FOUC |
+| 2026-03-24 | Manufacturer-grouped Parts Browser accordion | 189-part flat list replaced with collapsible manufacturer groups; worst-case compat status on group header reduces cognitive load |
+| 2026-03-24 | Slate palette (v1.1.0.0) replaces warm-grey | Slate is more "instrument panel" than warm grey; `--header-bg: #1a1d23` creates clear visual hierarchy header→panel→content |
+| 2026-03-24 | Inter added as body font alongside JetBrains Mono | Inter at 13px is more legible than system-ui at small sizes; loaded via `<link>` (not CSS @import) to avoid render-blocking |
+| 2026-03-24 | --text-tertiary darkened for WCAG AA | `#8c94a3` (3.05:1) fails AA for 10px section labels; `#636c7e` (5.28:1) passes; same fix applied to --chart-label and --chart-marker |
+| 2026-03-24 | MfrGroup `key={activeCategory + '-' + mfr}` | Manufacturer names appear in multiple categories; mfr-only key reuses stale open state on category switch |
