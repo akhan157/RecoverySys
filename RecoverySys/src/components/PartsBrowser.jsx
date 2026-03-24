@@ -40,13 +40,17 @@ function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen }) {
         }}
       >
         <span className="section-label">{mfr}</span>
-        <span style={{
-          fontSize: '10px',
-          color: 'var(--text-tertiary)',
-          transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
-          transition: 'transform 200ms ease',
-          display: 'inline-block',
-        }}>▶</span>
+        <svg
+          width="10" height="10" viewBox="0 0 10 10" fill="none"
+          style={{
+            color: 'var(--text-tertiary)',
+            transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+            transition: 'transform 200ms ease',
+            flexShrink: 0,
+          }}
+        >
+          <path d="M3 2L7 5L3 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
+        </svg>
       </button>
 
       {/* Parts grid — collapsed via max-height */}
