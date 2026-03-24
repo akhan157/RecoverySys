@@ -36,7 +36,7 @@ export default function ConfigSlot({ category, label, placeholder, part, warning
           width: '100%',
           padding: '0 12px',
           background: 'transparent',
-          border: '1px dashed #ccc',
+          border: '1px dashed var(--border-default)',
           borderRadius: 0,
           cursor: 'pointer',
           textAlign: 'left',
