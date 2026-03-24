@@ -1,5 +1,7 @@
 import { computeDescentRate } from './simulation.js'
 
+const G_ACCEL = 9.81
+
 /**
  * Evaluate all compatibility rules for the current config + specs.
  *
@@ -215,8 +217,6 @@ export function checkCompatibility({ config, specs }) {
 
   return warnings
 }
-
-const G_ACCEL = 9.81
 
 /**
  * Returns the compatibility status for a single slot.

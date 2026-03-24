@@ -11,7 +11,9 @@ const RHO_SL      = 1.225   // kg/m³ — sea-level air density (ISA)
  * More accurate than a constant 1.225 for flights above ~3,000 ft.
  */
 function airDensity(alt_m) {
-  const T = 288.15 - 0.0065 * alt_m          // temperature K (lapse rate 6.5 K/km)
+  // ISA troposphere valid to 11,000 m; clamp above that to avoid NaN from negative T
+  const alt_clamped = Math.min(Math.max(0, alt_m), 11000)
+  const T = 288.15 - 0.0065 * alt_clamped    // temperature K (lapse rate 6.5 K/km)
   return 1.225 * Math.pow(T / 288.15, 4.256) // ISA density ratio
 }
 
@@ -21,6 +23,7 @@ function airDensity(alt_m) {
  */
 export function computeDescentRate(chuteSpecs, mass_kg) {
   const { diameter_in, cd } = chuteSpecs
+  if (!cd || cd <= 0 || !diameter_in || diameter_in <= 0) return 0
   const radius_m = (diameter_in * 0.0254) / 2
   const area_m2  = Math.PI * radius_m * radius_m
   const v_mps    = Math.sqrt((2 * mass_kg * G) / (RHO_SL * cd * area_m2))
@@ -68,7 +71,9 @@ function integrateAscent(impulse_ns, total_mass_kg, burn_s, area_m2, cd) {
   }
 
   // ── Coast phase ──────────────────────────────────────────────────────────────
-  while (v > 0) {
+  let coast_iters = 0
+  while (v > 0 && coast_iters < 100000) {
+    coast_iters++
     const rho  = airDensity(alt)
     const drag = 0.5 * rho * cd * area_m2 * v * v   // drag always opposes motion
     const a    = -(drag + dry_mass_kg * G) / dry_mass_kg
@@ -141,17 +146,26 @@ export function runSimulation({ specs, config }) {
   const total_time_s   = phase2_time_s != null ? phase1_time_s + phase2_time_s : null
 
   // ── Drift ─────────────────────────────────────────────────────────────────────
-  const wind_fps = wind_mph * 5280 / 3600
-  const drift_ft = wind_fps * (total_time_s ?? phase1_time_s)
+  // When no main chute is selected, drogue carries the rocket all the way to the ground;
+  // include the final deploy_ft segment (under drogue) so drift is not underestimated.
+  const wind_fps       = wind_mph * 5280 / 3600
+  const effective_time = main_fps
+    ? (total_time_s ?? phase1_time_s)
+    : phase1_time_s + (deploy_ft / drogue_fps)
+  const drift_ft = wind_fps * effective_time
+
+  // ── Round display values before building timeline so chart matches metrics ─────
+  const main_fps_rounded   = main_fps != null ? Math.round(main_fps * 10) / 10 : null
+  const drogue_fps_rounded = Math.round(drogue_fps)
 
   // ── Timeline ──────────────────────────────────────────────────────────────────
-  const timeline = buildTimeline({ apogee_ft, drogue_fps, main_fps, deploy_ft, phase1_time_s, phase2_time_s })
+  const timeline = buildTimeline({ apogee_ft, drogue_fps: drogue_fps_rounded, main_fps: main_fps_rounded, deploy_ft, phase1_time_s, phase2_time_s })
 
   return {
     apogee_ft:      Math.round(apogee_ft),
     apogee_method,
-    drogue_fps:     Math.round(drogue_fps),
-    main_fps:       main_fps != null ? Math.round(main_fps * 10) / 10 : null,
+    drogue_fps:     drogue_fps_rounded,
+    main_fps:       main_fps_rounded,
     phase1_time_s:  Math.round(phase1_time_s),
     phase2_time_s:  phase2_time_s != null ? Math.round(phase2_time_s) : null,
     total_time_s:   total_time_s != null ? Math.round(total_time_s) : null,

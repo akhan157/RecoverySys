@@ -92,10 +92,8 @@ function reducer(state, action) {
         simFailed: action.simulation === null,
         simRunning: false,
       }
-    case 'ADD_TOAST': {
-      const id = Date.now()
-      return { ...state, toasts: [...state.toasts, { id, ...action.toast }] }
-    }
+    case 'ADD_TOAST':
+      return { ...state, toasts: [...state.toasts, { ...action.toast, id: action.id }] }
     case 'REMOVE_TOAST':
       return { ...state, toasts: state.toasts.filter(t => t.id !== action.id) }
     case 'SET_SAVE_STATE':
@@ -113,7 +111,8 @@ function reducer(state, action) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, null, buildInitialState)
-  const debounceRef = useRef(null)
+  const debounceRef  = useRef(null)
+  const toastCounter = useRef(0)
 
   // ── Parts browser collapse (UI pref, persisted separately) ──────────────────
   const [browserCollapsed, setBrowserCollapsed] = React.useState(
@@ -163,32 +162,41 @@ export default function App() {
 
   const runSim = useCallback(() => {
     dispatch({ type: 'START_SIM' })
-    // Simulate async (could be a worker in v2)
-    setTimeout(() => {
-      const result = runSimulation({ specs: state.specs, config: state.config })
-      dispatch({ type: 'SET_SIM', simulation: result })
-    }, 600)
+    const result = runSimulation({ specs: state.specs, config: state.config })
+    dispatch({ type: 'SET_SIM', simulation: result })
   }, [state.specs, state.config])
 
   const saveConfig = useCallback(() => {
     dispatch({ type: 'SET_SAVE_STATE', state: 'saving' })
+    let ok = false
     try {
       localStorage.setItem('recoverysys-config', JSON.stringify({
         config: state.config,
         specs: state.specs,
       }))
+      ok = true
     } catch { /* storage full */ }
-    setTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'saved' }), 400)
-    setTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'idle' }), 2400)
+    if (ok) {
+      setTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'saved' }), 400)
+      setTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'idle' }), 2400)
+    } else {
+      dispatch({ type: 'SET_SAVE_STATE', state: 'idle' })
+      dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Save failed — storage full', level: 'error' } })
+    }
   }, [state.config, state.specs])
 
   const copyShareLink = useCallback(() => {
-    const payload = { config: state.config, specs: state.specs }
-    const encoded = btoa(JSON.stringify(payload))
-    const url = `${location.origin}${location.pathname}?c=${encodeURIComponent(encoded)}`
-    navigator.clipboard.writeText(url).catch(() => {})
-    dispatch({ type: 'SET_SHARE_STATE', state: 'copied' })
-    setTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
+    try {
+      const payload = { config: state.config, specs: state.specs }
+      // encodeURIComponent handles the full Unicode range; btoa alone throws on non-Latin-1
+      const encoded = btoa(encodeURIComponent(JSON.stringify(payload)))
+      const url = `${location.origin}${location.pathname}?c=${encodeURIComponent(encoded)}`
+      navigator.clipboard.writeText(url).catch(() => {})
+      dispatch({ type: 'SET_SHARE_STATE', state: 'copied' })
+      setTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
+    } catch {
+      dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
+    }
   }, [state.config, state.specs])
 
   const doExportOrk = useCallback(async () => {
@@ -200,12 +208,12 @@ export default function App() {
       a.href = url
       a.download = 'recoverysys.ork'
       a.click()
-      URL.revokeObjectURL(url)
+      setTimeout(() => URL.revokeObjectURL(url), 10000)
       dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' })
-      dispatch({ type: 'ADD_TOAST', toast: { message: 'Downloaded!', level: 'ok' } })
-      setTimeout(() => dispatch({ type: 'REMOVE_TOAST', id: Date.now() }), 3000)
+      dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Downloaded!', level: 'ok' } })
     } catch {
       dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' })
+      dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Export failed — check browser console', level: 'error' } })
     }
   }, [state.config, state.specs, state.simulation])
 
@@ -219,9 +227,12 @@ export default function App() {
     const c = params.get('c')
     if (!c) return
     try {
-      const payload = JSON.parse(atob(decodeURIComponent(c)))
+      const payload = JSON.parse(decodeURIComponent(atob(decodeURIComponent(c))))
+      const validCategories = new Set(CATEGORIES.map(cat => cat.id))
+      const validSpecKeys   = new Set(Object.keys(DEFAULT_SPECS))
       if (payload.config) {
         Object.entries(payload.config).forEach(([cat, part]) => {
+          if (!validCategories.has(cat)) return   // reject unknown category keys
           if (part) {
             const found = PARTS.find(p => p.id === part.id)
             if (found) dispatch({ type: 'SELECT_PART', category: cat, part: found })
@@ -230,6 +241,7 @@ export default function App() {
       }
       if (payload.specs) {
         Object.entries(payload.specs).forEach(([key, value]) => {
+          if (!validSpecKeys.has(key)) return     // reject unknown spec keys
           dispatch({ type: 'SET_SPEC', key, value })
         })
       }

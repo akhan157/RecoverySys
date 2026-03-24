@@ -76,7 +76,7 @@ export default function RocketSpecs({ specs, onSetSpec }) {
         />
         <SpecInput
           id="airframe-id"
-          label="Bay ID"
+          label="Airframe Inner Dia."
           value={specs.airframe_id_in}
           unit="in"
           placeholder="e.g. 3.9"
@@ -84,7 +84,7 @@ export default function RocketSpecs({ specs, onSetSpec }) {
         />
         <SpecInput
           id="bay-length"
-          label="Bay Length"
+          label="Recovery Bay Length"
           value={specs.bay_length_in}
           unit="in"
           placeholder="e.g. 18"
