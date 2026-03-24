@@ -53,10 +53,10 @@ function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen }) {
         </svg>
       </button>
 
-      {/* Parts grid — collapsed via max-height */}
+      {/* Parts grid — collapsed via max-height; 9999px avoids catalog truncation */}
       <div style={{
         overflow: 'hidden',
-        maxHeight: open ? '1000px' : '0',
+        maxHeight: open ? '9999px' : '0',
         transition: 'max-height 200ms ease',
       }}>
         <div style={{
@@ -87,14 +87,14 @@ function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen }) {
                   transition: 'transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease',
                 }}
                 onMouseEnter={e => {
-                  if (!isSelected) {
+                  if (e.currentTarget.getAttribute('aria-pressed') !== 'true') {
                     e.currentTarget.style.transform = 'translateY(-1px)'
                     e.currentTarget.style.borderColor = 'var(--accent)'
                     e.currentTarget.style.boxShadow = '0 2px 8px var(--accent-ring)'
                   }
                 }}
                 onMouseLeave={e => {
-                  if (!isSelected) {
+                  if (e.currentTarget.getAttribute('aria-pressed') !== 'true') {
                     e.currentTarget.style.transform = ''
                     e.currentTarget.style.borderColor = 'var(--border-default)'
                     e.currentTarget.style.boxShadow = ''
@@ -178,10 +178,10 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
       </div>
 
       {/* Parts list — collapsible manufacturer groups */}
-      <div style={{ overflowY: 'auto' }}>
+      <div>
         {Object.entries(byMfr).map(([mfr, mfrParts], i) => (
           <MfrGroup
-            key={mfr}
+            key={activeCategory + '-' + mfr}
             mfr={mfr}
             parts={mfrParts}
             config={config}

@@ -27,3 +27,4 @@ build/
 .DS_Store
 Thumbs.db
 *.exe
+.claude/settings.local.json
