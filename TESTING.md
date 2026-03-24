@@ -6,7 +6,7 @@
 
 ## Framework
 
-**Vitest v4** + **@testing-library/react** + **jsdom**
+**Vitest v3** + **@testing-library/react** + **jsdom**
 
 ## Running Tests
 
