@@ -1,9 +1,12 @@
 export const CATEGORIES = [
-  { id: 'main_chute',      label: 'Main Chute',      placeholder: 'No main chute selected' },
-  { id: 'drogue_chute',    label: 'Drogue Chute',    placeholder: 'No drogue chute selected' },
-  { id: 'flight_computer', label: 'Flight Computer',  placeholder: 'No flight computer selected' },
-  { id: 'battery',         label: 'Battery',          placeholder: 'No battery selected' },
-  { id: 'shock_cord',      label: 'Shock Cord',       placeholder: 'No shock cord selected' },
+  { id: 'main_chute',       label: 'Main Chute',       placeholder: 'No main chute selected' },
+  { id: 'drogue_chute',     label: 'Drogue Chute',     placeholder: 'No drogue chute selected' },
+  { id: 'shock_cord',       label: 'Shock Cord',       placeholder: 'No shock cord selected' },
+  { id: 'chute_protector',  label: 'Chute Protector',  placeholder: 'No chute protector selected' },
+  { id: 'quick_links',      label: 'Quick Links',      placeholder: 'No quick links selected' },
+  { id: 'flight_computer',  label: 'Flight Computer',  placeholder: 'No flight computer selected' },
+  { id: 'battery',          label: 'Battery',          placeholder: 'No battery selected' },
+  { id: 'gps_tracker',      label: 'GPS Tracker',      placeholder: 'No GPS tracker selected' },
 ]
 
 export const PARTS = [
@@ -169,5 +172,101 @@ export const PARTS = [
     manufacturer: 'Generic',
     name: '1/4" Kevlar 20ft',
     specs: { strength_lbs: 1500, length_ft: 20, weight_g: 115 },
+  },
+
+  // ── Chute Protectors ─────────────────────────────────────────────────────────
+  // Nomex blankets that wrap around the chute to shield it from ejection charge heat.
+  // size_in = protector diameter; max_chute_diam_in = largest chute it safely covers.
+  {
+    id: 'tfr-nomex-9',
+    category: 'chute_protector',
+    manufacturer: 'Top Flight Recovery',
+    name: 'Nomex 9"',
+    specs: { size_in: 9, max_chute_diam_in: 24, weight_g: 40 },
+  },
+  {
+    id: 'tfr-nomex-12',
+    category: 'chute_protector',
+    manufacturer: 'Top Flight Recovery',
+    name: 'Nomex 12"',
+    specs: { size_in: 12, max_chute_diam_in: 36, weight_g: 65 },
+  },
+  {
+    id: 'tfr-nomex-18',
+    category: 'chute_protector',
+    manufacturer: 'Top Flight Recovery',
+    name: 'Nomex 18"',
+    specs: { size_in: 18, max_chute_diam_in: 54, weight_g: 110 },
+  },
+  {
+    id: 'tfr-nomex-24',
+    category: 'chute_protector',
+    manufacturer: 'Top Flight Recovery',
+    name: 'Nomex 24"',
+    specs: { size_in: 24, max_chute_diam_in: 72, weight_g: 170 },
+  },
+
+  // ── Quick Links ──────────────────────────────────────────────────────────────
+  // Rated steel quick links connecting shock cord to airframe bulkhead and chute bridle.
+  // strength_lbs = working load limit; weight_g = per pair (you typically need 2–3).
+  {
+    id: 'ql-316-zinc',
+    category: 'quick_links',
+    manufacturer: 'Generic',
+    name: '3/16" Zinc Quick Links (×2)',
+    specs: { strength_lbs: 880, size_in: 0.1875, weight_g: 30 },
+  },
+  {
+    id: 'ql-14-zinc',
+    category: 'quick_links',
+    manufacturer: 'Generic',
+    name: '1/4" Zinc Quick Links (×2)',
+    specs: { strength_lbs: 1540, size_in: 0.25, weight_g: 50 },
+  },
+  {
+    id: 'ql-316-ss',
+    category: 'quick_links',
+    manufacturer: 'Generic',
+    name: '3/16" Stainless Quick Links (×2)',
+    specs: { strength_lbs: 1100, size_in: 0.1875, weight_g: 35 },
+  },
+  {
+    id: 'ql-38-zinc',
+    category: 'quick_links',
+    manufacturer: 'Generic',
+    name: '3/8" Zinc Quick Links (×2)',
+    specs: { strength_lbs: 2640, size_in: 0.375, weight_g: 85 },
+  },
+
+  // ── GPS Trackers ─────────────────────────────────────────────────────────────
+  // Transmit location so you can find the rocket after landing.
+  // voltage_min/max = operating range; weight_g = tracker only (antenna included).
+  {
+    id: 'fw-gps',
+    category: 'gps_tracker',
+    manufacturer: 'Featherweight',
+    name: 'Featherweight GPS',
+    specs: { voltage_min: 3.3, voltage_max: 12.0, weight_g: 30, frequency_mhz: 915 },
+  },
+  {
+    id: 'brb-900',
+    category: 'gps_tracker',
+    manufacturer: 'Big Red Bee',
+    name: 'BRB900 APRS',
+    specs: { voltage_min: 7.0, voltage_max: 12.6, weight_g: 56, frequency_mhz: 915 },
+  },
+  {
+    id: 'et-quasar',
+    category: 'gps_tracker',
+    manufacturer: 'Eggtimer',
+    name: 'Quasar WiFi Tracker',
+    specs: { voltage_min: 3.3, voltage_max: 5.5, weight_g: 25, frequency_mhz: 2400 },
+  },
+  {
+    id: 'altus-micro',
+    category: 'gps_tracker',
+    manufacturer: 'Altus Metrum',
+    name: 'TeleMini v3',
+    specs: { voltage_min: 3.2, voltage_max: 5.5, weight_g: 21, frequency_mhz: 434 },
   },
 ]

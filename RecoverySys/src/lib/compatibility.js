@@ -123,6 +123,57 @@ export function checkCompatibility({ config, specs }) {
     }
   }
 
+  // ── Chute protector vs main chute ────────────────────────────────────────────
+  if (config.chute_protector && config.main_chute) {
+    const { size_in, max_chute_diam_in } = config.chute_protector.specs
+    const { diameter_in } = config.main_chute.specs
+    if (diameter_in > max_chute_diam_in) {
+      warnings.push({
+        level: 'error',
+        slot: 'chute_protector',
+        message: `${config.chute_protector.name} (max ${max_chute_diam_in}" chute) is too small for ${diameter_in}" main — chute may be scorched`,
+      })
+    }
+  }
+
+  // ── Quick links vs shock cord strength ───────────────────────────────────────
+  if (config.quick_links && config.shock_cord) {
+    const ql_lbs = config.quick_links.specs.strength_lbs
+    const sc_lbs = config.shock_cord.specs.strength_lbs
+    if (ql_lbs < sc_lbs) {
+      warnings.push({
+        level: 'error',
+        slot: 'quick_links',
+        message: `Quick links rated ${ql_lbs} lbs are weaker than shock cord (${sc_lbs} lbs) — links will fail first`,
+      })
+    } else if (ql_lbs < sc_lbs * 1.2) {
+      warnings.push({
+        level: 'warn',
+        slot: 'quick_links',
+        message: `Quick links (${ql_lbs} lbs) are only marginally stronger than shock cord (${sc_lbs} lbs)`,
+      })
+    }
+  }
+
+  // ── GPS tracker voltage vs battery ───────────────────────────────────────────
+  if (config.gps_tracker && config.battery) {
+    const batt_v = config.battery.specs.voltage
+    const { voltage_min, voltage_max } = config.gps_tracker.specs
+    if (batt_v < voltage_min) {
+      warnings.push({
+        level: 'error',
+        slot: 'gps_tracker',
+        message: `${config.battery.name} (${batt_v}V) is below ${config.gps_tracker.name} minimum (${voltage_min}V)`,
+      })
+    } else if (batt_v > voltage_max) {
+      warnings.push({
+        level: 'error',
+        slot: 'gps_tracker',
+        message: `${config.battery.name} (${batt_v}V) exceeds ${config.gps_tracker.name} maximum (${voltage_max}V) — will damage tracker`,
+      })
+    }
+  }
+
   // ── Single-deploy warning ────────────────────────────────────────────────────
   if (config.main_chute && !config.drogue_chute) {
     warnings.push({
@@ -137,7 +188,8 @@ export function checkCompatibility({ config, specs }) {
   // avoids a red error on a completely blank/default state.
   const hasAnyComponent = !!(
     config.main_chute || config.drogue_chute ||
-    config.flight_computer || config.battery || config.shock_cord
+    config.flight_computer || config.battery || config.shock_cord ||
+    config.chute_protector || config.quick_links || config.gps_tracker
   )
   if (!config.main_chute && hasAnyComponent) {
     warnings.push({

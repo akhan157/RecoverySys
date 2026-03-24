@@ -36,9 +36,12 @@ function buildInitialState() {
     config: {
       main_chute:      rehydrate(saved?.config?.main_chute),
       drogue_chute:    rehydrate(saved?.config?.drogue_chute),
+      shock_cord:      rehydrate(saved?.config?.shock_cord),
+      chute_protector: rehydrate(saved?.config?.chute_protector),
+      quick_links:     rehydrate(saved?.config?.quick_links),
       flight_computer: rehydrate(saved?.config?.flight_computer),
       battery:         rehydrate(saved?.config?.battery),
-      shock_cord:      rehydrate(saved?.config?.shock_cord),
+      gps_tracker:     rehydrate(saved?.config?.gps_tracker),
     },
     specs:          { ...DEFAULT_SPECS, ...(saved?.specs ?? {}) },
     activeCategory: CATEGORIES[0].id,
