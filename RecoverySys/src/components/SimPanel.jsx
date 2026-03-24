@@ -102,7 +102,7 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
         <div className="section-label" style={{ marginBottom: '8px' }}>Export</div>
         <button
           onClick={onExport}
-          disabled={exportState === 'exporting' || (!config.main_chute && !config.drogue_chute)}
+          disabled={exportState === 'exporting' || (!config.main_chute && !config.drogue_chute) || !parseFloat(specs.airframe_od_in)}
           style={{
             height: '32px',
             padding: '0 14px',
@@ -124,6 +124,11 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
             </>
           ) : exportState === 'done' ? 'Exported ✓' : 'Export .ork'}
         </button>
+        {!parseFloat(specs.airframe_od_in) && (
+          <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '6px' }}>
+            Enter Airframe OD in Rocket Specs to enable export.
+          </p>
+        )}
       </div>
     </div>
   )

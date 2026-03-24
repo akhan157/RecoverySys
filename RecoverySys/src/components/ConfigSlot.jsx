@@ -14,10 +14,6 @@ function slotSpecLine(part) {
     case 'main_chute':
     case 'drogue_chute':
       return `${part.specs.diameter_in}" Ø  Cd ${part.specs.cd}  packed ${part.specs.packed_diam_in}"  ${part.specs.weight_g}g`
-    case 'flight_computer':
-      return `${part.specs.min_voltage}–${part.specs.max_voltage}V  max ${part.specs.accel_limit_g}G  ${part.specs.weight_g}g`
-    case 'battery':
-      return `${part.specs.voltage}V  ${part.specs.capacity_mah}mAh  ${part.specs.weight_g}g`
     case 'shock_cord':
       return `${part.specs.strength_lbs} lbs  ${part.specs.length_ft}ft  ${part.specs.weight_g}g`
     default:
@@ -70,7 +66,7 @@ export default function ConfigSlot({ category, label, placeholder, part, warning
         <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {part.manufacturer} {part.name}
         </div>
-        <div className="mono" style={{ fontSize: '11px', color: '#666', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div className="mono" style={{ fontSize: '11px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
           {slotSpecLine(part)}
         </div>
       </div>

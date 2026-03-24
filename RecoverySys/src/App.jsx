@@ -113,6 +113,19 @@ export default function App() {
   const [state, dispatch] = useReducer(reducer, null, buildInitialState)
   const debounceRef  = useRef(null)
   const toastCounter = useRef(0)
+  const timeoutIds   = useRef([])
+
+  // Helper: schedule a state reset, auto-cancels on unmount
+  const safeTimeout = useCallback((fn, ms) => {
+    const id = setTimeout(fn, ms)
+    timeoutIds.current.push(id)
+    return id
+  }, [])
+
+  // Cleanup all pending timeouts on unmount
+  useEffect(() => {
+    return () => timeoutIds.current.forEach(clearTimeout)
+  }, [])
 
   // ── Parts browser collapse (UI pref, persisted separately) ──────────────────
   const [browserCollapsed, setBrowserCollapsed] = React.useState(
@@ -177,13 +190,13 @@ export default function App() {
       ok = true
     } catch { /* storage full */ }
     if (ok) {
-      setTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'saved' }), 400)
-      setTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'idle' }), 2400)
+      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'saved' }), 400)
+      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'idle' }), 2400)
     } else {
       dispatch({ type: 'SET_SAVE_STATE', state: 'idle' })
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Save failed — storage full', level: 'error' } })
     }
-  }, [state.config, state.specs])
+  }, [state.config, state.specs, safeTimeout])
 
   const copyShareLink = useCallback(() => {
     try {
@@ -193,11 +206,11 @@ export default function App() {
       const url = `${location.origin}${location.pathname}?c=${encodeURIComponent(encoded)}`
       navigator.clipboard.writeText(url).catch(() => {})
       dispatch({ type: 'SET_SHARE_STATE', state: 'copied' })
-      setTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
+      safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
     } catch {
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
     }
-  }, [state.config, state.specs])
+  }, [state.config, state.specs, safeTimeout])
 
   const doExportOrk = useCallback(async () => {
     dispatch({ type: 'SET_EXPORT_STATE', state: 'exporting' })
@@ -208,14 +221,14 @@ export default function App() {
       a.href = url
       a.download = 'recoverysys.ork'
       a.click()
-      setTimeout(() => URL.revokeObjectURL(url), 10000)
+      safeTimeout(() => URL.revokeObjectURL(url), 10000)
       dispatch({ type: 'SET_EXPORT_STATE', state: 'done' })
-      setTimeout(() => dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' }), 3000)
+      safeTimeout(() => dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' }), 3000)
     } catch {
       dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' })
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Export failed — check browser console', level: 'error' } })
     }
-  }, [state.config, state.specs, state.simulation])
+  }, [state.config, state.specs, state.simulation, safeTimeout])
 
   const removeToast = useCallback((id) => {
     dispatch({ type: 'REMOVE_TOAST', id })
