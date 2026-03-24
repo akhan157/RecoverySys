@@ -1,12 +1,25 @@
 import React from 'react'
 import FlightChart from './FlightChart.jsx'
 
-function MetricRow({ label, value, unit }) {
+function MetricCard({ label, value, unit, animClass }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-      <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{label}</span>
+    <div
+      className={animClass}
+      style={{
+        background: 'var(--bg-panel)',
+        border: '1px solid var(--border-default)',
+        borderRadius: 'var(--radius)',
+        padding: '10px 12px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2px',
+      }}
+    >
+      <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        {label}
+      </span>
       <span>
-        <span className="mono" style={{ fontSize: '13px', color: 'var(--text-primary)' }}>
+        <span className="mono" style={{ fontSize: '15px', color: 'var(--text-primary)' }}>
           {value ?? '—'}
         </span>
         {unit && value != null && (
@@ -34,9 +47,7 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
       {/* Chart */}
       <div>
         <div className="section-label" style={{ marginBottom: '8px' }}>Flight Profile</div>
-        <div style={{ overflowX: 'auto' }}>
-          <FlightChart simulation={simulation} />
-        </div>
+        <FlightChart simulation={simulation} />
       </div>
 
       {/* Run button */}
@@ -46,10 +57,10 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
         style={{
           height: '36px',
           width: '100%',
-          background: ready && !simRunning ? 'var(--cta-bg)' : '#999',
-          color: 'var(--cta-fg)',
+          background: ready && !simRunning ? 'var(--cta-bg)' : 'var(--border-default)',
+          color: ready && !simRunning ? 'var(--cta-fg)' : 'var(--text-tertiary)',
           border: 'none',
-          borderRadius: '4px',
+          borderRadius: 'var(--radius)',
           cursor: ready && !simRunning ? 'pointer' : 'default',
           fontSize: '13px',
           fontWeight: 500,
@@ -57,7 +68,11 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
+          transition: 'transform 150ms ease, opacity 150ms ease',
         }}
+        onMouseEnter={e => { if (ready && !simRunning) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.opacity = '0.9' } }}
+        onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.opacity = '' }}
+        onMouseDown={e => { if (ready && !simRunning) e.currentTarget.style.transform = 'translateY(0)' }}
       >
         {simRunning ? (
           <>
@@ -76,50 +91,81 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
 
       {/* Degenerate sim error */}
       {simFailed && !simRunning && (
-        <p style={{ fontSize: '11px', color: '#c0392b', marginTop: '-8px', lineHeight: 1.4 }}>
+        <p style={{ fontSize: '11px', color: 'var(--error-fg)', marginTop: '-8px', lineHeight: 1.4 }}>
           ⚠ Main deploy altitude exceeds estimated apogee — lower the deploy altitude or increase motor impulse.
         </p>
       )}
 
-      {/* Results */}
+      {/* Results — 4-col grid with fade-up stagger */}
       {simulation && (
         <div>
-          <div className="section-label" style={{ marginBottom: '8px' }}>Results</div>
-          <MetricRow
-            label={simulation.apogee_method === 'heuristic' ? 'Apogee (±30%)' : 'Apogee (±10–15%)'}
-            value={simulation.apogee_ft.toLocaleString()}
-            unit="ft"
-          />
-          <MetricRow label="Drogue descent" value={simulation.drogue_fps} unit="fps" />
-          <MetricRow label="Main descent" value={simulation.main_fps} unit="fps" />
-          <MetricRow label="Descent time" value={simulation.total_time_s ?? simulation.phase1_time_s} unit="s" />
-          <MetricRow label="Drift" value={simulation.drift_ft.toLocaleString()} unit="ft" />
+          <div className="section-label" style={{ marginBottom: '10px' }}>Results</div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+            <MetricCard
+              animClass="fade-up fade-up-1"
+              label={simulation.apogee_method === 'heuristic' ? 'Apogee ±30%' : 'Apogee ±15%'}
+              value={simulation.apogee_ft.toLocaleString()}
+              unit="ft"
+            />
+            <MetricCard
+              animClass="fade-up fade-up-2"
+              label="Main descent"
+              value={simulation.main_fps}
+              unit="fps"
+            />
+            <MetricCard
+              animClass="fade-up fade-up-3"
+              label="Descent time"
+              value={simulation.total_time_s ?? simulation.phase1_time_s}
+              unit="s"
+            />
+            <MetricCard
+              animClass="fade-up fade-up-4"
+              label="Drift"
+              value={simulation.drift_ft.toLocaleString()}
+              unit="ft"
+            />
+          </div>
+          {simulation.drogue_fps != null && (
+            <div style={{ marginTop: '6px' }}>
+              <MetricCard
+                animClass="fade-up"
+                label="Drogue descent"
+                value={simulation.drogue_fps}
+                unit="fps"
+              />
+            </div>
+          )}
         </div>
       )}
 
       {/* Export */}
       <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-        <div className="section-label" style={{ marginBottom: '8px' }}>Export</div>
+        <div className="section-label" style={{ marginBottom: '10px' }}>Export</div>
         <button
           onClick={onExport}
           disabled={exportState === 'exporting' || (!config.main_chute && !config.drogue_chute) || !parseFloat(specs.airframe_od_in)}
           style={{
             height: '32px',
-            padding: '0 14px',
+            padding: '0 16px',
             background: 'transparent',
             color: 'var(--text-primary)',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
+            border: '1px solid var(--border-default)',
+            borderRadius: 'var(--radius)',
             cursor: exportState === 'exporting' ? 'default' : 'pointer',
             fontSize: '13px',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '6px',
+            transition: 'transform 150ms ease, border-color 200ms ease',
           }}
+          onMouseEnter={e => { if (exportState !== 'exporting') { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.borderColor = 'var(--accent)' } }}
+          onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'var(--border-default)' }}
+          onMouseDown={e => { if (exportState !== 'exporting') e.currentTarget.style.transform = 'translateY(0)' }}
         >
           {exportState === 'exporting' ? (
             <>
-              <span className="spinner" style={{ borderTopColor: '#1a1a1a', borderColor: '#ccc' }} />
+              <span className="spinner" style={{ borderTopColor: 'var(--text-primary)', borderColor: 'var(--border-default)' }} />
               Exporting…
             </>
           ) : exportState === 'done' ? 'Exported ✓' : 'Export .ork'}

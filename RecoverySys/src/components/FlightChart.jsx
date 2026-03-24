@@ -27,22 +27,22 @@ function Axes({ maxAlt, maxTime }) {
       {/* Grid lines */}
       {yTicks.map(alt => (
         <line key={`gy${alt}`} x1={PAD.left} y1={yS(alt)} x2={PAD.left + CHART_W} y2={yS(alt)}
-          stroke="#eee" strokeWidth="1" />
+          stroke="var(--chart-grid)" strokeWidth="1" />
       ))}
       {xTicks.map(t => (
         <line key={`gx${t}`} x1={xS(t)} y1={PAD.top} x2={xS(t)} y2={PAD.top + CHART_H}
-          stroke="#eee" strokeWidth="1" />
+          stroke="var(--chart-grid)" strokeWidth="1" />
       ))}
 
       {/* Y-axis labels */}
       {yTicks.map(alt => (
         <text key={`yl${alt}`} x={PAD.left - 4} y={yS(alt) + 3}
-          textAnchor="end" fontSize="10" fontFamily="ui-monospace, monospace" fill="#888">
+          textAnchor="end" fontSize="10" fontFamily="ui-monospace, monospace" fill="var(--chart-label)">
           {alt >= 1000 ? `${alt / 1000}k` : alt}
         </text>
       ))}
       <text x={10} y={PAD.top + CHART_H / 2}
-        textAnchor="middle" fontSize="9" fontFamily="system-ui" fill="#888"
+        textAnchor="middle" fontSize="9" fontFamily="system-ui" fill="var(--chart-label)"
         transform={`rotate(-90, 10, ${PAD.top + CHART_H / 2})`}>
         ALT (ft)
       </text>
@@ -50,16 +50,16 @@ function Axes({ maxAlt, maxTime }) {
       {/* X-axis labels */}
       {xTicks.map(t => (
         <text key={`xl${t}`} x={xS(t)} y={PAD.top + CHART_H + 14}
-          textAnchor="middle" fontSize="10" fontFamily="ui-monospace, monospace" fill="#888">
+          textAnchor="middle" fontSize="10" fontFamily="ui-monospace, monospace" fill="var(--chart-label)">
           {t}s
         </text>
       ))}
 
       {/* Axis lines */}
       <line x1={PAD.left} y1={PAD.top} x2={PAD.left} y2={PAD.top + CHART_H}
-        stroke="#ccc" strokeWidth="1" />
+        stroke="var(--chart-axis)" strokeWidth="1" />
       <line x1={PAD.left} y1={PAD.top + CHART_H} x2={PAD.left + CHART_W} y2={PAD.top + CHART_H}
-        stroke="#ccc" strokeWidth="1" />
+        stroke="var(--chart-axis)" strokeWidth="1" />
     </>
   )
 }
@@ -108,10 +108,11 @@ export default function FlightChart({ simulation }) {
   if (!simulation) {
     // No-data state: axes visible, CTA centered
     return (
-      <svg width={W} height={H} style={{ background: '#fafafa', border: '1px solid #eee', display: 'block' }}>
+      <svg viewBox={`0 0 ${W} ${H}`} width="100%"
+        style={{ display: 'block', background: 'var(--chart-bg)', border: '1px solid var(--chart-border)', borderRadius: 'var(--radius)' }}>
         <Axes maxAlt={5000} maxTime={120} />
         <text x={PAD.left + CHART_W / 2} y={PAD.top + CHART_H / 2 - 4}
-          textAnchor="middle" fontSize="12" fontFamily="system-ui" fill="#bbb">
+          textAnchor="middle" fontSize="12" fontFamily="system-ui" fill="var(--chart-marker)">
           Run Simulation →
         </text>
       </svg>
@@ -139,7 +140,8 @@ export default function FlightChart({ simulation }) {
   if (landPt) events.push({ t: landPt.t, label: 'LDG' })
 
   return (
-    <svg width={W} height={H} style={{ background: '#fafafa', border: '1px solid #eee', display: 'block' }}>
+    <svg viewBox={`0 0 ${W} ${H}`} width="100%"
+      style={{ display: 'block', background: 'var(--chart-bg)', border: '1px solid var(--chart-border)', borderRadius: 'var(--radius)' }}>
       <Axes maxAlt={maxAlt} maxTime={maxTime} />
 
       {/* Event marker lines */}
@@ -148,10 +150,10 @@ export default function FlightChart({ simulation }) {
           <line
             x1={xS(ev.t)} y1={PAD.top}
             x2={xS(ev.t)} y2={PAD.top + CHART_H}
-            stroke="#aaa" strokeWidth="1" strokeDasharray="3,3"
+            stroke="var(--chart-marker)" strokeWidth="1" strokeDasharray="3,3"
           />
           <text x={xS(ev.t) + 3} y={PAD.top + 10}
-            fontSize="8" fontFamily="ui-monospace, monospace" fill="#aaa">
+            fontSize="8" fontFamily="ui-monospace, monospace" fill="var(--chart-marker)">
             {ev.label}
           </text>
         </g>
@@ -161,7 +163,7 @@ export default function FlightChart({ simulation }) {
       <path
         ref={pathRef}
         d={d}
-        stroke="#1a1a1a"
+        stroke="var(--chart-path)"
         strokeWidth="2"
         fill="none"
         style={{ strokeDasharray: 'none', strokeDashoffset: 0 }}

@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { PARTS } from '../data/parts.js'
 import { slotStatus } from '../lib/compatibility.js'
 import CompatDot from './CompatDot.jsx'
@@ -19,6 +19,99 @@ function partSpecLine(part) {
   }
 }
 
+function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen }) {
+  const [open, setOpen] = useState(defaultOpen)
+
+  return (
+    <div style={{ borderBottom: '1px solid var(--border-subtle)' }}>
+      {/* Manufacturer header */}
+      <button
+        onClick={() => setOpen(o => !o)}
+        style={{
+          width: '100%',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 16px',
+          background: 'none',
+          border: 'none',
+          cursor: 'pointer',
+          textAlign: 'left',
+        }}
+      >
+        <span className="section-label">{mfr}</span>
+        <span style={{
+          fontSize: '10px',
+          color: 'var(--text-tertiary)',
+          transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
+          transition: 'transform 200ms ease',
+          display: 'inline-block',
+        }}>▶</span>
+      </button>
+
+      {/* Parts grid — collapsed via max-height */}
+      <div style={{
+        overflow: 'hidden',
+        maxHeight: open ? '1000px' : '0',
+        transition: 'max-height 200ms ease',
+      }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1fr',
+          gap: '6px',
+          padding: '4px 12px 12px',
+        }}>
+          {parts.map(part => {
+            const isSelected = config[part.category]?.id === part.id
+            return (
+              <button
+                key={part.id}
+                onClick={() => onSelectPart(part)}
+                aria-label={`${part.name} — ${partSpecLine(part)}${isSelected ? ' (selected)' : ''}`}
+                aria-pressed={isSelected}
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  justifyContent: 'center',
+                  padding: '8px 10px',
+                  background: isSelected ? 'var(--ok-bg)' : 'var(--bg-panel)',
+                  border: `1px solid ${isSelected ? 'var(--ok-fg)' : 'var(--border-default)'}`,
+                  borderRadius: 'var(--radius)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  gap: '3px',
+                  transition: 'transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease',
+                }}
+                onMouseEnter={e => {
+                  if (!isSelected) {
+                    e.currentTarget.style.transform = 'translateY(-1px)'
+                    e.currentTarget.style.borderColor = 'var(--accent)'
+                    e.currentTarget.style.boxShadow = '0 2px 8px var(--accent-ring)'
+                  }
+                }}
+                onMouseLeave={e => {
+                  if (!isSelected) {
+                    e.currentTarget.style.transform = ''
+                    e.currentTarget.style.borderColor = 'var(--border-default)'
+                    e.currentTarget.style.boxShadow = ''
+                  }
+                }}
+              >
+                <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.3 }}>
+                  {part.name}
+                </div>
+                <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, lineHeight: 1.2 }}>
+                  {partSpecLine(part)}
+                </div>
+              </button>
+            )
+          })}
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export default function PartsBrowser({ parts, categories, activeCategory, config, warnings, onSelectCategory, onSelectPart }) {
   const filtered = parts.filter(p => p.category === activeCategory)
 
@@ -30,11 +123,20 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
   })
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-      {/* Category tabs */}
-      <div style={{ borderBottom: '1px solid var(--border-default)', padding: '8px 0 0' }}>
-        <div className="section-label" style={{ padding: '0 16px 6px' }}>Category</div>
-        <div style={{ display: 'flex', flexDirection: 'column' }}>
+    <div style={{ display: 'flex', flexDirection: 'column' }}>
+      {/* Category tabs — pill style */}
+      <div style={{
+        borderBottom: '1px solid var(--border-default)',
+        padding: '10px 12px 0',
+        background: 'var(--bg-right)',
+      }}>
+        <div className="section-label" style={{ marginBottom: '8px' }}>Parts</div>
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          gap: '4px',
+          paddingBottom: '10px',
+        }}>
           {categories.map(cat => {
             const isActive = cat.id === activeCategory
             const selected = config[cat.id]
@@ -46,70 +148,42 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
               <button
                 key={cat.id}
                 onClick={() => onSelectCategory(cat.id)}
+                title={tooltip}
                 style={{
-                  display: 'flex',
+                  display: 'inline-flex',
                   alignItems: 'center',
-                  justifyContent: 'space-between',
-                  padding: '7px 16px',
-                  background: isActive ? 'var(--bg-hover)' : 'transparent',
-                  border: 'none',
-                  borderLeft: isActive ? '3px solid var(--text-primary)' : '3px solid transparent',
+                  gap: '5px',
+                  padding: '4px 10px',
+                  background: isActive ? 'var(--accent)' : 'var(--bg-panel)',
+                  color: isActive ? 'var(--accent-text)' : 'var(--text-secondary)',
+                  border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border-default)'}`,
+                  borderRadius: '20px',
                   cursor: 'pointer',
-                  textAlign: 'left',
-                  fontSize: '13px',
-                  fontWeight: isActive ? 500 : 400,
-                  color: isActive ? 'var(--text-primary)' : 'var(--text-secondary)',
-                  width: '100%',
+                  fontSize: '12px',
+                  fontWeight: isActive ? 600 : 400,
+                  transition: 'all 150ms ease',
+                  whiteSpace: 'nowrap',
                 }}
               >
-                <span>{cat.label}</span>
-                <CompatDot status={status} tooltip={tooltip} />
+                {cat.label}
+                {selected && <CompatDot status={status} tooltip={tooltip} />}
               </button>
             )
           })}
         </div>
       </div>
 
-      {/* Parts list */}
-      <div style={{ flex: 1, overflowY: 'auto' }}>
-        {Object.entries(byMfr).map(([mfr, mfrParts]) => (
-          <div key={mfr}>
-            <div className="section-label" style={{ padding: '10px 16px 4px' }}>{mfr}</div>
-            {mfrParts.map(part => {
-              const isSelected = config[part.category]?.id === part.id
-              return (
-                <button
-                  key={part.id}
-                  onClick={() => onSelectPart(part)}
-                  aria-label={`${part.name} — ${partSpecLine(part)}${isSelected ? ' (selected)' : ''}`}
-                  aria-pressed={isSelected}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    justifyContent: 'center',
-                    padding: '0 16px',
-                    height: '36px',
-                    width: '100%',
-                    background: isSelected ? 'var(--ok-bg)' : 'transparent',
-                    border: 'none',
-                    borderBottom: '1px solid var(--border-subtle)',
-                    cursor: 'pointer',
-                    textAlign: 'left',
-                    gap: '1px',
-                  }}
-                  onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-hover)' }}
-                  onMouseLeave={e => { if (!isSelected) e.currentTarget.style.background = 'transparent' }}
-                >
-                  <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)' }}>
-                    {part.name}
-                  </div>
-                  <div className="mono" style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 600 }}>
-                    {partSpecLine(part)}
-                  </div>
-                </button>
-              )
-            })}
-          </div>
+      {/* Parts list — collapsible manufacturer groups */}
+      <div style={{ overflowY: 'auto' }}>
+        {Object.entries(byMfr).map(([mfr, mfrParts], i) => (
+          <MfrGroup
+            key={mfr}
+            mfr={mfr}
+            parts={mfrParts}
+            config={config}
+            onSelectPart={onSelectPart}
+            defaultOpen={i === 0}
+          />
         ))}
       </div>
     </div>
