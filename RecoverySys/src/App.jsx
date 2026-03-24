@@ -356,8 +356,8 @@ export default function App() {
             </div>
           </div>
 
-          {/* Middle: Config Builder — fixed width, doesn't steal space from chart */}
-          <div style={{ width: '300px', flexShrink: 0, overflowY: 'auto', background: 'var(--bg-panel)', borderRight: '1px solid var(--border-default)' }}>
+          {/* Middle: Config Builder */}
+          <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-panel)', borderRight: '1px solid var(--border-default)' }}>
             <ConfigBuilder
               categories={CATEGORIES}
               config={state.config}
@@ -373,8 +373,8 @@ export default function App() {
             />
           </div>
 
-          {/* Right: Simulation Panel — flex, takes all remaining space so chart can breathe */}
-          <div style={{ flex: 1, minWidth: '360px', overflowY: 'auto', background: 'var(--bg-panel)' }}>
+          {/* Right: Simulation Panel */}
+          <div style={{ width: '380px', flexShrink: 0, overflowY: 'auto', background: 'var(--bg-panel)' }}>
             <SimPanel
               simulation={state.simulation}
               simFailed={state.simFailed}
