@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Recovery bay configuration tool for high-power rocketry (HPR). React 18 + Vite SPA. No backend — pure localStorage + URL-encoded share links.
 
-**Version:** 1.0.0.0 (see `RecoverySys/VERSION`)
+**Version:** 1.1.0.0 (see `RecoverySys/VERSION`)
 
 ### Key locations
 
@@ -41,7 +41,7 @@ npm run test:watch # watch mode
 - **safeTimeout:** `useRef` accumulates timer IDs; `useEffect` cleanup prevents stale setState after unmount
 - **Share links:** `btoa(encodeURIComponent(JSON.stringify(config)))` → `?c=` URL param
 - **Parts catalog:** Static JS array in `parts.js`; no backend DB
-- **Testing:** Vitest v4 + @testing-library/react + jsdom; fake timers + `flushPromises` pattern for async component tests
+- **Testing:** Vitest v3 + @testing-library/react + jsdom; fake timers + `flushPromises` pattern for async component tests
 
 ## gstack
 
