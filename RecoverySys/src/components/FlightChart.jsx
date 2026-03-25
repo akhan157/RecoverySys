@@ -123,22 +123,24 @@ export default function FlightChart({ simulation }) {
     )
   }
 
-  const { timeline, apogee_ft, deploy_ft, phase1_time_s, total_time_s } = simulation
+  const { timeline, apogee_ft, deploy_ft, phase1_time_s, total_time_s, apogee_t_s, burnout_t_s } = simulation
   const maxAlt  = nice1000(apogee_ft)
-  const maxTime = total_time_s
-    ? Math.ceil((total_time_s + 5) / 5) * 5
-    : Math.ceil((phase1_time_s + 5) / 5) * 5
+
+  // maxTime spans the full flight (ascent + descent)
+  const descentTime = total_time_s ?? phase1_time_s
+  const flightTime  = (apogee_t_s ?? 0) + descentTime
+  const maxTime = Math.ceil((flightTime + 5) / 5) * 5
 
   const xS = t => PAD.left + (t / maxTime) * CHART_W
   const yS = a => PAD.top  + CHART_H - (Math.max(0, a) / maxAlt) * CHART_H
 
   const d = buildPath(timeline, maxAlt, maxTime)
 
-  // Event markers
-  const events = [
-    { t: 0, label: 'APOG' },
-  ]
-  const mainPt = timeline.find(p => p.alt <= deploy_ft)
+  // Event markers — BURN only when ascent data is available (integrated mode)
+  const events = []
+  if (burnout_t_s != null && burnout_t_s > 0) events.push({ t: burnout_t_s, label: 'BURN' })
+  events.push({ t: apogee_t_s ?? 0, label: 'APOG' })
+  const mainPt = timeline.find(p => p.alt <= deploy_ft && p.t > (apogee_t_s ?? 0))
   if (mainPt) events.push({ t: mainPt.t, label: 'MAIN' })
   const landPt = timeline[timeline.length - 1]
   if (landPt) events.push({ t: landPt.t, label: 'LDG' })

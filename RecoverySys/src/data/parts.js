@@ -3,7 +3,9 @@ export const CATEGORIES = [
   { id: 'drogue_chute',     label: 'Drogue Chute',          placeholder: 'No drogue chute selected' },
   { id: 'shock_cord',       label: 'Shock Cord',            placeholder: 'No shock cord selected' },
   { id: 'chute_protector',  label: 'Chute Protector',       placeholder: 'No chute protector selected' },
+  { id: 'deployment_bag',   label: 'Deploy Bag',            placeholder: 'No deployment bag selected' },
   { id: 'quick_links',      label: 'Quick Links',           placeholder: 'No quick links selected' },
+  { id: 'swivel',           label: 'Swivel',                placeholder: 'No swivel selected' },
   { id: 'chute_device',     label: 'Chute-Mounted Device',  placeholder: 'No chute-mounted device selected' },
 ]
 
@@ -1359,33 +1361,88 @@ export const PARTS = [
 
     // ── Shock Cord ───────────────────────────────────────────────────────────────
   // packed_height_in = height of the cord bundle when Z-folded and sitting in the bay
+  // material: 'nylon' stretches ~15% (absorbs snatch energy); 'kevlar' stretches ~3% (higher peak snatch force)
+  //
+  // L1/L2 — tubular nylon (up to ~10 kg rocket mass)
   {
     id: 'sc-tub-half-15',
     category: 'shock_cord',
     manufacturer: 'Generic',
     name: '1/2" Tubular Nylon 15ft',
-    specs: { strength_lbs: 1000, length_ft: 15, weight_g: 120, packed_height_in: 2.0 },
+    specs: { material: 'nylon', strength_lbs: 1000, length_ft: 15, weight_g: 120, packed_height_in: 2.0 },
   },
   {
     id: 'sc-tub-1-10',
     category: 'shock_cord',
     manufacturer: 'Generic',
     name: '1" Tubular Nylon 10ft',
-    specs: { strength_lbs: 2000, length_ft: 10, weight_g: 150, packed_height_in: 2.5 },
+    specs: { material: 'nylon', strength_lbs: 2000, length_ft: 10, weight_g: 150, packed_height_in: 2.5 },
   },
+  // L1/L2 — Kevlar (light, compact; note lower elasticity = higher snatch force)
   {
     id: 'sc-kev-qtr-15',
     category: 'shock_cord',
     manufacturer: 'Generic',
     name: '1/4" Kevlar 15ft',
-    specs: { strength_lbs: 1500, length_ft: 15, weight_g: 85, packed_height_in: 1.5 },
+    specs: { material: 'kevlar', strength_lbs: 1500, length_ft: 15, weight_g: 85, packed_height_in: 1.5 },
   },
   {
     id: 'sc-kev-qtr-20',
     category: 'shock_cord',
     manufacturer: 'Generic',
     name: '1/4" Kevlar 20ft',
-    specs: { strength_lbs: 1500, length_ft: 20, weight_g: 115, packed_height_in: 2.0 },
+    specs: { material: 'kevlar', strength_lbs: 1500, length_ft: 20, weight_g: 115, packed_height_in: 2.0 },
+  },
+  // L3 — tubular nylon (10–30 kg rocket mass, 2000–5000 lbs)
+  {
+    id: 'sc-tub-1-20',
+    category: 'shock_cord',
+    manufacturer: 'Generic',
+    name: '1" Tubular Nylon 20ft',
+    specs: { material: 'nylon', strength_lbs: 2000, length_ft: 20, weight_g: 200, packed_height_in: 3.5 },
+  },
+  {
+    id: 'sc-tub-15-15',
+    category: 'shock_cord',
+    manufacturer: 'Generic',
+    name: '1.5" Tubular Nylon 15ft',
+    specs: { material: 'nylon', strength_lbs: 3500, length_ft: 15, weight_g: 250, packed_height_in: 4.0 },
+  },
+  {
+    id: 'sc-tub-15-25',
+    category: 'shock_cord',
+    manufacturer: 'Generic',
+    name: '1.5" Tubular Nylon 25ft',
+    specs: { material: 'nylon', strength_lbs: 3500, length_ft: 25, weight_g: 410, packed_height_in: 6.5 },
+  },
+  {
+    id: 'sc-tub-2-15',
+    category: 'shock_cord',
+    manufacturer: 'Generic',
+    name: '2" Tubular Nylon 15ft',
+    specs: { material: 'nylon', strength_lbs: 5000, length_ft: 15, weight_g: 375, packed_height_in: 5.0 },
+  },
+  // L3 — Kevlar (compact; for L3 use ratings 2× minimum recommended due to low elasticity)
+  {
+    id: 'sc-kev-half-20',
+    category: 'shock_cord',
+    manufacturer: 'Generic',
+    name: '1/2" Kevlar 20ft',
+    specs: { material: 'kevlar', strength_lbs: 3000, length_ft: 20, weight_g: 170, packed_height_in: 3.0 },
+  },
+  {
+    id: 'sc-kev-half-30',
+    category: 'shock_cord',
+    manufacturer: 'Generic',
+    name: '1/2" Kevlar 30ft',
+    specs: { material: 'kevlar', strength_lbs: 3000, length_ft: 30, weight_g: 255, packed_height_in: 4.5 },
+  },
+  {
+    id: 'sc-kev-3qtr-15',
+    category: 'shock_cord',
+    manufacturer: 'Generic',
+    name: '3/4" Kevlar 15ft',
+    specs: { material: 'kevlar', strength_lbs: 5000, length_ft: 15, weight_g: 200, packed_height_in: 3.0 },
   },
 
   // ── Chute Protectors ─────────────────────────────────────────────────────────
@@ -1396,28 +1453,82 @@ export const PARTS = [
     category: 'chute_protector',
     manufacturer: 'Top Flight Recovery',
     name: 'Nomex 9"',
-    specs: { size_in: 9, max_chute_diam_in: 24, weight_g: 40 },
+    specs: { size_in: 9, max_chute_diam_in: 24, weight_g: 40, packed_height_in: 0.5 },
   },
   {
     id: 'tfr-nomex-12',
     category: 'chute_protector',
     manufacturer: 'Top Flight Recovery',
     name: 'Nomex 12"',
-    specs: { size_in: 12, max_chute_diam_in: 36, weight_g: 65 },
+    specs: { size_in: 12, max_chute_diam_in: 36, weight_g: 65, packed_height_in: 0.75 },
   },
   {
     id: 'tfr-nomex-18',
     category: 'chute_protector',
     manufacturer: 'Top Flight Recovery',
     name: 'Nomex 18"',
-    specs: { size_in: 18, max_chute_diam_in: 54, weight_g: 110 },
+    specs: { size_in: 18, max_chute_diam_in: 54, weight_g: 110, packed_height_in: 1.0 },
   },
   {
     id: 'tfr-nomex-24',
     category: 'chute_protector',
     manufacturer: 'Top Flight Recovery',
     name: 'Nomex 24"',
-    specs: { size_in: 24, max_chute_diam_in: 72, weight_g: 170 },
+    specs: { size_in: 24, max_chute_diam_in: 72, weight_g: 170, packed_height_in: 1.5 },
+  },
+
+  // ── Deployment Bags ───────────────────────────────────────────────────────────
+  // Deployment bags (D-bags) contain the packed parachute and release it cleanly
+  // on ejection. They replace loose-packed chutes in dual-deploy setups.
+  // max_chute_diam_in = largest chute the bag can hold; packed_height_in = bay space.
+  {
+    id: 'dbag-9',
+    category: 'deployment_bag',
+    manufacturer: 'Generic',
+    name: 'Deployment Bag 9"',
+    specs: { max_chute_diam_in: 36, packed_height_in: 2.5, weight_g: 60 },
+  },
+  {
+    id: 'dbag-12',
+    category: 'deployment_bag',
+    manufacturer: 'Generic',
+    name: 'Deployment Bag 12"',
+    specs: { max_chute_diam_in: 54, packed_height_in: 3.5, weight_g: 90 },
+  },
+  {
+    id: 'dbag-15',
+    category: 'deployment_bag',
+    manufacturer: 'Generic',
+    name: 'Deployment Bag 15"',
+    specs: { max_chute_diam_in: 72, packed_height_in: 4.5, weight_g: 130 },
+  },
+  {
+    id: 'dbag-18',
+    category: 'deployment_bag',
+    manufacturer: 'Generic',
+    name: 'Deployment Bag 18"',
+    specs: { max_chute_diam_in: 96, packed_height_in: 6.0, weight_g: 175 },
+  },
+  {
+    id: 'fc-dbag-9',
+    category: 'deployment_bag',
+    manufacturer: 'Fruity Chutes',
+    name: 'Iris Ultra Deploy Bag 9"',
+    specs: { max_chute_diam_in: 36, packed_height_in: 2.5, weight_g: 55 },
+  },
+  {
+    id: 'fc-dbag-12',
+    category: 'deployment_bag',
+    manufacturer: 'Fruity Chutes',
+    name: 'Iris Ultra Deploy Bag 12"',
+    specs: { max_chute_diam_in: 60, packed_height_in: 3.5, weight_g: 85 },
+  },
+  {
+    id: 'fc-dbag-18',
+    category: 'deployment_bag',
+    manufacturer: 'Fruity Chutes',
+    name: 'Iris Ultra Deploy Bag 18"',
+    specs: { max_chute_diam_in: 96, packed_height_in: 5.5, weight_g: 160 },
   },
 
   // ── Quick Links ──────────────────────────────────────────────────────────────
@@ -1450,6 +1561,52 @@ export const PARTS = [
     manufacturer: 'Generic',
     name: '3/8" Zinc Quick Links (×2)',
     specs: { strength_lbs: 2640, size_in: 0.375, weight_g: 85 },
+  },
+
+  // ── Swivels ──────────────────────────────────────────────────────────────────
+  // Swivels prevent line twist between shock cord segments and between drogue
+  // and main deployment systems. rated_lbs = working load limit.
+  {
+    id: 'sw-snap-38',
+    category: 'swivel',
+    manufacturer: 'Generic',
+    name: '3/8" Snap Swivel',
+    specs: { rated_lbs: 400, size_in: 0.375, weight_g: 15, packed_height_in: 0.5 },
+  },
+  {
+    id: 'sw-bb-half',
+    category: 'swivel',
+    manufacturer: 'Generic',
+    name: '1/2" Ball Bearing Swivel',
+    specs: { rated_lbs: 800, size_in: 0.5, weight_g: 25, packed_height_in: 0.5 },
+  },
+  {
+    id: 'sw-bb-3qtr',
+    category: 'swivel',
+    manufacturer: 'Generic',
+    name: '3/4" Ball Bearing Swivel',
+    specs: { rated_lbs: 2000, size_in: 0.75, weight_g: 45, packed_height_in: 0.75 },
+  },
+  {
+    id: 'sw-ss-half',
+    category: 'swivel',
+    manufacturer: 'Generic',
+    name: '1/2" Stainless Ball Bearing Swivel',
+    specs: { rated_lbs: 1200, size_in: 0.5, weight_g: 30, packed_height_in: 0.5 },
+  },
+  {
+    id: 'sw-ss-3qtr',
+    category: 'swivel',
+    manufacturer: 'Generic',
+    name: '3/4" Stainless Ball Bearing Swivel',
+    specs: { rated_lbs: 3500, size_in: 0.75, weight_g: 60, packed_height_in: 0.75 },
+  },
+  {
+    id: 'sw-ss-1',
+    category: 'swivel',
+    manufacturer: 'Generic',
+    name: '1" Stainless Ball Bearing Swivel',
+    specs: { rated_lbs: 6000, size_in: 1.0, weight_g: 90, packed_height_in: 1.0 },
   },
 
   // ── Chute-Mounted Devices ────────────────────────────────────────────────────

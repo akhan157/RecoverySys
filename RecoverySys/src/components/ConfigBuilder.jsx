@@ -70,7 +70,7 @@ export default function ConfigBuilder({
             }}
             onMouseEnter={e => { if (saveState !== 'saving') { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.opacity = '0.9' } }}
             onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.opacity = '' }}
-            onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0)' }}
+            onMouseDown={e => { if (saveState !== 'saving') e.currentTarget.style.transform = 'translateY(0)' }}
           >
             {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved ✓' : 'Save Config'}
           </button>
