@@ -2,7 +2,7 @@ import React, { useRef, useEffect, useCallback } from 'react'
 
 const W = 340
 const H = 240
-const PAD = { top: 16, right: 16, bottom: 36, left: 56 }
+const PAD = { top: 20, right: 16, bottom: 36, left: 56 }
 const CHART_W = W - PAD.left - PAD.right
 const CHART_H = H - PAD.top  - PAD.bottom
 
@@ -34,8 +34,8 @@ function Axes({ maxAlt, maxTime }) {
           stroke="var(--chart-grid)" strokeWidth="1" />
       ))}
 
-      {/* Y-axis labels */}
-      {yTicks.map(alt => (
+      {/* Y-axis labels — skip 0 to avoid collision with "0s" x-label */}
+      {yTicks.filter(alt => alt > 0).map(alt => (
         <text key={`yl${alt}`} x={PAD.left - 4} y={yS(alt) + 3}
           textAnchor="end" fontSize="10" fontFamily="ui-monospace, monospace" fill="var(--chart-label)">
           {alt >= 1000 ? `${alt / 1000}k` : alt}
@@ -47,13 +47,17 @@ function Axes({ maxAlt, maxTime }) {
         ALT (ft)
       </text>
 
-      {/* X-axis labels */}
-      {xTicks.map(t => (
-        <text key={`xl${t}`} x={xS(t)} y={PAD.top + CHART_H + 14}
-          textAnchor="middle" fontSize="10" fontFamily="ui-monospace, monospace" fill="var(--chart-label)">
-          {t}s
-        </text>
-      ))}
+      {/* X-axis labels — thin out when many ticks to prevent crowding */}
+      {xTicks.map((t, i) => {
+        const step = xTicks.length > 8 ? 2 : 1
+        if (i % step !== 0) return null
+        return (
+          <text key={`xl${t}`} x={xS(t)} y={PAD.top + CHART_H + 14}
+            textAnchor="middle" fontSize="10" fontFamily="ui-monospace, monospace" fill="var(--chart-label)">
+            {t}s
+          </text>
+        )
+      })}
 
       {/* Axis lines */}
       <line x1={PAD.left} y1={PAD.top} x2={PAD.left} y2={PAD.top + CHART_H}
