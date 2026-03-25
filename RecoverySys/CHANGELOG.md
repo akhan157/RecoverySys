@@ -3,6 +3,40 @@
 All notable changes to RecoverySys are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.1.1.0] - 2026-03-25
+
+### Added
+- Custom parachute builder — add, select, and delete custom chutes (name, diameter, Cd, packed dims, weight) stored in `localStorage` under `recoverysys-custom-parts`; appear in a dedicated CUSTOM group above catalog entries in the PartsBrowser
+- Deployment bag and swivel parts catalog entries (21 new parts); deployment bag packing check and swivel ejection-load check in compatibility engine
+- Ejection G-factor input in RocketSpecs — overrides the auto-default (20G L1/L2, 30G L3); applied to shock cord, quick link, and swivel load checks
+- Bay obstruction input in RocketSpecs — reserves inches for hardpoints and electronics sleds; deducted from usable bay before volume check
+- Descent rate warning tier — warn at 15–20 fps ("consider a larger chute") in addition to the existing error at >20 fps
+- Drogue descent rate check — warn if drogue is slower than 30 fps (excessive drift) or faster than 150 fps (high ejection shock)
+- Numerical ascent integration in `simulation.js` — `integrateAscent()` provides ±10–15% apogee accuracy when burn time is supplied (vs ±30% heuristic); full ascent trajectory for chart rendering
+- BURN/APOG/MAIN/LDG flight event markers on FlightChart
+- ISA density-corrected descent rates — `computeDescentRate()` now accounts for actual deployment altitude rather than sea-level density
+- Chute-mounted device altitude range check (e.g., Jolly Logic Chute Release max programmable altitude)
+- Tiered bridle/harness length minimums — 5 ft L1, 10 ft L2, 15 ft L3
+- Kevlar inelasticity advisory for L3 rockets — warn when Kevlar harness is rated less than 2× calculated minimum
+- SimPanel MetricCard grid — apogee, drogue descent, main descent, drift, and total flight time displayed as cards with animation
+- Post-sim sanity warnings — high-drift alert (>3000 ft), subsonic burnout note, and velocity context in SimPanel
+
+### Changed
+- Parts browser redesigned — manufacturer-grouped collapsible sections with `aria-pressed` selection state; CUSTOM group always shown first when custom parts exist
+- `RocketSpecs` expanded with ejection G-factor and bay obstruction fields
+- Share link decoder now searches `allParts` (custom + catalog) instead of `PARTS` only — custom parts on the same device resolve correctly; separate toast for custom parts that cannot be shared vs. catalog parts that are missing
+- Mobile PartsBrowser was missing `parts={allParts}`, `customParts`, `onAddCustomPart`, and `onDeleteCustomPart` props — custom chutes are now visible on mobile
+
+### Fixed
+- Custom part IDs switched from `Date.now()` to `crypto.randomUUID()` — prevents silent collision if two parts are created in the same millisecond
+- Negative bay obstruction input was accepted and silently inflated usable bay length; now clamped to `Math.max(0, ...)`
+- Ejection G-factor values below 5G (e.g., a typo of `0.1` instead `10`) now floored at 5G — prevents all hardware load checks from returning near-zero required strength
+- Main deploy altitude fallback changed from 0 ft to 500 ft when field is blank — prevents optimistic (sea-level) descent rate calculation in compatibility check
+- Bay utilization percentage no longer produces `Infinity%` when usable bay is zero
+- Short-burn ascent timeline (single-entry array) no longer drops the apogee point when spliced with the descent timeline
+- `localStorage` reads and writes for theme and custom parts wrapped in `try/catch` — prevents mount crash in Safari private mode and quota-exceeded environments
+- Descent rate hard-error threshold restored to 20 fps (was incorrectly raised to 25 fps in v1.1.0.0)
+
 ## [1.1.0.0] - 2026-03-24
 
 ### Added
