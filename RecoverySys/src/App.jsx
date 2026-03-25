@@ -1,4 +1,4 @@
-import React, { useReducer, useEffect, useCallback, useRef } from 'react'
+import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import { PARTS, CATEGORIES } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import { checkCompatibility } from './lib/compatibility.js'
@@ -20,6 +20,8 @@ const DEFAULT_SPECS = {
   drag_cd:                '',
   wind_speed_mph:         '',
   main_deploy_alt_ft:     '500',
+  ejection_g_factor:      '',   // blank = auto (20G for <10 kg, 30G for ≥10 kg L3)
+  bay_obstruction_in:     '',   // reserved inches taken by hardpoints, sleds, etc.
 }
 
 function loadSaved() {
@@ -30,16 +32,27 @@ function loadSaved() {
   } catch { return null }
 }
 
+function loadCustomParts() {
+  try {
+    const raw = localStorage.getItem('recoverysys-custom-parts')
+    return raw ? JSON.parse(raw) : []
+  } catch { return [] }
+}
+
 function buildInitialState() {
   const saved = loadSaved()
-  const rehydrate = (part) => part ? PARTS.find(p => p.id === part.id) ?? null : null
+  const custom = loadCustomParts()
+  const allParts = [...custom, ...PARTS]
+  const rehydrate = (part) => part ? allParts.find(p => p.id === part.id) ?? null : null
   return {
     config: {
       main_chute:      rehydrate(saved?.config?.main_chute),
       drogue_chute:    rehydrate(saved?.config?.drogue_chute),
       shock_cord:      rehydrate(saved?.config?.shock_cord),
       chute_protector: rehydrate(saved?.config?.chute_protector),
+      deployment_bag:  rehydrate(saved?.config?.deployment_bag),
       quick_links:     rehydrate(saved?.config?.quick_links),
+      swivel:          rehydrate(saved?.config?.swivel),
       chute_device:    rehydrate(saved?.config?.chute_device),
     },
     specs:          { ...DEFAULT_SPECS, ...(saved?.specs ?? {}) },
@@ -108,13 +121,38 @@ export default function App() {
   }, [])
 
   // ── Dark mode ─────────────────────────────────────────────────────────────
-  const [darkMode, setDarkMode] = React.useState(
-    () => localStorage.getItem('recoverysys-theme') === 'dark'
-  )
+  const [darkMode, setDarkMode] = React.useState(() => {
+    try { return localStorage.getItem('recoverysys-theme') === 'dark' } catch { return false }
+  })
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : '')
-    localStorage.setItem('recoverysys-theme', darkMode ? 'dark' : 'light')
+    if (darkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+    } else {
+      document.documentElement.removeAttribute('data-theme')
+    }
+    try { localStorage.setItem('recoverysys-theme', darkMode ? 'dark' : 'light') } catch { /* storage unavailable */ }
   }, [darkMode])
+
+  // ── Custom parts ──────────────────────────────────────────────────────────
+  const [customParts, setCustomParts] = useState(loadCustomParts)
+
+  const allParts = useMemo(() => [...customParts, ...PARTS], [customParts])
+
+  useEffect(() => {
+    try { localStorage.setItem('recoverysys-custom-parts', JSON.stringify(customParts)) } catch { /* storage unavailable */ }
+  }, [customParts])
+
+  const addCustomPart = useCallback((part) => {
+    setCustomParts(prev => [...prev, part])
+  }, [])
+
+  const deleteCustomPart = useCallback((id) => {
+    setCustomParts(prev => prev.filter(p => p.id !== id))
+    // Clear the config slot if the deleted part is currently selected
+    Object.entries(state.config).forEach(([category, selected]) => {
+      if (selected?.id === id) dispatch({ type: 'REMOVE_PART', category })
+    })
+  }, [state.config])
 
   // ── Compatibility ─────────────────────────────────────────────────────────
   useEffect(() => {
@@ -161,7 +199,11 @@ export default function App() {
 
   const copyShareLink = useCallback(() => {
     try {
-      const payload = { config: state.config, specs: state.specs }
+      // Serialize only part IDs (not full objects) to keep URLs compact
+      const configIds = Object.fromEntries(
+        Object.entries(state.config).map(([cat, part]) => [cat, part ? { id: part.id } : null])
+      )
+      const payload = { config: configIds, specs: state.specs }
       const encoded = btoa(encodeURIComponent(JSON.stringify(payload)))
       const url = `${location.origin}${location.pathname}?c=${encodeURIComponent(encoded)}`
       navigator.clipboard.writeText(url).catch(() => {})
@@ -208,13 +250,29 @@ export default function App() {
       const validCategories = new Set(CATEGORIES.map(cat => cat.id))
       const validSpecKeys   = new Set(Object.keys(DEFAULT_SPECS))
       if (payload.config) {
+        let catalogMissing = 0
+        let customMissing  = 0
         Object.entries(payload.config).forEach(([cat, part]) => {
           if (!validCategories.has(cat)) return
           if (part) {
-            const found = PARTS.find(p => p.id === part.id)
+            const found = allParts.find(p => p.id === part.id)
             if (found) dispatch({ type: 'SELECT_PART', category: cat, part: found })
+            else if (part.id?.startsWith('custom-')) customMissing++
+            else catalogMissing++
           }
         })
+        if (catalogMissing > 0) {
+          dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
+            message: `${catalogMissing} part${catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`,
+            level: 'warn',
+          }})
+        }
+        if (customMissing > 0) {
+          dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
+            message: `${customMissing} custom part${customMissing > 1 ? 's' : ''} in this link can't be shared — add them manually.`,
+            level: 'warn',
+          }})
+        }
       }
       if (payload.specs) {
         Object.entries(payload.specs).forEach(([key, value]) => {
@@ -302,13 +360,16 @@ export default function App() {
           flexDirection: 'column',
         }}>
           <PartsBrowser
-            parts={PARTS}
+            parts={allParts}
             categories={CATEGORIES}
             activeCategory={state.activeCategory}
             config={state.config}
             warnings={state.warnings}
+            customParts={customParts}
             onSelectCategory={setCategory}
             onSelectPart={selectPart}
+            onAddCustomPart={addCustomPart}
+            onDeleteCustomPart={deleteCustomPart}
           />
           <div style={{ borderTop: '1px solid var(--border-default)' }}>
             <SimPanel
@@ -330,13 +391,16 @@ export default function App() {
         <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-panel)' }}>
           {state.mobileTab === 'parts' && (
             <PartsBrowser
-              parts={PARTS}
+              parts={allParts}
               categories={CATEGORIES}
               activeCategory={state.activeCategory}
               config={state.config}
               warnings={state.warnings}
+              customParts={customParts}
               onSelectCategory={setCategory}
               onSelectPart={selectPart}
+              onAddCustomPart={addCustomPart}
+              onDeleteCustomPart={deleteCustomPart}
             />
           )}
           {state.mobileTab === 'config' && (
