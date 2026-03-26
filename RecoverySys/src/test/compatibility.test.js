@@ -4,8 +4,8 @@ import { checkCompatibility, slotStatus } from '../lib/compatibility.js'
 const baseSpecs = {
   rocket_mass_g:      '2500',
   airframe_od_in:     '4',
-  airframe_id_in:     '3.9',
-  bay_length_in:      '18',
+  airframe_id_in:     '3.9',  // standard 4" airframe tube
+  bay_length_in:      '18',   // π × (3.9/2)² × 18 ≈ 215 in³ usable bay
   main_deploy_alt_ft: '500',
 }
 
@@ -70,14 +70,15 @@ describe('checkCompatibility', () => {
     expect(warnings).toHaveLength(0)
   })
 
-  it('errors when bay stacked height exceeds bay length', () => {
-    // Stuff the bay with massive chutes
+  it('errors when chute packed volumes exceed bay volume', () => {
+    // bay_cross_area ≈ 11.95 in²; hugeDrogue packed_length=20 → vol ≈ 239 in³
+    // bay: 3.9" ID × 5" → vol ≈ 60 in³ → error triggered
     const hugeDrogue = { name: 'Huge', specs: { diameter_in: 12, cd: 1.5, packed_diam_in: 2, packed_length_in: 20 } }
     const warnings = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: hugeDrogue },
-      specs: { ...baseSpecs, bay_length_in: '5' }, // 5" bay, 20+4 = 24" stacked
+      specs: { ...baseSpecs, bay_length_in: '5' },
     })
-    expect(warnings.some(w => w.slot === 'bay_length' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
   })
 
   it('errors when main descent exceeds 20 fps', () => {
@@ -178,15 +179,16 @@ describe('checkCompatibility', () => {
     expect(warnings.some(w => w.slot === 'shock_cord' && w.level === 'warn' && w.message.includes('10ft'))).toBe(true)
   })
 
-  it('deployment bag packed height is included in bay stacking', () => {
-    // bay = 5", main = 4", bag = 3.5" → total 7.5" > 5" → error
-    const smallMain = { name: 'SM', specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 4 } }
-    const bag = { name: 'Bag', specs: { max_chute_diam_in: 96, packed_height_in: 3.5, weight_g: 90 } }
+  it('errors when chute volumes alone exceed the bay volume', () => {
+    // bay_cross_area ≈ 11.95 in²; smallMain(4) + hugeDrogue(20) → vol ≈ 287 in³
+    // bay: 3.9" ID × 2.5" → vol ≈ 30 in³ → error
+    const smallMain  = { name: 'SM',  specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 4 } }
+    const hugeDrogue = { name: 'HD',  specs: { diameter_in: 12, cd: 1.5, packed_diam_in: 2, packed_length_in: 20 } }
     const warnings = checkCompatibility({
-      config: { main_chute: smallMain, deployment_bag: bag },
-      specs: { ...baseSpecs, bay_length_in: '5' },
+      config: { main_chute: smallMain, drogue_chute: hugeDrogue },
+      specs: { ...baseSpecs, bay_length_in: '2.5' },
     })
-    expect(warnings.some(w => w.slot === 'bay_length' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
   })
 })
 

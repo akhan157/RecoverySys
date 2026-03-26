@@ -11,13 +11,14 @@ const G_ACCEL = 9.81
 export function checkCompatibility({ config, specs }) {
   const warnings = []
 
-  const mass_g         = parseFloat(specs.rocket_mass_g)
-  const airframe_od    = parseFloat(specs.airframe_od_in)
-  const airframe_id    = parseFloat(specs.airframe_id_in) || (airframe_od > 0 ? airframe_od - 0.5 : 0)
-  const bay_length     = parseFloat(specs.bay_length_in)
-  const bay_obstruction = Math.max(0, parseFloat(specs.bay_obstruction_in) || 0)
-  const usable_bay     = bay_length > 0 ? Math.max(0, bay_length - bay_obstruction) : 0
-  const mass_kg        = mass_g > 0 ? mass_g / 1000 : null
+  const mass_g          = parseFloat(specs.rocket_mass_g)
+  const airframe_id     = parseFloat(specs.airframe_id_in)  || 0
+  const bay_length      = parseFloat(specs.bay_length_in)   || 0
+  const bay_cross_area  = airframe_id > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) : 0
+  const bay_volume      = bay_cross_area > 0 && bay_length > 0 ? bay_cross_area * bay_length : 0
+  const obstruction_vol = Math.max(0, parseFloat(specs.bay_obstruction_vol_in3) || 0)
+  const usable_volume   = bay_volume > 0 ? Math.max(0, bay_volume - obstruction_vol) : 0
+  const mass_kg         = mass_g > 0 ? mass_g / 1000 : null
 
   // Ejection G-factor: user-supplied value takes precedence; auto-default is 20G (L1/L2)
   // or 30G for L3-class rockets (≥10 kg). Matches NAR/TRA guidelines.
@@ -26,16 +27,7 @@ export function checkCompatibility({ config, specs }) {
 
   // ── Main chute ──────────────────────────────────────────────────────────────
   if (config.main_chute) {
-    const { packed_diam_in, diameter_in, cd } = config.main_chute.specs
-
-    // Packed diameter vs airframe inner bore
-    if (airframe_id > 0 && packed_diam_in >= airframe_id) {
-      warnings.push({
-        level: 'error',
-        slot: 'main_chute',
-        message: `Main chute packed diameter (${packed_diam_in}") exceeds bay inner diameter (${airframe_id.toFixed(2)}") — won't fit`,
-      })
-    }
+    const { diameter_in, cd } = config.main_chute.specs
 
     // Descent rate check — use actual deploy altitude for density correction
     if (mass_kg) {
@@ -65,16 +57,7 @@ export function checkCompatibility({ config, specs }) {
 
   // ── Drogue chute ────────────────────────────────────────────────────────────
   if (config.drogue_chute) {
-    const { packed_diam_in, diameter_in, cd } = config.drogue_chute.specs
-
-    // Packed diameter vs airframe inner bore
-    if (airframe_id > 0 && packed_diam_in >= airframe_id) {
-      warnings.push({
-        level: 'error',
-        slot: 'drogue_chute',
-        message: `Drogue packed diameter (${packed_diam_in}") exceeds bay inner diameter (${airframe_id.toFixed(2)}") — won't fit`,
-      })
-    }
+    const { diameter_in, cd } = config.drogue_chute.specs
 
     // Drogue descent rate — should be fast (50–120 fps) to minimize drift before main deploy
     if (mass_kg) {
@@ -252,35 +235,49 @@ export function checkCompatibility({ config, specs }) {
     }
   }
 
-  // ── Bay volume / stacked length ──────────────────────────────────────────────
-  // Sum the estimated packed height of every component in the bay.
-  // Component heights with real data come from parts specs; electronics use
-  // conservative fixed estimates since we don't carry board dimensions.
-  if (bay_length > 0) {
-    let stacked = 0
-    if (config.main_chute?.specs.packed_length_in)    stacked += config.main_chute.specs.packed_length_in
-    if (config.drogue_chute?.specs.packed_length_in)  stacked += config.drogue_chute.specs.packed_length_in
-    if (config.shock_cord?.specs.packed_height_in)    stacked += config.shock_cord.specs.packed_height_in
-    if (config.chute_protector)                       stacked += config.chute_protector.specs.packed_height_in ?? 0.5
-    if (config.deployment_bag)                        stacked += config.deployment_bag.specs.packed_height_in
-    if (config.quick_links)                           stacked += 0.5   // small hardware, negligible
-    if (config.swivel)                                stacked += config.swivel.specs.packed_height_in ?? 0.25
-    if (config.chute_device)                          stacked += 1.0   // clips to harness, ~1"
-
-    if (stacked > 0) {
-      const obstr = bay_obstruction > 0 ? ` (${bay_obstruction}" reserved for obstructions)` : ''
-      const pct   = usable_bay > 0 ? Math.round((stacked / usable_bay) * 100) : 100
-      if (stacked > usable_bay) {
+  // ── Packed diameter fit check ────────────────────────────────────────────────
+  // A chute's packed diameter must be ≤ airframe ID or it won't slide into the tube.
+  if (airframe_id > 0) {
+    for (const [slot, item] of [['main_chute', config.main_chute], ['drogue_chute', config.drogue_chute]]) {
+      const pd = item?.specs.packed_diam_in
+      if (pd && pd > airframe_id) {
         warnings.push({
           level: 'error',
-          slot: 'bay_length',
-          message: `Components total ~${stacked.toFixed(1)}" but only ${usable_bay.toFixed(1)}" usable in ${bay_length}" bay${obstr} — won't close`,
+          slot,
+          message: `${item.name} packed diameter ${pd}" exceeds airframe ID ${airframe_id}" — won't fit in tube`,
         })
-      } else if (stacked > usable_bay * 0.85) {
+      }
+    }
+  }
+
+  // ── Bay volume / stacked volume ──────────────────────────────────────────────
+  // Chutes stack axially and fill the tube cross-section — volume = bay_cross_area × packed_length.
+  // Bags, cords, and hardware omitted (no reliable packed_length independent of install).
+  // Use 85% warn / 100% error thresholds.
+  if (bay_volume > 0) {
+    const chuteVol = (chuteSpecs) => {
+      if (!chuteSpecs?.packed_length_in) return 0
+      return bay_cross_area * chuteSpecs.packed_length_in
+    }
+
+    let stacked_vol = 0
+    stacked_vol += chuteVol(config.main_chute?.specs)
+    stacked_vol += chuteVol(config.drogue_chute?.specs)
+
+    if (stacked_vol > 0) {
+      const obstrNote = obstruction_vol > 0 ? ` (${obstruction_vol.toFixed(1)} in³ obstructions subtracted)` : ''
+      const pct = usable_volume > 0 ? Math.round((stacked_vol / usable_volume) * 100) : 100
+      if (stacked_vol > usable_volume) {
+        warnings.push({
+          level: 'error',
+          slot: 'bay_volume',
+          message: `Packed chutes total ~${stacked_vol.toFixed(0)} in³ but only ${usable_volume.toFixed(0)} in³ usable in bay${obstrNote} — won't close`,
+        })
+      } else if (stacked_vol > usable_volume * 0.85) {
         warnings.push({
           level: 'warn',
-          slot: 'bay_length',
-          message: `Bay is ${pct}% full (~${stacked.toFixed(1)}" of ${usable_bay.toFixed(1)}" usable${obstr}) — very tight, consider a longer bay`,
+          slot: 'bay_volume',
+          message: `Bay is ${pct}% full (~${stacked_vol.toFixed(0)} in³ of ${usable_volume.toFixed(0)} in³ usable${obstrNote}) — very tight`,
         })
       }
     }

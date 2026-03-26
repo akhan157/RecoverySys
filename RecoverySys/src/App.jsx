@@ -2,7 +2,6 @@ import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } 
 import { PARTS, CATEGORIES } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import { checkCompatibility } from './lib/compatibility.js'
-import { exportOrk } from './lib/ork.js'
 import PartsBrowser from './components/PartsBrowser.jsx'
 import ConfigBuilder from './components/ConfigBuilder.jsx'
 import SimPanel from './components/SimPanel.jsx'
@@ -14,14 +13,13 @@ const DEFAULT_SPECS = {
   rocket_mass_g:          '',
   motor_total_impulse_ns: '',
   burn_time_s:            '',
-  airframe_od_in:         '',
   airframe_id_in:         '',
   bay_length_in:          '',
   drag_cd:                '',
   wind_speed_mph:         '',
   main_deploy_alt_ft:     '500',
   ejection_g_factor:      '',   // blank = auto (20G for <10 kg, 30G for ≥10 kg L3)
-  bay_obstruction_in:     '',   // reserved inches taken by hardpoints, sleds, etc.
+  bay_obstruction_vol_in3: '',  // volume (in³) of obstructions inside the bay (sleds, hardpoints, etc.)
 }
 
 function loadSaved() {
@@ -65,7 +63,6 @@ function buildInitialState() {
     toasts:         [],
     saveState:      'idle',
     shareState:     'idle',
-    exportState:    'idle',
   }
 }
 
@@ -95,8 +92,6 @@ function reducer(state, action) {
       return { ...state, saveState: action.state }
     case 'SET_SHARE_STATE':
       return { ...state, shareState: action.state }
-    case 'SET_EXPORT_STATE':
-      return { ...state, exportState: action.state }
     default:
       return state
   }
@@ -213,22 +208,6 @@ export default function App() {
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
     }
   }, [state.config, state.specs, safeTimeout])
-
-  const doExportOrk = useCallback(async () => {
-    dispatch({ type: 'SET_EXPORT_STATE', state: 'exporting' })
-    try {
-      const blob = await exportOrk({ config: state.config, specs: state.specs, simulation: state.simulation })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url; a.download = 'recoverysys.ork'; a.click()
-      safeTimeout(() => URL.revokeObjectURL(url), 10000)
-      dispatch({ type: 'SET_EXPORT_STATE', state: 'done' })
-      safeTimeout(() => dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' }), 3000)
-    } catch {
-      dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' })
-      dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Export failed — check browser console', level: 'error' } })
-    }
-  }, [state.config, state.specs, state.simulation, safeTimeout])
 
   const removeToast = useCallback((id) => dispatch({ type: 'REMOVE_TOAST', id }), [])
 
@@ -376,11 +355,9 @@ export default function App() {
               simulation={state.simulation}
               simFailed={state.simFailed}
               simRunning={state.simRunning}
-              exportState={state.exportState}
               config={state.config}
               specs={state.specs}
               onRun={runSim}
-              onExport={doExportOrk}
             />
           </div>
         </div>
@@ -423,11 +400,9 @@ export default function App() {
               simulation={state.simulation}
               simFailed={state.simFailed}
               simRunning={state.simRunning}
-              exportState={state.exportState}
               config={state.config}
               specs={state.specs}
               onRun={runSim}
-              onExport={doExportOrk}
             />
           )}
         </div>

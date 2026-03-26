@@ -3,19 +3,11 @@ import { render, screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import App from '../App.jsx'
-import { exportOrk } from '../lib/ork.js'
 
-// Mock exportOrk — jsdom has no Blob URL support
-vi.mock('../lib/ork.js', () => ({
-  exportOrk: vi.fn(),
-}))
-
-// Stub clipboard and URL APIs not supported in jsdom
+// Stub clipboard API not supported in jsdom
 Object.assign(navigator, {
   clipboard: { writeText: vi.fn().mockResolvedValue(undefined) },
 })
-global.URL.createObjectURL = vi.fn(() => 'blob:mock')
-global.URL.revokeObjectURL = vi.fn()
 
 // ── localStorage helpers ───────────────────────────────────────────────────────
 
@@ -44,7 +36,6 @@ const SAVED_SESSION = {
     rocket_mass_g:          '2500',
     motor_total_impulse_ns: '640',
     burn_time_s:            '1.8',
-    airframe_od_in:         '4',
     airframe_id_in:         '3.9',
     bay_length_in:          '18',
     drag_cd:                '0.5',
@@ -88,112 +79,6 @@ describe('App — restored-session toast', () => {
       render(<App />)
     })
     expect(screen.queryByText('Restored your last session.')).not.toBeInTheDocument()
-  })
-})
-
-// ── Export button guard ───────────────────────────────────────────────────────
-
-describe('App — export button disabled state', () => {
-  beforeEach(() => {
-    clearLocalStorage()
-    vi.useFakeTimers()
-  })
-
-  afterEach(() => {
-    vi.runAllTimers()
-    vi.useRealTimers()
-    clearLocalStorage()
-  })
-
-  it('is disabled when no chutes are configured (default state)', async () => {
-    await act(async () => {
-      render(<App />)
-    })
-    const exportButtons = screen.getAllByRole('button', { name: /export .ork/i })
-    expect(exportButtons.length).toBeGreaterThan(0)
-    exportButtons.forEach(btn => expect(btn).toBeDisabled())
-  })
-
-  it('is disabled when main chute is set but airframe_od_in is empty', async () => {
-    // Save a config with main chute but no airframe OD
-    setLocalStorage({
-      ...SAVED_SESSION,
-      specs: { ...SAVED_SESSION.specs, airframe_od_in: '' },
-    })
-    await act(async () => {
-      render(<App />)
-    })
-    const exportButtons = screen.getAllByRole('button', { name: /export .ork/i })
-    exportButtons.forEach(btn => expect(btn).toBeDisabled())
-  })
-
-  it('shows hint text "Enter Airframe OD" when airframe_od_in is empty and chute selected', async () => {
-    setLocalStorage({
-      ...SAVED_SESSION,
-      specs: { ...SAVED_SESSION.specs, airframe_od_in: '' },
-    })
-    await act(async () => {
-      render(<App />)
-    })
-    const hints = screen.getAllByText(/enter airframe od/i)
-    expect(hints.length).toBeGreaterThan(0)
-  })
-})
-
-// Helper: flush all pending microtasks/promises without advancing fake timers
-const flushPromises = () => new Promise(resolve => setTimeout(resolve, 0))
-
-// ── Export state machine ──────────────────────────────────────────────────────
-
-describe('App — export state machine', () => {
-  beforeEach(() => {
-    clearLocalStorage()
-    vi.mocked(exportOrk).mockResolvedValue(new Blob(['<zip>'], { type: 'application/octet-stream' }))
-  })
-
-  afterEach(() => {
-    clearLocalStorage()
-    vi.restoreAllMocks()
-  })
-
-  it('shows "Exported ✓" after a successful export then resets to idle after 3s', async () => {
-    // Regression: ISSUE (eng-review) — export state machine stays in 'done' forever
-    // Found by /plan-eng-review on 2026-03-23
-    // Report: .gstack/qa-reports/qa-report-localhost-2026-03-23.md
-    vi.useFakeTimers({ shouldAdvanceTime: true })
-
-    try {
-      setLocalStorage(SAVED_SESSION)
-      await act(async () => {
-        render(<App />)
-      })
-
-      // Advance past the 300ms compatibility debounce
-      await act(async () => { vi.advanceTimersByTime(400) })
-
-      const exportButtons = screen.getAllByRole('button', { name: /export .ork/i })
-      const activeBtn = exportButtons.find(b => !b.disabled)
-      if (!activeBtn) return // skip if button can't be enabled in this env
-
-      // Click export — this triggers the async exportOrk flow
-      await act(async () => {
-        activeBtn.click()
-        // Flush the resolved promise from the mock
-        await flushPromises()
-      })
-
-      // "Exported ✓" should now be showing
-      const doneButtons = screen.queryAllByRole('button', { name: /exported/i })
-      expect(doneButtons.length).toBeGreaterThan(0)
-
-      // After 3 seconds the safeTimeout fires and resets to idle
-      await act(async () => { vi.advanceTimersByTime(3100) })
-
-      const resetButtons = screen.queryAllByRole('button', { name: /export .ork/i })
-      expect(resetButtons.length).toBeGreaterThan(0)
-    } finally {
-      vi.useRealTimers()
-    }
   })
 })
 

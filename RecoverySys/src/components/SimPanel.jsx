@@ -38,7 +38,7 @@ function canRun(specs, config) {
   )
 }
 
-export default function SimPanel({ simulation, simFailed, simRunning, exportState, config, specs, onRun, onExport }) {
+export default function SimPanel({ simulation, simFailed, simRunning, config, specs, onRun }) {
   const ready = canRun(specs, config)
 
   return (
@@ -157,43 +157,6 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
         </div>
       )}
 
-      {/* Export */}
-      <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-        <div className="section-label" style={{ marginBottom: '10px' }}>Export</div>
-        <button
-          onClick={onExport}
-          disabled={exportState === 'exporting' || (!config.main_chute && !config.drogue_chute) || !parseFloat(specs.airframe_od_in)}
-          style={{
-            height: '32px',
-            padding: '0 16px',
-            background: 'transparent',
-            color: 'var(--text-primary)',
-            border: '1px solid var(--border-default)',
-            borderRadius: 'var(--radius)',
-            cursor: exportState === 'exporting' ? 'default' : 'pointer',
-            fontSize: '13px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            transition: 'transform 150ms ease, border-color 200ms ease',
-          }}
-          onMouseEnter={e => { if (exportState !== 'exporting') { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.borderColor = 'var(--accent)' } }}
-          onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'var(--border-default)' }}
-          onMouseDown={e => { if (exportState !== 'exporting') e.currentTarget.style.transform = 'translateY(0)' }}
-        >
-          {exportState === 'exporting' ? (
-            <>
-              <span className="spinner" style={{ borderTopColor: 'var(--text-primary)', borderColor: 'var(--border-default)' }} />
-              Exporting…
-            </>
-          ) : exportState === 'done' ? 'Exported ✓' : 'Export .ork'}
-        </button>
-        {!parseFloat(specs.airframe_od_in) && (
-          <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '6px' }}>
-            Enter Airframe OD in Rocket Specs to enable export.
-          </p>
-        )}
-      </div>
     </div>
   )
 }

@@ -50,6 +50,15 @@ export default function RocketSpecs({ specs, onSetSpec }) {
   const gDisplay = specs.ejection_g_factor ? parseFloat(specs.ejection_g_factor) : gAuto
   const gIsLow   = gDisplay < 12   // below NAR minimum
 
+  // Bay volume — computed from airframe ID + bay length; obstructions subtracted for usable
+  const airframe_id     = parseFloat(specs.airframe_id_in)
+  const bay_length      = parseFloat(specs.bay_length_in)
+  const obstruction_vol = parseFloat(specs.bay_obstruction_vol_in3) || 0
+  const bayVolume       = (airframe_id > 0 && bay_length > 0)
+    ? Math.PI * Math.pow(airframe_id / 2, 2) * bay_length
+    : null
+  const usableVolume    = bayVolume != null ? Math.max(0, bayVolume - obstruction_vol) : null
+
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <div className="section-label">Rocket Specs — optional, improves sim accuracy</div>
@@ -79,16 +88,8 @@ export default function RocketSpecs({ specs, onSetSpec }) {
           onChange={v => onSetSpec('burn_time_s', v)}
         />
         <SpecInput
-          id="airframe"
-          label="Airframe OD"
-          value={specs.airframe_od_in}
-          unit="in"
-          placeholder="e.g. 4"
-          onChange={v => onSetSpec('airframe_od_in', v)}
-        />
-        <SpecInput
           id="airframe-id"
-          label="Airframe Inner Dia."
+          label="Airframe ID"
           value={specs.airframe_id_in}
           unit="in"
           placeholder="e.g. 3.9"
@@ -104,12 +105,28 @@ export default function RocketSpecs({ specs, onSetSpec }) {
         />
         <SpecInput
           id="bay-obstruction"
-          label="Bay Obstructions"
-          value={specs.bay_obstruction_in}
-          unit="in"
+          label="Obstruction Volume"
+          value={specs.bay_obstruction_vol_in3}
+          unit="in³"
           placeholder="0"
-          onChange={v => onSetSpec('bay_obstruction_in', v)}
+          onChange={v => onSetSpec('bay_obstruction_vol_in3', v)}
         />
+
+        {/* Bay volume readout — computed from ID + length; always shown when both are filled */}
+        {bayVolume != null && (
+          <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '16px', alignItems: 'center',
+            padding: '6px 10px', background: 'var(--bg-right)', border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius)', fontSize: '11px', color: 'var(--text-tertiary)' }}>
+            <span>Bay <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{bayVolume.toFixed(1)} in³</strong></span>
+            {obstruction_vol > 0 && <>
+              <span style={{ color: 'var(--border-default)' }}>–</span>
+              <span>Obstructions <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{obstruction_vol.toFixed(1)} in³</strong></span>
+              <span style={{ color: 'var(--border-default)' }}>=</span>
+              <span>Usable <strong style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>{usableVolume.toFixed(1)} in³</strong></span>
+            </>}
+          </div>
+        )}
+
         <SpecInput
           id="cd"
           label="Drag Coeff (Cd)"
@@ -178,7 +195,7 @@ export default function RocketSpecs({ specs, onSetSpec }) {
           : 'Enter burn time for ±10–15% apogee accuracy. Without it, fallback heuristic gives ±30%.'}
       </p>
       <p style={{ fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.4, marginTop: '-4px' }}>
-        Cd: blank = 0.50 (typical HPR). G-Factor: blank = auto (20G L1/L2, 30G L3 ≥10 kg). BP charges typically 20–30G; CO2/Tender Descender 8–12G. Bay Obstructions: inches occupied by hardpoints, avionics sleds, or other hardware not part of the recovery stack.
+        Cd: blank = 0.50 (typical HPR). G-Factor: blank = auto (20G L1/L2, 30G L3 ≥10 kg). BP charges typically 20–30G; CO2/Tender Descender 8–12G. Airframe ID: inner diameter of your airframe tube (e.g. 3.9" for a 4" tube). Bay Length: axial length of your recovery bay. Obstruction Volume: volume of avionics sleds, bulkheads, or other hardware inside the bay — subtracted to get usable packing space.
       </p>
     </div>
   )
