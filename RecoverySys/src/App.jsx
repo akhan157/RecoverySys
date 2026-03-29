@@ -3,6 +3,7 @@ import { PARTS, CATEGORIES } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import { checkCompatibility } from './lib/compatibility.js'
 import { exportOrk } from './lib/ork.js'
+import { fetchRcConfig, extractRcSpecs } from './lib/rc.js'
 import PartsBrowser from './components/PartsBrowser.jsx'
 import ConfigBuilder from './components/ConfigBuilder.jsx'
 import SimPanel from './components/SimPanel.jsx'
@@ -242,6 +243,25 @@ export default function App() {
         dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Restored your last session.', level: 'ok' } })
       }
     } catch { /* no saved config or parse error — silent */ }
+  }, []) // run once on mount
+
+  // ── Load rc config on mount (first-time visitors only) ──────────────────────
+  // Applies site-wide spec defaults from /recoverysys.rc.json when there is
+  // no saved session and no share link — operators use this to pre-configure
+  // their hosted instance with sensible defaults for their club/field.
+  useEffect(() => {
+    const params = new URLSearchParams(location.search)
+    if (params.get('c')) return                                    // share link wins
+    if (localStorage.getItem('recoverysys-config')) return        // saved session wins
+    const validSpecKeys = new Set(Object.keys(DEFAULT_SPECS))
+    fetchRcConfig().then(rc => {
+      const overrides = extractRcSpecs(rc, validSpecKeys)
+      if (Object.keys(overrides).length === 0) return
+      Object.entries(overrides).forEach(([key, value]) => {
+        dispatch({ type: 'SET_SPEC', key, value })
+      })
+      dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Loaded site defaults from rc config.', level: 'ok' } })
+    })
   }, []) // run once on mount
 
   // ── Load share link on mount ─────────────────────────────────────────────────
