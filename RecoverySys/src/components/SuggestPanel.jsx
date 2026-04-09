@@ -66,9 +66,7 @@ function SuggestRow({ part, detail, isSelected, onSelect }) {
 function SuggestSection({ label, children }) {
   return (
     <div style={{ marginBottom: '12px' }}>
-      <div style={{
-        fontSize: '10px', fontWeight: 700, letterSpacing: '0.05em',
-        color: 'var(--text-tertiary)', textTransform: 'uppercase',
+      <div className="section-label" style={{
         padding: '6px 10px', borderBottom: '1px solid var(--border-subtle)',
         background: 'var(--bg-right)',
       }}>

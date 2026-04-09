@@ -178,26 +178,26 @@ export default function DispersionMap({ simulation, specs }) {
               fontSize: '11px', color: 'var(--text-tertiary)',
             }}>
               <span>
-                Drift <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                Drift <strong style={{ color: 'var(--text-primary)', fontFamily: '"JetBrains Mono", ui-monospace, monospace' }}>
                   {drift.drift_ft.toLocaleString()} ft
                 </strong>
                 {' '}({(drift.drift_m / 1000).toFixed(2)} km)
               </span>
               {drift.bearing_deg != null && (
                 <span>
-                  Direction <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                  Direction <strong style={{ color: 'var(--text-primary)', fontFamily: '"JetBrains Mono", ui-monospace, monospace' }}>
                     {compassLabel(drift.bearing_deg)} ({Math.round(drift.bearing_deg)}°)
                   </strong>
                 </span>
               )}
               <span>
-                Drogue phase <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                Drogue phase <strong style={{ color: 'var(--text-primary)', fontFamily: '"JetBrains Mono", ui-monospace, monospace' }}>
                   {drift.drogue_drift_ft.toLocaleString()} ft / {drift.drogue_time_s}s
                 </strong>
               </span>
               {drift.main_drift_ft > 0 && (
                 <span>
-                  Main phase <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                  Main phase <strong style={{ color: 'var(--text-primary)', fontFamily: '"JetBrains Mono", ui-monospace, monospace' }}>
                     {drift.main_drift_ft.toLocaleString()} ft / {drift.main_time_s}s
                   </strong>
                 </span>

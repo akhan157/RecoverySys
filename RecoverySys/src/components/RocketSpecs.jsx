@@ -105,8 +105,7 @@ function MotorSearch({ onSetSpec }) {
           <span style={{ fontSize: '12px' }}>
             <span className="mono" style={{ color: 'var(--ok-fg, #4ade80)', fontWeight: 700 }}>{selected.designation}</span>
             <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
-              {selected.manufacturerAbbrev} — {Math.round(selected.totImpulseNs)} Ns
-              {selected.burnTimeS != null ? ` / ${selected.burnTimeS.toFixed(1)}s` : ''}
+              {selected.manufacturerAbbrev} — <span className="mono">{Math.round(selected.totImpulseNs)} Ns{selected.burnTimeS != null ? ` / ${selected.burnTimeS.toFixed(1)}s` : ''}</span>
             </span>
           </span>
           <button
@@ -165,8 +164,7 @@ function MotorSearch({ onSetSpec }) {
             >
               <span className="mono" style={{ fontWeight: 700 }}>{m.designation}</span>
               <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
-                {m.manufacturerAbbrev} — {Math.round(m.totImpulseNs)} Ns
-                {m.burnTimeS != null ? ` / ${m.burnTimeS.toFixed(1)}s` : ''}
+                {m.manufacturerAbbrev} — <span className="mono">{Math.round(m.totImpulseNs)} Ns{m.burnTimeS != null ? ` / ${m.burnTimeS.toFixed(1)}s` : ''}</span>
               </span>
             </button>
           ))}
