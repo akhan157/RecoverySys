@@ -28,3 +28,4 @@ build/
 Thumbs.db
 *.exe
 .claude/settings.local.json
+.claude/skills/gstack/
