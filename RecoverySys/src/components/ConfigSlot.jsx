@@ -16,6 +16,20 @@ function slotSpecLine(part) {
       return `${part.specs.diameter_in}" Ø  Cd ${part.specs.cd}  packed ${part.specs.packed_diam_in}"  ${part.specs.weight_g}g`
     case 'shock_cord':
       return `${part.specs.strength_lbs} lbs  ${part.specs.length_ft}ft  ${part.specs.weight_g}g`
+    case 'chute_protector':
+      return `${part.specs.size_in}" fits ≤${part.specs.max_chute_diam_in}" chute  ${part.specs.weight_g}g`
+    case 'quick_links':
+      return `${part.specs.strength_lbs} lbs  ${part.specs.size_in}" size  ${part.specs.weight_g}g`
+    case 'deployment_bag':
+      return `fits ≤${part.specs.max_chute_diam_in}" chute  ${part.specs.packed_height_in}" packed  ${part.specs.weight_g}g`
+    case 'swivel':
+      return `${part.specs.rated_lbs} lbs WLL  ${part.specs.size_in}" size  ${part.specs.weight_g}g`
+    case 'chute_device': {
+      const altRange = part.specs.deploy_alt_min_ft != null
+        ? `  ${part.specs.deploy_alt_min_ft}–${part.specs.deploy_alt_max_ft}ft`
+        : ''
+      return `${part.specs.weight_g}g${altRange}`
+    }
     default:
       return ''
   }
