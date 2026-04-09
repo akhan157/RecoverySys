@@ -3,6 +3,31 @@
 All notable changes to RecoverySys are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [1.2.0.0] - 2026-04-09
+
+### Added
+- **ThrustCurve motor search** — live search field in Rocket Specs queries ThrustCurve.org API; selecting a motor auto-fills total impulse and burn time; AbortController prevents stale results from overwriting fresh ones
+- **Suggest Parts panel** — collapsible panel above SimPanel ranks main chutes, drogue chutes, and shock cords against user-specified target descent rates; "Use" button applies the part in one click
+- **Dispersion Map** — Leaflet-powered interactive map shows predicted landing zone given wind speed/direction and launch coordinates; drift distance, compass bearing, and ±20% uncertainty circle displayed
+- **Shock cord load analysis** — `computeShockLoad()` calculates peak ejection force, safety factor (material-tiered: nylon ≥4×, Kevlar ≥8×), and strain energy absorbed; displayed in SimPanel after each simulation run
+- **Wind direction and launch coordinates** in Rocket Specs — `wind_direction_deg` (meteorological convention), `launch_lat`, `launch_lon`; enable the dispersion map landing prediction
+- `computeDrift()` exported from `simulation.js` — Great Circle landing coordinate prediction from apogee, descent rates, and wind vector
+
+### Changed
+- `computeDescentRate()` density-corrects at actual deployment altitude (main at deploy\_ft, drogue at mid-phase average) — descent rates at high-altitude sites are now faster and more accurate
+- Deployment bag and swivel packed heights now count toward bay volume utilization
+- Tiered harness length minimums added to compatibility engine (5 ft L1, 10 ft L2, 15 ft L3)
+- `bearing_deg` in `computeDrift` is `null` when wind direction is unspecified — prevents the map from defaulting to a misleading due-north bearing
+
+### Fixed
+- `airframe_od_in` → `airframe_id_in` field rename migrated automatically on load — returning users' saved configs and share links work without re-entry
+- `computeShockLoad` now returns `null` for zero or negative G-factor inputs (safety-critical guard against silent PASS rating)
+- MotorSearch `clear()` now aborts any in-flight ThrustCurve request — prevents stale API responses from reopening the dropdown after clear
+- MotorSearch validates ThrustCurve API fields (`totImpulseNs`, `burnTimeS`) before writing to state — corrupted API records no longer silently set spec fields to `NaN`
+- Leaflet map calls `invalidateSize()` when overlays update — tiles now render correctly when launch coordinates are entered after the map panel is first opened
+- Dispersion stats bar hides the Main phase row when no main chute drift is computed (was showing "0 ft / 0s" misleadingly)
+- MotorSearch debounce timer and in-flight fetch now cancelled on component unmount — prevents `setState` calls on unmounted component
+
 ## [1.1.1.0] - 2026-03-25
 
 ### Added

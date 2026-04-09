@@ -27,6 +27,44 @@ Last updated: 2026-03-24 by /plan-ceo-review
 
 ---
 
+### TODO: Dynamic snatch load model for shock cords
+**What:** Replace the static `mass × G_factor × 9.81` shock load formula with a dynamic impulse-based model that integrates deployment force over cord stretch duration.
+**Why:** The static formula assumes instantaneous load application. In reality, the cord stretches over time, and the peak snatch force depends on deployment velocity, cord spring constant, and damping. Kevlar's low elongation makes this especially relevant — the static formula may underestimate or overestimate depending on conditions.
+**Pros:** More accurate safety factor; directly comparable to test data from cord manufacturers.
+**Cons:** Requires deployment velocity (= drogue descent rate at main deploy altitude — we have this from the sim) and accurate spring constants (k values) per cord. Significantly more complex than the current model.
+**Context:** Current v1 implementation uses `peak_load_lbs = mass_kg × G_factor × 9.81 / 4.448` with a material-tiered safety factor threshold (nylon ≥4, kevlar ≥8). A dynamic model would compute `F_snatch = m × v² / (2 × δ_max)` where δ_max = cord_length × elongation_pct. This is a `simulation.js`-only change once elongation data is in parts.js.
+**Effort:** M → with CC+gstack: S
+**Priority:** P2
+**Depends on:** elongation_pct already added to parts.js in v1.1 shock cord feature
+
+---
+
+## v2 — Flight Visualization & Diagnostics
+
+### TODO: Main-deploy vs apogee sanity check in SimPanel
+**What:** Post-sim banner: ERROR if `main_deploy_alt_ft >= apogee_ft`, WARN if drogue phase < 500ft or drogue time < 5s.
+**Why:** A misconfigured deploy altitude can mean the main chute never fires — currently silent. Users catch this only by reading the numbers.
+**Pros:** Prevents a common setup mistake; zero logic change to sim engine.
+**Cons:** None.
+**Context:** Needs access to `simulation.apogee_ft`, `simulation.deploy_ft`, and `simulation.phase1_time_s`. Render as a banner above the stat cards in SimPanel (reuse existing warn-bg/error-bg CSS vars).
+**Effort:** XS → with CC+gstack: XS
+**Priority:** P1
+**Depends on:** None
+
+---
+
+### TODO: Ascent arc in FlightChart
+**What:** Prepend ascent trajectory points to the chart timeline so the full flight arc (liftoff → apogee → landing) is visible.
+**Why:** Current chart starts at apogee; users can't see the ascent profile or motor burn point.
+**Pros:** Shows the complete flight; enables a BURN marker at motor burnout.
+**Cons:** Ascent timeline is already computed in `integrateAscent()` and included in the `timeline` array returned by `runSimulation()` — no physics change needed. Only FlightChart.jsx needs updating.
+**Context:** The `ascentTimeline` is already merged into `simulation.timeline` in `runSimulation()`. FlightChart just needs to render a BURN event marker at `simulation.burnout_t_s`. Add it to the `events` array in FlightChart.jsx.
+**Effort:** XS → with CC+gstack: XS
+**Priority:** P2
+**Depends on:** None
+
+---
+
 ## v2 — Parts Catalog
 
 ### TODO: Parts catalog update tooling
