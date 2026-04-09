@@ -7,16 +7,26 @@ function partSpecLine(part) {
     case 'main_chute':
     case 'drogue_chute':
       return `${part.specs.diameter_in}" Ø  Cd ${part.specs.cd}  ${part.specs.weight_g}g`
+    case 'chute_protector':
+      return `${part.specs.size_in}" fits ≤${part.specs.max_chute_diam_in}" chute  ${part.specs.weight_g}g`
     case 'flight_computer':
       return `${part.specs.min_voltage}–${part.specs.max_voltage}V  ${part.specs.weight_g}g`
     case 'battery':
       return `${part.specs.voltage}V  ${part.specs.capacity_mah}mAh  ${part.specs.weight_g}g`
     case 'shock_cord':
       return `${part.specs.strength_lbs} lbs  ${part.specs.length_ft}ft  ${part.specs.weight_g}g`
+    case 'quick_links':
+      return `${part.specs.strength_lbs} lbs  ${part.specs.size_in}" size  ${part.specs.weight_g}g`
     case 'deployment_bag':
       return `fits ≤${part.specs.max_chute_diam_in}" chute  ${part.specs.packed_height_in}" packed  ${part.specs.weight_g}g`
     case 'swivel':
       return `${part.specs.rated_lbs} lbs WLL  ${part.specs.size_in}" size  ${part.specs.weight_g}g`
+    case 'chute_device': {
+      const altRange = part.specs.deploy_alt_min_ft != null
+        ? `  ${part.specs.deploy_alt_min_ft}–${part.specs.deploy_alt_max_ft}ft`
+        : ''
+      return `${part.specs.weight_g}g${altRange}`
+    }
     default:
       return ''
   }
@@ -150,6 +160,7 @@ function CustomGroup({ parts, config, onSelectPart, onDelete }) {
               >
                 <button
                   onClick={() => onSelectPart(part)}
+                  aria-label={`${part.name} — ${partSpecLine(part) || 'custom'}${isSelected ? ' (selected)' : ''}`}
                   aria-pressed={isSelected}
                   style={{
                     width: '100%',
@@ -169,8 +180,10 @@ function CustomGroup({ parts, config, onSelectPart, onDelete }) {
                 </button>
                 {/* Delete button — positioned over card, stops propagation */}
                 <button
-                  onClick={() => onDelete(part.id)}
+                  type="button"
+                  onClick={e => { e.stopPropagation(); onDelete(part.id) }}
                   title="Delete custom part"
+                  aria-label={`Delete ${part.name}`}
                   style={{
                     position: 'absolute', top: '4px', right: '4px',
                     width: '16px', height: '16px',
@@ -207,11 +220,12 @@ function CustomChuteForm({ category, onAdd, onCancel }) {
     if (!name.trim()) { setError('Name is required'); return }
     const d = parseFloat(diameter_in), c = parseFloat(cd)
     const pd = parseFloat(packed_diam_in), pl = parseFloat(packed_length_in), w = parseFloat(weight_g)
-    if (!d || d <= 0) { setError('Diameter must be > 0'); return }
-    if (!c || c <= 0) { setError('Cd must be > 0'); return }
-    if (!pd || pd <= 0) { setError('Packed diameter must be > 0'); return }
-    if (!pl || pl <= 0) { setError('Packed length must be > 0'); return }
-    if (!w || w <= 0) { setError('Weight must be > 0'); return }
+    // isFinite() rejects Infinity, -Infinity, and NaN (e.g. "1e308" parses to Infinity)
+    if (!isFinite(d) || d <= 0) { setError('Diameter must be a finite number > 0'); return }
+    if (!isFinite(c) || c <= 0) { setError('Cd must be a finite number > 0'); return }
+    if (!isFinite(pd) || pd <= 0) { setError('Packed diameter must be a finite number > 0'); return }
+    if (!isFinite(pl) || pl <= 0) { setError('Packed length must be a finite number > 0'); return }
+    if (!isFinite(w) || w <= 0) { setError('Weight must be a finite number > 0'); return }
     onAdd({
       id: `custom-${crypto.randomUUID()}`,
       category,
@@ -366,8 +380,9 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
             const isActive = cat.id === activeCategory
             const selected = config[cat.id]
             const status   = selected ? slotStatus(cat.id, warnings) : 'neutral'
-            const tooltip  = (status === 'warn' || status === 'error')
-              ? warnings.find(w => w.slot === cat.id)?.message
+            const slotWarnings = warnings.filter(w => w.slot === cat.id)
+            const tooltip  = (status === 'warn' || status === 'error') && slotWarnings.length > 0
+              ? slotWarnings.map(w => w.message).join('\n')
               : undefined
             return (
               <button
