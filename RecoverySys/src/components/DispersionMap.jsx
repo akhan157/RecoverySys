@@ -86,15 +86,18 @@ export default function DispersionMap({ simulation, specs }) {
 
   // Update overlays whenever simulation / drift changes
   useEffect(() => {
-    const map = leafRef.current
-    if (!map || !open) return
+    if (!open) return
+    let cancelled = false
 
     getLeaflet().then((Lf) => {
+      if (cancelled || !leafRef.current) return   // re-validate after async: map may have been destroyed
+      const map = leafRef.current
+
       // Invalidate size first: map may have been initialized while container was display:none
       map.invalidateSize()
 
-      // Clear previous overlays
-      layersRef.current.forEach(l => l.remove())
+      // Clear previous overlays (guard each remove — a broken layer must not abort the loop)
+      layersRef.current.forEach(l => { try { l.remove() } catch (_) {} })
       layersRef.current = []
 
       const add = (layer) => { layer.addTo(map); layersRef.current.push(layer) }
@@ -145,6 +148,7 @@ export default function DispersionMap({ simulation, specs }) {
         map.setView([launch_lat, launch_lon], 13)
       }
     })
+    return () => { cancelled = true }
   }, [open, mapReady, drift, launch_lat, launch_lon, hasCoords])  // eslint-disable-line react-hooks/exhaustive-deps
 
   const canShow = !!simulation && !!drift
