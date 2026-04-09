@@ -216,10 +216,14 @@ export default function App() {
       const payload = { config: configIds, specs: state.specs }
       const encoded = btoa(encodeURIComponent(JSON.stringify(payload)))
       const url = `${location.origin}${location.pathname}?c=${encodeURIComponent(encoded)}`
-      navigator.clipboard.writeText(url).catch(() => {})
+      navigator.clipboard.writeText(url).catch(() => {
+        // Async clipboard failure (e.g. permission denied in restricted context)
+        dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
+      })
       dispatch({ type: 'SET_SHARE_STATE', state: 'copied' })
       safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
     } catch {
+      // Synchronous failure — clipboard API unavailable
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
     }
   }, [state.config, state.specs, safeTimeout])
