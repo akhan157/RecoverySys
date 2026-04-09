@@ -154,6 +154,66 @@ export default function SimPanel({ simulation, simFailed, simRunning, config, sp
               />
             </div>
           )}
+
+          {/* Shock cord load analysis */}
+          {simulation.shock_load && (
+            <div style={{ marginTop: '14px' }}>
+              <div className="section-label" style={{ marginBottom: '8px' }}>Shock Cord Load</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <MetricCard
+                  animClass="fade-up"
+                  label="Peak load"
+                  value={simulation.shock_load.peak_load_lbs.toLocaleString()}
+                  unit="lbs"
+                />
+                <div
+                  className="fade-up"
+                  style={{
+                    background: 'var(--bg-panel)',
+                    border: '1px solid var(--border-default)',
+                    borderRadius: 'var(--radius)',
+                    padding: '10px 12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Safety Factor
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="mono" style={{ fontSize: '15px', color: 'var(--text-primary)' }}>
+                      {simulation.shock_load.safety_factor}×
+                    </span>
+                    <span style={{
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      padding: '1px 5px',
+                      borderRadius: '3px',
+                      background: simulation.shock_load.sf_status === 'pass' ? 'var(--ok-bg, #1a3a1a)' : simulation.shock_load.sf_status === 'warn' ? 'var(--warn-bg)' : 'var(--error-bg)',
+                      color: simulation.shock_load.sf_status === 'pass' ? 'var(--ok-fg, #4ade80)' : simulation.shock_load.sf_status === 'warn' ? 'var(--warn-fg)' : 'var(--error-fg)',
+                    }}>
+                      {simulation.shock_load.sf_status === 'pass' ? 'OK' : simulation.shock_load.sf_status === 'warn' ? 'LOW' : 'FAIL'}
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div style={{ marginTop: '6px' }}>
+                <MetricCard
+                  animClass="fade-up"
+                  label="Strain energy absorbed"
+                  value={simulation.shock_load.strain_energy_J}
+                  unit="J"
+                />
+              </div>
+              <p style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '6px', lineHeight: 1.5 }}>
+                {simulation.shock_load.material === 'kevlar'
+                  ? `Kevlar threshold: ≥${simulation.shock_load.sf_thresholds.pass}× (low elongation = high snatch force)`
+                  : `Nylon threshold: ≥${simulation.shock_load.sf_thresholds.pass}×`
+                }
+              </p>
+            </div>
+          )}
         </div>
       )}
 
