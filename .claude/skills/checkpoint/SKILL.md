@@ -1,36 +1,22 @@
 ---
-name: investigate
+name: checkpoint
 preamble-tier: 2
 version: 1.0.0
 description: |
-  Systematic debugging with root cause investigation. Four phases: investigate,
-  analyze, hypothesize, implement. Iron Law: no fixes without root cause.
-  Use when asked to "debug this", "fix this bug", "why is this broken",
-  "investigate this error", or "root cause analysis".
-  Proactively invoke this skill (do NOT debug directly) when the user reports
-  errors, 500 errors, stack traces, unexpected behavior, "it was working
-  yesterday", or is troubleshooting why something stopped working. (gstack)
+  Save and resume working state checkpoints. Captures git state, decisions made,
+  and remaining work so you can pick up exactly where you left off — even across
+  Conductor workspace handoffs between branches.
+  Use when asked to "checkpoint", "save progress", "where was I", "resume",
+  "what was I working on", or "pick up where I left off".
+  Proactively suggest when a session is ending, the user is switching context,
+  or before a long break. (gstack)
 allowed-tools:
   - Bash
   - Read
   - Write
-  - Edit
-  - Grep
   - Glob
+  - Grep
   - AskUserQuestion
-  - WebSearch
-hooks:
-  PreToolUse:
-    - matcher: "Edit"
-      hooks:
-        - type: command
-          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
-          statusMessage: "Checking debug scope boundary..."
-    - matcher: "Write"
-      hooks:
-        - type: command
-          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
-          statusMessage: "Checking debug scope boundary..."
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
@@ -65,7 +51,7 @@ echo "TELEMETRY: ${_TEL:-off}"
 echo "TEL_PROMPTED: $_TEL_PROMPTED"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"investigate","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"checkpoint","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 # zsh-compatible: use find instead of glob to avoid NOMATCH error
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
@@ -90,7 +76,7 @@ else
   echo "LEARNINGS: 0"
 fi
 # Session timeline: record skill start (local-only, never sent anywhere)
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"investigate","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"checkpoint","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 # Check if CLAUDE.md has routing rules
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
@@ -549,227 +535,279 @@ Then write a `## GSTACK REVIEW REPORT` section to the end of the plan file:
 file you are allowed to edit in plan mode. The plan file review report is part of the
 plan's living status.
 
-# Systematic Debugging
+# /checkpoint — Save and Resume Working State
 
-## Iron Law
+You are a **Staff Engineer who keeps meticulous session notes**. Your job is to
+capture the full working context — what's being done, what decisions were made,
+what's left — so that any future session (even on a different branch or workspace)
+can resume without losing a beat.
 
-**NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST.**
-
-Fixing symptoms creates whack-a-mole debugging. Every fix that doesn't address root cause makes the next bug harder to find. Find the root cause, then fix it.
+**HARD GATE:** Do NOT implement code changes. This skill captures and restores
+context only.
 
 ---
 
-## Phase 1: Root Cause Investigation
+## Detect command
 
-Gather context before forming any hypothesis.
+Parse the user's input to determine which command to run:
 
-1. **Collect symptoms:** Read the error messages, stack traces, and reproduction steps. If the user hasn't provided enough context, ask ONE question at a time via AskUserQuestion.
+- `/checkpoint` or `/checkpoint save` → **Save**
+- `/checkpoint resume` → **Resume**
+- `/checkpoint list` → **List**
 
-2. **Read the code:** Trace the code path from the symptom back to potential causes. Use Grep to find all references, Read to understand the logic.
+If the user provides a title after the command (e.g., `/checkpoint auth refactor`),
+use it as the checkpoint title. Otherwise, infer a title from the current work.
 
-3. **Check recent changes:**
-   ```bash
-   git log --oneline -20 -- <affected-files>
-   ```
-   Was this working before? What changed? A regression means the root cause is in the diff.
+---
 
-4. **Reproduce:** Can you trigger the bug deterministically? If not, gather more evidence before proceeding.
+## Save flow
 
-## Prior Learnings
-
-Search for relevant learnings from previous sessions:
+### Step 1: Gather state
 
 ```bash
-_CROSS_PROJ=$(~/.claude/skills/gstack/bin/gstack-config get cross_project_learnings 2>/dev/null || echo "unset")
-echo "CROSS_PROJECT: $_CROSS_PROJ"
-if [ "$_CROSS_PROJ" = "true" ]; then
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 --cross-project 2>/dev/null || true
+eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" && mkdir -p ~/.gstack/projects/$SLUG
+```
+
+Collect the current working state:
+
+```bash
+echo "=== BRANCH ==="
+git rev-parse --abbrev-ref HEAD 2>/dev/null
+echo "=== STATUS ==="
+git status --short 2>/dev/null
+echo "=== DIFF STAT ==="
+git diff --stat 2>/dev/null
+echo "=== STAGED DIFF STAT ==="
+git diff --cached --stat 2>/dev/null
+echo "=== RECENT LOG ==="
+git log --oneline -10 2>/dev/null
+```
+
+### Step 2: Summarize context
+
+Using the gathered state plus your conversation history, produce a summary covering:
+
+1. **What's being worked on** — the high-level goal or feature
+2. **Decisions made** — architectural choices, trade-offs, approaches chosen and why
+3. **Remaining work** — concrete next steps, in priority order
+4. **Notes** — anything a future session needs to know (gotchas, blocked items,
+   open questions, things that were tried and didn't work)
+
+If the user provided a title, use it. Otherwise, infer a concise title (3-6 words)
+from the work being done.
+
+### Step 3: Compute session duration
+
+Try to determine how long this session has been active:
+
+```bash
+# Try _TEL_START (Conductor timestamp) first, then shell process start time
+if [ -n "$_TEL_START" ]; then
+  START_EPOCH="$_TEL_START"
+elif [ -n "$PPID" ]; then
+  START_EPOCH=$(ps -o lstart= -p $PPID 2>/dev/null | xargs -I{} date -jf "%c" "{}" "+%s" 2>/dev/null || echo "")
+fi
+if [ -n "$START_EPOCH" ]; then
+  NOW=$(date +%s)
+  DURATION=$((NOW - START_EPOCH))
+  echo "SESSION_DURATION_S=$DURATION"
 else
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 2>/dev/null || true
+  echo "SESSION_DURATION_S=unknown"
 fi
 ```
 
-If `CROSS_PROJECT` is `unset` (first time): Use AskUserQuestion:
+If the duration cannot be determined, omit the `session_duration_s` field from the
+checkpoint file.
 
-> gstack can search learnings from your other projects on this machine to find
-> patterns that might apply here. This stays local (no data leaves your machine).
-> Recommended for solo developers. Skip if you work on multiple client codebases
-> where cross-contamination would be a concern.
-
-Options:
-- A) Enable cross-project learnings (recommended)
-- B) Keep learnings project-scoped only
-
-If A: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings true`
-If B: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings false`
-
-Then re-run the search with the appropriate flag.
-
-If learnings are found, incorporate them into your analysis. When a review finding
-matches a past learning, display:
-
-**"Prior learning applied: [key] (confidence N/10, from [date])"**
-
-This makes the compounding visible. The user should see that gstack is getting
-smarter on their codebase over time.
-
-Output: **"Root cause hypothesis: ..."** — a specific, testable claim about what is wrong and why.
-
----
-
-## Scope Lock
-
-After forming your root cause hypothesis, lock edits to the affected module to prevent scope creep.
+### Step 4: Write checkpoint file
 
 ```bash
-[ -x "${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh" ] && echo "FREEZE_AVAILABLE" || echo "FREEZE_UNAVAILABLE"
+eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" && mkdir -p ~/.gstack/projects/$SLUG
+CHECKPOINT_DIR="$HOME/.gstack/projects/$SLUG/checkpoints"
+mkdir -p "$CHECKPOINT_DIR"
+TIMESTAMP=$(date +%Y%m%d-%H%M%S)
+echo "CHECKPOINT_DIR=$CHECKPOINT_DIR"
+echo "TIMESTAMP=$TIMESTAMP"
 ```
 
-**If FREEZE_AVAILABLE:** Identify the narrowest directory containing the affected files. Write it to the freeze state file:
+Write the checkpoint file to `{CHECKPOINT_DIR}/{TIMESTAMP}-{title-slug}.md` where
+`title-slug` is the title in kebab-case (lowercase, spaces replaced with hyphens,
+special characters removed).
 
-```bash
-STATE_DIR="${CLAUDE_PLUGIN_DATA:-$HOME/.gstack}"
-mkdir -p "$STATE_DIR"
-echo "<detected-directory>/" > "$STATE_DIR/freeze-dir.txt"
-echo "Debug scope locked to: <detected-directory>/"
+The file format:
+
+```markdown
+---
+status: in-progress
+branch: {current branch name}
+timestamp: {ISO-8601 timestamp, e.g. 2026-03-31T14:30:00-07:00}
+session_duration_s: {computed duration, omit if unknown}
+files_modified:
+  - path/to/file1
+  - path/to/file2
+---
+
+## Working on: {title}
+
+### Summary
+
+{1-3 sentences describing the high-level goal and current progress}
+
+### Decisions Made
+
+{Bulleted list of architectural choices, trade-offs, and reasoning}
+
+### Remaining Work
+
+{Numbered list of concrete next steps, in priority order}
+
+### Notes
+
+{Gotchas, blocked items, open questions, things tried that didn't work}
 ```
 
-Substitute `<detected-directory>` with the actual directory path (e.g., `src/auth/`). Tell the user: "Edits restricted to `<dir>/` for this debug session. This prevents changes to unrelated code. Run `/unfreeze` to remove the restriction."
+The `files_modified` list comes from `git status --short` (both staged and unstaged
+modified files). Use relative paths from the repo root.
 
-If the bug spans the entire repo or the scope is genuinely unclear, skip the lock and note why.
+After writing, confirm to the user:
 
-**If FREEZE_UNAVAILABLE:** Skip scope lock. Edits are unrestricted.
-
----
-
-## Phase 2: Pattern Analysis
-
-Check if this bug matches a known pattern:
-
-| Pattern | Signature | Where to look |
-|---------|-----------|---------------|
-| Race condition | Intermittent, timing-dependent | Concurrent access to shared state |
-| Nil/null propagation | NoMethodError, TypeError | Missing guards on optional values |
-| State corruption | Inconsistent data, partial updates | Transactions, callbacks, hooks |
-| Integration failure | Timeout, unexpected response | External API calls, service boundaries |
-| Configuration drift | Works locally, fails in staging/prod | Env vars, feature flags, DB state |
-| Stale cache | Shows old data, fixes on cache clear | Redis, CDN, browser cache, Turbo |
-
-Also check:
-- `TODOS.md` for related known issues
-- `git log` for prior fixes in the same area — **recurring bugs in the same files are an architectural smell**, not a coincidence
-
-**External pattern search:** If the bug doesn't match a known pattern above, WebSearch for:
-- "{framework} {generic error type}" — **sanitize first:** strip hostnames, IPs, file paths, SQL, customer data. Search the error category, not the raw message.
-- "{library} {component} known issues"
-
-If WebSearch is unavailable, skip this search and proceed with hypothesis testing. If a documented solution or known dependency bug surfaces, present it as a candidate hypothesis in Phase 3.
-
----
-
-## Phase 3: Hypothesis Testing
-
-Before writing ANY fix, verify your hypothesis.
-
-1. **Confirm the hypothesis:** Add a temporary log statement, assertion, or debug output at the suspected root cause. Run the reproduction. Does the evidence match?
-
-2. **If the hypothesis is wrong:** Before forming the next hypothesis, consider searching for the error. **Sanitize first** — strip hostnames, IPs, file paths, SQL fragments, customer identifiers, and any internal/proprietary data from the error message. Search only the generic error type and framework context: "{component} {sanitized error type} {framework version}". If the error message is too specific to sanitize safely, skip the search. If WebSearch is unavailable, skip and proceed. Then return to Phase 1. Gather more evidence. Do not guess.
-
-3. **3-strike rule:** If 3 hypotheses fail, **STOP**. Use AskUserQuestion:
-   ```
-   3 hypotheses tested, none match. This may be an architectural issue
-   rather than a simple bug.
-
-   A) Continue investigating — I have a new hypothesis: [describe]
-   B) Escalate for human review — this needs someone who knows the system
-   C) Add logging and wait — instrument the area and catch it next time
-   ```
-
-**Red flags** — if you see any of these, slow down:
-- "Quick fix for now" — there is no "for now." Fix it right or escalate.
-- Proposing a fix before tracing data flow — you're guessing.
-- Each fix reveals a new problem elsewhere — wrong layer, not wrong code.
-
----
-
-## Phase 4: Implementation
-
-Once root cause is confirmed:
-
-1. **Fix the root cause, not the symptom.** The smallest change that eliminates the actual problem.
-
-2. **Minimal diff:** Fewest files touched, fewest lines changed. Resist the urge to refactor adjacent code.
-
-3. **Write a regression test** that:
-   - **Fails** without the fix (proves the test is meaningful)
-   - **Passes** with the fix (proves the fix works)
-
-4. **Run the full test suite.** Paste the output. No regressions allowed.
-
-5. **If the fix touches >5 files:** Use AskUserQuestion to flag the blast radius:
-   ```
-   This fix touches N files. That's a large blast radius for a bug fix.
-   A) Proceed — the root cause genuinely spans these files
-   B) Split — fix the critical path now, defer the rest
-   C) Rethink — maybe there's a more targeted approach
-   ```
-
----
-
-## Phase 5: Verification & Report
-
-**Fresh verification:** Reproduce the original bug scenario and confirm it's fixed. This is not optional.
-
-Run the test suite and paste the output.
-
-Output a structured debug report:
 ```
-DEBUG REPORT
+CHECKPOINT SAVED
 ════════════════════════════════════════
-Symptom:         [what the user observed]
-Root cause:      [what was actually wrong]
-Fix:             [what was changed, with file:line references]
-Evidence:        [test output, reproduction attempt showing fix works]
-Regression test: [file:line of the new test]
-Related:         [TODOS.md items, prior bugs in same area, architectural notes]
-Status:          DONE | DONE_WITH_CONCERNS | BLOCKED
+Title:    {title}
+Branch:   {branch}
+File:     {path to checkpoint file}
+Modified: {N} files
+Duration: {duration or "unknown"}
 ════════════════════════════════════════
 ```
 
-## Capture Learnings
+---
 
-If you discovered a non-obvious pattern, pitfall, or architectural insight during
-this session, log it for future sessions:
+## Resume flow
+
+### Step 1: Find checkpoints
 
 ```bash
-~/.claude/skills/gstack/bin/gstack-learnings-log '{"skill":"investigate","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"source":"SOURCE","files":["path/to/relevant/file"]}'
+eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" && mkdir -p ~/.gstack/projects/$SLUG
+CHECKPOINT_DIR="$HOME/.gstack/projects/$SLUG/checkpoints"
+if [ -d "$CHECKPOINT_DIR" ]; then
+  find "$CHECKPOINT_DIR" -maxdepth 1 -name "*.md" -type f 2>/dev/null | xargs ls -1t 2>/dev/null | head -20
+else
+  echo "NO_CHECKPOINTS"
+fi
 ```
 
-**Types:** `pattern` (reusable approach), `pitfall` (what NOT to do), `preference`
-(user stated), `architecture` (structural decision), `tool` (library/framework insight),
-`operational` (project environment/CLI/workflow knowledge).
+List checkpoints from **all branches** (checkpoint files contain the branch name
+in their frontmatter, so all files in the directory are candidates). This enables
+Conductor workspace handoff — a checkpoint saved on one branch can be resumed from
+another.
 
-**Sources:** `observed` (you found this in the code), `user-stated` (user told you),
-`inferred` (AI deduction), `cross-model` (both Claude and Codex agree).
+### Step 2: Load checkpoint
 
-**Confidence:** 1-10. Be honest. An observed pattern you verified in the code is 8-9.
-An inference you're not sure about is 4-5. A user preference they explicitly stated is 10.
+If the user specified a checkpoint (by number, title fragment, or date), find the
+matching file. Otherwise, load the **most recent** checkpoint.
 
-**files:** Include the specific file paths this learning references. This enables
-staleness detection: if those files are later deleted, the learning can be flagged.
+Read the checkpoint file and present a summary:
 
-**Only log genuine discoveries.** Don't log obvious things. Don't log things the user
-already knows. A good test: would this insight save time in a future session? If yes, log it.
+```
+RESUMING CHECKPOINT
+════════════════════════════════════════
+Title:       {title}
+Branch:      {branch from checkpoint}
+Saved:       {timestamp, human-readable}
+Duration:    Last session was {formatted duration} (if available)
+Status:      {status}
+════════════════════════════════════════
+
+### Summary
+{summary from checkpoint}
+
+### Remaining Work
+{remaining work items from checkpoint}
+
+### Notes
+{notes from checkpoint}
+```
+
+If the current branch differs from the checkpoint's branch, note this:
+"This checkpoint was saved on branch `{branch}`. You are currently on
+`{current branch}`. You may want to switch branches before continuing."
+
+### Step 3: Offer next steps
+
+After presenting the checkpoint, ask via AskUserQuestion:
+
+- A) Continue working on the remaining items
+- B) Show the full checkpoint file
+- C) Just needed the context, thanks
+
+If A, summarize the first remaining work item and suggest starting there.
+
+---
+
+## List flow
+
+### Step 1: Gather checkpoints
+
+```bash
+eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" && mkdir -p ~/.gstack/projects/$SLUG
+CHECKPOINT_DIR="$HOME/.gstack/projects/$SLUG/checkpoints"
+if [ -d "$CHECKPOINT_DIR" ]; then
+  echo "CHECKPOINT_DIR=$CHECKPOINT_DIR"
+  find "$CHECKPOINT_DIR" -maxdepth 1 -name "*.md" -type f 2>/dev/null | xargs ls -1t 2>/dev/null
+else
+  echo "NO_CHECKPOINTS"
+fi
+```
+
+### Step 2: Display table
+
+**Default behavior:** Show checkpoints for the **current branch** only.
+
+If the user passes `--all` (e.g., `/checkpoint list --all`), show checkpoints
+from **all branches**.
+
+Read the frontmatter of each checkpoint file to extract `status`, `branch`, and
+`timestamp`. Parse the title from the filename (the part after the timestamp).
+
+Present as a table:
+
+```
+CHECKPOINTS ({branch} branch)
+════════════════════════════════════════
+#  Date        Title                    Status
+─  ──────────  ───────────────────────  ───────────
+1  2026-03-31  auth-refactor            in-progress
+2  2026-03-30  api-pagination           completed
+3  2026-03-28  db-migration-setup       in-progress
+════════════════════════════════════════
+```
+
+If `--all` is used, add a Branch column:
+
+```
+CHECKPOINTS (all branches)
+════════════════════════════════════════
+#  Date        Title                    Branch              Status
+─  ──────────  ───────────────────────  ──────────────────  ───────────
+1  2026-03-31  auth-refactor            feat/auth           in-progress
+2  2026-03-30  api-pagination           main                completed
+3  2026-03-28  db-migration-setup       feat/db-migration   in-progress
+════════════════════════════════════════
+```
+
+If there are no checkpoints, tell the user: "No checkpoints saved yet. Run
+`/checkpoint` to save your current working state."
 
 ---
 
 ## Important Rules
 
-- **3+ failed fix attempts → STOP and question the architecture.** Wrong architecture, not failed hypothesis.
-- **Never apply a fix you cannot verify.** If you can't reproduce and confirm, don't ship it.
-- **Never say "this should fix it."** Verify and prove it. Run the tests.
-- **If fix touches >5 files → AskUserQuestion** about blast radius before proceeding.
-- **Completion status:**
-  - DONE — root cause found, fix applied, regression test written, all tests pass
-  - DONE_WITH_CONCERNS — fixed but cannot fully verify (e.g., intermittent bug, requires staging)
-  - BLOCKED — root cause unclear after investigation, escalated
+- **Never modify code.** This skill only reads state and writes checkpoint files.
+- **Always include the branch name** in checkpoint files — this is critical for
+  cross-branch resume in Conductor workspaces.
+- **Checkpoint files are append-only.** Never overwrite or delete existing checkpoint
+  files. Each save creates a new file.
+- **Infer, don't interrogate.** Use git state and conversation context to fill in
+  the checkpoint. Only use AskUserQuestion if the title genuinely cannot be inferred.

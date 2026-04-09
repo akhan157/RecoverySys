@@ -1,36 +1,19 @@
 ---
-name: investigate
-preamble-tier: 2
-version: 1.0.0
+name: open-gstack-browser
+version: 0.2.0
 description: |
-  Systematic debugging with root cause investigation. Four phases: investigate,
-  analyze, hypothesize, implement. Iron Law: no fixes without root cause.
-  Use when asked to "debug this", "fix this bug", "why is this broken",
-  "investigate this error", or "root cause analysis".
-  Proactively invoke this skill (do NOT debug directly) when the user reports
-  errors, 500 errors, stack traces, unexpected behavior, "it was working
-  yesterday", or is troubleshooting why something stopped working. (gstack)
+  Launch GStack Browser — AI-controlled Chromium with the sidebar extension baked in.
+  Opens a visible browser window where you can watch every action in real time.
+  The sidebar shows a live activity feed and chat. Anti-bot stealth built in.
+  Use when asked to "open gstack browser", "launch browser", "connect chrome",
+  "open chrome", "real browser", "launch chrome", "side panel", or "control my browser".
+voice-triggers:
+  - "show me the browser"
 allowed-tools:
   - Bash
   - Read
-  - Write
-  - Edit
-  - Grep
-  - Glob
   - AskUserQuestion
-  - WebSearch
-hooks:
-  PreToolUse:
-    - matcher: "Edit"
-      hooks:
-        - type: command
-          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
-          statusMessage: "Checking debug scope boundary..."
-    - matcher: "Write"
-      hooks:
-        - type: command
-          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
-          statusMessage: "Checking debug scope boundary..."
+
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
@@ -65,7 +48,7 @@ echo "TELEMETRY: ${_TEL:-off}"
 echo "TEL_PROMPTED: $_TEL_PROMPTED"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"investigate","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"open-gstack-browser","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 # zsh-compatible: use find instead of glob to avoid NOMATCH error
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
@@ -90,7 +73,7 @@ else
   echo "LEARNINGS: 0"
 fi
 # Session timeline: record skill start (local-only, never sent anywhere)
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"investigate","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"open-gstack-browser","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 # Check if CLAUDE.md has routing rules
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
@@ -392,6 +375,24 @@ AI makes completeness near-free. Always recommend the complete option over short
 
 Include `Completeness: X/10` for each option (10=all edge cases, 7=happy path, 3=shortcut).
 
+## Repo Ownership — See Something, Say Something
+
+`REPO_MODE` controls how to handle issues outside your branch:
+- **`solo`** — You own everything. Investigate and offer to fix proactively.
+- **`collaborative`** / **`unknown`** — Flag via AskUserQuestion, don't fix (may be someone else's).
+
+Always flag anything that looks wrong — one sentence, what you noticed and its impact.
+
+## Search Before Building
+
+Before building anything unfamiliar, **search first.** See `~/.claude/skills/gstack/ETHOS.md`.
+- **Layer 1** (tried and true) — don't reinvent. **Layer 2** (new and popular) — scrutinize. **Layer 3** (first principles) — prize above all.
+
+**Eureka:** When first-principles reasoning contradicts conventional wisdom, name it and log:
+```bash
+jq -n --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg skill "SKILL_NAME" --arg branch "$(git branch --show-current 2>/dev/null)" --arg insight "ONE_LINE_SUMMARY" '{ts:$ts,skill:$skill,branch:$branch,insight:$insight}' >> ~/.gstack/analytics/eureka.jsonl 2>/dev/null || true
+```
+
 ## Completion Status Protocol
 
 When completing a skill workflow, report status using one of:
@@ -549,227 +550,222 @@ Then write a `## GSTACK REVIEW REPORT` section to the end of the plan file:
 file you are allowed to edit in plan mode. The plan file review report is part of the
 plan's living status.
 
-# Systematic Debugging
+# /open-gstack-browser — Launch GStack Browser
 
-## Iron Law
+Launch GStack Browser — AI-controlled Chromium with the sidebar extension,
+anti-bot stealth, and custom branding. You see every action in real time.
 
-**NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST.**
-
-Fixing symptoms creates whack-a-mole debugging. Every fix that doesn't address root cause makes the next bug harder to find. Find the root cause, then fix it.
-
----
-
-## Phase 1: Root Cause Investigation
-
-Gather context before forming any hypothesis.
-
-1. **Collect symptoms:** Read the error messages, stack traces, and reproduction steps. If the user hasn't provided enough context, ask ONE question at a time via AskUserQuestion.
-
-2. **Read the code:** Trace the code path from the symptom back to potential causes. Use Grep to find all references, Read to understand the logic.
-
-3. **Check recent changes:**
-   ```bash
-   git log --oneline -20 -- <affected-files>
-   ```
-   Was this working before? What changed? A regression means the root cause is in the diff.
-
-4. **Reproduce:** Can you trigger the bug deterministically? If not, gather more evidence before proceeding.
-
-## Prior Learnings
-
-Search for relevant learnings from previous sessions:
+## SETUP (run this check BEFORE any browse command)
 
 ```bash
-_CROSS_PROJ=$(~/.claude/skills/gstack/bin/gstack-config get cross_project_learnings 2>/dev/null || echo "unset")
-echo "CROSS_PROJECT: $_CROSS_PROJ"
-if [ "$_CROSS_PROJ" = "true" ]; then
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 --cross-project 2>/dev/null || true
+_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+B=""
+[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
+[ -z "$B" ] && B=~/.claude/skills/gstack/browse/dist/browse
+if [ -x "$B" ]; then
+  echo "READY: $B"
 else
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 2>/dev/null || true
+  echo "NEEDS_SETUP"
 fi
 ```
 
-If `CROSS_PROJECT` is `unset` (first time): Use AskUserQuestion:
+If `NEEDS_SETUP`:
+1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
+2. Run: `cd <SKILL_DIR> && ./setup`
+3. If `bun` is not installed:
+   ```bash
+   if ! command -v bun >/dev/null 2>&1; then
+     BUN_VERSION="1.3.10"
+     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
+     tmpfile=$(mktemp)
+     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
+     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
+     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
+       echo "ERROR: bun install script checksum mismatch" >&2
+       echo "  expected: $BUN_INSTALL_SHA" >&2
+       echo "  got:      $actual_sha" >&2
+       rm "$tmpfile"; exit 1
+     fi
+     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
+     rm "$tmpfile"
+   fi
+   ```
 
-> gstack can search learnings from your other projects on this machine to find
-> patterns that might apply here. This stays local (no data leaves your machine).
-> Recommended for solo developers. Skip if you work on multiple client codebases
-> where cross-contamination would be a concern.
+## Step 0: Pre-flight cleanup
+
+Before connecting, kill any stale browse servers and clean up lock files that
+may have persisted from a crash. This prevents "already connected" false
+positives and Chromium profile lock conflicts.
+
+```bash
+# Kill any existing browse server
+if [ -f "$(git rev-parse --show-toplevel 2>/dev/null)/.gstack/browse.json" ]; then
+  _OLD_PID=$(cat "$(git rev-parse --show-toplevel)/.gstack/browse.json" 2>/dev/null | grep -o '"pid":[0-9]*' | grep -o '[0-9]*')
+  [ -n "$_OLD_PID" ] && kill "$_OLD_PID" 2>/dev/null || true
+  sleep 1
+  [ -n "$_OLD_PID" ] && kill -9 "$_OLD_PID" 2>/dev/null || true
+  rm -f "$(git rev-parse --show-toplevel)/.gstack/browse.json"
+fi
+# Clean Chromium profile locks (can persist after crashes)
+_PROFILE_DIR="$HOME/.gstack/chromium-profile"
+for _LF in SingletonLock SingletonSocket SingletonCookie; do
+  rm -f "$_PROFILE_DIR/$_LF" 2>/dev/null || true
+done
+echo "Pre-flight cleanup done"
+```
+
+## Step 1: Connect
+
+```bash
+$B connect
+```
+
+This launches GStack Browser (rebranded Chromium) in headed mode with:
+- A visible window you can watch (not your regular Chrome — it stays untouched)
+- The gstack sidebar extension auto-loaded via `launchPersistentContext`
+- Anti-bot stealth patches (sites like Google and NYTimes work without captchas)
+- Custom user agent and GStack Browser branding in Dock/menu bar
+- A sidebar agent process for chat commands
+
+The `connect` command auto-discovers the extension from the gstack install
+directory. It always uses port **34567** so the extension can auto-connect.
+
+After connecting, print the full output to the user. Confirm you see
+`Mode: headed` in the output.
+
+If the output shows an error or the mode is not `headed`, run `$B status` and
+share the output with the user before proceeding.
+
+## Step 2: Verify
+
+```bash
+$B status
+```
+
+Confirm the output shows `Mode: headed`. Read the port from the state file:
+
+```bash
+cat "$(git rev-parse --show-toplevel 2>/dev/null)/.gstack/browse.json" 2>/dev/null | grep -o '"port":[0-9]*' | grep -o '[0-9]*'
+```
+
+The port should be **34567**. If it's different, note it — the user may need it
+for the Side Panel.
+
+Also find the extension path so you can help the user if they need to load it manually:
+
+```bash
+_EXT_PATH=""
+_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+[ -n "$_ROOT" ] && [ -f "$_ROOT/.claude/skills/gstack/extension/manifest.json" ] && _EXT_PATH="$_ROOT/.claude/skills/gstack/extension"
+[ -z "$_EXT_PATH" ] && [ -f "$HOME/.claude/skills/gstack/extension/manifest.json" ] && _EXT_PATH="$HOME/.claude/skills/gstack/extension"
+echo "EXTENSION_PATH: ${_EXT_PATH:-NOT FOUND}"
+```
+
+## Step 3: Guide the user to the Side Panel
+
+Use AskUserQuestion:
+
+> Chrome is launched with gstack control. You should see Playwright's Chromium
+> (not your regular Chrome) with a golden shimmer line at the top of the page.
+>
+> The Side Panel extension should be auto-loaded. To open it:
+> 1. Look for the **puzzle piece icon** (Extensions) in the toolbar — it may
+>    already show the gstack icon if the extension loaded successfully
+> 2. Click the **puzzle piece** → find **gstack browse** → click the **pin icon**
+> 3. Click the pinned **gstack icon** in the toolbar
+> 4. The Side Panel should open on the right showing a live activity feed
+>
+> **Port:** 34567 (auto-detected — the extension connects automatically in the
+> Playwright-controlled Chrome).
 
 Options:
-- A) Enable cross-project learnings (recommended)
-- B) Keep learnings project-scoped only
+- A) I can see the Side Panel — let's go!
+- B) I can see Chrome but can't find the extension
+- C) Something went wrong
 
-If A: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings true`
-If B: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings false`
+If B: Tell the user:
 
-Then re-run the search with the appropriate flag.
+> The extension is loaded into Playwright's Chromium at launch time, but
+> sometimes it doesn't appear immediately. Try these steps:
+>
+> 1. Type `chrome://extensions` in the address bar
+> 2. Look for **"gstack browse"** — it should be listed and enabled
+> 3. If it's there but not pinned, go back to any page, click the puzzle piece
+>    icon, and pin it
+> 4. If it's NOT listed at all, click **"Load unpacked"** and navigate to:
+>    - Press **Cmd+Shift+G** in the file picker dialog
+>    - Paste this path: `{EXTENSION_PATH}` (use the path from Step 2)
+>    - Click **Select**
+>
+> After loading, pin it and click the icon to open the Side Panel.
+>
+> If the Side Panel badge stays gray (disconnected), click the gstack icon
+> and enter port **34567** manually.
 
-If learnings are found, incorporate them into your analysis. When a review finding
-matches a past learning, display:
+If C:
 
-**"Prior learning applied: [key] (confidence N/10, from [date])"**
+1. Run `$B status` and show the output
+2. If the server is not healthy, re-run Step 0 cleanup + Step 1 connect
+3. If the server IS healthy but the browser isn't visible, try `$B focus`
+4. If that fails, ask the user what they see (error message, blank screen, etc.)
 
-This makes the compounding visible. The user should see that gstack is getting
-smarter on their codebase over time.
+## Step 4: Demo
 
-Output: **"Root cause hypothesis: ..."** — a specific, testable claim about what is wrong and why.
-
----
-
-## Scope Lock
-
-After forming your root cause hypothesis, lock edits to the affected module to prevent scope creep.
-
-```bash
-[ -x "${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh" ] && echo "FREEZE_AVAILABLE" || echo "FREEZE_UNAVAILABLE"
-```
-
-**If FREEZE_AVAILABLE:** Identify the narrowest directory containing the affected files. Write it to the freeze state file:
-
-```bash
-STATE_DIR="${CLAUDE_PLUGIN_DATA:-$HOME/.gstack}"
-mkdir -p "$STATE_DIR"
-echo "<detected-directory>/" > "$STATE_DIR/freeze-dir.txt"
-echo "Debug scope locked to: <detected-directory>/"
-```
-
-Substitute `<detected-directory>` with the actual directory path (e.g., `src/auth/`). Tell the user: "Edits restricted to `<dir>/` for this debug session. This prevents changes to unrelated code. Run `/unfreeze` to remove the restriction."
-
-If the bug spans the entire repo or the scope is genuinely unclear, skip the lock and note why.
-
-**If FREEZE_UNAVAILABLE:** Skip scope lock. Edits are unrestricted.
-
----
-
-## Phase 2: Pattern Analysis
-
-Check if this bug matches a known pattern:
-
-| Pattern | Signature | Where to look |
-|---------|-----------|---------------|
-| Race condition | Intermittent, timing-dependent | Concurrent access to shared state |
-| Nil/null propagation | NoMethodError, TypeError | Missing guards on optional values |
-| State corruption | Inconsistent data, partial updates | Transactions, callbacks, hooks |
-| Integration failure | Timeout, unexpected response | External API calls, service boundaries |
-| Configuration drift | Works locally, fails in staging/prod | Env vars, feature flags, DB state |
-| Stale cache | Shows old data, fixes on cache clear | Redis, CDN, browser cache, Turbo |
-
-Also check:
-- `TODOS.md` for related known issues
-- `git log` for prior fixes in the same area — **recurring bugs in the same files are an architectural smell**, not a coincidence
-
-**External pattern search:** If the bug doesn't match a known pattern above, WebSearch for:
-- "{framework} {generic error type}" — **sanitize first:** strip hostnames, IPs, file paths, SQL, customer data. Search the error category, not the raw message.
-- "{library} {component} known issues"
-
-If WebSearch is unavailable, skip this search and proceed with hypothesis testing. If a documented solution or known dependency bug surfaces, present it as a candidate hypothesis in Phase 3.
-
----
-
-## Phase 3: Hypothesis Testing
-
-Before writing ANY fix, verify your hypothesis.
-
-1. **Confirm the hypothesis:** Add a temporary log statement, assertion, or debug output at the suspected root cause. Run the reproduction. Does the evidence match?
-
-2. **If the hypothesis is wrong:** Before forming the next hypothesis, consider searching for the error. **Sanitize first** — strip hostnames, IPs, file paths, SQL fragments, customer identifiers, and any internal/proprietary data from the error message. Search only the generic error type and framework context: "{component} {sanitized error type} {framework version}". If the error message is too specific to sanitize safely, skip the search. If WebSearch is unavailable, skip and proceed. Then return to Phase 1. Gather more evidence. Do not guess.
-
-3. **3-strike rule:** If 3 hypotheses fail, **STOP**. Use AskUserQuestion:
-   ```
-   3 hypotheses tested, none match. This may be an architectural issue
-   rather than a simple bug.
-
-   A) Continue investigating — I have a new hypothesis: [describe]
-   B) Escalate for human review — this needs someone who knows the system
-   C) Add logging and wait — instrument the area and catch it next time
-   ```
-
-**Red flags** — if you see any of these, slow down:
-- "Quick fix for now" — there is no "for now." Fix it right or escalate.
-- Proposing a fix before tracing data flow — you're guessing.
-- Each fix reveals a new problem elsewhere — wrong layer, not wrong code.
-
----
-
-## Phase 4: Implementation
-
-Once root cause is confirmed:
-
-1. **Fix the root cause, not the symptom.** The smallest change that eliminates the actual problem.
-
-2. **Minimal diff:** Fewest files touched, fewest lines changed. Resist the urge to refactor adjacent code.
-
-3. **Write a regression test** that:
-   - **Fails** without the fix (proves the test is meaningful)
-   - **Passes** with the fix (proves the fix works)
-
-4. **Run the full test suite.** Paste the output. No regressions allowed.
-
-5. **If the fix touches >5 files:** Use AskUserQuestion to flag the blast radius:
-   ```
-   This fix touches N files. That's a large blast radius for a bug fix.
-   A) Proceed — the root cause genuinely spans these files
-   B) Split — fix the critical path now, defer the rest
-   C) Rethink — maybe there's a more targeted approach
-   ```
-
----
-
-## Phase 5: Verification & Report
-
-**Fresh verification:** Reproduce the original bug scenario and confirm it's fixed. This is not optional.
-
-Run the test suite and paste the output.
-
-Output a structured debug report:
-```
-DEBUG REPORT
-════════════════════════════════════════
-Symptom:         [what the user observed]
-Root cause:      [what was actually wrong]
-Fix:             [what was changed, with file:line references]
-Evidence:        [test output, reproduction attempt showing fix works]
-Regression test: [file:line of the new test]
-Related:         [TODOS.md items, prior bugs in same area, architectural notes]
-Status:          DONE | DONE_WITH_CONCERNS | BLOCKED
-════════════════════════════════════════
-```
-
-## Capture Learnings
-
-If you discovered a non-obvious pattern, pitfall, or architectural insight during
-this session, log it for future sessions:
+After the user confirms the Side Panel is working, run a quick demo:
 
 ```bash
-~/.claude/skills/gstack/bin/gstack-learnings-log '{"skill":"investigate","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"source":"SOURCE","files":["path/to/relevant/file"]}'
+$B goto https://news.ycombinator.com
 ```
 
-**Types:** `pattern` (reusable approach), `pitfall` (what NOT to do), `preference`
-(user stated), `architecture` (structural decision), `tool` (library/framework insight),
-`operational` (project environment/CLI/workflow knowledge).
+Wait 2 seconds, then:
 
-**Sources:** `observed` (you found this in the code), `user-stated` (user told you),
-`inferred` (AI deduction), `cross-model` (both Claude and Codex agree).
+```bash
+$B snapshot -i
+```
 
-**Confidence:** 1-10. Be honest. An observed pattern you verified in the code is 8-9.
-An inference you're not sure about is 4-5. A user preference they explicitly stated is 10.
+Tell the user: "Check the Side Panel — you should see the `goto` and `snapshot`
+commands appear in the activity feed. Every command Claude runs shows up here
+in real time."
 
-**files:** Include the specific file paths this learning references. This enables
-staleness detection: if those files are later deleted, the learning can be flagged.
+## Step 5: Sidebar chat
 
-**Only log genuine discoveries.** Don't log obvious things. Don't log things the user
-already knows. A good test: would this insight save time in a future session? If yes, log it.
+After the activity feed demo, tell the user about the sidebar chat:
 
----
+> The Side Panel also has a **chat tab**. Try typing a message like "take a
+> snapshot and describe this page." A sidebar agent (a child Claude instance)
+> executes your request in the browser — you'll see the commands appear in
+> the activity feed as they happen.
+>
+> The sidebar agent can navigate pages, click buttons, fill forms, and read
+> content. Each task gets up to 5 minutes. It runs in an isolated session, so
+> it won't interfere with this Claude Code window.
 
-## Important Rules
+## Step 6: What's next
 
-- **3+ failed fix attempts → STOP and question the architecture.** Wrong architecture, not failed hypothesis.
-- **Never apply a fix you cannot verify.** If you can't reproduce and confirm, don't ship it.
-- **Never say "this should fix it."** Verify and prove it. Run the tests.
-- **If fix touches >5 files → AskUserQuestion** about blast radius before proceeding.
-- **Completion status:**
-  - DONE — root cause found, fix applied, regression test written, all tests pass
-  - DONE_WITH_CONCERNS — fixed but cannot fully verify (e.g., intermittent bug, requires staging)
-  - BLOCKED — root cause unclear after investigation, escalated
+Tell the user:
+
+> You're all set! Here's what you can do with the connected Chrome:
+>
+> **Watch Claude work in real time:**
+> - Run any gstack skill (`/qa`, `/design-review`, `/benchmark`) and watch
+>   every action happen in the visible Chrome window + Side Panel feed
+> - No cookie import needed — the Playwright browser shares its own session
+>
+> **Control the browser directly:**
+> - **Sidebar chat** — type natural language in the Side Panel and the sidebar
+>   agent executes it (e.g., "fill in the login form and submit")
+> - **Browse commands** — `$B goto <url>`, `$B click <sel>`, `$B fill <sel> <val>`,
+>   `$B snapshot -i` — all visible in Chrome + Side Panel
+>
+> **Window management:**
+> - `$B focus` — bring Chrome to the foreground anytime
+> - `$B disconnect` — close headed Chrome and return to headless mode
+>
+> **What skills look like in headed mode:**
+> - `/qa` runs its full test suite in the visible browser — you see every page
+>   load, every click, every assertion
+> - `/design-review` takes screenshots in the real browser — same pixels you see
+> - `/benchmark` measures performance in the headed browser
+
+Then proceed with whatever the user asked to do. If they didn't specify a task,
+ask what they'd like to test or browse.

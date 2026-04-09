@@ -1,36 +1,21 @@
 ---
-name: investigate
+name: health
 preamble-tier: 2
 version: 1.0.0
 description: |
-  Systematic debugging with root cause investigation. Four phases: investigate,
-  analyze, hypothesize, implement. Iron Law: no fixes without root cause.
-  Use when asked to "debug this", "fix this bug", "why is this broken",
-  "investigate this error", or "root cause analysis".
-  Proactively invoke this skill (do NOT debug directly) when the user reports
-  errors, 500 errors, stack traces, unexpected behavior, "it was working
-  yesterday", or is troubleshooting why something stopped working. (gstack)
+  Code quality dashboard. Wraps existing project tools (type checker, linter,
+  test runner, dead code detector, shell linter), computes a weighted composite
+  0-10 score, and tracks trends over time. Use when: "health check",
+  "code quality", "how healthy is the codebase", "run all checks",
+  "quality score". (gstack)
 allowed-tools:
   - Bash
   - Read
   - Write
   - Edit
-  - Grep
   - Glob
+  - Grep
   - AskUserQuestion
-  - WebSearch
-hooks:
-  PreToolUse:
-    - matcher: "Edit"
-      hooks:
-        - type: command
-          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
-          statusMessage: "Checking debug scope boundary..."
-    - matcher: "Write"
-      hooks:
-        - type: command
-          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
-          statusMessage: "Checking debug scope boundary..."
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
@@ -65,7 +50,7 @@ echo "TELEMETRY: ${_TEL:-off}"
 echo "TEL_PROMPTED: $_TEL_PROMPTED"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"investigate","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"health","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 # zsh-compatible: use find instead of glob to avoid NOMATCH error
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
@@ -90,7 +75,7 @@ else
   echo "LEARNINGS: 0"
 fi
 # Session timeline: record skill start (local-only, never sent anywhere)
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"investigate","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"health","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 # Check if CLAUDE.md has routing rules
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
@@ -549,227 +534,268 @@ Then write a `## GSTACK REVIEW REPORT` section to the end of the plan file:
 file you are allowed to edit in plan mode. The plan file review report is part of the
 plan's living status.
 
-# Systematic Debugging
+# /health -- Code Quality Dashboard
 
-## Iron Law
+You are a **Staff Engineer who owns the CI dashboard**. You know that code quality
+isn't one metric -- it's a composite of type safety, lint cleanliness, test coverage,
+dead code, and script hygiene. Your job is to run every available tool, score the
+results, present a clear dashboard, and track trends so the team knows if quality
+is improving or slipping.
 
-**NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST.**
+**HARD GATE:** Do NOT fix any issues. Produce the dashboard and recommendations only.
+The user decides what to act on.
 
-Fixing symptoms creates whack-a-mole debugging. Every fix that doesn't address root cause makes the next bug harder to find. Find the root cause, then fix it.
+## User-invocable
+When the user types `/health`, run this skill.
 
 ---
 
-## Phase 1: Root Cause Investigation
+## Step 1: Detect Health Stack
 
-Gather context before forming any hypothesis.
+Read CLAUDE.md and look for a `## Health Stack` section. If found, parse the tools
+listed there and skip auto-detection.
 
-1. **Collect symptoms:** Read the error messages, stack traces, and reproduction steps. If the user hasn't provided enough context, ask ONE question at a time via AskUserQuestion.
-
-2. **Read the code:** Trace the code path from the symptom back to potential causes. Use Grep to find all references, Read to understand the logic.
-
-3. **Check recent changes:**
-   ```bash
-   git log --oneline -20 -- <affected-files>
-   ```
-   Was this working before? What changed? A regression means the root cause is in the diff.
-
-4. **Reproduce:** Can you trigger the bug deterministically? If not, gather more evidence before proceeding.
-
-## Prior Learnings
-
-Search for relevant learnings from previous sessions:
+If no `## Health Stack` section exists, auto-detect available tools:
 
 ```bash
-_CROSS_PROJ=$(~/.claude/skills/gstack/bin/gstack-config get cross_project_learnings 2>/dev/null || echo "unset")
-echo "CROSS_PROJECT: $_CROSS_PROJ"
-if [ "$_CROSS_PROJ" = "true" ]; then
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 --cross-project 2>/dev/null || true
-else
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 2>/dev/null || true
-fi
+# Type checker
+[ -f tsconfig.json ] && echo "TYPECHECK: tsc --noEmit"
+
+# Linter
+[ -f biome.json ] || [ -f biome.jsonc ] && echo "LINT: biome check ."
+setopt +o nomatch 2>/dev/null || true
+ls eslint.config.* .eslintrc.* .eslintrc 2>/dev/null | head -1 | xargs -I{} echo "LINT: eslint ."
+[ -f .pylintrc ] || [ -f pyproject.toml ] && grep -q "pylint\|ruff" pyproject.toml 2>/dev/null && echo "LINT: ruff check ."
+
+# Test runner
+[ -f package.json ] && grep -q '"test"' package.json 2>/dev/null && echo "TEST: $(node -e "console.log(JSON.parse(require('fs').readFileSync('package.json','utf8')).scripts.test)" 2>/dev/null)"
+[ -f pyproject.toml ] && grep -q "pytest" pyproject.toml 2>/dev/null && echo "TEST: pytest"
+[ -f Cargo.toml ] && echo "TEST: cargo test"
+[ -f go.mod ] && echo "TEST: go test ./..."
+
+# Dead code
+command -v knip >/dev/null 2>&1 && echo "DEADCODE: knip"
+[ -f package.json ] && grep -q '"knip"' package.json 2>/dev/null && echo "DEADCODE: npx knip"
+
+# Shell linting
+command -v shellcheck >/dev/null 2>&1 && ls *.sh scripts/*.sh bin/*.sh 2>/dev/null | head -1 | xargs -I{} echo "SHELL: shellcheck"
 ```
 
-If `CROSS_PROJECT` is `unset` (first time): Use AskUserQuestion:
+Use Glob to search for shell scripts:
+- `**/*.sh` (shell scripts in the repo)
 
-> gstack can search learnings from your other projects on this machine to find
-> patterns that might apply here. This stays local (no data leaves your machine).
-> Recommended for solo developers. Skip if you work on multiple client codebases
-> where cross-contamination would be a concern.
+After auto-detection, present the detected tools via AskUserQuestion:
 
-Options:
-- A) Enable cross-project learnings (recommended)
-- B) Keep learnings project-scoped only
+"I detected these health check tools for this project:
 
-If A: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings true`
-If B: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings false`
+- Type check: `tsc --noEmit`
+- Lint: `biome check .`
+- Tests: `bun test`
+- Dead code: `knip`
+- Shell lint: `shellcheck *.sh`
 
-Then re-run the search with the appropriate flag.
+A) Looks right -- persist to CLAUDE.md and continue
+B) I need to adjust some tools (tell me which)
+C) Skip persistence -- just run these"
 
-If learnings are found, incorporate them into your analysis. When a review finding
-matches a past learning, display:
+If the user chooses A or B (after adjustments), append or update a `## Health Stack`
+section in CLAUDE.md:
 
-**"Prior learning applied: [key] (confidence N/10, from [date])"**
+```markdown
+## Health Stack
 
-This makes the compounding visible. The user should see that gstack is getting
-smarter on their codebase over time.
-
-Output: **"Root cause hypothesis: ..."** — a specific, testable claim about what is wrong and why.
+- typecheck: tsc --noEmit
+- lint: biome check .
+- test: bun test
+- deadcode: knip
+- shell: shellcheck *.sh scripts/*.sh
+```
 
 ---
 
-## Scope Lock
+## Step 2: Run Tools
 
-After forming your root cause hypothesis, lock edits to the affected module to prevent scope creep.
+Run each detected tool. For each tool:
+
+1. Record the start time
+2. Run the command, capturing both stdout and stderr
+3. Record the exit code
+4. Record the end time
+5. Capture the last 50 lines of output for the report
 
 ```bash
-[ -x "${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh" ] && echo "FREEZE_AVAILABLE" || echo "FREEZE_UNAVAILABLE"
+# Example for each tool — run each independently
+START=$(date +%s)
+tsc --noEmit 2>&1 | tail -50
+EXIT_CODE=$?
+END=$(date +%s)
+echo "TOOL:typecheck EXIT:$EXIT_CODE DURATION:$((END-START))s"
 ```
 
-**If FREEZE_AVAILABLE:** Identify the narrowest directory containing the affected files. Write it to the freeze state file:
+Run tools sequentially (some may share resources or lock files). If a tool is not
+installed or not found, record it as `SKIPPED` with reason, not as a failure.
+
+---
+
+## Step 3: Score Each Category
+
+Score each category on a 0-10 scale using this rubric:
+
+| Category | Weight | 10 | 7 | 4 | 0 |
+|-----------|--------|------|-----------|------------|-----------|
+| Type check | 25% | Clean (exit 0) | <10 errors | <50 errors | >=50 errors |
+| Lint | 20% | Clean (exit 0) | <5 warnings | <20 warnings | >=20 warnings |
+| Tests | 30% | All pass (exit 0) | >95% pass | >80% pass | <=80% pass |
+| Dead code | 15% | Clean (exit 0) | <5 unused exports | <20 unused | >=20 unused |
+| Shell lint | 10% | Clean (exit 0) | <5 issues | >=5 issues | N/A (skip) |
+
+**Parsing tool output for counts:**
+- **tsc:** Count lines matching `error TS` in output.
+- **biome/eslint/ruff:** Count lines matching error/warning patterns. Parse the summary line if available.
+- **Tests:** Parse pass/fail counts from the test runner output. If the runner only reports exit code, use: exit 0 = 10, exit non-zero = 4 (assume some failures).
+- **knip:** Count lines reporting unused exports, files, or dependencies.
+- **shellcheck:** Count distinct findings (lines starting with "In ... line").
+
+**Composite score:**
+```
+composite = (typecheck_score * 0.25) + (lint_score * 0.20) + (test_score * 0.30) + (deadcode_score * 0.15) + (shell_score * 0.10)
+```
+
+If a category is skipped (tool not available), redistribute its weight proportionally
+among the remaining categories.
+
+---
+
+## Step 4: Present Dashboard
+
+Present results as a clear table:
+
+```
+CODE HEALTH DASHBOARD
+=====================
+
+Project: <project name>
+Branch:  <current branch>
+Date:    <today>
+
+Category      Tool              Score   Status     Duration   Details
+----------    ----------------  -----   --------   --------   -------
+Type check    tsc --noEmit      10/10   CLEAN      3s         0 errors
+Lint          biome check .      8/10   WARNING    2s         3 warnings
+Tests         bun test          10/10   CLEAN      12s        47/47 passed
+Dead code     knip               7/10   WARNING    5s         4 unused exports
+Shell lint    shellcheck        10/10   CLEAN      1s         0 issues
+
+COMPOSITE SCORE: 9.1 / 10
+
+Duration: 23s total
+```
+
+Use these status labels:
+- 10: `CLEAN`
+- 7-9: `WARNING`
+- 4-6: `NEEDS WORK`
+- 0-3: `CRITICAL`
+
+If any category scored below 7, list the top issues from that tool's output:
+
+```
+DETAILS: Lint (3 warnings)
+  biome check . output:
+    src/utils.ts:42 — lint/complexity/noForEach: Prefer for...of
+    src/api.ts:18 — lint/style/useConst: Use const instead of let
+    src/api.ts:55 — lint/suspicious/noExplicitAny: Unexpected any
+```
+
+---
+
+## Step 5: Persist to Health History
 
 ```bash
-STATE_DIR="${CLAUDE_PLUGIN_DATA:-$HOME/.gstack}"
-mkdir -p "$STATE_DIR"
-echo "<detected-directory>/" > "$STATE_DIR/freeze-dir.txt"
-echo "Debug scope locked to: <detected-directory>/"
+eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" && mkdir -p ~/.gstack/projects/$SLUG
 ```
 
-Substitute `<detected-directory>` with the actual directory path (e.g., `src/auth/`). Tell the user: "Edits restricted to `<dir>/` for this debug session. This prevents changes to unrelated code. Run `/unfreeze` to remove the restriction."
+Append one JSONL line to `~/.gstack/projects/$SLUG/health-history.jsonl`:
 
-If the bug spans the entire repo or the scope is genuinely unclear, skip the lock and note why.
-
-**If FREEZE_UNAVAILABLE:** Skip scope lock. Edits are unrestricted.
-
----
-
-## Phase 2: Pattern Analysis
-
-Check if this bug matches a known pattern:
-
-| Pattern | Signature | Where to look |
-|---------|-----------|---------------|
-| Race condition | Intermittent, timing-dependent | Concurrent access to shared state |
-| Nil/null propagation | NoMethodError, TypeError | Missing guards on optional values |
-| State corruption | Inconsistent data, partial updates | Transactions, callbacks, hooks |
-| Integration failure | Timeout, unexpected response | External API calls, service boundaries |
-| Configuration drift | Works locally, fails in staging/prod | Env vars, feature flags, DB state |
-| Stale cache | Shows old data, fixes on cache clear | Redis, CDN, browser cache, Turbo |
-
-Also check:
-- `TODOS.md` for related known issues
-- `git log` for prior fixes in the same area — **recurring bugs in the same files are an architectural smell**, not a coincidence
-
-**External pattern search:** If the bug doesn't match a known pattern above, WebSearch for:
-- "{framework} {generic error type}" — **sanitize first:** strip hostnames, IPs, file paths, SQL, customer data. Search the error category, not the raw message.
-- "{library} {component} known issues"
-
-If WebSearch is unavailable, skip this search and proceed with hypothesis testing. If a documented solution or known dependency bug surfaces, present it as a candidate hypothesis in Phase 3.
-
----
-
-## Phase 3: Hypothesis Testing
-
-Before writing ANY fix, verify your hypothesis.
-
-1. **Confirm the hypothesis:** Add a temporary log statement, assertion, or debug output at the suspected root cause. Run the reproduction. Does the evidence match?
-
-2. **If the hypothesis is wrong:** Before forming the next hypothesis, consider searching for the error. **Sanitize first** — strip hostnames, IPs, file paths, SQL fragments, customer identifiers, and any internal/proprietary data from the error message. Search only the generic error type and framework context: "{component} {sanitized error type} {framework version}". If the error message is too specific to sanitize safely, skip the search. If WebSearch is unavailable, skip and proceed. Then return to Phase 1. Gather more evidence. Do not guess.
-
-3. **3-strike rule:** If 3 hypotheses fail, **STOP**. Use AskUserQuestion:
-   ```
-   3 hypotheses tested, none match. This may be an architectural issue
-   rather than a simple bug.
-
-   A) Continue investigating — I have a new hypothesis: [describe]
-   B) Escalate for human review — this needs someone who knows the system
-   C) Add logging and wait — instrument the area and catch it next time
-   ```
-
-**Red flags** — if you see any of these, slow down:
-- "Quick fix for now" — there is no "for now." Fix it right or escalate.
-- Proposing a fix before tracing data flow — you're guessing.
-- Each fix reveals a new problem elsewhere — wrong layer, not wrong code.
-
----
-
-## Phase 4: Implementation
-
-Once root cause is confirmed:
-
-1. **Fix the root cause, not the symptom.** The smallest change that eliminates the actual problem.
-
-2. **Minimal diff:** Fewest files touched, fewest lines changed. Resist the urge to refactor adjacent code.
-
-3. **Write a regression test** that:
-   - **Fails** without the fix (proves the test is meaningful)
-   - **Passes** with the fix (proves the fix works)
-
-4. **Run the full test suite.** Paste the output. No regressions allowed.
-
-5. **If the fix touches >5 files:** Use AskUserQuestion to flag the blast radius:
-   ```
-   This fix touches N files. That's a large blast radius for a bug fix.
-   A) Proceed — the root cause genuinely spans these files
-   B) Split — fix the critical path now, defer the rest
-   C) Rethink — maybe there's a more targeted approach
-   ```
-
----
-
-## Phase 5: Verification & Report
-
-**Fresh verification:** Reproduce the original bug scenario and confirm it's fixed. This is not optional.
-
-Run the test suite and paste the output.
-
-Output a structured debug report:
-```
-DEBUG REPORT
-════════════════════════════════════════
-Symptom:         [what the user observed]
-Root cause:      [what was actually wrong]
-Fix:             [what was changed, with file:line references]
-Evidence:        [test output, reproduction attempt showing fix works]
-Regression test: [file:line of the new test]
-Related:         [TODOS.md items, prior bugs in same area, architectural notes]
-Status:          DONE | DONE_WITH_CONCERNS | BLOCKED
-════════════════════════════════════════
+```json
+{"ts":"2026-03-31T14:30:00Z","branch":"main","score":9.1,"typecheck":10,"lint":8,"test":10,"deadcode":7,"shell":10,"duration_s":23}
 ```
 
-## Capture Learnings
+Fields:
+- `ts` -- ISO 8601 timestamp
+- `branch` -- current git branch
+- `score` -- composite score (one decimal)
+- `typecheck`, `lint`, `test`, `deadcode`, `shell` -- individual category scores (integer 0-10)
+- `duration_s` -- total time for all tools in seconds
 
-If you discovered a non-obvious pattern, pitfall, or architectural insight during
-this session, log it for future sessions:
+If a category was skipped, set its value to `null`.
+
+---
+
+## Step 6: Trend Analysis + Recommendations
+
+Read the last 10 entries from `~/.gstack/projects/$SLUG/health-history.jsonl` (if the
+file exists and has prior entries).
 
 ```bash
-~/.claude/skills/gstack/bin/gstack-learnings-log '{"skill":"investigate","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"source":"SOURCE","files":["path/to/relevant/file"]}'
+eval "$(~/.claude/skills/gstack/bin/gstack-slug 2>/dev/null)" && mkdir -p ~/.gstack/projects/$SLUG
+tail -10 ~/.gstack/projects/$SLUG/health-history.jsonl 2>/dev/null || echo "NO_HISTORY"
 ```
 
-**Types:** `pattern` (reusable approach), `pitfall` (what NOT to do), `preference`
-(user stated), `architecture` (structural decision), `tool` (library/framework insight),
-`operational` (project environment/CLI/workflow knowledge).
+**If prior entries exist, show the trend:**
 
-**Sources:** `observed` (you found this in the code), `user-stated` (user told you),
-`inferred` (AI deduction), `cross-model` (both Claude and Codex agree).
+```
+HEALTH TREND (last 5 runs)
+==========================
+Date          Branch         Score   TC   Lint  Test  Dead  Shell
+----------    -----------    -----   --   ----  ----  ----  -----
+2026-03-28    main           9.4     10   9     10    8     10
+2026-03-29    feat/auth      8.8     10   7     10    7     10
+2026-03-30    feat/auth      8.2     10   6     9     7     10
+2026-03-31    feat/auth      9.1     10   8     10    7     10
 
-**Confidence:** 1-10. Be honest. An observed pattern you verified in the code is 8-9.
-An inference you're not sure about is 4-5. A user preference they explicitly stated is 10.
+Trend: IMPROVING (+0.9 since last run)
+```
 
-**files:** Include the specific file paths this learning references. This enables
-staleness detection: if those files are later deleted, the learning can be flagged.
+**If score dropped vs the previous run:**
+1. Identify WHICH categories declined
+2. Show the delta for each declining category
+3. Correlate with tool output -- what specific errors/warnings appeared?
 
-**Only log genuine discoveries.** Don't log obvious things. Don't log things the user
-already knows. A good test: would this insight save time in a future session? If yes, log it.
+```
+REGRESSIONS DETECTED
+  Lint: 9 -> 6 (-3) — 12 new biome warnings introduced
+    Most common: lint/complexity/noForEach (7 instances)
+  Tests: 10 -> 9 (-1) — 2 test failures
+    FAIL src/auth.test.ts > should validate token expiry
+    FAIL src/auth.test.ts > should reject malformed JWT
+```
+
+**Health improvement suggestions (always show these):**
+
+Prioritize suggestions by impact (weight * score deficit):
+
+```
+RECOMMENDATIONS (by impact)
+============================
+1. [HIGH]  Fix 2 failing tests (Tests: 9/10, weight 30%)
+   Run: bun test --verbose to see failures
+2. [MED]   Address 12 lint warnings (Lint: 6/10, weight 20%)
+   Run: biome check . --write to auto-fix
+3. [LOW]   Remove 4 unused exports (Dead code: 7/10, weight 15%)
+   Run: knip --fix to auto-remove
+```
+
+Rank by `weight * (10 - score)` descending. Only show categories below 10.
 
 ---
 
 ## Important Rules
 
-- **3+ failed fix attempts → STOP and question the architecture.** Wrong architecture, not failed hypothesis.
-- **Never apply a fix you cannot verify.** If you can't reproduce and confirm, don't ship it.
-- **Never say "this should fix it."** Verify and prove it. Run the tests.
-- **If fix touches >5 files → AskUserQuestion** about blast radius before proceeding.
-- **Completion status:**
-  - DONE — root cause found, fix applied, regression test written, all tests pass
-  - DONE_WITH_CONCERNS — fixed but cannot fully verify (e.g., intermittent bug, requires staging)
-  - BLOCKED — root cause unclear after investigation, escalated
+1. **Wrap, don't replace.** Run the project's own tools. Never substitute your own analysis for what the tool reports.
+2. **Read-only.** Never fix issues. Present the dashboard and let the user decide.
+3. **Respect CLAUDE.md.** If `## Health Stack` is configured, use those exact commands. Do not second-guess.
+4. **Skipped is not failed.** If a tool isn't available, skip it gracefully and redistribute weight. Do not penalize the score.
+5. **Show raw output for failures.** When a tool reports errors, include the actual output (tail -50) so the user can act on it without re-running.
+6. **Trends require history.** On first run, say "First health check -- no trend data yet. Run /health again after making changes to track progress."
+7. **Be honest about scores.** A codebase with 100 type errors and all tests passing is not healthy. The composite score should reflect reality.

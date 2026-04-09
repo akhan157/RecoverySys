@@ -1,36 +1,23 @@
 ---
-name: investigate
-preamble-tier: 2
-version: 1.0.0
+name: pair-agent
+version: 0.1.0
 description: |
-  Systematic debugging with root cause investigation. Four phases: investigate,
-  analyze, hypothesize, implement. Iron Law: no fixes without root cause.
-  Use when asked to "debug this", "fix this bug", "why is this broken",
-  "investigate this error", or "root cause analysis".
-  Proactively invoke this skill (do NOT debug directly) when the user reports
-  errors, 500 errors, stack traces, unexpected behavior, "it was working
-  yesterday", or is troubleshooting why something stopped working. (gstack)
+  Pair a remote AI agent with your browser. One command generates a setup key and
+  prints instructions the other agent can follow to connect. Works with OpenClaw,
+  Hermes, Codex, Cursor, or any agent that can make HTTP requests. The remote agent
+  gets its own tab with scoped access (read+write by default, admin on request).
+  Use when asked to "pair agent", "connect agent", "share browser", "remote browser",
+  "let another agent use my browser", or "give browser access". (gstack)
+voice-triggers:
+  - "pair agent"
+  - "connect agent"
+  - "share my browser"
+  - "remote browser access"
 allowed-tools:
   - Bash
   - Read
-  - Write
-  - Edit
-  - Grep
-  - Glob
   - AskUserQuestion
-  - WebSearch
-hooks:
-  PreToolUse:
-    - matcher: "Edit"
-      hooks:
-        - type: command
-          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
-          statusMessage: "Checking debug scope boundary..."
-    - matcher: "Write"
-      hooks:
-        - type: command
-          command: "bash ${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh"
-          statusMessage: "Checking debug scope boundary..."
+
 ---
 <!-- AUTO-GENERATED from SKILL.md.tmpl — do not edit directly -->
 <!-- Regenerate: bun run gen:skill-docs -->
@@ -65,7 +52,7 @@ echo "TELEMETRY: ${_TEL:-off}"
 echo "TEL_PROMPTED: $_TEL_PROMPTED"
 mkdir -p ~/.gstack/analytics
 if [ "$_TEL" != "off" ]; then
-echo '{"skill":"investigate","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
+echo '{"skill":"pair-agent","ts":"'$(date -u +%Y-%m-%dT%H:%M:%SZ)'","repo":"'$(basename "$(git rev-parse --show-toplevel 2>/dev/null)" 2>/dev/null || echo "unknown")'"}'  >> ~/.gstack/analytics/skill-usage.jsonl 2>/dev/null || true
 fi
 # zsh-compatible: use find instead of glob to avoid NOMATCH error
 for _PF in $(find ~/.gstack/analytics -maxdepth 1 -name '.pending-*' 2>/dev/null); do
@@ -90,7 +77,7 @@ else
   echo "LEARNINGS: 0"
 fi
 # Session timeline: record skill start (local-only, never sent anywhere)
-~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"investigate","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
+~/.claude/skills/gstack/bin/gstack-timeline-log '{"skill":"pair-agent","event":"started","branch":"'"$_BRANCH"'","session":"'"$_SESSION_ID"'"}' 2>/dev/null &
 # Check if CLAUDE.md has routing rules
 _HAS_ROUTING="no"
 if [ -f CLAUDE.md ] && grep -q "## Skill routing" CLAUDE.md 2>/dev/null; then
@@ -392,6 +379,24 @@ AI makes completeness near-free. Always recommend the complete option over short
 
 Include `Completeness: X/10` for each option (10=all edge cases, 7=happy path, 3=shortcut).
 
+## Repo Ownership — See Something, Say Something
+
+`REPO_MODE` controls how to handle issues outside your branch:
+- **`solo`** — You own everything. Investigate and offer to fix proactively.
+- **`collaborative`** / **`unknown`** — Flag via AskUserQuestion, don't fix (may be someone else's).
+
+Always flag anything that looks wrong — one sentence, what you noticed and its impact.
+
+## Search Before Building
+
+Before building anything unfamiliar, **search first.** See `~/.claude/skills/gstack/ETHOS.md`.
+- **Layer 1** (tried and true) — don't reinvent. **Layer 2** (new and popular) — scrutinize. **Layer 3** (first principles) — prize above all.
+
+**Eureka:** When first-principles reasoning contradicts conventional wisdom, name it and log:
+```bash
+jq -n --arg ts "$(date -u +%Y-%m-%dT%H:%M:%SZ)" --arg skill "SKILL_NAME" --arg branch "$(git branch --show-current 2>/dev/null)" --arg insight "ONE_LINE_SUMMARY" '{ts:$ts,skill:$skill,branch:$branch,insight:$insight}' >> ~/.gstack/analytics/eureka.jsonl 2>/dev/null || true
+```
+
 ## Completion Status Protocol
 
 When completing a skill workflow, report status using one of:
@@ -549,227 +554,276 @@ Then write a `## GSTACK REVIEW REPORT` section to the end of the plan file:
 file you are allowed to edit in plan mode. The plan file review report is part of the
 plan's living status.
 
-# Systematic Debugging
+# /pair-agent — Share Your Browser With Another AI Agent
 
-## Iron Law
+You're sitting in Claude Code with a browser running. You also have another AI agent
+open (OpenClaw, Hermes, Codex, Cursor, whatever). You want that other agent to be
+able to browse the web using YOUR browser. This skill makes that happen.
 
-**NO FIXES WITHOUT ROOT CAUSE INVESTIGATION FIRST.**
+## How it works
 
-Fixing symptoms creates whack-a-mole debugging. Every fix that doesn't address root cause makes the next bug harder to find. Find the root cause, then fix it.
+Your gstack browser runs a local HTTP server. This skill creates a one-time setup key,
+prints a block of instructions, and you paste those instructions into the other agent.
+The other agent exchanges the key for a session token, creates its own tab, and starts
+browsing. Each agent gets its own tab. They can't mess with each other's tabs.
 
----
+The setup key expires in 5 minutes and can only be used once. If it leaks, it's dead
+before anyone can abuse it. The session token lasts 24 hours.
 
-## Phase 1: Root Cause Investigation
+**Same machine:** If the other agent is on the same machine (like OpenClaw running
+locally), you can skip the copy-paste ceremony and write the credentials directly to
+the agent's config directory.
 
-Gather context before forming any hypothesis.
+**Remote:** If the other agent is on a different machine, you need an ngrok tunnel.
+The skill will tell you if one is needed and how to set it up.
 
-1. **Collect symptoms:** Read the error messages, stack traces, and reproduction steps. If the user hasn't provided enough context, ask ONE question at a time via AskUserQuestion.
-
-2. **Read the code:** Trace the code path from the symptom back to potential causes. Use Grep to find all references, Read to understand the logic.
-
-3. **Check recent changes:**
-   ```bash
-   git log --oneline -20 -- <affected-files>
-   ```
-   Was this working before? What changed? A regression means the root cause is in the diff.
-
-4. **Reproduce:** Can you trigger the bug deterministically? If not, gather more evidence before proceeding.
-
-## Prior Learnings
-
-Search for relevant learnings from previous sessions:
+## SETUP (run this check BEFORE any browse command)
 
 ```bash
-_CROSS_PROJ=$(~/.claude/skills/gstack/bin/gstack-config get cross_project_learnings 2>/dev/null || echo "unset")
-echo "CROSS_PROJECT: $_CROSS_PROJ"
-if [ "$_CROSS_PROJ" = "true" ]; then
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 --cross-project 2>/dev/null || true
+_ROOT=$(git rev-parse --show-toplevel 2>/dev/null)
+B=""
+[ -n "$_ROOT" ] && [ -x "$_ROOT/.claude/skills/gstack/browse/dist/browse" ] && B="$_ROOT/.claude/skills/gstack/browse/dist/browse"
+[ -z "$B" ] && B=~/.claude/skills/gstack/browse/dist/browse
+if [ -x "$B" ]; then
+  echo "READY: $B"
 else
-  ~/.claude/skills/gstack/bin/gstack-learnings-search --limit 10 2>/dev/null || true
+  echo "NEEDS_SETUP"
 fi
 ```
 
-If `CROSS_PROJECT` is `unset` (first time): Use AskUserQuestion:
+If `NEEDS_SETUP`:
+1. Tell the user: "gstack browse needs a one-time build (~10 seconds). OK to proceed?" Then STOP and wait.
+2. Run: `cd <SKILL_DIR> && ./setup`
+3. If `bun` is not installed:
+   ```bash
+   if ! command -v bun >/dev/null 2>&1; then
+     BUN_VERSION="1.3.10"
+     BUN_INSTALL_SHA="bab8acfb046aac8c72407bdcce903957665d655d7acaa3e11c7c4616beae68dd"
+     tmpfile=$(mktemp)
+     curl -fsSL "https://bun.sh/install" -o "$tmpfile"
+     actual_sha=$(shasum -a 256 "$tmpfile" | awk '{print $1}')
+     if [ "$actual_sha" != "$BUN_INSTALL_SHA" ]; then
+       echo "ERROR: bun install script checksum mismatch" >&2
+       echo "  expected: $BUN_INSTALL_SHA" >&2
+       echo "  got:      $actual_sha" >&2
+       rm "$tmpfile"; exit 1
+     fi
+     BUN_VERSION="$BUN_VERSION" bash "$tmpfile"
+     rm "$tmpfile"
+   fi
+   ```
 
-> gstack can search learnings from your other projects on this machine to find
-> patterns that might apply here. This stays local (no data leaves your machine).
-> Recommended for solo developers. Skip if you work on multiple client codebases
-> where cross-contamination would be a concern.
+## Step 1: Check prerequisites
+
+```bash
+$B status 2>/dev/null
+```
+
+If the browse server is not running, start it:
+
+```bash
+$B goto about:blank
+```
+
+This ensures the server is up and healthy before pairing.
+
+## Step 2: Ask what they want
+
+Use AskUserQuestion:
+
+> Which agent do you want to pair with your browser? This determines the
+> instructions format and where credentials get written.
 
 Options:
-- A) Enable cross-project learnings (recommended)
-- B) Keep learnings project-scoped only
+- A) OpenClaw (local or remote)
+- B) Codex / OpenAI Agents (local)
+- C) Cursor (local)
+- D) Another Claude Code session (local or remote)
+- E) Something else (generic HTTP instructions — use this for Hermes)
 
-If A: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings true`
-If B: run `~/.claude/skills/gstack/bin/gstack-config set cross_project_learnings false`
+Based on the answer, set `TARGET_HOST`:
+- A → `openclaw`
+- B → `codex`
+- C → `cursor`
+- D → `claude`
+- E → generic (no host-specific config)
 
-Then re-run the search with the appropriate flag.
+## Step 3: Local or remote?
 
-If learnings are found, incorporate them into your analysis. When a review finding
-matches a past learning, display:
+Use AskUserQuestion:
 
-**"Prior learning applied: [key] (confidence N/10, from [date])"**
+> Is the other agent running on this same machine, or on a different machine/server?
+>
+> **Same machine** skips the copy-paste ceremony. Credentials are written directly to
+> the agent's config directory. No tunnel needed.
+>
+> **Different machine** generates a setup key and instruction block. If ngrok is
+> installed, the tunnel starts automatically. If not, I'll walk you through setup.
+>
+> RECOMMENDATION: Choose A if the agent is local. It's instant, no copy-paste needed.
 
-This makes the compounding visible. The user should see that gstack is getting
-smarter on their codebase over time.
+Options:
+- A) Same machine (write credentials directly)
+- B) Different machine (generate instruction block for copy-paste)
 
-Output: **"Root cause hypothesis: ..."** — a specific, testable claim about what is wrong and why.
+## Step 4: Execute pairing
 
----
+### If same machine (option A):
 
-## Scope Lock
-
-After forming your root cause hypothesis, lock edits to the affected module to prevent scope creep.
-
-```bash
-[ -x "${CLAUDE_SKILL_DIR}/../freeze/bin/check-freeze.sh" ] && echo "FREEZE_AVAILABLE" || echo "FREEZE_UNAVAILABLE"
-```
-
-**If FREEZE_AVAILABLE:** Identify the narrowest directory containing the affected files. Write it to the freeze state file:
-
-```bash
-STATE_DIR="${CLAUDE_PLUGIN_DATA:-$HOME/.gstack}"
-mkdir -p "$STATE_DIR"
-echo "<detected-directory>/" > "$STATE_DIR/freeze-dir.txt"
-echo "Debug scope locked to: <detected-directory>/"
-```
-
-Substitute `<detected-directory>` with the actual directory path (e.g., `src/auth/`). Tell the user: "Edits restricted to `<dir>/` for this debug session. This prevents changes to unrelated code. Run `/unfreeze` to remove the restriction."
-
-If the bug spans the entire repo or the scope is genuinely unclear, skip the lock and note why.
-
-**If FREEZE_UNAVAILABLE:** Skip scope lock. Edits are unrestricted.
-
----
-
-## Phase 2: Pattern Analysis
-
-Check if this bug matches a known pattern:
-
-| Pattern | Signature | Where to look |
-|---------|-----------|---------------|
-| Race condition | Intermittent, timing-dependent | Concurrent access to shared state |
-| Nil/null propagation | NoMethodError, TypeError | Missing guards on optional values |
-| State corruption | Inconsistent data, partial updates | Transactions, callbacks, hooks |
-| Integration failure | Timeout, unexpected response | External API calls, service boundaries |
-| Configuration drift | Works locally, fails in staging/prod | Env vars, feature flags, DB state |
-| Stale cache | Shows old data, fixes on cache clear | Redis, CDN, browser cache, Turbo |
-
-Also check:
-- `TODOS.md` for related known issues
-- `git log` for prior fixes in the same area — **recurring bugs in the same files are an architectural smell**, not a coincidence
-
-**External pattern search:** If the bug doesn't match a known pattern above, WebSearch for:
-- "{framework} {generic error type}" — **sanitize first:** strip hostnames, IPs, file paths, SQL, customer data. Search the error category, not the raw message.
-- "{library} {component} known issues"
-
-If WebSearch is unavailable, skip this search and proceed with hypothesis testing. If a documented solution or known dependency bug surfaces, present it as a candidate hypothesis in Phase 3.
-
----
-
-## Phase 3: Hypothesis Testing
-
-Before writing ANY fix, verify your hypothesis.
-
-1. **Confirm the hypothesis:** Add a temporary log statement, assertion, or debug output at the suspected root cause. Run the reproduction. Does the evidence match?
-
-2. **If the hypothesis is wrong:** Before forming the next hypothesis, consider searching for the error. **Sanitize first** — strip hostnames, IPs, file paths, SQL fragments, customer identifiers, and any internal/proprietary data from the error message. Search only the generic error type and framework context: "{component} {sanitized error type} {framework version}". If the error message is too specific to sanitize safely, skip the search. If WebSearch is unavailable, skip and proceed. Then return to Phase 1. Gather more evidence. Do not guess.
-
-3. **3-strike rule:** If 3 hypotheses fail, **STOP**. Use AskUserQuestion:
-   ```
-   3 hypotheses tested, none match. This may be an architectural issue
-   rather than a simple bug.
-
-   A) Continue investigating — I have a new hypothesis: [describe]
-   B) Escalate for human review — this needs someone who knows the system
-   C) Add logging and wait — instrument the area and catch it next time
-   ```
-
-**Red flags** — if you see any of these, slow down:
-- "Quick fix for now" — there is no "for now." Fix it right or escalate.
-- Proposing a fix before tracing data flow — you're guessing.
-- Each fix reveals a new problem elsewhere — wrong layer, not wrong code.
-
----
-
-## Phase 4: Implementation
-
-Once root cause is confirmed:
-
-1. **Fix the root cause, not the symptom.** The smallest change that eliminates the actual problem.
-
-2. **Minimal diff:** Fewest files touched, fewest lines changed. Resist the urge to refactor adjacent code.
-
-3. **Write a regression test** that:
-   - **Fails** without the fix (proves the test is meaningful)
-   - **Passes** with the fix (proves the fix works)
-
-4. **Run the full test suite.** Paste the output. No regressions allowed.
-
-5. **If the fix touches >5 files:** Use AskUserQuestion to flag the blast radius:
-   ```
-   This fix touches N files. That's a large blast radius for a bug fix.
-   A) Proceed — the root cause genuinely spans these files
-   B) Split — fix the critical path now, defer the rest
-   C) Rethink — maybe there's a more targeted approach
-   ```
-
----
-
-## Phase 5: Verification & Report
-
-**Fresh verification:** Reproduce the original bug scenario and confirm it's fixed. This is not optional.
-
-Run the test suite and paste the output.
-
-Output a structured debug report:
-```
-DEBUG REPORT
-════════════════════════════════════════
-Symptom:         [what the user observed]
-Root cause:      [what was actually wrong]
-Fix:             [what was changed, with file:line references]
-Evidence:        [test output, reproduction attempt showing fix works]
-Regression test: [file:line of the new test]
-Related:         [TODOS.md items, prior bugs in same area, architectural notes]
-Status:          DONE | DONE_WITH_CONCERNS | BLOCKED
-════════════════════════════════════════
-```
-
-## Capture Learnings
-
-If you discovered a non-obvious pattern, pitfall, or architectural insight during
-this session, log it for future sessions:
+Run pair-agent with --local flag:
 
 ```bash
-~/.claude/skills/gstack/bin/gstack-learnings-log '{"skill":"investigate","type":"TYPE","key":"SHORT_KEY","insight":"DESCRIPTION","confidence":N,"source":"SOURCE","files":["path/to/relevant/file"]}'
+$B pair-agent --local TARGET_HOST
 ```
 
-**Types:** `pattern` (reusable approach), `pitfall` (what NOT to do), `preference`
-(user stated), `architecture` (structural decision), `tool` (library/framework insight),
-`operational` (project environment/CLI/workflow knowledge).
+Replace `TARGET_HOST` with the value from Step 2 (openclaw, codex, cursor, etc.).
 
-**Sources:** `observed` (you found this in the code), `user-stated` (user told you),
-`inferred` (AI deduction), `cross-model` (both Claude and Codex agree).
+If it succeeds, tell the user:
+"Done. TARGET_HOST can now use your browser. It will read credentials from the
+config file that was written. Try asking it to navigate to a URL."
 
-**Confidence:** 1-10. Be honest. An observed pattern you verified in the code is 8-9.
-An inference you're not sure about is 4-5. A user preference they explicitly stated is 10.
+If it fails (host not found, write permission error), show the error and suggest
+using the generic remote flow instead.
 
-**files:** Include the specific file paths this learning references. This enables
-staleness detection: if those files are later deleted, the learning can be flagged.
+### If different machine (option B):
 
-**Only log genuine discoveries.** Don't log obvious things. Don't log things the user
-already knows. A good test: would this insight save time in a future session? If yes, log it.
+First, detect ngrok status:
 
----
+```bash
+which ngrok 2>/dev/null && echo "NGROK_INSTALLED" || echo "NGROK_NOT_INSTALLED"
+ngrok config check 2>/dev/null && echo "NGROK_AUTHED" || echo "NGROK_NOT_AUTHED"
+```
 
-## Important Rules
+**If ngrok is installed and authed:** Just run the command. The CLI will auto-detect
+ngrok, start the tunnel, and print the instruction block with the tunnel URL:
 
-- **3+ failed fix attempts → STOP and question the architecture.** Wrong architecture, not failed hypothesis.
-- **Never apply a fix you cannot verify.** If you can't reproduce and confirm, don't ship it.
-- **Never say "this should fix it."** Verify and prove it. Run the tests.
-- **If fix touches >5 files → AskUserQuestion** about blast radius before proceeding.
-- **Completion status:**
-  - DONE — root cause found, fix applied, regression test written, all tests pass
-  - DONE_WITH_CONCERNS — fixed but cannot fully verify (e.g., intermittent bug, requires staging)
-  - BLOCKED — root cause unclear after investigation, escalated
+```bash
+$B pair-agent --client TARGET_HOST
+```
+
+If the user also needs admin access (JS execution, cookies, storage):
+
+```bash
+$B pair-agent --admin --client TARGET_HOST
+```
+
+**CRITICAL: You MUST output the full instruction block to the user.** The command
+prints everything between ═══ lines. Copy the ENTIRE block verbatim into your
+response so the user can copy-paste it into their other agent. Do NOT summarize it,
+do NOT skip it, do NOT just say "here's the output." The user needs to SEE the block
+to copy it. Output it inside a markdown code block so it's easy to select and copy.
+
+Then tell the user:
+"Copy the block above and paste it into your other agent's chat. The setup key
+expires in 5 minutes."
+
+**If ngrok is installed but NOT authed:** Walk the user through authentication:
+
+Tell the user:
+"ngrok is installed but not logged in. Let's fix that:
+
+1. Go to https://dashboard.ngrok.com/get-started/your-authtoken
+2. Copy your auth token
+3. Come back here and I'll run the auth command for you."
+
+STOP here and wait for the user to provide their auth token.
+
+When they provide it, run:
+```bash
+ngrok config add-authtoken THEIR_TOKEN
+```
+
+Then retry `$B pair-agent --client TARGET_HOST`.
+
+**If ngrok is NOT installed:** Walk the user through installation:
+
+Tell the user:
+"To connect a remote agent, we need ngrok (a tunnel that exposes your local
+browser to the internet securely).
+
+1. Go to https://ngrok.com and sign up (free tier works)
+2. Install ngrok:
+   - macOS: `brew install ngrok`
+   - Linux: `snap install ngrok` or download from ngrok.com/download
+3. Auth it: `ngrok config add-authtoken YOUR_TOKEN`
+   (get your token from https://dashboard.ngrok.com/get-started/your-authtoken)
+4. Come back here and run `/pair-agent` again."
+
+STOP here. Wait for the user to install ngrok and re-invoke.
+
+## Step 5: Verify connection
+
+After the user pastes the instructions into the other agent, wait a moment then check:
+
+```bash
+$B status
+```
+
+Look for the connected agent in the status output. If it appears, tell the user:
+"The remote agent is connected and has its own tab. You'll see its activity in the
+side panel if you have GStack Browser open."
+
+## What the remote agent can do
+
+With default (read+write) access:
+- Navigate to URLs, click elements, fill forms, take screenshots
+- Read page content (text, HTML, snapshot)
+- Create new tabs (each agent gets its own)
+- Cannot execute arbitrary JavaScript, read cookies, or access storage
+
+With admin access (--admin flag):
+- Everything above, plus JS execution, cookie access, storage access
+- Use sparingly. Only for agents you fully trust.
+
+## Troubleshooting
+
+**"Tab not owned by your agent"** — The remote agent tried to interact with a tab
+it didn't create. Tell it to run `newtab` first to get its own tab.
+
+**"Domain not allowed"** — The token has domain restrictions. Re-pair with broader
+domain access or no domain restrictions.
+
+**"Rate limit exceeded"** — The agent is sending > 10 requests/second. It should
+wait for the Retry-After header and slow down.
+
+**"Token expired"** — The 24-hour session expired. Run `/pair-agent` again to
+generate a new setup key.
+
+**Agent can't reach the server** — If remote, check the ngrok tunnel is running
+(`$B status`). If local, check the browse server is running.
+
+## Platform-specific notes
+
+### OpenClaw / AlphaClaw
+
+OpenClaw agents use the `exec` tool instead of `Bash`. The instruction block uses
+`exec curl` syntax which OpenClaw understands natively. When using `--local openclaw`,
+credentials are written to `~/.openclaw/skills/gstack/browse-remote.json`.
+
+
+### Codex
+
+Codex agents can execute shell commands via `codex exec`. The instruction block's
+curl commands work directly. When using `--local codex`, credentials are written
+to `~/.codex/skills/gstack/browse-remote.json`.
+
+### Cursor
+
+Cursor's AI can run terminal commands. The instruction block works as-is.
+When using `--local cursor`, credentials are written to
+`~/.cursor/skills/gstack/browse-remote.json`.
+
+## Revoking access
+
+To disconnect a specific agent:
+
+```bash
+$B tunnel revoke AGENT_NAME
+```
+
+To disconnect all agents and rotate the root token:
+
+```bash
+# This invalidates ALL scoped tokens immediately
+$B tunnel rotate
+```
