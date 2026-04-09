@@ -25,6 +25,9 @@ function SuggestRow({ part, detail, isSelected, onSelect }) {
   return (
     <div
       onClick={() => !isSelected && onSelect(part)}
+      // data-selected lets onMouseLeave read the CURRENT selection state rather than
+      // closing over a stale `isSelected` value from the render before the click.
+      data-selected={isSelected ? 'true' : 'false'}
       style={{
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '7px 10px',
@@ -34,7 +37,10 @@ function SuggestRow({ part, detail, isSelected, onSelect }) {
         transition: 'background 120ms',
       }}
       onMouseEnter={e => { if (!isSelected) e.currentTarget.style.background = 'var(--bg-right)' }}
-      onMouseLeave={e => { e.currentTarget.style.background = isSelected ? 'var(--ok-bg, rgba(74,222,128,0.06))' : 'none' }}
+      onMouseLeave={e => {
+        const sel = e.currentTarget.dataset.selected === 'true'
+        e.currentTarget.style.background = sel ? 'var(--ok-bg, rgba(74,222,128,0.06))' : 'none'
+      }}
     >
       <div>
         <div style={{ fontSize: '12px', fontWeight: 600, color: 'var(--text-primary)' }}>
