@@ -51,7 +51,10 @@ function MotorSearch({ onSetSpec }) {
         setResults([])
         setOpen(false)
       } finally {
-        setLoading(false)
+        // Only clear the spinner if this request was NOT aborted.
+        // If aborted, a newer request is already in flight and manages its own loading state.
+        // Without this guard, the abort path clears the spinner while the fresh request still runs.
+        if (!controller.signal.aborted) setLoading(false)
       }
     }, 350)
   }
@@ -105,7 +108,7 @@ function MotorSearch({ onSetSpec }) {
           <span style={{ fontSize: '12px' }}>
             <span className="mono" style={{ color: 'var(--ok-fg, #4ade80)', fontWeight: 700 }}>{selected.designation}</span>
             <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
-              {selected.manufacturerAbbrev} — <span className="mono">{Math.round(selected.totImpulseNs)} Ns{selected.burnTimeS != null ? ` / ${selected.burnTimeS.toFixed(1)}s` : ''}</span>
+              {selected.manufacturerAbbrev} — <span className="mono">{Math.round(selected.totImpulseNs)} Ns{selected.burnTimeS != null ? ` / ${Number(selected.burnTimeS).toFixed(1)}s` : ''}</span>
             </span>
           </span>
           <button
@@ -164,7 +167,7 @@ function MotorSearch({ onSetSpec }) {
             >
               <span className="mono" style={{ fontWeight: 700 }}>{m.designation}</span>
               <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
-                {m.manufacturerAbbrev} — <span className="mono">{Math.round(m.totImpulseNs)} Ns{m.burnTimeS != null ? ` / ${m.burnTimeS.toFixed(1)}s` : ''}</span>
+                {m.manufacturerAbbrev} — <span className="mono">{Math.round(m.totImpulseNs)} Ns{m.burnTimeS != null ? ` / ${Number(m.burnTimeS).toFixed(1)}s` : ''}</span>
               </span>
             </button>
           ))}
@@ -231,7 +234,11 @@ function autoGFactor(mass_g) {
 
 export default function RocketSpecs({ specs, onSetSpec }) {
   const gAuto    = autoGFactor(specs.rocket_mass_g)
-  const gDisplay = specs.ejection_g_factor ? parseFloat(specs.ejection_g_factor) : gAuto
+  // Use != '' instead of truthy check so the string '0' is treated as user-entered,
+  // not silently replaced with gAuto (which would suppress the "Below 12G" NAR warning).
+  const gDisplay = (specs.ejection_g_factor != null && specs.ejection_g_factor !== '')
+    ? parseFloat(specs.ejection_g_factor)
+    : gAuto
   const gIsLow   = gDisplay < 12   // below NAR minimum
 
   // Bay volume — computed from airframe ID + bay length; obstructions subtracted for usable
@@ -373,7 +380,7 @@ export default function RocketSpecs({ specs, onSetSpec }) {
               type="number"
               min="1"
               max="100"
-              value={specs.ejection_g_factor}
+              value={specs.ejection_g_factor ?? ''}
               placeholder={`auto (${gAuto}G)`}
               onChange={e => onSetSpec('ejection_g_factor', e.target.value)}
               style={{
