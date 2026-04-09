@@ -133,7 +133,13 @@ export default function App() {
 
   // ── Dark mode ─────────────────────────────────────────────────────────────
   const [darkMode, setDarkMode] = React.useState(() => {
-    try { return localStorage.getItem('recoverysys-theme') === 'dark' } catch { return false }
+    try {
+      const stored = localStorage.getItem('recoverysys-theme')
+      if (stored === 'dark') return true
+      if (stored === 'light') return false
+      // No explicit preference stored — respect OS setting
+      return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
+    } catch { return false }
   })
   useEffect(() => {
     if (darkMode) {
@@ -306,6 +312,8 @@ export default function App() {
           <button
             onClick={() => setDarkMode(d => !d)}
             title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+            aria-pressed={darkMode}
             style={{
               background: 'none',
               border: '1px solid rgba(255,255,255,0.15)',
@@ -318,7 +326,8 @@ export default function App() {
               transition: 'border-color 0.2s, color 0.2s',
             }}
           >
-            {darkMode ? '☀' : '☾'}
+            {/* \uFE0F variation selector ensures emoji rendering on all platforms */}
+            {darkMode ? '☀\uFE0F' : '☾\uFE0F'}
           </button>
           <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontFamily: "'JetBrains Mono', monospace" }}>
             v1
