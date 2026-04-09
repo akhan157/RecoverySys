@@ -116,6 +116,11 @@ function reducer(state, action) {
       return { ...state, saveState: action.state }
     case 'SET_SHARE_STATE':
       return { ...state, shareState: action.state }
+    // Atomically replace config + specs from a share link.
+    // Doing this in one action prevents the receiver's localStorage-restored values
+    // from bleeding through for slots/keys that are null or absent in the payload.
+    case 'LOAD_SHARE':
+      return { ...state, config: action.config, specs: action.specs, simulation: null }
     default:
       return state
   }
@@ -231,12 +236,16 @@ export default function App() {
       const payload = { config: configIds, specs: state.specs }
       const encoded = btoa(encodeURIComponent(JSON.stringify(payload)))
       const url = `${location.origin}${location.pathname}?c=${encodeURIComponent(encoded)}`
-      navigator.clipboard.writeText(url).catch(() => {
+      // Only show "Copied!" after the write actually succeeds.
+      // Previously this dispatched 'copied' immediately and caught failure with a toast,
+      // showing "Copied!" even when the clipboard write failed.
+      navigator.clipboard.writeText(url).then(() => {
+        dispatch({ type: 'SET_SHARE_STATE', state: 'copied' })
+        safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
+      }).catch(() => {
         // Async clipboard failure (e.g. permission denied in restricted context)
         dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
       })
-      dispatch({ type: 'SET_SHARE_STATE', state: 'copied' })
-      safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
     } catch {
       // Synchronous failure — clipboard API unavailable
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
@@ -265,36 +274,52 @@ export default function App() {
       const payload = JSON.parse(decodeURIComponent(atob(decodeURIComponent(c))))
       const validCategories = new Set(CATEGORIES.map(cat => cat.id))
       const validSpecKeys   = new Set(Object.keys(DEFAULT_SPECS))
+
+      // Build a complete config + specs from the payload, then dispatch LOAD_SHARE in
+      // one atomic action. This prevents the receiver's localStorage-restored state
+      // from bleeding through for slots (null in payload) or spec keys absent from payload.
+      // Build a clean-slate config (all slots null) derived from CATEGORIES so it
+      // stays in sync automatically if new slots are ever added.
+      const newConfig = Object.fromEntries(CATEGORIES.map(cat => [cat.id, null]))
+      let catalogMissing = 0
+      let customMissing  = 0
+
       if (payload.config) {
-        let catalogMissing = 0
-        let customMissing  = 0
         Object.entries(payload.config).forEach(([cat, part]) => {
           if (!validCategories.has(cat)) return
           if (part) {
             const found = allParts.find(p => p.id === part.id)
-            if (found) dispatch({ type: 'SELECT_PART', category: cat, part: found })
+            if (found) newConfig[cat] = found
             else if (part.id?.startsWith('custom-')) customMissing++
             else catalogMissing++
+            // If not found, slot stays null (clean slate) — not the receiver's local part
           }
+          // null part → slot stays null; no bleed-through from receiver's localStorage
         })
-        if (catalogMissing > 0) {
-          dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
-            message: `${catalogMissing} part${catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`,
-            level: 'warn',
-          }})
-        }
-        if (customMissing > 0) {
-          dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
-            message: `${customMissing} custom part${customMissing > 1 ? 's' : ''} in this link can't be shared — add them manually.`,
-            level: 'warn',
-          }})
-        }
       }
+
+      // Merge shared specs on top of DEFAULT_SPECS (keys absent from payload stay at default)
+      const newSpecs = { ...DEFAULT_SPECS }
       if (payload.specs) {
         Object.entries(payload.specs).forEach(([key, value]) => {
           if (!validSpecKeys.has(key)) return
-          dispatch({ type: 'SET_SPEC', key, value })
+          newSpecs[key] = value
         })
+      }
+
+      dispatch({ type: 'LOAD_SHARE', config: newConfig, specs: newSpecs })
+
+      if (catalogMissing > 0) {
+        dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
+          message: `${catalogMissing} part${catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`,
+          level: 'warn',
+        }})
+      }
+      if (customMissing > 0) {
+        dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
+          message: `${customMissing} custom part${customMissing > 1 ? 's' : ''} in this link can't be shared — add them manually.`,
+          level: 'warn',
+        }})
       }
     } catch { /* malformed */ }
   }, [])
