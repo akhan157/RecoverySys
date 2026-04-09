@@ -190,6 +190,20 @@ describe('checkCompatibility', () => {
     })
     expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
   })
+
+  it('hardware items (protector, bag, swivel) count toward bay volume', () => {
+    // bay: 3.9" ID × 4" → cross_area ≈ 11.95 in², usable ≈ 47.8 in³
+    // main: packed_length_in=3 → vol ≈ 35.9 in³ (75%)  — below 85% alone
+    // protector(packed_height_in=0.75) + swivel(0.5) → +14.9 in³ → total ≈ 50.8 in³ > 47.8 → error
+    const tightMain = { name: 'Main', specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 3 } }
+    const protector = { name: 'Nomex 12"', specs: { size_in: 12, max_chute_diam_in: 36, weight_g: 65, packed_height_in: 0.75 } }
+    const swivel    = { name: 'Swivel',    specs: { rated_lbs: 800, size_in: 0.5, weight_g: 25, packed_height_in: 0.5 } }
+    const warnings = checkCompatibility({
+      config: { main_chute: tightMain, chute_protector: protector, swivel },
+      specs: { ...baseSpecs, bay_length_in: '4' },
+    })
+    expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
+  })
 })
 
 describe('slotStatus', () => {
