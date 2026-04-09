@@ -48,7 +48,16 @@ function loadCustomParts() {
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
     // Reject any entry missing the minimum shape required by PartsBrowser + rehydrate
-    return parsed.filter(p => p && typeof p.id === 'string' && typeof p.name === 'string' && typeof p.category === 'string')
+    // Also require specs to be a non-null object — partSpecLine accesses spec fields directly
+    // and will throw TypeError if specs is undefined/null (e.g. from manual localStorage edits)
+    return parsed.filter(p =>
+      p &&
+      typeof p.id === 'string' &&
+      typeof p.name === 'string' &&
+      typeof p.category === 'string' &&
+      p.specs !== null &&
+      typeof p.specs === 'object'
+    )
   } catch { return [] }
 }
 
