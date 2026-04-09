@@ -102,17 +102,15 @@ export default function SimPanel({ simulation, simFailed, simRunning, config, sp
           <div className="section-label" style={{ marginBottom: '10px' }}>Results</div>
 
           {/* Apogee / deploy sanity warnings */}
-          {simulation.deploy_ft >= simulation.apogee_ft && (
-            <div style={{ marginBottom: '8px', padding: '8px 10px', background: 'var(--error-bg)', border: '1px solid var(--error-border)', borderRadius: 'var(--radius)', fontSize: '12px', color: 'var(--error-fg)', lineHeight: 1.4 }}>
-              ✕ Main deploy altitude ({simulation.deploy_ft.toLocaleString()} ft) is at or above apogee ({simulation.apogee_ft.toLocaleString()} ft) — chute will never deploy
-            </div>
-          )}
-          {simulation.deploy_ft < simulation.apogee_ft && (simulation.apogee_ft - simulation.deploy_ft) < 500 && (
+          {/* Note: deploy_ft >= apogee_ft is impossible here — runSimulation returns null
+              in that case, so {simulation && ...} guard prevents this block from rendering.
+              The simFailed banner above handles that case. */}
+          {(simulation.apogee_ft - simulation.deploy_ft) < 500 && (
             <div style={{ marginBottom: '8px', padding: '8px 10px', background: 'var(--warn-bg)', border: '1px solid var(--warn-border)', borderRadius: 'var(--radius)', fontSize: '12px', color: 'var(--warn-fg)', lineHeight: 1.4 }}>
               ⚠ Only {(simulation.apogee_ft - simulation.deploy_ft).toLocaleString()} ft of drogue phase — very little separation before main deploy
             </div>
           )}
-          {simulation.phase1_time_s < 5 && simulation.deploy_ft < simulation.apogee_ft && (
+          {simulation.phase1_time_s < 5 && (
             <div style={{ marginBottom: '8px', padding: '8px 10px', background: 'var(--warn-bg)', border: '1px solid var(--warn-border)', borderRadius: 'var(--radius)', fontSize: '12px', color: 'var(--warn-fg)', lineHeight: 1.4 }}>
               ⚠ Drogue phase is only {simulation.phase1_time_s}s — consider a lower main deploy altitude
             </div>

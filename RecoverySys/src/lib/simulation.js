@@ -278,9 +278,13 @@ export function runSimulation({ specs, config }) {
   // Main: deploys at deploy_ft; drogue: average across its phase (apogee → deploy)
   const mid_drogue_ft = (apogee_ft + deploy_ft) / 2
 
-  const drogue_fps = config.drogue_chute
+  const drogue_fps_raw = config.drogue_chute
     ? computeDescentRate(config.drogue_chute.specs, mass_kg, mid_drogue_ft)
     : 100    // ballistic near-free-fall
+  // Guard: 0 fps (degenerate chute specs) causes division-by-zero → Infinity → infinite loop
+  // in buildTimeline. Return null to surface a simFailed state rather than hanging the tab.
+  if (drogue_fps_raw <= 0) return null
+  const drogue_fps = drogue_fps_raw
 
   const main_fps = config.main_chute
     ? computeDescentRate(config.main_chute.specs, mass_kg, deploy_ft)
