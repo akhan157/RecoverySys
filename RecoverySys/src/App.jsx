@@ -5,6 +5,8 @@ import { checkCompatibility } from './lib/compatibility.js'
 import PartsBrowser from './components/PartsBrowser.jsx'
 import ConfigBuilder from './components/ConfigBuilder.jsx'
 import SimPanel from './components/SimPanel.jsx'
+import SuggestPanel from './components/SuggestPanel.jsx'
+import DispersionMap from './components/DispersionMap.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 
 // ── State ────────────────────────────────────────────────────────────────────
@@ -17,16 +19,24 @@ const DEFAULT_SPECS = {
   bay_length_in:          '',
   drag_cd:                '',
   wind_speed_mph:         '',
+  wind_direction_deg:     '',   // 0=N, 90=E, 180=S, 270=W
   main_deploy_alt_ft:     '500',
   ejection_g_factor:      '',   // blank = auto (20G for <10 kg, 30G for ≥10 kg L3)
   bay_obstruction_vol_in3: '',  // volume (in³) of obstructions inside the bay (sleds, hardpoints, etc.)
+  launch_lat:             '',   // launch site latitude (decimal degrees)
+  launch_lon:             '',   // launch site longitude (decimal degrees)
 }
 
 function loadSaved() {
   try {
     const raw = localStorage.getItem('recoverysys-config')
     if (!raw) return null
-    return JSON.parse(raw)
+    const saved = JSON.parse(raw)
+    // v1.1.x migration: airframe_od_in → airframe_id_in (wall thickness negligible for sim)
+    if (saved?.specs?.airframe_od_in != null && saved?.specs?.airframe_id_in == null) {
+      saved.specs.airframe_id_in = saved.specs.airframe_od_in
+    }
+    return saved
   } catch { return null }
 }
 
@@ -169,7 +179,6 @@ export default function App() {
   const setSpec       = useCallback((key, value) => dispatch({ type: 'SET_SPEC', key, value }), [])
   const setCategory   = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
   const setMobileTab  = useCallback((tab) => dispatch({ type: 'SET_MOBILE_TAB', tab }), [])
-
   const runSim = useCallback(() => {
     dispatch({ type: 'START_SIM' })
     const result = runSimulation({ specs: state.specs, config: state.config })
@@ -327,6 +336,7 @@ export default function App() {
             onSave={saveConfig}
             onShare={copyShareLink}
             onSelectCategory={setCategory}
+
           />
         </div>
 
@@ -350,6 +360,12 @@ export default function App() {
             onAddCustomPart={addCustomPart}
             onDeleteCustomPart={deleteCustomPart}
           />
+          <SuggestPanel
+            parts={allParts}
+            specs={state.specs}
+            config={state.config}
+            onSelectPart={selectPart}
+          />
           <div style={{ borderTop: '1px solid var(--border-default)' }}>
             <SimPanel
               simulation={state.simulation}
@@ -358,6 +374,10 @@ export default function App() {
               config={state.config}
               specs={state.specs}
               onRun={runSim}
+            />
+            <DispersionMap
+              simulation={state.simulation}
+              specs={state.specs}
             />
           </div>
         </div>
@@ -393,17 +413,30 @@ export default function App() {
               onSave={saveConfig}
               onShare={copyShareLink}
               onSelectCategory={setCategory}
+  
             />
           )}
           {state.mobileTab === 'simulation' && (
-            <SimPanel
-              simulation={state.simulation}
-              simFailed={state.simFailed}
-              simRunning={state.simRunning}
-              config={state.config}
-              specs={state.specs}
-              onRun={runSim}
-            />
+            <>
+              <SuggestPanel
+                parts={allParts}
+                specs={state.specs}
+                config={state.config}
+                onSelectPart={selectPart}
+              />
+              <SimPanel
+                simulation={state.simulation}
+                simFailed={state.simFailed}
+                simRunning={state.simRunning}
+                config={state.config}
+                specs={state.specs}
+                onRun={runSim}
+              />
+              <DispersionMap
+                simulation={state.simulation}
+                specs={state.specs}
+              />
+            </>
           )}
         </div>
         <div style={{ height: '44px', borderTop: '1px solid var(--border-default)', display: 'flex', background: 'var(--bg-panel)', flexShrink: 0 }}>
