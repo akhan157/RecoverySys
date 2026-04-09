@@ -264,6 +264,14 @@ export function checkCompatibility({ config, specs }) {
     stacked_vol += chuteVol(config.main_chute?.specs)
     stacked_vol += chuteVol(config.drogue_chute?.specs)
 
+    // Hardware items (chute protector, deployment bag, swivel) also occupy axial bay space
+    if (config.chute_protector?.specs.packed_height_in)
+      stacked_vol += bay_cross_area * config.chute_protector.specs.packed_height_in
+    if (config.deployment_bag?.specs.packed_height_in)
+      stacked_vol += bay_cross_area * config.deployment_bag.specs.packed_height_in
+    if (config.swivel?.specs.packed_height_in)
+      stacked_vol += bay_cross_area * config.swivel.specs.packed_height_in
+
     if (stacked_vol > 0) {
       const obstrNote = obstruction_vol > 0 ? ` (${obstruction_vol.toFixed(1)} in³ obstructions subtracted)` : ''
       const pct = usable_volume > 0 ? Math.round((stacked_vol / usable_volume) * 100) : 100
