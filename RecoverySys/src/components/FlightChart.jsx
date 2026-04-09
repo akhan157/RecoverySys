@@ -85,6 +85,7 @@ export default function FlightChart({ simulation }) {
     if (!simulation || !pathRef.current) return
     const path = pathRef.current
     const len  = path.getTotalLength()
+    let timerId
 
     if (!prevSim.current) {
       // First render: draw left-to-right
@@ -97,16 +98,19 @@ export default function FlightChart({ simulation }) {
         path.style.strokeDashoffset = 0
       })
     } else {
-      // Re-run: crossfade
+      // Re-run: crossfade. Use '' to clear dasharray (not 'none' which is invalid CSS for stroke-dasharray).
+      // Capture timerId so we can cancel it if the component unmounts or simulation changes again
+      // before the 200 ms fade completes — otherwise the stale callback overwrites the new path state.
       path.style.transition = 'opacity 200ms'
       path.style.opacity = 0
-      setTimeout(() => {
-        path.style.strokeDasharray  = 'none'
-        path.style.strokeDashoffset = 0
+      timerId = setTimeout(() => {
+        path.style.strokeDasharray  = ''  // clear → solid line (SVG default)
+        path.style.strokeDashoffset = ''
         path.style.opacity = 1
       }, 200)
     }
     prevSim.current = simulation
+    return () => clearTimeout(timerId)
   }, [simulation])
 
   if (!simulation) {
@@ -124,7 +128,10 @@ export default function FlightChart({ simulation }) {
   }
 
   const { timeline, apogee_ft, deploy_ft, phase1_time_s, total_time_s, apogee_t_s, burnout_t_s } = simulation
-  const maxAlt  = nice1000(apogee_ft)
+  // Guard: nice1000(0) = 0 → division-by-zero in yS() → NaN coordinates → blank chart.
+  // runSimulation already returns null when apogee_ft <= deploy_ft, but corrupted
+  // share-link data could produce apogee_ft: 0. Clamp to at least 1000 ft.
+  const maxAlt  = Math.max(1000, nice1000(apogee_ft))
 
   // maxTime spans the full flight (ascent + descent)
   const descentTime = total_time_s ?? phase1_time_s
@@ -165,14 +172,13 @@ export default function FlightChart({ simulation }) {
         </g>
       ))}
 
-      {/* Flight path */}
+      {/* Flight path — no inline strokeDasharray/Offset; the animation useEffect owns those */}
       <path
         ref={pathRef}
         d={d}
         stroke="var(--chart-path)"
         strokeWidth="2"
         fill="none"
-        style={{ strokeDasharray: 'none', strokeDashoffset: 0 }}
       />
     </svg>
   )
