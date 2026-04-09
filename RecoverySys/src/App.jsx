@@ -35,6 +35,7 @@ function loadSaved() {
     // v1.1.x migration: airframe_od_in → airframe_id_in (wall thickness negligible for sim)
     if (saved?.specs?.airframe_od_in != null && saved?.specs?.airframe_id_in == null) {
       saved.specs.airframe_id_in = saved.specs.airframe_od_in
+      delete saved.specs.airframe_od_in   // remove ghost key so it doesn't pollute state.specs
     }
     return saved
   } catch { return null }
@@ -43,7 +44,11 @@ function loadSaved() {
 function loadCustomParts() {
   try {
     const raw = localStorage.getItem('recoverysys-custom-parts')
-    return raw ? JSON.parse(raw) : []
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    // Reject any entry missing the minimum shape required by PartsBrowser + rehydrate
+    return parsed.filter(p => p && typeof p.id === 'string' && typeof p.name === 'string' && typeof p.category === 'string')
   } catch { return [] }
 }
 
@@ -63,7 +68,7 @@ function buildInitialState() {
       swivel:          rehydrate(saved?.config?.swivel),
       chute_device:    rehydrate(saved?.config?.chute_device),
     },
-    specs:          { ...DEFAULT_SPECS, ...(saved?.specs ?? {}) },
+    specs:          { ...DEFAULT_SPECS, ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)) },
     activeCategory: CATEGORIES[0].id,
     mobileTab:      'parts',
     simulation:     null,
@@ -222,6 +227,7 @@ export default function App() {
 
   useEffect(() => {
     try {
+      if (new URLSearchParams(location.search).get('c')) return   // share link active — skip restore toast, URL state takes precedence
       const raw = localStorage.getItem('recoverysys-config')
       if (raw && JSON.parse(raw)) {
         dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Restored your last session.', level: 'ok' } })

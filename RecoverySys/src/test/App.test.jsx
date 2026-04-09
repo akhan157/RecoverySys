@@ -80,6 +80,27 @@ describe('App — restored-session toast', () => {
     })
     expect(screen.queryByText('Restored your last session.')).not.toBeInTheDocument()
   })
+
+  it('does NOT show the restore toast when a share link ?c= param is present', async () => {
+    // Both localStorage AND a share link present — URL wins, no "Restored" toast
+    setLocalStorage(SAVED_SESSION)
+    const original = window.location.search
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, search: '?c=dummyencodedpayload' },
+      writable: true,
+      configurable: true,
+    })
+    await act(async () => {
+      render(<App />)
+    })
+    expect(screen.queryByText('Restored your last session.')).not.toBeInTheDocument()
+    // Restore location
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, search: original },
+      writable: true,
+      configurable: true,
+    })
+  })
 })
 
 // ── Mobile tab bar badge ──────────────────────────────────────────────────────
