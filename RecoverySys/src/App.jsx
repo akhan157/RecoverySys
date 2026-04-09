@@ -116,9 +116,10 @@ function reducer(state, action) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, null, buildInitialState)
-  const debounceRef  = useRef(null)
-  const toastCounter = useRef(0)
-  const timeoutIds   = useRef([])
+  const debounceRef       = useRef(null)
+  const toastCounter      = useRef(0)
+  const timeoutIds        = useRef([])
+  const restoredToastFired = useRef(false)   // guard against React 18 StrictMode double-invoke
 
   const safeTimeout = useCallback((fn, ms) => {
     const id = setTimeout(fn, ms)
@@ -226,6 +227,8 @@ export default function App() {
   const removeToast = useCallback((id) => dispatch({ type: 'REMOVE_TOAST', id }), [])
 
   useEffect(() => {
+    if (restoredToastFired.current) return   // idempotent under React 18 StrictMode double-invoke
+    restoredToastFired.current = true
     try {
       if (new URLSearchParams(location.search).get('c')) return   // share link active — skip restore toast, URL state takes precedence
       const raw = localStorage.getItem('recoverysys-config')
