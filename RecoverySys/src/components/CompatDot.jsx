@@ -22,6 +22,10 @@ export default function CompatDot({ status, tooltip }) {
     }
   }, [status])
 
+  // Cleanup: clear hover timer if the dot unmounts while the delay is pending.
+  // Without this, the timer fires on an unmounted component → stale setState.
+  useEffect(() => () => clearTimeout(hoverTimer.current), [])
+
   const handleMouseEnter = () => {
     if (status === 'neutral' || !tooltip) return
     hoverTimer.current = setTimeout(() => setShowTooltip(true), 200)
