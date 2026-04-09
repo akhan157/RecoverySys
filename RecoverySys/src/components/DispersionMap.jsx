@@ -25,7 +25,8 @@ function markerSvg(color) {
 }
 
 export default function DispersionMap({ simulation, specs }) {
-  const [open, setOpen] = useState(false)
+  const [open, setOpen]       = useState(false)
+  const [mapReady, setMapReady] = useState(false)  // true once Leaflet map is mounted
   const mapRef    = useRef(null)   // DOM node
   const leafRef   = useRef(null)   // Leaflet map instance
   const layersRef = useRef([])     // overlay layers to remove on update
@@ -70,6 +71,7 @@ export default function DispersionMap({ simulation, specs }) {
       }).addTo(map)
 
       leafRef.current = map
+      setMapReady(true)   // signal overlay effect that map is ready
     })
 
     return () => {
@@ -78,6 +80,7 @@ export default function DispersionMap({ simulation, specs }) {
         leafRef.current.remove()
         leafRef.current = null
       }
+      setMapReady(false)
     }
   }, [open])  // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -86,7 +89,7 @@ export default function DispersionMap({ simulation, specs }) {
     const map = leafRef.current
     if (!map || !open) return
 
-    getLeaflet().then(() => {
+    getLeaflet().then((Lf) => {
       // Invalidate size first: map may have been initialized while container was display:none
       map.invalidateSize()
 
@@ -142,7 +145,7 @@ export default function DispersionMap({ simulation, specs }) {
         map.setView([launch_lat, launch_lon], 13)
       }
     })
-  }, [open, drift, launch_lat, launch_lon, hasCoords])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, mapReady, drift, launch_lat, launch_lon, hasCoords])  // eslint-disable-line react-hooks/exhaustive-deps
 
   const canShow = !!simulation && !!drift
 
