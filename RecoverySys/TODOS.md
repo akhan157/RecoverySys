@@ -41,27 +41,7 @@ Last updated: 2026-03-24 by /plan-ceo-review
 
 ## v2 — Flight Visualization & Diagnostics
 
-### TODO: Main-deploy vs apogee sanity check in SimPanel
-**What:** Post-sim banner: ERROR if `main_deploy_alt_ft >= apogee_ft`, WARN if drogue phase < 500ft or drogue time < 5s.
-**Why:** A misconfigured deploy altitude can mean the main chute never fires — currently silent. Users catch this only by reading the numbers.
-**Pros:** Prevents a common setup mistake; zero logic change to sim engine.
-**Cons:** None.
-**Context:** Needs access to `simulation.apogee_ft`, `simulation.deploy_ft`, and `simulation.phase1_time_s`. Render as a banner above the stat cards in SimPanel (reuse existing warn-bg/error-bg CSS vars).
-**Effort:** XS → with CC+gstack: XS
-**Priority:** P1
-**Depends on:** None
-
----
-
-### TODO: Ascent arc in FlightChart
-**What:** Prepend ascent trajectory points to the chart timeline so the full flight arc (liftoff → apogee → landing) is visible.
-**Why:** Current chart starts at apogee; users can't see the ascent profile or motor burn point.
-**Pros:** Shows the complete flight; enables a BURN marker at motor burnout.
-**Cons:** Ascent timeline is already computed in `integrateAscent()` and included in the `timeline` array returned by `runSimulation()` — no physics change needed. Only FlightChart.jsx needs updating.
-**Context:** The `ascentTimeline` is already merged into `simulation.timeline` in `runSimulation()`. FlightChart just needs to render a BURN event marker at `simulation.burnout_t_s`. Add it to the `events` array in FlightChart.jsx.
-**Effort:** XS → with CC+gstack: XS
-**Priority:** P2
-**Depends on:** None
+*(No open items — P1 deploy sanity banners and P2 full ascent arc shipped in v1.2.0.0)*
 
 ---
 
