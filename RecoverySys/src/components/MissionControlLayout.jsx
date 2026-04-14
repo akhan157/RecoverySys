@@ -25,14 +25,14 @@ function partSpecLine(part) {
 }
 
 const SLOT_LABELS = {
-  main_chute:      'PRIMARY_DEPLOYMENT',
-  drogue_chute:    'ASCENT_STABILIZER',
-  shock_cord:      'TETHER_SYSTEM',
-  chute_protector: 'THERMAL_SHIELD',
-  deployment_bag:  'CONTAINMENT_UNIT',
-  quick_links:     'ATTACHMENT_HARDWARE',
-  swivel:          'ROTATION_BEARING',
-  chute_device:    'AUXILIARY_DEVICE',
+  main_chute:      'MAIN_CHUTE',
+  drogue_chute:    'DROGUE_CHUTE',
+  shock_cord:      'SHOCK_CORD',
+  chute_protector: 'CHUTE_PROTECTOR',
+  deployment_bag:  'DEPLOY_BAG',
+  quick_links:     'QUICK_LINKS',
+  swivel:          'SWIVEL',
+  chute_device:    'CHUTE_DEVICE',
 }
 
 const SLOT_ICONS = {
