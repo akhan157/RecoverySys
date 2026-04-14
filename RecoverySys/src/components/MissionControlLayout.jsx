@@ -107,34 +107,6 @@ export default function MissionControlLayout({
 
       {/* ── Body ────────────────────────────────────────────────────────── */}
       <div className="mc-body">
-        {/* ── Sidebar ───────────────────────────────────────────────────── */}
-        <aside className="mc-sidebar" aria-label="Sidebar">
-          <div className="mc-sidebar__identity">
-            <div className="mc-sidebar__title">RECOVERY_BAY</div>
-            <div className="mc-sidebar__subtitle">OSCILLOSCOPE_ACTIVE</div>
-          </div>
-          <nav className="mc-sidebar__nav" aria-label="Tab navigation">
-            {TABS.map(item => (
-              <button
-                key={item.id}
-                className={`mc-sidebar__nav-btn ${activeTab === item.id ? 'mc-sidebar__nav-btn--active' : ''}`}
-                onClick={() => setActiveTab(item.id)}
-              >
-                <span className="mc-sidebar__nav-icon">{item.icon}</span>
-                {item.label}
-              </button>
-            ))}
-          </nav>
-          <div className="mc-sidebar__bottom">
-            <button className="mc-sidebar__cta" onClick={runSim} disabled={!canRun}>
-              {state.simRunning ? 'RUNNING...' : 'RUN_SIMULATION'}
-            </button>
-            <button className="mc-sidebar__link" onClick={() => setActiveTab('SIMULATION')}>
-              ⚠ ALERTS ({state.warnings.length})
-            </button>
-          </div>
-        </aside>
-
         {/* ── Main Content Area ─────────────────────────────────────────── */}
         <main className="mc-main" role="main">
           {activeTab === 'DASHBOARD' && (
@@ -191,6 +163,13 @@ export default function MissionControlLayout({
 
       {/* ── Status Bar ──────────────────────────────────────────────────── */}
       <div className="mc-statusbar">
+        <button
+          className="mc-statusbar__run"
+          onClick={runSim}
+          disabled={!canRun}
+        >
+          {state.simRunning ? '⟳ RUNNING...' : '▶ RUN_SIM'}
+        </button>
         <div className="mc-statusbar__item">
           MOTOR: {state.specs.motor_total_impulse_ns ? `${state.specs.motor_total_impulse_ns}Ns` : 'NOT_SET'}
         </div>
