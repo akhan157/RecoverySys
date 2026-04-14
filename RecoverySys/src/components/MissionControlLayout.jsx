@@ -195,10 +195,10 @@ export default function MissionControlLayout({
           MOTOR: {state.specs.motor_total_impulse_ns ? `${state.specs.motor_total_impulse_ns}Ns` : 'NOT_SET'}
         </div>
         <div className="mc-statusbar__item">
-          DESCENT_RATE: {state.simulation ? `${state.simulation.main_fps.toFixed(1)} FT/S` : '—'}
+          DESCENT_RATE: {state.simulation?.main_fps != null ? `${state.simulation.main_fps.toFixed(1)} FT/S` : '—'}
         </div>
         <div className="mc-statusbar__item">
-          DRIFT: {state.simulation ? `${state.simulation.drift_ft.toFixed(0)} FT` : '—'}
+          DRIFT: {state.simulation?.drift_ft != null ? `${state.simulation.drift_ft.toFixed(0)} FT` : '—'}
         </div>
         {state.simulation?.shock_load && (
           <div className="mc-statusbar__item">
@@ -391,7 +391,7 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
           <div className="mc-panel-header">
             FLIGHT_PROFILE // DESCENT_PHASE_V4.2
             <span className="mc-panel-header__right">
-              {sim ? `REF_ID: STR-SIM-${String(Math.abs(sim.apogee_ft * 7 + sim.drift_ft) % 9999).padStart(4, '0')}` : 'AWAITING_DATA'}
+              {sim ? `REF_ID: STR-SIM-${String(Math.abs((sim.apogee_ft || 0) * 7 + (sim.drift_ft || 0)) % 9999).padStart(4, '0')}` : 'AWAITING_DATA'}
             </span>
           </div>
           <div className="mc-sim__chart-area">
@@ -411,9 +411,9 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
           <div className="mc-panel-header">SIMULATION_DATA</div>
           <div className="mc-sim__data-grid">
             <MetricCard label="APOGEE_ALTITUDE" value={sim ? sim.apogee_ft.toLocaleString() : '—'} unit="ft" />
-            <MetricCard label="MAIN_DESCENT" value={sim ? sim.main_fps.toFixed(1) : '—'} unit="ft/s"
-              warn={sim && sim.main_fps > 15} />
-            <MetricCard label="DESCENT_TIME" value={sim ? Math.round(sim.total_time_s) : '—'} unit="sec" />
+            <MetricCard label="MAIN_DESCENT" value={sim?.main_fps != null ? sim.main_fps.toFixed(1) : '—'} unit="ft/s"
+              warn={sim?.main_fps != null && sim.main_fps > 15} />
+            <MetricCard label="DESCENT_TIME" value={sim?.total_time_s != null ? Math.round(sim.total_time_s) : '—'} unit="sec" />
             <MetricCard label="DRIFT_DISTANCE" value={sim ? sim.drift_ft.toLocaleString() : '—'} unit="ft" />
             {sim?.drogue_fps && (
               <MetricCard label="DROGUE_DESCENT" value={sim.drogue_fps.toFixed(1)} unit="ft/s" />
@@ -426,8 +426,8 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
                 <MetricCard label="SAFETY_FACTOR"
                   value={shock.safety_factor.toFixed(1) + '×'}
                   unit=""
-                  status={shock.sf_status}
-                  statusLabel={shock.sf_status === 'ok' ? 'OK' : shock.sf_status === 'marginal' ? 'MARGINAL' : 'FAIL'}
+                  status={shock.sf_status === 'pass' ? 'ok' : shock.sf_status === 'warn' ? 'marginal' : 'fail'}
+                  statusLabel={shock.sf_status === 'pass' ? 'OK' : shock.sf_status === 'warn' ? 'MARGINAL' : 'FAIL'}
                 />
                 <MetricCard label="STRAIN_ENERGY" value={shock.strain_energy_J.toFixed(1)} unit="J" />
               </>

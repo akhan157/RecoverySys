@@ -233,7 +233,7 @@ export function runSimulation({ specs, config }) {
   const cd        = parseFloat(specs.drag_cd) || CD_DEFAULT
   const wind_mph  = parseFloat(specs.wind_speed_mph) || 0
   const deploy_ft = parseFloat(specs.main_deploy_alt_ft) || 500
-  const g_factor  = parseFloat(specs.ejection_g_factor) || 20
+  const g_factor  = Math.max(1, parseFloat(specs.ejection_g_factor) || 20)
 
   if (!mass_g || !impulse || mass_g <= 0 || impulse <= 0) return null
 
