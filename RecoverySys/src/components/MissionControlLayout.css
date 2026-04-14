@@ -162,9 +162,9 @@
 }
 
 .mc-parts-panel {
-  width: 280px;
-  min-width: 280px;
-  max-width: 280px;
+  width: 360px;
+  min-width: 360px;
+  max-width: 360px;
   background: var(--mc-bg-panel);
   border-right: 1px solid var(--mc-border);
   display: flex;
