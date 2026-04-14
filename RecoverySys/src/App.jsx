@@ -20,6 +20,14 @@ const DEFAULT_SPECS = {
   bay_obstruction_vol_in3: '',  // volume (in³) of obstructions inside the bay (sleds, hardpoints, etc.)
   launch_lat:             '',   // launch site latitude (decimal degrees)
   launch_lon:             '',   // launch site longitude (decimal degrees)
+  // Wind layers — mid & aloft (surface uses wind_speed_mph / wind_direction_deg above)
+  wind_surface_alt_ft:    '',   // surface layer altitude (default 0)
+  wind_mid_speed_mph:     '',   // mid-altitude wind speed
+  wind_mid_direction_deg: '',   // mid-altitude wind direction
+  wind_mid_alt_ft:        '',   // mid-altitude layer height
+  wind_aloft_speed_mph:   '',   // aloft wind speed
+  wind_aloft_direction_deg: '', // aloft wind direction
+  wind_aloft_alt_ft:      '',   // aloft layer height
 }
 
 function loadSaved() {

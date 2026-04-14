@@ -201,7 +201,8 @@ export default function FlightChart({ simulation }) {
   }
 
   const { timeline, apogee_ft, deploy_ft, phase1_time_s, total_time_s, apogee_t_s, burnout_t_s } = simulation
-  const maxAlt  = Math.max(1000, nice1000(apogee_ft))
+  // Guarantee at least 2,000 ft headroom above apogee for event labels
+  const maxAlt  = Math.max(1000, nice1000(apogee_ft) + 2000)
   const descentTime = total_time_s ?? phase1_time_s
   const flightTime  = (apogee_t_s ?? 0) + descentTime
   const maxTime = Math.ceil((flightTime + 5) / 5) * 5
@@ -251,20 +252,36 @@ export default function FlightChart({ simulation }) {
       />
 
       {/* Event marker lines */}
-      {events.map(ev => (
-        <g key={ev.label}>
-          <line
-            x1={xS(ev.t)} y1={PAD.top}
-            x2={xS(ev.t)} y2={PAD.top + CHART_H}
-            stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" strokeDasharray="2,2"
-          />
-          <text x={xS(ev.t) + 3} y={PAD.top + 10}
-            fontSize="7" fontFamily="'Space Grotesk', monospace"
-            fill="rgba(255,255,255,0.35)" letterSpacing="0.5">
-            {ev.label}
-          </text>
-        </g>
-      ))}
+      {(() => {
+        // Compute label positions with collision avoidance
+        const MIN_X_GAP = 22  // minimum px between labels before staggering
+        const positions = events.map((ev, idx) => ({ ...ev, x: xS(ev.t), row: 0 }))
+        // Assign rows: if too close to a previous label on the same row, bump down
+        for (let i = 1; i < positions.length; i++) {
+          for (let row = 0; row < 4; row++) {
+            const conflict = positions.slice(0, i).some(
+              prev => prev.row === row && Math.abs(positions[i].x - prev.x) < MIN_X_GAP
+            )
+            if (!conflict) { positions[i].row = row; break }
+            positions[i].row = row + 1
+          }
+        }
+        return positions.map(ev => (
+          <g key={ev.label}>
+            <line
+              x1={ev.x} y1={PAD.top}
+              x2={ev.x} y2={PAD.top + CHART_H}
+              stroke="rgba(255,255,255,0.45)" strokeWidth="0.75" strokeDasharray="3,3"
+            />
+            {/* Label placed at top of chart in the headroom above the curve */}
+            <text x={ev.x + 3} y={PAD.top + 10 + ev.row * 10}
+              fontSize="7" fontFamily="'Space Grotesk', monospace"
+              fill="rgba(255,255,255,0.7)" fontWeight="600" letterSpacing="0.5">
+              {ev.label}
+            </text>
+          </g>
+        ))
+      })()}
 
       {/* Flight path — white, stroke-width 2 */}
       <path
@@ -275,13 +292,6 @@ export default function FlightChart({ simulation }) {
         fill="none"
       />
 
-      {/* Live readout — top right of chart area with white bar */}
-      <LiveReadout
-        label="LIVE"
-        value={apogee_ft.toLocaleString()}
-        x={PAD.left + CHART_W - 4}
-        y={PAD.top + 14}
-      />
     </svg>
   )
 }

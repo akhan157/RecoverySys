@@ -220,14 +220,10 @@ describe('computeDrift', () => {
     expect(result.bearing_deg).toBe(0)
   })
 
-  it('bearing is null when wind_direction_deg is missing (never default to north)', () => {
-    // Defaulting to 0 (north) would produce misleading landing coords — bearing must be null
+  it('returns null when wind_direction_deg is missing (direction required for layer-based drift)', () => {
+    // Wind speed without direction produces no valid wind layers → null drift
     const result = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '' } })
-    expect(result).not.toBeNull()
-    expect(result.bearing_deg).toBeNull()
-    // Landing coords also null when bearing is unknown
-    expect(result.land_lat).toBeNull()
-    expect(result.land_lon).toBeNull()
+    expect(result).toBeNull()
   })
 
   it('computes landing coords when launch_lat/lon provided', () => {

@@ -330,22 +330,47 @@ export default function RocketSpecs({ specs, onSetSpec }) {
           placeholder="0.50"
           onChange={v => onSetSpec('drag_cd', v)}
         />
-        <SpecInput
-          id="wind"
-          label="Wind Speed"
-          value={specs.wind_speed_mph}
-          unit="mph"
-          placeholder="e.g. 10"
-          onChange={v => onSetSpec('wind_speed_mph', v)}
-        />
-        <SpecInput
-          id="wind-dir"
-          label="Wind Direction"
-          value={specs.wind_direction_deg}
-          unit="°"
-          placeholder="0=N 90=E"
-          onChange={v => onSetSpec('wind_direction_deg', v)}
-        />
+        {/* ── Wind Profile (multi-layer) ──────────────────────────────── */}
+        <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+          <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', letterSpacing: '0.05em', fontWeight: 600, marginTop: '4px' }}>
+            WIND PROFILE
+          </div>
+
+          {/* Surface layer */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+            <SpecInput id="wind" label="Surface Speed" value={specs.wind_speed_mph} unit="mph" placeholder="e.g. 10"
+              onChange={v => onSetSpec('wind_speed_mph', v)} />
+            <SpecInput id="wind-dir" label="Surface Dir" value={specs.wind_direction_deg} unit="°" placeholder="0=N 90=E"
+              onChange={v => onSetSpec('wind_direction_deg', v)} />
+            <SpecInput id="wind-surface-alt" label="Surface Alt" value={specs.wind_surface_alt_ft} unit="ft" placeholder="0"
+              onChange={v => onSetSpec('wind_surface_alt_ft', v)} />
+          </div>
+
+          {/* Mid-altitude layer */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+            <SpecInput id="wind-mid" label="Mid Speed" value={specs.wind_mid_speed_mph} unit="mph" placeholder="e.g. 15"
+              onChange={v => onSetSpec('wind_mid_speed_mph', v)} />
+            <SpecInput id="wind-mid-dir" label="Mid Dir" value={specs.wind_mid_direction_deg} unit="°" placeholder="0=N"
+              onChange={v => onSetSpec('wind_mid_direction_deg', v)} />
+            <SpecInput id="wind-mid-alt" label="Mid Alt" value={specs.wind_mid_alt_ft} unit="ft" placeholder="e.g. 5000"
+              onChange={v => onSetSpec('wind_mid_alt_ft', v)} />
+          </div>
+
+          {/* Aloft layer */}
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+            <SpecInput id="wind-aloft" label="Aloft Speed" value={specs.wind_aloft_speed_mph} unit="mph" placeholder="e.g. 30"
+              onChange={v => onSetSpec('wind_aloft_speed_mph', v)} />
+            <SpecInput id="wind-aloft-dir" label="Aloft Dir" value={specs.wind_aloft_direction_deg} unit="°" placeholder="0=N"
+              onChange={v => onSetSpec('wind_aloft_direction_deg', v)} />
+            <SpecInput id="wind-aloft-alt" label="Aloft Alt" value={specs.wind_aloft_alt_ft} unit="ft" placeholder="e.g. 15000"
+              onChange={v => onSetSpec('wind_aloft_alt_ft', v)} />
+          </div>
+
+          <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
+            Enter surface wind only for basic drift. Add mid/aloft layers for wind shear modeling.
+            Direction = where wind blows FROM (meteorological). Monte Carlo runs 500 iterations with ±30% speed, ±15° direction variance.
+          </div>
+        </div>
         <SpecInput
           id="launch-lat"
           label="Launch Lat"

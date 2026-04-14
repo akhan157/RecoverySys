@@ -147,60 +147,193 @@ export function computeShockLoad(cordSpecs, mass_kg, g_factor) {
 }
 
 /**
- * Compute predicted drift from launch site given wind and descent phases.
+ * Interpolate wind speed & direction at a given altitude from a set of wind layers.
+ * Layers are sorted by altitude; below the lowest layer uses the lowest value,
+ * above the highest uses the highest value.
  *
- * Returns { drift_ft, drift_m, bearing_deg, land_lat, land_lon, … } or null.
- *   drift_ft        — total horizontal distance drifted downwind (feet)
- *   bearing_deg     — direction rocket drifts toward (downwind bearing, 0=N)
- *   land_lat/lon    — predicted landing coords (when launch_lat/lon provided)
+ * Each layer: { alt_ft, speed_mph, direction_deg }
+ * Returns { speed_mph, direction_deg }
+ */
+function interpolateWind(alt_ft, layers) {
+  if (!layers || layers.length === 0) return { speed_mph: 0, direction_deg: 0 }
+  if (layers.length === 1) return { speed_mph: layers[0].speed_mph, direction_deg: layers[0].direction_deg }
+
+  // Sort by altitude
+  const sorted = [...layers].sort((a, b) => a.alt_ft - b.alt_ft)
+
+  // Below lowest layer
+  if (alt_ft <= sorted[0].alt_ft) return { speed_mph: sorted[0].speed_mph, direction_deg: sorted[0].direction_deg }
+  // Above highest layer
+  if (alt_ft >= sorted[sorted.length - 1].alt_ft) {
+    const top = sorted[sorted.length - 1]
+    return { speed_mph: top.speed_mph, direction_deg: top.direction_deg }
+  }
+
+  // Find bracketing layers
+  for (let i = 0; i < sorted.length - 1; i++) {
+    if (alt_ft >= sorted[i].alt_ft && alt_ft <= sorted[i + 1].alt_ft) {
+      const lo = sorted[i], hi = sorted[i + 1]
+      const frac = (alt_ft - lo.alt_ft) / (hi.alt_ft - lo.alt_ft)
+      // Linear interpolation for speed
+      const speed_mph = lo.speed_mph + frac * (hi.speed_mph - lo.speed_mph)
+      // Angular interpolation for direction (shortest path around 360°)
+      let dDir = hi.direction_deg - lo.direction_deg
+      if (dDir > 180) dDir -= 360
+      if (dDir < -180) dDir += 360
+      const direction_deg = ((lo.direction_deg + frac * dDir) % 360 + 360) % 360
+      return { speed_mph, direction_deg }
+    }
+  }
+  const last = sorted[sorted.length - 1]
+  return { speed_mph: last.speed_mph, direction_deg: last.direction_deg }
+}
+
+/**
+ * Parse wind layers from specs. Supports up to 3 layers (surface, mid, aloft).
+ * Falls back to the single wind_speed_mph / wind_direction_deg if no layers are set.
+ * Returns array of { alt_ft, speed_mph, direction_deg } sorted by altitude.
+ */
+export function parseWindLayers(specs) {
+  const layers = []
+
+  // Layer 0 — Surface
+  const s0_speed = parseFloat(specs.wind_speed_mph)
+  const s0_dir   = parseFloat(specs.wind_direction_deg)
+  if (s0_speed > 0 && isFinite(s0_dir)) {
+    layers.push({
+      alt_ft: parseFloat(specs.wind_surface_alt_ft) || 0,
+      speed_mph: s0_speed,
+      direction_deg: s0_dir,
+    })
+  }
+
+  // Layer 1 — Mid altitude
+  const s1_speed = parseFloat(specs.wind_mid_speed_mph)
+  const s1_dir   = parseFloat(specs.wind_mid_direction_deg)
+  const s1_alt   = parseFloat(specs.wind_mid_alt_ft)
+  if (s1_speed > 0 && s1_alt > 0) {
+    layers.push({ alt_ft: s1_alt, speed_mph: s1_speed, direction_deg: isFinite(s1_dir) ? s1_dir : 0 })
+  }
+
+  // Layer 2 — Aloft
+  const s2_speed = parseFloat(specs.wind_aloft_speed_mph)
+  const s2_dir   = parseFloat(specs.wind_aloft_direction_deg)
+  const s2_alt   = parseFloat(specs.wind_aloft_alt_ft)
+  if (s2_speed > 0 && s2_alt > 0) {
+    layers.push({ alt_ft: s2_alt, speed_mph: s2_speed, direction_deg: isFinite(s2_dir) ? s2_dir : 0 })
+  }
+
+  return layers.sort((a, b) => a.alt_ft - b.alt_ft)
+}
+
+/**
+ * Project a point from (lat, lon) given a bearing (degrees) and distance (metres).
+ * Returns { lat, lon } in decimal degrees.
+ */
+function projectPoint(lat_deg, lon_deg, bearing_deg, dist_m) {
+  const R    = 6371000
+  const lat1 = lat_deg * Math.PI / 180
+  const lon1 = lon_deg * Math.PI / 180
+  const brng = bearing_deg * Math.PI / 180
+  const lat2 = Math.asin(
+    Math.sin(lat1) * Math.cos(dist_m / R) +
+    Math.cos(lat1) * Math.sin(dist_m / R) * Math.cos(brng)
+  )
+  const lon2 = lon1 + Math.atan2(
+    Math.sin(brng) * Math.sin(dist_m / R) * Math.cos(lat1),
+    Math.cos(dist_m / R) - Math.sin(lat1) * Math.sin(lat2)
+  )
+  return { lat: lat2 * 180 / Math.PI, lon: lon2 * 180 / Math.PI }
+}
+
+/**
+ * Compute predicted drift using altitude-binned wind layers.
+ * Steps the rocket down in altitude increments, sampling wind at each altitude
+ * to accumulate X/Y displacement (east/north components).
+ *
+ * Returns { drift_ft, drift_m, bearing_deg, land_lat, land_lon,
+ *           drogue_drift_ft, main_drift_ft, drogue_time_s, main_time_s,
+ *           drogue_vector, main_vector } or null.
  */
 export function computeDrift({ simulation, specs }) {
   if (!simulation) return null
 
-  const wind_mph   = parseFloat(specs.wind_speed_mph)
-  const wind_deg   = parseFloat(specs.wind_direction_deg)  // met convention: direction wind comes FROM
+  const layers = parseWindLayers(specs)
+  if (layers.length === 0) return null
+
   const launch_lat = parseFloat(specs.launch_lat)
   const launch_lon = parseFloat(specs.launch_lon)
-
-  if (!wind_mph || wind_mph <= 0) return null
-
-  const wind_fps = wind_mph * MPH_TO_FPS   // mph → ft/s
+  const hasCoords  = isFinite(launch_lat) && isFinite(launch_lon)
 
   const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation
   if (!drogue_fps || !apogee_ft) return null
 
-  // Drogue phase: apogee → main deploy altitude
-  const drogue_span    = Math.max(0, apogee_ft - (deploy_ft || 500))
-  const drogue_time_s  = drogue_fps > 0 ? drogue_span / drogue_fps : 0
-  const drogue_drift_ft = wind_fps * drogue_time_s
+  const ALT_STEP = 100  // ft per integration step
 
-  // Main phase: main deploy altitude → ground
-  const main_span    = deploy_ft || 500
-  const main_time_s  = (main_fps && main_fps > 0) ? main_span / main_fps : 0
-  const main_drift_ft = wind_fps * main_time_s
+  // Accumulate east/north displacement in feet
+  let dx_ft = 0, dy_ft = 0  // east, north
+  let drogue_dx = 0, drogue_dy = 0
+  let main_dx = 0, main_dy = 0
+  let drogue_time_s = 0, main_time_s = 0
 
-  const drift_ft = drogue_drift_ft + main_drift_ft
+  // Phase 1: Drogue — apogee → deploy_ft
+  const deploy = deploy_ft || 500
+  let alt = apogee_ft
+  while (alt > deploy) {
+    const step_ft = Math.min(ALT_STEP, alt - deploy)
+    const mid_alt = alt - step_ft / 2
+    const wind    = interpolateWind(mid_alt, layers)
+    const wind_fps_local = wind.speed_mph * MPH_TO_FPS
+    const dt      = step_ft / drogue_fps  // time to fall this step
+    // Wind blows FROM direction_deg → drift TOWARD (direction_deg + 180)
+    const drift_bearing = (wind.direction_deg + 180) % 360
+    const bearing_rad   = drift_bearing * Math.PI / 180
+    const step_east  = wind_fps_local * dt * Math.sin(bearing_rad)
+    const step_north = wind_fps_local * dt * Math.cos(bearing_rad)
+    drogue_dx += step_east
+    drogue_dy += step_north
+    drogue_time_s += dt
+    alt -= step_ft
+  }
+
+  // Phase 2: Main — deploy_ft → ground
+  alt = deploy
+  const effective_main_fps = (main_fps && main_fps > 0) ? main_fps : drogue_fps
+  while (alt > 0) {
+    const step_ft = Math.min(ALT_STEP, alt)
+    const mid_alt = alt - step_ft / 2
+    const wind    = interpolateWind(Math.max(0, mid_alt), layers)
+    const wind_fps_local = wind.speed_mph * MPH_TO_FPS
+    const dt      = step_ft / effective_main_fps
+    const drift_bearing = (wind.direction_deg + 180) % 360
+    const bearing_rad   = drift_bearing * Math.PI / 180
+    const step_east  = wind_fps_local * dt * Math.sin(bearing_rad)
+    const step_north = wind_fps_local * dt * Math.cos(bearing_rad)
+    main_dx += step_east
+    main_dy += step_north
+    main_time_s += dt
+    alt -= step_ft
+  }
+
+  dx_ft = drogue_dx + main_dx
+  dy_ft = drogue_dy + main_dy
+
+  const drift_ft = Math.sqrt(dx_ft * dx_ft + dy_ft * dy_ft)
   const drift_m  = drift_ft / FT_PER_M
+  const drogue_drift_ft = Math.sqrt(drogue_dx * drogue_dx + drogue_dy * drogue_dy)
+  const main_drift_ft   = Math.sqrt(main_dx * main_dx + main_dy * main_dy)
 
-  // Wind direction (met convention): wind FROM wind_deg → rocket drifts TOWARD (wind_deg + 180) % 360
-  // If wind direction not provided, bearing is unknown (null) — never default to north (misleading)
-  const bearing_deg = isFinite(wind_deg) ? (wind_deg + 180) % 360 : null
+  // Net bearing from displacement vector
+  const bearing_deg = drift_ft > 0
+    ? ((Math.atan2(dx_ft, dy_ft) * 180 / Math.PI) + 360) % 360
+    : null
 
-  // Great-circle landing coords — only computable when bearing is known
+  // Landing coords
   let land_lat = null, land_lon = null
-  if (bearing_deg !== null && isFinite(launch_lat) && isFinite(launch_lon) && drift_m > 0) {
-    const R    = 6371000  // Earth radius m
-    const lat1 = launch_lat * Math.PI / 180
-    const lon1 = launch_lon * Math.PI / 180
-    const brng = bearing_deg * Math.PI / 180
-    const lat2 = Math.asin(Math.sin(lat1) * Math.cos(drift_m / R) +
-                           Math.cos(lat1) * Math.sin(drift_m / R) * Math.cos(brng))
-    const lon2 = lon1 + Math.atan2(
-      Math.sin(brng) * Math.sin(drift_m / R) * Math.cos(lat1),
-      Math.cos(drift_m / R) - Math.sin(lat1) * Math.sin(lat2)
-    )
-    land_lat = lat2 * 180 / Math.PI
-    land_lon = lon2 * 180 / Math.PI
+  if (bearing_deg !== null && hasCoords && drift_m > 0) {
+    const pt = projectPoint(launch_lat, launch_lon, bearing_deg, drift_m)
+    land_lat = pt.lat
+    land_lon = pt.lon
   }
 
   return {
@@ -213,7 +346,157 @@ export function computeDrift({ simulation, specs }) {
     bearing_deg,
     land_lat,
     land_lon,
+    // Phase vectors for map rendering (east/north displacements in feet)
+    drogue_vector: { dx_ft: drogue_dx, dy_ft: drogue_dy },
+    main_vector:   { dx_ft: main_dx,   dy_ft: main_dy },
   }
+}
+
+/**
+ * Run Monte Carlo dispersion simulation.
+ * Randomizes wind speed (±30%) and direction (±15°) per layer per iteration
+ * to produce a scatter of landing points.
+ *
+ * Returns { scatter: [{lat, lon}], ellipse: {cx, cy, rx, ry, angle}, meanDrift }
+ * or null if insufficient data.
+ */
+export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 }) {
+  if (!simulation) return null
+
+  const baseLayers = parseWindLayers(specs)
+  if (baseLayers.length === 0) return null
+
+  const launch_lat = parseFloat(specs.launch_lat)
+  const launch_lon = parseFloat(specs.launch_lon)
+  if (!isFinite(launch_lat) || !isFinite(launch_lon)) return null
+
+  const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation
+  if (!drogue_fps || !apogee_ft) return null
+
+  const ALT_STEP = 200  // coarser steps for MC performance
+  const deploy = deploy_ft || 500
+  const effective_main_fps = (main_fps && main_fps > 0) ? main_fps : drogue_fps
+
+  // Seeded random with Box-Muller for Gaussian noise
+  function gaussRand() {
+    let u = 0, v = 0
+    while (u === 0) u = Math.random()
+    while (v === 0) v = Math.random()
+    return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
+  }
+
+  const scatter = []
+
+  for (let i = 0; i < iterations; i++) {
+    // Perturb each wind layer independently
+    const perturbedLayers = baseLayers.map(layer => ({
+      alt_ft: layer.alt_ft,
+      speed_mph: Math.max(0, layer.speed_mph * (1 + 0.30 * gaussRand())),
+      direction_deg: ((layer.direction_deg + 15 * gaussRand()) % 360 + 360) % 360,
+    }))
+
+    let dx_ft = 0, dy_ft = 0
+
+    // Drogue phase
+    let alt = apogee_ft
+    while (alt > deploy) {
+      const step_ft = Math.min(ALT_STEP, alt - deploy)
+      const mid_alt = alt - step_ft / 2
+      const wind = interpolateWind(mid_alt, perturbedLayers)
+      const wind_fps_local = wind.speed_mph * MPH_TO_FPS
+      const dt = step_ft / drogue_fps
+      const drift_bearing = (wind.direction_deg + 180) % 360
+      const bearing_rad = drift_bearing * Math.PI / 180
+      dx_ft += wind_fps_local * dt * Math.sin(bearing_rad)
+      dy_ft += wind_fps_local * dt * Math.cos(bearing_rad)
+      alt -= step_ft
+    }
+
+    // Main phase
+    alt = deploy
+    while (alt > 0) {
+      const step_ft = Math.min(ALT_STEP, alt)
+      const mid_alt = alt - step_ft / 2
+      const wind = interpolateWind(Math.max(0, mid_alt), perturbedLayers)
+      const wind_fps_local = wind.speed_mph * MPH_TO_FPS
+      const dt = step_ft / effective_main_fps
+      const drift_bearing = (wind.direction_deg + 180) % 360
+      const bearing_rad = drift_bearing * Math.PI / 180
+      dx_ft += wind_fps_local * dt * Math.sin(bearing_rad)
+      dy_ft += wind_fps_local * dt * Math.cos(bearing_rad)
+      alt -= step_ft
+    }
+
+    // Convert displacement to lat/lon
+    const drift_ft = Math.sqrt(dx_ft * dx_ft + dy_ft * dy_ft)
+    const drift_m  = drift_ft / FT_PER_M
+    const bearing  = ((Math.atan2(dx_ft, dy_ft) * 180 / Math.PI) + 360) % 360
+    if (drift_m > 0) {
+      const pt = projectPoint(launch_lat, launch_lon, bearing, drift_m)
+      scatter.push(pt)
+    }
+  }
+
+  if (scatter.length < 10) return null
+
+  // Compute 2σ confidence ellipse from scatter
+  const ellipse = fitConfidenceEllipse(scatter)
+
+  // Mean drift distance
+  const meanLat = scatter.reduce((s, p) => s + p.lat, 0) / scatter.length
+  const meanLon = scatter.reduce((s, p) => s + p.lon, 0) / scatter.length
+
+  return { scatter, ellipse, meanLat, meanLon }
+}
+
+/**
+ * Fit a 2σ (95%) confidence ellipse to a set of {lat, lon} points.
+ * Returns { cx, cy, rx, ry, angle_deg } where cx/cy are center lat/lon,
+ * rx/ry are semi-axes in metres, and angle_deg is rotation from north (CW).
+ */
+export function fitConfidenceEllipse(points) {
+  const n = points.length
+  if (n < 3) return null
+
+  const cx = points.reduce((s, p) => s + p.lat, 0) / n
+  const cy = points.reduce((s, p) => s + p.lon, 0) / n
+
+  // Convert to local meters (approximate for small areas)
+  const m_per_deg_lat = 111320
+  const m_per_deg_lon = 111320 * Math.cos(cx * Math.PI / 180)
+
+  // Compute covariance matrix in meters
+  let sxx = 0, syy = 0, sxy = 0
+  for (const p of points) {
+    const x = (p.lon - cy) * m_per_deg_lon  // east
+    const y = (p.lat - cx) * m_per_deg_lat  // north
+    sxx += x * x
+    syy += y * y
+    sxy += x * y
+  }
+  sxx /= (n - 1)
+  syy /= (n - 1)
+  sxy /= (n - 1)
+
+  // Eigenvalues of 2x2 covariance matrix
+  const trace = sxx + syy
+  const det   = sxx * syy - sxy * sxy
+  const disc  = Math.sqrt(Math.max(0, trace * trace / 4 - det))
+  const lambda1 = trace / 2 + disc
+  const lambda2 = trace / 2 - disc
+
+  // 2σ scale factor for 95% confidence (chi-squared with 2 DOF, p=0.05 → 5.991)
+  const scale = Math.sqrt(5.991)
+
+  const rx = scale * Math.sqrt(Math.max(0, lambda1))  // semi-major in metres
+  const ry = scale * Math.sqrt(Math.max(0, lambda2))  // semi-minor in metres
+
+  // Rotation angle (angle of the major axis from east, CW)
+  const angle_rad = Math.atan2(2 * sxy, sxx - syy) / 2
+  // Convert to degrees from north (geographic convention)
+  const angle_deg = (90 - angle_rad * 180 / Math.PI + 360) % 360
+
+  return { cx, cy, rx, ry, angle_deg }
 }
 
 /**
