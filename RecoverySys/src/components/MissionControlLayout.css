@@ -83,10 +83,10 @@
 
 .mc-header__icon-btn {
   background: none;
-  border: 1px solid #333;
+  border: 1px solid var(--mc-border-card);
   color: var(--mc-text-dim);
-  width: 32px;
-  height: 32px;
+  width: 44px;
+  height: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -216,7 +216,8 @@
   letter-spacing: 0.04em;
   cursor: pointer;
   text-align: left;
-  padding: 4px;
+  padding: 10px 4px;
+  min-height: 44px;
   display: flex;
   align-items: center;
   gap: 8px;
@@ -370,15 +371,19 @@
 
 .mc-slot__remove {
   position: absolute;
-  top: 6px;
-  right: 8px;
+  top: 2px;
+  right: 2px;
   background: none;
   border: none;
   color: var(--mc-text-faint);
   cursor: pointer;
   font-size: 14px;
   line-height: 1;
-  padding: 2px;
+  min-width: 44px;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .mc-slot__remove:hover {
