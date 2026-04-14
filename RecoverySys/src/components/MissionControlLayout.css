@@ -791,3 +791,54 @@
   padding-bottom: 20px;
   border-bottom: 1px solid var(--mc-border);
 }
+
+/* ── Responsive: Tablet ──────────────────────────────────────────────── */
+
+@media (max-width: 1024px) {
+  .mc-sidebar { display: none; }
+
+  .mc-dashboard {
+    flex-direction: column;
+    overflow-y: auto;
+  }
+  .mc-parts-panel {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    max-height: 50vh;
+    border-right: none;
+    border-bottom: 1px solid var(--mc-border);
+  }
+  .mc-config-summary {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    border-left: none;
+    border-top: 1px solid var(--mc-border);
+  }
+  .mc-schematic { min-height: 300px; }
+
+  .mc-sim__top { flex-direction: column; }
+  .mc-sim__chart { border-right: none; border-bottom: 1px solid var(--mc-border); min-height: 300px; }
+  .mc-sim__data { width: 100%; }
+  .mc-sim__data-grid { flex-direction: row; flex-wrap: wrap; }
+  .mc-sim__data-card { flex: 1 1 140px; }
+
+  .mc-sim__bottom { flex-direction: column; min-height: auto; max-height: none; }
+  .mc-sim__compat { border-right: none; border-bottom: 1px solid var(--mc-border); }
+}
+
+/* ── Responsive: Mobile ──────────────────────────────────────────────── */
+
+@media (max-width: 640px) {
+  .mc-header { padding: 0 12px; gap: 8px; }
+  .mc-header__tabs { margin-left: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
+  .mc-header__tab { padding: 14px 10px; font-size: 10px; white-space: nowrap; }
+  .mc-header__brand { font-size: 11px; }
+
+  .mc-bay-grid { grid-template-columns: 1fr; gap: 8px; padding: 12px; }
+
+  .mc-inv-grid { grid-template-columns: 1fr; }
+
+  .mc-statusbar { font-size: 9px; gap: 12px; overflow-x: auto; }
+}
