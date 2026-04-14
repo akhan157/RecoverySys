@@ -24,8 +24,8 @@ function markerSvg(color) {
   </svg>`
 }
 
-export default function DispersionMap({ simulation, specs }) {
-  const [open, setOpen]       = useState(false)
+export default function DispersionMap({ simulation, specs, forceOpen = false }) {
+  const [open, setOpen]       = useState(forceOpen)
   const [mapReady, setMapReady] = useState(false)  // true once Leaflet map is mounted
   const mapRef    = useRef(null)   // DOM node
   const leafRef   = useRef(null)   // Leaflet map instance

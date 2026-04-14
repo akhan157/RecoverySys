@@ -2,13 +2,8 @@ import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } 
 import { PARTS, CATEGORIES } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import { checkCompatibility } from './lib/compatibility.js'
-import PartsBrowser from './components/PartsBrowser.jsx'
-import ConfigBuilder from './components/ConfigBuilder.jsx'
-import SimPanel from './components/SimPanel.jsx'
-import SuggestPanel from './components/SuggestPanel.jsx'
-import DispersionMap from './components/DispersionMap.jsx'
+import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
-
 // ── State ────────────────────────────────────────────────────────────────────
 
 const DEFAULT_SPECS = {
@@ -326,202 +321,26 @@ export default function App() {
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
-
-      {/* Header */}
-      <header style={{
-        height: '52px',
-        background: 'var(--header-bg)',
-        borderBottom: '1px solid var(--header-border)',
-        padding: '0 24px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexShrink: 0,
-      }}>
-        <span style={{ fontWeight: 700, fontSize: '15px', color: '#ffffff', letterSpacing: '-0.01em' }}>
-          RecoverySys
-        </span>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-          <button
-            onClick={() => setDarkMode(d => !d)}
-            title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-            aria-pressed={darkMode}
-            style={{
-              background: 'none',
-              border: '1px solid rgba(255,255,255,0.15)',
-              color: 'rgba(255,255,255,0.7)',
-              width: '32px', height: '32px',
-              borderRadius: '4px',
-              cursor: 'pointer',
-              fontSize: '13px',
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              transition: 'border-color 0.2s, color 0.2s',
-            }}
-          >
-            {/* \uFE0F variation selector ensures emoji rendering on all platforms */}
-            {darkMode ? '☀\uFE0F' : '☾\uFE0F'}
-          </button>
-          <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.3)', fontFamily: "'JetBrains Mono', monospace" }}>
-            v1
-          </span>
-        </div>
-      </header>
-
-      {/* Desktop: 2-col layout */}
-      <div className="hidden md:flex" style={{ flex: 1, overflow: 'hidden' }}>
-
-        {/* Left col: Config + Specs */}
-        <div style={{
-          width: '50%',
-          flexShrink: 0,
-          overflowY: 'auto',
-          background: 'var(--bg-panel)',
-          borderRight: '1px solid var(--border-default)',
-        }}>
-          <ConfigBuilder
-            categories={CATEGORIES}
-            config={state.config}
-            specs={state.specs}
-            warnings={state.warnings}
-            saveState={state.saveState}
-            shareState={state.shareState}
-            onRemovePart={removePart}
-            onSetSpec={setSpec}
-            onSave={saveConfig}
-            onShare={copyShareLink}
-            onSelectCategory={setCategory}
-
-          />
-        </div>
-
-        {/* Right col: Parts + Chart */}
-        <div style={{
-          flex: 1,
-          overflowY: 'auto',
-          background: 'var(--bg-right)',
-          display: 'flex',
-          flexDirection: 'column',
-        }}>
-          <PartsBrowser
-            parts={allParts}
-            categories={CATEGORIES}
-            activeCategory={state.activeCategory}
-            config={state.config}
-            warnings={state.warnings}
-            customParts={customParts}
-            onSelectCategory={setCategory}
-            onSelectPart={selectPart}
-            onAddCustomPart={addCustomPart}
-            onDeleteCustomPart={deleteCustomPart}
-          />
-          <SuggestPanel
-            parts={allParts}
-            specs={state.specs}
-            config={state.config}
-            onSelectPart={selectPart}
-          />
-          <div style={{ borderTop: '1px solid var(--border-default)' }}>
-            <SimPanel
-              simulation={state.simulation}
-              simFailed={state.simFailed}
-              simRunning={state.simRunning}
-              config={state.config}
-              specs={state.specs}
-              onRun={runSim}
-            />
-            <DispersionMap
-              simulation={state.simulation}
-              specs={state.specs}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* Mobile: tabbed */}
-      <div className="flex md:hidden flex-col" style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-        <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-panel)' }}>
-          {state.mobileTab === 'parts' && (
-            <PartsBrowser
-              parts={allParts}
-              categories={CATEGORIES}
-              activeCategory={state.activeCategory}
-              config={state.config}
-              warnings={state.warnings}
-              customParts={customParts}
-              onSelectCategory={setCategory}
-              onSelectPart={selectPart}
-              onAddCustomPart={addCustomPart}
-              onDeleteCustomPart={deleteCustomPart}
-            />
-          )}
-          {state.mobileTab === 'config' && (
-            <ConfigBuilder
-              categories={CATEGORIES}
-              config={state.config}
-              specs={state.specs}
-              warnings={state.warnings}
-              saveState={state.saveState}
-              shareState={state.shareState}
-              onRemovePart={removePart}
-              onSetSpec={setSpec}
-              onSave={saveConfig}
-              onShare={copyShareLink}
-              onSelectCategory={setCategory}
-  
-            />
-          )}
-          {state.mobileTab === 'simulation' && (
-            <>
-              <SuggestPanel
-                parts={allParts}
-                specs={state.specs}
-                config={state.config}
-                onSelectPart={selectPart}
-              />
-              <SimPanel
-                simulation={state.simulation}
-                simFailed={state.simFailed}
-                simRunning={state.simRunning}
-                config={state.config}
-                specs={state.specs}
-                onRun={runSim}
-              />
-              <DispersionMap
-                simulation={state.simulation}
-                specs={state.specs}
-              />
-            </>
-          )}
-        </div>
-        <div style={{ height: '44px', borderTop: '1px solid var(--border-default)', display: 'flex', background: 'var(--bg-panel)', flexShrink: 0 }}>
-          {[
-            { id: 'parts',      label: 'Parts' },
-            { id: 'config',     label: 'Config', badge: state.warnings.some(w => w.level === 'error') },
-            { id: 'simulation', label: 'Simulation' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setMobileTab(tab.id)}
-              style={{
-                flex: 1, border: 'none', background: 'none', cursor: 'pointer',
-                fontSize: '11px',
-                fontWeight: state.mobileTab === tab.id ? 600 : 400,
-                color: state.mobileTab === tab.id ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                borderTop: state.mobileTab === tab.id ? '2px solid var(--accent)' : '2px solid transparent',
-                transition: 'color 150ms',
-                display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '4px',
-              }}
-            >
-              {tab.label}
-              {tab.badge && <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--error-fg)', flexShrink: 0 }} />}
-            </button>
-          ))}
-        </div>
-      </div>
-
+    <>
+      <MissionControlLayout
+        state={state}
+        dispatch={dispatch}
+        allParts={allParts}
+        customParts={customParts}
+        selectPart={selectPart}
+        removePart={removePart}
+        setSpec={setSpec}
+        setCategory={setCategory}
+        runSim={runSim}
+        saveConfig={saveConfig}
+        copyShareLink={copyShareLink}
+        addCustomPart={addCustomPart}
+        deleteCustomPart={deleteCustomPart}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        safeTimeout={safeTimeout}
+      />
       <ToastContainer toasts={state.toasts} onRemove={removeToast} />
-    </div>
+    </>
   )
 }

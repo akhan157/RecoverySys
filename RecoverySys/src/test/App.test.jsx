@@ -103,9 +103,9 @@ describe('App — restored-session toast', () => {
   })
 })
 
-// ── Mobile tab bar badge ──────────────────────────────────────────────────────
+// ── Status bar warning badge (Mission Control layout) ────────────────────────
 
-describe('App — mobile Config tab error badge', () => {
+describe('App — status bar warning badge', () => {
   beforeEach(() => {
     clearLocalStorage()
     vi.useFakeTimers()
@@ -117,7 +117,7 @@ describe('App — mobile Config tab error badge', () => {
     clearLocalStorage()
   })
 
-  it('shows error badge on Config tab when compatibility errors exist', async () => {
+  it('shows warning badge in status bar when compatibility errors exist', async () => {
     // A drogue chute with no main chute triggers a 'main_chute' error
     setLocalStorage({
       config: {
@@ -140,14 +140,12 @@ describe('App — mobile Config tab error badge', () => {
       vi.advanceTimersByTime(400)
     })
 
-    // The badge is a span with background: var(--error-fg) in the mobile tab bar
-    // waitFor is intentionally avoided here — fake timers block its polling loop.
-    // After act(advanceTimersByTime), React state is already committed synchronously.
-    const badge = document.querySelector('span[style*="var(--error-fg)"]')
+    // Mission Control layout shows warning count in the status bar badge
+    const badge = document.querySelector('.mc-statusbar__badge--warn')
     expect(badge).toBeInTheDocument()
   })
 
-  it('shows NO badge on Config tab when there are no errors', async () => {
+  it('shows NOMINAL badge when there are no errors', async () => {
     // Default state — no components, no errors
     await act(async () => {
       render(<App />)
@@ -157,7 +155,7 @@ describe('App — mobile Config tab error badge', () => {
       vi.advanceTimersByTime(400)
     })
 
-    const badge = document.querySelector('span[style*="var(--error-fg)"]')
+    const badge = document.querySelector('.mc-statusbar__badge--warn')
     expect(badge).not.toBeInTheDocument()
   })
 })
