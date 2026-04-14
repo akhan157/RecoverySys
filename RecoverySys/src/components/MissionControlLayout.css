@@ -585,7 +585,7 @@
 
 .mc-sim__chart-area {
   flex: 1;
-  padding: 8px;
+  padding: 12px;
   display: flex;
   align-items: center;
   justify-content: center;

@@ -10,19 +10,13 @@ function nice1000(val) {
   return Math.ceil(val / 1000) * 1000
 }
 
-/* ── Crosshatch pattern definition ───────────────────────────────────── */
+/* ── SVG defs: single-direction diagonal hatch (matches Stitch export) ── */
 function ChartDefs() {
   return (
     <defs>
-      {/* Fine crosshatch for grid */}
-      <pattern id="osc-grid" width="16" height="16" patternUnits="userSpaceOnUse">
-        <line x1="0" y1="0" x2="16" y2="16" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-        <line x1="16" y1="0" x2="0" y2="16" stroke="rgba(255,255,255,0.06)" strokeWidth="0.5" />
-      </pattern>
-      {/* Denser crosshatch for area fill */}
-      <pattern id="osc-fill" width="8" height="8" patternUnits="userSpaceOnUse">
-        <line x1="0" y1="0" x2="8" y2="8" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
-        <line x1="8" y1="0" x2="0" y2="8" stroke="rgba(255,255,255,0.12)" strokeWidth="0.5" />
+      {/* Diagonal hatch for area fill — single direction, 4px, white */}
+      <pattern id="osc-hatch" width="4" height="4" patternUnits="userSpaceOnUse">
+        <path d="M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2" stroke="white" strokeWidth="0.5" />
       </pattern>
       {/* Clip to chart area */}
       <clipPath id="osc-clip">
@@ -32,7 +26,7 @@ function ChartDefs() {
   )
 }
 
-/* ── Oscilloscope-style axes ─────────────────────────────────────────── */
+/* ── Oscilloscope grid + axes ────────────────────────────────────────── */
 function Axes({ maxAlt, maxTime }) {
   const yTicks = []
   for (let alt = 0; alt <= maxAlt; alt += 1000) yTicks.push(alt)
@@ -45,32 +39,37 @@ function Axes({ maxAlt, maxTime }) {
   const xS = t => PAD.left + (t / maxTime) * CHART_W
   const yS = a => PAD.top  + CHART_H - (a / maxAlt) * CHART_H
 
+  /* CSS-style oscilloscope grid rendered as SVG lines at 20px intervals */
+  const gridLines = []
+  const gridSpacing = 12 // SVG units, maps to ~20px at rendered size
+  for (let x = PAD.left; x <= PAD.left + CHART_W; x += gridSpacing) {
+    gridLines.push(
+      <line key={`vg${x}`} x1={x} y1={PAD.top} x2={x} y2={PAD.top + CHART_H}
+        stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+    )
+  }
+  for (let y = PAD.top; y <= PAD.top + CHART_H; y += gridSpacing) {
+    gridLines.push(
+      <line key={`hg${y}`} x1={PAD.left} y1={y} x2={PAD.left + CHART_W} y2={y}
+        stroke="rgba(255,255,255,0.1)" strokeWidth="0.5" />
+    )
+  }
+
   return (
     <>
-      {/* Background crosshatch grid */}
-      <rect x={PAD.left} y={PAD.top} width={CHART_W} height={CHART_H}
-        fill="url(#osc-grid)" />
-
-      {/* Major grid lines */}
-      {yTicks.map(alt => (
-        <line key={`gy${alt}`} x1={PAD.left} y1={yS(alt)} x2={PAD.left + CHART_W} y2={yS(alt)}
-          stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-      ))}
-      {xTicks.map(t => (
-        <line key={`gx${t}`} x1={xS(t)} y1={PAD.top} x2={xS(t)} y2={PAD.top + CHART_H}
-          stroke="rgba(255,255,255,0.08)" strokeWidth="0.5" />
-      ))}
+      {/* Oscilloscope grid */}
+      {gridLines}
 
       {/* Y-axis labels */}
       {yTicks.filter(alt => alt > 0).map(alt => (
         <text key={`yl${alt}`} x={PAD.left - 6} y={yS(alt) + 3}
-          textAnchor="end" fontSize="9" fontFamily="'JetBrains Mono', monospace"
+          textAnchor="end" fontSize="9" fontFamily="'Space Grotesk', 'JetBrains Mono', monospace"
           fill="rgba(255,255,255,0.4)">
           {alt >= 1000 ? `${alt / 1000}k` : alt}
         </text>
       ))}
       <text x={12} y={PAD.top + CHART_H / 2}
-        textAnchor="middle" fontSize="8" fontFamily="'JetBrains Mono', monospace"
+        textAnchor="middle" fontSize="8" fontFamily="'Space Grotesk', 'JetBrains Mono', monospace"
         fill="rgba(255,255,255,0.35)"
         transform={`rotate(-90, 12, ${PAD.top + CHART_H / 2})`}>
         ALT (ft)
@@ -82,36 +81,31 @@ function Axes({ maxAlt, maxTime }) {
         if (i % step !== 0) return null
         return (
           <text key={`xl${t}`} x={xS(t)} y={PAD.top + CHART_H + 14}
-            textAnchor="middle" fontSize="9" fontFamily="'JetBrains Mono', monospace"
+            textAnchor="middle" fontSize="9" fontFamily="'Space Grotesk', 'JetBrains Mono', monospace"
             fill="rgba(255,255,255,0.4)">
             {t}s
           </text>
         )
       })}
 
-      {/* Chart border */}
+      {/* Chart border — white/10 like the Stitch export */}
       <rect x={PAD.left} y={PAD.top} width={CHART_W} height={CHART_H}
-        fill="none" stroke="rgba(255,255,255,0.12)" strokeWidth="1" />
+        fill="none" stroke="rgba(255,255,255,0.1)" strokeWidth="1" />
     </>
   )
 }
 
-/* ── Live readout badge ──────────────────────────────────────────────── */
-function LiveReadout({ value, unit, x, y }) {
+/* ── Live readout (top-right, with white bar) ────────────────────────── */
+function LiveReadout({ label, value, x, y }) {
   return (
     <g>
-      <rect x={x - 60} y={y} width={58} height={28} rx={2}
-        fill="rgba(0,0,0,0.6)" stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" />
-      <text x={x - 31} y={y + 12}
-        textAnchor="middle" fontSize="7" fontFamily="'JetBrains Mono', monospace"
-        fill="rgba(255,255,255,0.5)" letterSpacing="0.5">
-        LIVE
+      <text x={x} y={y}
+        textAnchor="end" fontSize="8" fontFamily="'Space Grotesk', 'JetBrains Mono', monospace"
+        fill="#ffffff" fontWeight="700">
+        {label}: {value}
       </text>
-      <text x={x - 31} y={y + 23}
-        textAnchor="middle" fontSize="11" fontFamily="'JetBrains Mono', monospace"
-        fill="#ffffff" fontWeight="600">
-        {value}
-      </text>
+      <line x1={x - 30} y1={y + 4} x2={x} y2={y + 4}
+        stroke="#ffffff" strokeWidth="2" />
     </g>
   )
 }
@@ -160,7 +154,7 @@ export default function FlightChart({ simulation }) {
         timerId = setTimeout(() => {
           if (fillRef.current) {
             fillRef.current.style.transition = 'opacity 400ms ease-in'
-            fillRef.current.style.opacity = 1
+            fillRef.current.style.opacity = 0.3
           }
         }, 600)
       })
@@ -172,7 +166,7 @@ export default function FlightChart({ simulation }) {
         path.style.strokeDasharray  = ''
         path.style.strokeDashoffset = ''
         path.style.opacity = 1
-        if (fillRef.current) fillRef.current.style.opacity = 1
+        if (fillRef.current) fillRef.current.style.opacity = 0.3
       }, 200)
     }
     prevSim.current = simulation
@@ -182,23 +176,23 @@ export default function FlightChart({ simulation }) {
   if (!simulation) {
     return (
       <svg viewBox={`0 0 ${W} ${H}`} width="100%"
-        style={{ display: 'block', background: '#0a0a0a', borderRadius: '4px' }}>
+        style={{ display: 'block', background: '#0e0e0e' }}>
         <ChartDefs />
         <Axes maxAlt={5000} maxTime={120} />
-        {/* Header bar */}
-        <rect x={PAD.left} y={4} width={2} height={14} fill="rgba(255,255,255,0.5)" />
+        {/* Header */}
+        <rect x={PAD.left} y={6} width={2} height={12} fill="rgba(255,255,255,0.5)" />
         <text x={PAD.left + 8} y={15}
-          fontSize="9" fontFamily="'JetBrains Mono', monospace" fill="rgba(255,255,255,0.5)"
-          letterSpacing="0.5">
+          fontSize="8" fontFamily="'Space Grotesk', monospace" fill="rgba(255,255,255,0.5)"
+          fontWeight="700" letterSpacing="1.5">
           FLIGHT PROFILE (FT)
         </text>
         <text x={PAD.left + CHART_W} y={15}
-          textAnchor="end" fontSize="8" fontFamily="'JetBrains Mono', monospace"
+          textAnchor="end" fontSize="8" fontFamily="'Space Grotesk', monospace"
           fill="rgba(255,255,255,0.3)" letterSpacing="0.5">
           AWAITING DATA
         </text>
         <text x={PAD.left + CHART_W / 2} y={PAD.top + CHART_H / 2}
-          textAnchor="middle" fontSize="11" fontFamily="'JetBrains Mono', monospace"
+          textAnchor="middle" fontSize="11" fontFamily="'Space Grotesk', monospace"
           fill="rgba(255,255,255,0.25)">
           Run Simulation →
         </text>
@@ -229,29 +223,29 @@ export default function FlightChart({ simulation }) {
 
   return (
     <svg viewBox={`0 0 ${W} ${H}`} width="100%"
-      style={{ display: 'block', background: '#0a0a0a', borderRadius: '4px' }}>
+      style={{ display: 'block', background: '#0e0e0e' }}>
       <ChartDefs />
 
-      {/* Header bar */}
-      <rect x={PAD.left} y={4} width={2} height={14} fill="#ffffff" />
+      {/* Header — left-accent bar + label + scale */}
+      <rect x={PAD.left} y={6} width={2} height={12} fill="#ffffff" />
       <text x={PAD.left + 8} y={15}
-        fontSize="9" fontFamily="'JetBrains Mono', monospace" fill="rgba(255,255,255,0.7)"
-        letterSpacing="0.5">
+        fontSize="8" fontFamily="'Space Grotesk', monospace" fill="rgba(255,255,255,0.7)"
+        fontWeight="700" letterSpacing="1.5">
         FLIGHT PROFILE (FT)
       </text>
       <text x={PAD.left + CHART_W} y={15}
-        textAnchor="end" fontSize="8" fontFamily="'JetBrains Mono', monospace"
+        textAnchor="end" fontSize="8" fontFamily="'Space Grotesk', monospace"
         fill="rgba(255,255,255,0.3)" letterSpacing="0.5">
         SCALE: 1:{(maxAlt / 100).toFixed(0)}
       </text>
 
       <Axes maxAlt={maxAlt} maxTime={maxTime} />
 
-      {/* Crosshatch area fill under the curve */}
+      {/* Hatched area fill under the curve — 0.3 opacity like Stitch */}
       <path
         ref={fillRef}
         d={fillD}
-        fill="url(#osc-fill)"
+        fill="url(#osc-hatch)"
         clipPath="url(#osc-clip)"
         style={{ opacity: 0 }}
       />
@@ -265,29 +259,28 @@ export default function FlightChart({ simulation }) {
             stroke="rgba(255,255,255,0.15)" strokeWidth="0.5" strokeDasharray="2,2"
           />
           <text x={xS(ev.t) + 3} y={PAD.top + 10}
-            fontSize="7" fontFamily="'JetBrains Mono', monospace"
+            fontSize="7" fontFamily="'Space Grotesk', monospace"
             fill="rgba(255,255,255,0.35)" letterSpacing="0.5">
             {ev.label}
           </text>
         </g>
       ))}
 
-      {/* Flight path */}
+      {/* Flight path — white, stroke-width 2 */}
       <path
         ref={pathRef}
         d={d}
         stroke="#ffffff"
-        strokeWidth="1.5"
+        strokeWidth="2"
         fill="none"
-        strokeLinejoin="round"
       />
 
-      {/* Live readout */}
+      {/* Live readout — top right of chart area with white bar */}
       <LiveReadout
+        label="LIVE"
         value={apogee_ft.toLocaleString()}
-        unit="ft"
-        x={PAD.left + CHART_W}
-        y={PAD.top + 6}
+        x={PAD.left + CHART_W - 4}
+        y={PAD.top + 14}
       />
     </svg>
   )
