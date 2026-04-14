@@ -864,5 +864,14 @@
 
   .mc-inv-grid { grid-template-columns: 1fr; }
 
+  .mc-sim { height: auto; }
+  .mc-sim__top { flex-direction: column; }
+  .mc-sim__chart { border-right: none; border-bottom: 1px solid var(--mc-border); min-height: 280px; }
+  .mc-sim__data { width: 100%; }
+  .mc-sim__data-grid { flex-direction: row; flex-wrap: wrap; }
+  .mc-sim__data-card { flex: 1 1 120px; }
+  .mc-sim__bottom { flex-direction: column; min-height: auto; max-height: none; }
+  .mc-sim__compat { border-right: none; border-bottom: 1px solid var(--mc-border); }
+
   .mc-statusbar { font-size: 9px; gap: 12px; overflow-x: auto; }
 }
