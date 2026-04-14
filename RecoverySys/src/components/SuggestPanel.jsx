@@ -203,7 +203,7 @@ export default function SuggestPanel({ parts, specs, config, onSelectPart }) {
               Enter Rocket Mass in Rocket Specs to get suggestions.
             </div>
           ) : !suggestions ? null : (
-            <div style={{ maxHeight: '360px', overflowY: 'auto' }}>
+            <div style={{ maxHeight: '240px', overflowY: 'auto' }}>
 
               {suggestions.mainChutes.length > 0 && (
                 <SuggestSection label={`Main Chute — target ${targetMain} fps`}>

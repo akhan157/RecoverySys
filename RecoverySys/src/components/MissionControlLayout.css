@@ -178,7 +178,7 @@
   min-width: 0;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  overflow-y: auto;
 }
 
 .mc-config-summary {
@@ -213,12 +213,10 @@
 /* ── Config Slots (Bay Schematic) ─────────────────────────────────────── */
 
 .mc-bay-grid {
-  flex: 1;
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 10px;
   padding: 16px;
-  overflow-y: auto;
   align-content: start;
 }
 
@@ -677,7 +675,6 @@
 
 .mc-suggest-wrap {
   border-top: 1px solid var(--mc-border);
-  flex-shrink: 0;
 }
 
 /* ── Specs Panel ──────────────────────────────────────────────────────── */
