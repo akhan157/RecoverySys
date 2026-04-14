@@ -1,12 +1,25 @@
 import React from 'react'
 import FlightChart from './FlightChart.jsx'
 
-function MetricRow({ label, value, unit }) {
+function MetricCard({ label, value, unit, animClass }) {
   return (
-    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', padding: '5px 0', borderBottom: '1px solid var(--border-subtle)' }}>
-      <span style={{ fontSize: '11px', color: 'var(--text-tertiary)' }}>{label}</span>
+    <div
+      className={animClass}
+      style={{
+        background: 'var(--bg-panel)',
+        border: '1px solid var(--border-default)',
+        borderRadius: 'var(--radius)',
+        padding: '10px 12px',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '2px',
+      }}
+    >
+      <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+        {label}
+      </span>
       <span>
-        <span className="mono" style={{ fontSize: '13px', color: 'var(--text-primary)' }}>
+        <span className="mono" style={{ fontSize: '15px', color: 'var(--text-primary)' }}>
           {value ?? '—'}
         </span>
         {unit && value != null && (
@@ -25,7 +38,7 @@ function canRun(specs, config) {
   )
 }
 
-export default function SimPanel({ simulation, simFailed, simRunning, exportState, config, specs, onRun, onExport }) {
+export default function SimPanel({ simulation, simFailed, simRunning, config, specs, onRun }) {
   const ready = canRun(specs, config)
 
   return (
@@ -34,9 +47,7 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
       {/* Chart */}
       <div>
         <div className="section-label" style={{ marginBottom: '8px' }}>Flight Profile</div>
-        <div style={{ overflowX: 'auto' }}>
-          <FlightChart simulation={simulation} />
-        </div>
+        <FlightChart simulation={simulation} />
       </div>
 
       {/* Run button */}
@@ -46,10 +57,10 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
         style={{
           height: '36px',
           width: '100%',
-          background: ready && !simRunning ? 'var(--cta-bg)' : '#999',
-          color: 'var(--cta-fg)',
+          background: ready && !simRunning ? 'var(--cta-bg)' : 'var(--border-default)',
+          color: ready && !simRunning ? 'var(--cta-fg)' : 'var(--text-tertiary)',
           border: 'none',
-          borderRadius: '4px',
+          borderRadius: 'var(--radius)',
           cursor: ready && !simRunning ? 'pointer' : 'default',
           fontSize: '13px',
           fontWeight: 500,
@@ -57,11 +68,15 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
           alignItems: 'center',
           justifyContent: 'center',
           gap: '8px',
+          transition: 'transform 150ms ease, opacity 150ms ease',
         }}
+        onMouseEnter={e => { if (ready && !simRunning) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.opacity = '0.9' } }}
+        onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.opacity = '' }}
+        onMouseDown={e => { if (ready && !simRunning) e.currentTarget.style.transform = 'translateY(0)' }}
       >
         {simRunning ? (
           <>
-            <span className="spinner" /> Calculating…
+            <span className="spinner" style={{ borderColor: 'transparent', borderTopColor: 'var(--cta-fg)' }} /> Calculating…
           </>
         ) : (
           'Run Simulation →'
@@ -76,60 +91,130 @@ export default function SimPanel({ simulation, simFailed, simRunning, exportStat
 
       {/* Degenerate sim error */}
       {simFailed && !simRunning && (
-        <p style={{ fontSize: '11px', color: '#c0392b', marginTop: '-8px', lineHeight: 1.4 }}>
+        <p style={{ fontSize: '11px', color: 'var(--error-fg)', marginTop: '-8px', lineHeight: 1.4 }}>
           ⚠ Main deploy altitude exceeds estimated apogee — lower the deploy altitude or increase motor impulse.
         </p>
       )}
 
-      {/* Results */}
+      {/* Results — 4-col grid with fade-up stagger */}
       {simulation && (
         <div>
-          <div className="section-label" style={{ marginBottom: '8px' }}>Results</div>
-          <MetricRow
-            label={simulation.apogee_method === 'heuristic' ? 'Apogee (±30%)' : 'Apogee (±10–15%)'}
-            value={simulation.apogee_ft.toLocaleString()}
-            unit="ft"
-          />
-          <MetricRow label="Drogue descent" value={simulation.drogue_fps} unit="fps" />
-          <MetricRow label="Main descent" value={simulation.main_fps} unit="fps" />
-          <MetricRow label="Descent time" value={simulation.total_time_s ?? simulation.phase1_time_s} unit="s" />
-          <MetricRow label="Drift" value={simulation.drift_ft.toLocaleString()} unit="ft" />
+          <div className="section-label" style={{ marginBottom: '10px' }}>Results</div>
+
+          {/* Apogee / deploy sanity warnings */}
+          {/* Note: deploy_ft >= apogee_ft is impossible here — runSimulation returns null
+              in that case, so {simulation && ...} guard prevents this block from rendering.
+              The simFailed banner above handles that case. */}
+          {(simulation.apogee_ft - simulation.deploy_ft) < 500 && (
+            <div style={{ marginBottom: '8px', padding: '8px 10px', background: 'var(--warn-bg)', border: '1px solid var(--warn-border)', borderRadius: 'var(--radius)', fontSize: '12px', color: 'var(--warn-fg)', lineHeight: 1.4 }}>
+              ⚠ Only {(simulation.apogee_ft - simulation.deploy_ft).toLocaleString()} ft of drogue phase — very little separation before main deploy
+            </div>
+          )}
+          {simulation.phase1_time_s < 5 && (
+            <div style={{ marginBottom: '8px', padding: '8px 10px', background: 'var(--warn-bg)', border: '1px solid var(--warn-border)', borderRadius: 'var(--radius)', fontSize: '12px', color: 'var(--warn-fg)', lineHeight: 1.4 }}>
+              ⚠ Drogue phase is only {simulation.phase1_time_s}s — consider a lower main deploy altitude
+            </div>
+          )}
+
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+            <MetricCard
+              animClass="fade-up fade-up-1"
+              label={simulation.apogee_method === 'heuristic' ? 'Apogee ±30%' : 'Apogee ±15%'}
+              value={simulation.apogee_ft.toLocaleString()}
+              unit="ft"
+            />
+            <MetricCard
+              animClass="fade-up fade-up-2"
+              label="Main descent"
+              value={simulation.main_fps}
+              unit="fps"
+            />
+            <MetricCard
+              animClass="fade-up fade-up-3"
+              label="Descent time"
+              value={simulation.total_time_s ?? simulation.phase1_time_s}
+              unit="s"
+            />
+            <MetricCard
+              animClass="fade-up fade-up-4"
+              label="Drift"
+              value={simulation.drift_ft.toLocaleString()}
+              unit="ft"
+            />
+          </div>
+          {config.drogue_chute != null && (
+            <div style={{ marginTop: '6px' }}>
+              <MetricCard
+                animClass="fade-up"
+                label="Drogue descent"
+                value={simulation.drogue_fps}
+                unit="fps"
+              />
+            </div>
+          )}
+
+          {/* Shock cord load analysis */}
+          {simulation.shock_load && (
+            <div style={{ marginTop: '14px' }}>
+              <div className="section-label" style={{ marginBottom: '8px' }}>Shock Cord Load</div>
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px' }}>
+                <MetricCard
+                  animClass="fade-up"
+                  label="Peak load"
+                  value={simulation.shock_load.peak_load_lbs.toLocaleString()}
+                  unit="lbs"
+                />
+                <div
+                  className="fade-up"
+                  style={{
+                    background: 'var(--bg-panel)',
+                    border: '1px solid var(--border-default)',
+                    borderRadius: 'var(--radius)',
+                    padding: '10px 12px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '2px',
+                  }}
+                >
+                  <span style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                    Safety Factor
+                  </span>
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span className="mono" style={{ fontSize: '15px', color: 'var(--text-primary)' }}>
+                      {simulation.shock_load.safety_factor}×
+                    </span>
+                    <span style={{
+                      fontSize: '10px',
+                      fontWeight: 700,
+                      padding: '1px 5px',
+                      borderRadius: '3px',
+                      background: simulation.shock_load.sf_status === 'pass' ? 'var(--ok-bg, #1a3a1a)' : simulation.shock_load.sf_status === 'warn' ? 'var(--warn-bg)' : 'var(--error-bg)',
+                      color: simulation.shock_load.sf_status === 'pass' ? 'var(--ok-fg, #4ade80)' : simulation.shock_load.sf_status === 'warn' ? 'var(--warn-fg)' : 'var(--error-fg)',
+                    }}>
+                      {simulation.shock_load.sf_status === 'pass' ? 'OK' : simulation.shock_load.sf_status === 'warn' ? 'LOW' : 'FAIL'}
+                    </span>
+                  </span>
+                </div>
+              </div>
+              <div style={{ marginTop: '6px' }}>
+                <MetricCard
+                  animClass="fade-up"
+                  label="Strain energy absorbed"
+                  value={simulation.shock_load.strain_energy_J}
+                  unit="J"
+                />
+              </div>
+              <p style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '6px', lineHeight: 1.5 }}>
+                {simulation.shock_load.material === 'kevlar'
+                  ? `Kevlar threshold: ≥${simulation.shock_load.sf_thresholds.pass}× (low elongation = high snatch force)`
+                  : `Nylon threshold: ≥${simulation.shock_load.sf_thresholds.pass}×`
+                }
+              </p>
+            </div>
+          )}
         </div>
       )}
 
-      {/* Export */}
-      <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: '12px' }}>
-        <div className="section-label" style={{ marginBottom: '8px' }}>Export</div>
-        <button
-          onClick={onExport}
-          disabled={exportState === 'exporting' || (!config.main_chute && !config.drogue_chute) || !parseFloat(specs.airframe_od_in)}
-          style={{
-            height: '32px',
-            padding: '0 14px',
-            background: 'transparent',
-            color: 'var(--text-primary)',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            cursor: exportState === 'exporting' ? 'default' : 'pointer',
-            fontSize: '13px',
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-          }}
-        >
-          {exportState === 'exporting' ? (
-            <>
-              <span className="spinner" style={{ borderTopColor: '#1a1a1a', borderColor: '#ccc' }} />
-              Exporting…
-            </>
-          ) : exportState === 'done' ? 'Exported ✓' : 'Export .ork'}
-        </button>
-        {!parseFloat(specs.airframe_od_in) && (
-          <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', marginTop: '6px' }}>
-            Enter Airframe OD in Rocket Specs to enable export.
-          </p>
-        )}
-      </div>
     </div>
   )
 }

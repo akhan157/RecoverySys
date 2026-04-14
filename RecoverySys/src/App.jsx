@@ -1,49 +1,78 @@
-import React, { useReducer, useEffect, useCallback, useRef } from 'react'
+import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import { PARTS, CATEGORIES } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import { checkCompatibility } from './lib/compatibility.js'
-import { exportOrk } from './lib/ork.js'
-import PartsBrowser from './components/PartsBrowser.jsx'
-import ConfigBuilder from './components/ConfigBuilder.jsx'
-import SimPanel from './components/SimPanel.jsx'
+import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
-
 // ── State ────────────────────────────────────────────────────────────────────
 
 const DEFAULT_SPECS = {
   rocket_mass_g:          '',
   motor_total_impulse_ns: '',
   burn_time_s:            '',
-  airframe_od_in:         '',
   airframe_id_in:         '',
   bay_length_in:          '',
   drag_cd:                '',
   wind_speed_mph:         '',
+  wind_direction_deg:     '',   // 0=N, 90=E, 180=S, 270=W
   main_deploy_alt_ft:     '500',
+  ejection_g_factor:      '',   // blank = auto (20G for <10 kg, 30G for ≥10 kg L3)
+  bay_obstruction_vol_in3: '',  // volume (in³) of obstructions inside the bay (sleds, hardpoints, etc.)
+  launch_lat:             '',   // launch site latitude (decimal degrees)
+  launch_lon:             '',   // launch site longitude (decimal degrees)
 }
 
 function loadSaved() {
   try {
     const raw = localStorage.getItem('recoverysys-config')
     if (!raw) return null
-    return JSON.parse(raw)
+    const saved = JSON.parse(raw)
+    // v1.1.x migration: airframe_od_in → airframe_id_in (wall thickness negligible for sim)
+    if (saved?.specs?.airframe_od_in != null && saved?.specs?.airframe_id_in == null) {
+      saved.specs.airframe_id_in = saved.specs.airframe_od_in
+      delete saved.specs.airframe_od_in   // remove ghost key so it doesn't pollute state.specs
+    }
+    return saved
   } catch { return null }
+}
+
+function loadCustomParts() {
+  try {
+    const raw = localStorage.getItem('recoverysys-custom-parts')
+    if (!raw) return []
+    const parsed = JSON.parse(raw)
+    if (!Array.isArray(parsed)) return []
+    // Reject any entry missing the minimum shape required by PartsBrowser + rehydrate
+    // Also require specs to be a non-null object — partSpecLine accesses spec fields directly
+    // and will throw TypeError if specs is undefined/null (e.g. from manual localStorage edits)
+    return parsed.filter(p =>
+      p &&
+      typeof p.id === 'string' &&
+      typeof p.name === 'string' &&
+      typeof p.category === 'string' &&
+      p.specs !== null &&
+      typeof p.specs === 'object'
+    )
+  } catch { return [] }
 }
 
 function buildInitialState() {
   const saved = loadSaved()
-  // Re-hydrate part references from PARTS array
-  const rehydrate = (part) => part ? PARTS.find(p => p.id === part.id) ?? null : null
+  const custom = loadCustomParts()
+  const allParts = [...custom, ...PARTS]
+  const rehydrate = (part) => part ? allParts.find(p => p.id === part.id) ?? null : null
   return {
     config: {
       main_chute:      rehydrate(saved?.config?.main_chute),
       drogue_chute:    rehydrate(saved?.config?.drogue_chute),
       shock_cord:      rehydrate(saved?.config?.shock_cord),
       chute_protector: rehydrate(saved?.config?.chute_protector),
+      deployment_bag:  rehydrate(saved?.config?.deployment_bag),
       quick_links:     rehydrate(saved?.config?.quick_links),
+      swivel:          rehydrate(saved?.config?.swivel),
       chute_device:    rehydrate(saved?.config?.chute_device),
     },
-    specs:          { ...DEFAULT_SPECS, ...(saved?.specs ?? {}) },
+    specs:          { ...DEFAULT_SPECS, ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)) },
     activeCategory: CATEGORIES[0].id,
     mobileTab:      'parts',
     simulation:     null,
@@ -51,32 +80,19 @@ function buildInitialState() {
     simRunning:     false,
     warnings:       [],
     toasts:         [],
-    saveState:      'idle',   // 'idle' | 'saving' | 'saved'
-    shareState:     'idle',   // 'idle' | 'copied'
-    exportState:    'idle',   // 'idle' | 'exporting' | 'done'
+    saveState:      'idle',
+    shareState:     'idle',
   }
 }
 
 function reducer(state, action) {
   switch (action.type) {
     case 'SELECT_PART':
-      return {
-        ...state,
-        config: { ...state.config, [action.category]: action.part },
-        simulation: null,
-      }
+      return { ...state, config: { ...state.config, [action.category]: action.part }, simulation: null }
     case 'REMOVE_PART':
-      return {
-        ...state,
-        config: { ...state.config, [action.category]: null },
-        simulation: null,
-      }
+      return { ...state, config: { ...state.config, [action.category]: null }, simulation: null }
     case 'SET_SPEC':
-      return {
-        ...state,
-        specs: { ...state.specs, [action.key]: action.value },
-        simulation: null,
-      }
+      return { ...state, specs: { ...state.specs, [action.key]: action.value }, simulation: null }
     case 'SET_CATEGORY':
       return { ...state, activeCategory: action.category }
     case 'SET_MOBILE_TAB':
@@ -86,12 +102,7 @@ function reducer(state, action) {
     case 'START_SIM':
       return { ...state, simRunning: true, simFailed: false }
     case 'SET_SIM':
-      return {
-        ...state,
-        simulation: action.simulation,
-        simFailed: action.simulation === null,
-        simRunning: false,
-      }
+      return { ...state, simulation: action.simulation, simFailed: action.simulation === null, simRunning: false }
     case 'ADD_TOAST':
       return { ...state, toasts: [...state.toasts, { ...action.toast, id: action.id }] }
     case 'REMOVE_TOAST':
@@ -100,8 +111,11 @@ function reducer(state, action) {
       return { ...state, saveState: action.state }
     case 'SET_SHARE_STATE':
       return { ...state, shareState: action.state }
-    case 'SET_EXPORT_STATE':
-      return { ...state, exportState: action.state }
+    // Atomically replace config + specs from a share link.
+    // Doing this in one action prevents the receiver's localStorage-restored values
+    // from bleeding through for slots/keys that are null or absent in the payload.
+    case 'LOAD_SHARE':
+      return { ...state, config: action.config, specs: action.specs, simulation: null }
     default:
       return state
   }
@@ -111,35 +125,62 @@ function reducer(state, action) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, null, buildInitialState)
-  const debounceRef  = useRef(null)
-  const toastCounter = useRef(0)
-  const timeoutIds   = useRef([])
+  const debounceRef       = useRef(null)
+  const toastCounter      = useRef(0)
+  const timeoutIds        = useRef([])
+  const restoredToastFired = useRef(false)   // guard against React 18 StrictMode double-invoke
 
-  // Helper: schedule a state reset, auto-cancels on unmount
   const safeTimeout = useCallback((fn, ms) => {
     const id = setTimeout(fn, ms)
     timeoutIds.current.push(id)
     return id
   }, [])
 
-  // Cleanup all pending timeouts on unmount
   useEffect(() => {
     return () => timeoutIds.current.forEach(clearTimeout)
   }, [])
 
-  // ── Parts browser collapse (UI pref, persisted separately) ──────────────────
-  const [browserCollapsed, setBrowserCollapsed] = React.useState(
-    () => localStorage.getItem('recoverysys-browser-collapsed') === 'true'
-  )
-  const toggleBrowser = useCallback(() => {
-    setBrowserCollapsed(prev => {
-      const next = !prev
-      localStorage.setItem('recoverysys-browser-collapsed', String(next))
-      return next
-    })
+  // ── Dark mode ─────────────────────────────────────────────────────────────
+  const [darkMode, setDarkMode] = React.useState(() => {
+    try {
+      const stored = localStorage.getItem('recoverysys-theme')
+      if (stored === 'dark') return true
+      if (stored === 'light') return false
+      // No explicit preference stored — respect OS setting
+      return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
+    } catch { return false }
+  })
+  useEffect(() => {
+    if (darkMode) {
+      document.documentElement.setAttribute('data-theme', 'dark')
+    } else {
+      document.documentElement.removeAttribute('data-theme')
+    }
+    try { localStorage.setItem('recoverysys-theme', darkMode ? 'dark' : 'light') } catch { /* storage unavailable */ }
+  }, [darkMode])
+
+  // ── Custom parts ──────────────────────────────────────────────────────────
+  const [customParts, setCustomParts] = useState(loadCustomParts)
+
+  const allParts = useMemo(() => [...customParts, ...PARTS], [customParts])
+
+  useEffect(() => {
+    try { localStorage.setItem('recoverysys-custom-parts', JSON.stringify(customParts)) } catch { /* storage unavailable */ }
+  }, [customParts])
+
+  const addCustomPart = useCallback((part) => {
+    setCustomParts(prev => [...prev, part])
   }, [])
 
-  // ── Recompute compatibility whenever config or specs change ─────────────────
+  const deleteCustomPart = useCallback((id) => {
+    setCustomParts(prev => prev.filter(p => p.id !== id))
+    // Clear the config slot if the deleted part is currently selected
+    Object.entries(state.config).forEach(([category, selected]) => {
+      if (selected?.id === id) dispatch({ type: 'REMOVE_PART', category })
+    })
+  }, [state.config])
+
+  // ── Compatibility ─────────────────────────────────────────────────────────
   useEffect(() => {
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
@@ -149,30 +190,16 @@ export default function App() {
     return () => clearTimeout(debounceRef.current)
   }, [state.config, state.specs])
 
-  // ── Actions ─────────────────────────────────────────────────────────────────
-
+  // ── Actions ───────────────────────────────────────────────────────────────
   const selectPart = useCallback((part) => {
     dispatch({ type: 'SELECT_PART', category: part.category, part })
-    // Auto-switch category in browser to match
     dispatch({ type: 'SET_CATEGORY', category: part.category })
   }, [])
 
-  const removePart = useCallback((category) => {
-    dispatch({ type: 'REMOVE_PART', category })
-  }, [])
-
-  const setSpec = useCallback((key, value) => {
-    dispatch({ type: 'SET_SPEC', key, value })
-  }, [])
-
-  const setCategory = useCallback((cat) => {
-    dispatch({ type: 'SET_CATEGORY', category: cat })
-  }, [])
-
-  const setMobileTab = useCallback((tab) => {
-    dispatch({ type: 'SET_MOBILE_TAB', tab })
-  }, [])
-
+  const removePart    = useCallback((category) => dispatch({ type: 'REMOVE_PART', category }), [])
+  const setSpec       = useCallback((key, value) => dispatch({ type: 'SET_SPEC', key, value }), [])
+  const setCategory   = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
+  const setMobileTab  = useCallback((tab) => dispatch({ type: 'SET_MOBILE_TAB', tab }), [])
   const runSim = useCallback(() => {
     dispatch({ type: 'START_SIM' })
     const result = runSimulation({ specs: state.specs, config: state.config })
@@ -183,10 +210,7 @@ export default function App() {
     dispatch({ type: 'SET_SAVE_STATE', state: 'saving' })
     let ok = false
     try {
-      localStorage.setItem('recoverysys-config', JSON.stringify({
-        config: state.config,
-        specs: state.specs,
-      }))
+      localStorage.setItem('recoverysys-config', JSON.stringify({ config: state.config, specs: state.specs }))
       ok = true
     } catch { /* storage full */ }
     if (ok) {
@@ -200,51 +224,43 @@ export default function App() {
 
   const copyShareLink = useCallback(() => {
     try {
-      const payload = { config: state.config, specs: state.specs }
-      // encodeURIComponent handles the full Unicode range; btoa alone throws on non-Latin-1
+      // Serialize only part IDs (not full objects) to keep URLs compact
+      const configIds = Object.fromEntries(
+        Object.entries(state.config).map(([cat, part]) => [cat, part ? { id: part.id } : null])
+      )
+      const payload = { config: configIds, specs: state.specs }
       const encoded = btoa(encodeURIComponent(JSON.stringify(payload)))
       const url = `${location.origin}${location.pathname}?c=${encodeURIComponent(encoded)}`
-      navigator.clipboard.writeText(url).catch(() => {})
-      dispatch({ type: 'SET_SHARE_STATE', state: 'copied' })
-      safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
+      // Only show "Copied!" after the write actually succeeds.
+      // Previously this dispatched 'copied' immediately and caught failure with a toast,
+      // showing "Copied!" even when the clipboard write failed.
+      navigator.clipboard.writeText(url).then(() => {
+        dispatch({ type: 'SET_SHARE_STATE', state: 'copied' })
+        safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
+      }).catch(() => {
+        // Async clipboard failure (e.g. permission denied in restricted context)
+        dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
+      })
     } catch {
+      // Synchronous failure — clipboard API unavailable
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
     }
   }, [state.config, state.specs, safeTimeout])
 
-  const doExportOrk = useCallback(async () => {
-    dispatch({ type: 'SET_EXPORT_STATE', state: 'exporting' })
-    try {
-      const blob = await exportOrk({ config: state.config, specs: state.specs, simulation: state.simulation })
-      const url = URL.createObjectURL(blob)
-      const a = document.createElement('a')
-      a.href = url
-      a.download = 'recoverysys.ork'
-      a.click()
-      safeTimeout(() => URL.revokeObjectURL(url), 10000)
-      dispatch({ type: 'SET_EXPORT_STATE', state: 'done' })
-      safeTimeout(() => dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' }), 3000)
-    } catch {
-      dispatch({ type: 'SET_EXPORT_STATE', state: 'idle' })
-      dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Export failed — check browser console', level: 'error' } })
-    }
-  }, [state.config, state.specs, state.simulation, safeTimeout])
+  const removeToast = useCallback((id) => dispatch({ type: 'REMOVE_TOAST', id }), [])
 
-  const removeToast = useCallback((id) => {
-    dispatch({ type: 'REMOVE_TOAST', id })
-  }, [])
-
-  // ── Restored-session toast ────────────────────────────────────────────────────
   useEffect(() => {
+    if (restoredToastFired.current) return   // idempotent under React 18 StrictMode double-invoke
+    restoredToastFired.current = true
     try {
+      if (new URLSearchParams(location.search).get('c')) return   // share link active — skip restore toast, URL state takes precedence
       const raw = localStorage.getItem('recoverysys-config')
       if (raw && JSON.parse(raw)) {
         dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Restored your last session.', level: 'ok' } })
       }
-    } catch { /* no saved config or parse error — silent */ }
-  }, []) // run once on mount
+    } catch { /* silent */ }
+  }, [])
 
-  // ── Load share link on mount ─────────────────────────────────────────────────
   useEffect(() => {
     const params = new URLSearchParams(location.search)
     const c = params.get('c')
@@ -253,229 +269,78 @@ export default function App() {
       const payload = JSON.parse(decodeURIComponent(atob(decodeURIComponent(c))))
       const validCategories = new Set(CATEGORIES.map(cat => cat.id))
       const validSpecKeys   = new Set(Object.keys(DEFAULT_SPECS))
+
+      // Build a complete config + specs from the payload, then dispatch LOAD_SHARE in
+      // one atomic action. This prevents the receiver's localStorage-restored state
+      // from bleeding through for slots (null in payload) or spec keys absent from payload.
+      // Build a clean-slate config (all slots null) derived from CATEGORIES so it
+      // stays in sync automatically if new slots are ever added.
+      const newConfig = Object.fromEntries(CATEGORIES.map(cat => [cat.id, null]))
+      let catalogMissing = 0
+      let customMissing  = 0
+
       if (payload.config) {
         Object.entries(payload.config).forEach(([cat, part]) => {
-          if (!validCategories.has(cat)) return   // reject unknown category keys
+          if (!validCategories.has(cat)) return
           if (part) {
-            const found = PARTS.find(p => p.id === part.id)
-            if (found) dispatch({ type: 'SELECT_PART', category: cat, part: found })
+            const found = allParts.find(p => p.id === part.id)
+            if (found) newConfig[cat] = found
+            else if (part.id?.startsWith('custom-')) customMissing++
+            else catalogMissing++
+            // If not found, slot stays null (clean slate) — not the receiver's local part
           }
+          // null part → slot stays null; no bleed-through from receiver's localStorage
         })
       }
+
+      // Merge shared specs on top of DEFAULT_SPECS (keys absent from payload stay at default)
+      const newSpecs = { ...DEFAULT_SPECS }
       if (payload.specs) {
         Object.entries(payload.specs).forEach(([key, value]) => {
-          if (!validSpecKeys.has(key)) return     // reject unknown spec keys
-          dispatch({ type: 'SET_SPEC', key, value })
+          if (!validSpecKeys.has(key)) return
+          newSpecs[key] = value
         })
+      }
+
+      dispatch({ type: 'LOAD_SHARE', config: newConfig, specs: newSpecs })
+
+      if (catalogMissing > 0) {
+        dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
+          message: `${catalogMissing} part${catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`,
+          level: 'warn',
+        }})
+      }
+      if (customMissing > 0) {
+        dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
+          message: `${customMissing} custom part${customMissing > 1 ? 's' : ''} in this link can't be shared — add them manually.`,
+          level: 'warn',
+        }})
       }
     } catch { /* malformed */ }
   }, [])
 
-  // ── Render ───────────────────────────────────────────────────────────────────
+  // ── Render ────────────────────────────────────────────────────────────────
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: 'var(--bg-app)' }}>
-      {/* Header */}
-      <header style={{
-        background: 'var(--cta-bg)',
-        color: 'var(--cta-fg)',
-        padding: '0 16px',
-        height: '40px',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        flexShrink: 0,
-        borderBottom: '1px solid #000',
-      }}>
-        <span style={{ fontWeight: 600, letterSpacing: '0.5px' }}>RECOVERYSYS</span>
-        <span style={{ fontSize: '11px', color: '#888', fontFamily: 'ui-monospace, monospace' }}>v1</span>
-      </header>
-
-      {/* 3-panel layout (desktop) / tab layout (mobile) */}
-      <div style={{ flex: 1, overflow: 'hidden', display: 'flex' }}>
-        {/* Desktop: 3 columns */}
-        <div className="hidden md:flex" style={{ flex: 1, overflow: 'hidden' }}>
-          {/* Left: Parts Browser (collapsible) */}
-          <div style={{
-            width: browserCollapsed ? '24px' : '280px',
-            flexShrink: 0,
-            borderRight: '1px solid var(--border-default)',
-            background: 'var(--bg-panel)',
-            overflow: 'hidden',
-            transition: 'width 200ms ease',
-            position: 'relative',
-            display: 'flex',
-            flexDirection: 'column',
-          }}>
-            {/* Collapse toggle — always visible on right edge */}
-            <button
-              onClick={toggleBrowser}
-              title={browserCollapsed ? 'Expand parts browser' : 'Collapse parts browser'}
-              style={{
-                position: 'absolute',
-                top: '50%',
-                right: 0,
-                transform: 'translateY(-50%)',
-                width: '20px',
-                height: '48px',
-                background: 'var(--bg-panel)',
-                border: '1px solid var(--border-default)',
-                borderRight: 'none',
-                borderRadius: '4px 0 0 4px',
-                cursor: 'pointer',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                fontSize: '10px',
-                color: 'var(--text-tertiary)',
-                zIndex: 10,
-                flexShrink: 0,
-                padding: 0,
-              }}
-            >
-              {browserCollapsed ? '›' : '‹'}
-            </button>
-
-            {/* Parts browser content — hidden when collapsed */}
-            <div style={{
-              flex: 1,
-              overflowY: 'auto',
-              opacity: browserCollapsed ? 0 : 1,
-              pointerEvents: browserCollapsed ? 'none' : 'auto',
-              transition: 'opacity 150ms ease',
-              width: '280px',   /* keep inner width stable during transition */
-            }}>
-              <PartsBrowser
-                parts={PARTS}
-                categories={CATEGORIES}
-                activeCategory={state.activeCategory}
-                config={state.config}
-                warnings={state.warnings}
-                onSelectCategory={setCategory}
-                onSelectPart={selectPart}
-              />
-            </div>
-          </div>
-
-          {/* Middle: Config Builder */}
-          <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-panel)', borderRight: '1px solid var(--border-default)' }}>
-            <ConfigBuilder
-              categories={CATEGORIES}
-              config={state.config}
-              specs={state.specs}
-              warnings={state.warnings}
-              saveState={state.saveState}
-              shareState={state.shareState}
-              onRemovePart={removePart}
-              onSetSpec={setSpec}
-              onSave={saveConfig}
-              onShare={copyShareLink}
-              onSelectCategory={setCategory}
-            />
-          </div>
-
-          {/* Right: Simulation Panel */}
-          <div style={{ width: '380px', flexShrink: 0, overflowY: 'auto', background: 'var(--bg-panel)' }}>
-            <SimPanel
-              simulation={state.simulation}
-              simFailed={state.simFailed}
-              simRunning={state.simRunning}
-              exportState={state.exportState}
-              config={state.config}
-              specs={state.specs}
-              onRun={runSim}
-              onExport={doExportOrk}
-            />
-          </div>
-        </div>
-
-        {/* Mobile: tabbed */}
-        <div className="flex md:hidden flex-col" style={{ flex: 1, overflow: 'hidden', position: 'relative' }}>
-          {/* Tab content */}
-          <div style={{ flex: 1, overflowY: 'auto', background: 'var(--bg-panel)' }}>
-            {state.mobileTab === 'parts' && (
-              <PartsBrowser
-                parts={PARTS}
-                categories={CATEGORIES}
-                activeCategory={state.activeCategory}
-                config={state.config}
-                warnings={state.warnings}
-                onSelectCategory={setCategory}
-                onSelectPart={selectPart}
-              />
-            )}
-            {state.mobileTab === 'config' && (
-              <ConfigBuilder
-                categories={CATEGORIES}
-                config={state.config}
-                specs={state.specs}
-                warnings={state.warnings}
-                saveState={state.saveState}
-                shareState={state.shareState}
-                onRemovePart={removePart}
-                onSetSpec={setSpec}
-                onSave={saveConfig}
-                onShare={copyShareLink}
-                onSelectCategory={setCategory}
-              />
-            )}
-            {state.mobileTab === 'simulation' && (
-              <SimPanel
-                simulation={state.simulation}
-                simFailed={state.simFailed}
-                simRunning={state.simRunning}
-                exportState={state.exportState}
-                config={state.config}
-                specs={state.specs}
-                onRun={runSim}
-                onExport={doExportOrk}
-              />
-            )}
-          </div>
-
-          {/* Mobile tab bar */}
-          <div style={{
-            height: '44px',
-            borderTop: '1px solid var(--border-default)',
-            display: 'flex',
-            background: 'var(--bg-panel)',
-            flexShrink: 0,
-          }}>
-            {[
-              { id: 'parts',      label: 'Parts' },
-              { id: 'config',     label: 'Config',     badge: state.warnings.some(w => w.level === 'error') },
-              { id: 'simulation', label: 'Simulation' },
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setMobileTab(tab.id)}
-                style={{
-                  flex: 1,
-                  border: 'none',
-                  background: 'none',
-                  cursor: 'pointer',
-                  fontSize: '11px',
-                  fontWeight: state.mobileTab === tab.id ? 600 : 400,
-                  color: state.mobileTab === tab.id ? 'var(--text-primary)' : 'var(--text-tertiary)',
-                  borderTop: state.mobileTab === tab.id ? '2px solid var(--text-primary)' : '2px solid transparent',
-                  transition: 'color 150ms',
-                  position: 'relative',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: '4px',
-                }}
-              >
-                {tab.label}
-                {tab.badge && (
-                  <span style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--error-fg)', flexShrink: 0 }} />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-
+    <>
+      <MissionControlLayout
+        state={state}
+        dispatch={dispatch}
+        allParts={allParts}
+        customParts={customParts}
+        selectPart={selectPart}
+        removePart={removePart}
+        setSpec={setSpec}
+        setCategory={setCategory}
+        runSim={runSim}
+        saveConfig={saveConfig}
+        copyShareLink={copyShareLink}
+        addCustomPart={addCustomPart}
+        deleteCustomPart={deleteCustomPart}
+        darkMode={darkMode}
+        setDarkMode={setDarkMode}
+        safeTimeout={safeTimeout}
+      />
       <ToastContainer toasts={state.toasts} onRemove={removeToast} />
-    </div>
+    </>
   )
 }

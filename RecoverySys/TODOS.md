@@ -1,34 +1,61 @@
 # TODOS.md — RecoverySys
-Last updated: 2026-03-22 by /plan-eng-review
+Last updated: 2026-03-24 by /plan-ceo-review
 
 ## v2 — Physics & Simulation
 
 ### TODO: Altitude-dependent wind model
 **What:** Replace the single `wind_speed_mph` input with an altitude-banded wind profile.
-**Why:** Current drift formula (`drift_ft = apogee_ft / rate × wind_fps`) uses a constant wind speed (converted from `wind_speed_mph` input) from launch to landing. Real wind varies significantly with altitude — apogee wind can be 3-5x ground wind. This causes drift prediction errors on high-altitude flights.
+**Why:** Current drift formula (`drift_ft = apogee_ft / rate × wind_fps`) uses a constant wind speed from launch to landing. Real wind varies significantly with altitude — apogee wind can be 3-5x ground wind. This causes drift prediction errors on high-altitude flights.
 **Pros:** More accurate drift prediction; matches ARS reference engine's wind model.
 **Cons:** Adds a new UI input (wind profile instead of single speed); increases form complexity.
-**Context:** ARS reference engine (`Jeffrey Version`) reads altitude-dependent wind from `FAR_Trip_3_Wind.xlsx` with meridional and zonal components. v2 could add a "Wind Profile" input with altitude-banded speeds (e.g., 0-1000ft, 1000-5000ft, 5000ft+). The parts DB schema change is zero — this is purely a `rocket_specs` + physics engine change.
-**Depends on / blocked by:** v1 must ship before this work begins. No technical blockers within v2.
+**Context:** ARS reference engine (`Jeffrey Version`) reads altitude-dependent wind with meridional and zonal components. v2 could add a "Wind Profile" input with altitude-banded speeds (e.g., 0-1000ft, 1000-5000ft, 5000ft+). This is purely a `rocket_specs` + `simulation.js` change — zero parts catalog changes needed.
+**Effort:** M → with CC+gstack: S
+**Priority:** P2
+**Depends on:** None
 
 ---
 
 ### TODO: Accurate apogee via thrust-curve integration
 **What:** Replace the `(impulse/mass) × 0.5` heuristic with numerical integration of the powered flight phase using motor thrust curves.
 **Why:** The v1 heuristic has ±30% error. For an L3 flyer trying to hit a specific field or stay within a flight zone, 30% error on a 5000ft apogee = ±1500ft. That's the difference between a field and a tree line.
-**Pros:** Eliminates the ±30% label from the UI; enables meaningful apogee prediction; unlocks Monte Carlo sims; enables RocketPy integration.
-**Cons:** Requires a motor parts category (manufacturers, designations, thrust curves — significant data entry); adds powered-phase simulation complexity.
-**Context:** v1 uses `motor_total_impulse_ns` as a user-entered scalar. v2 needs a `motors` parts category with thrust curve data (ThrustCurve.org has this in RASP format). The physics engine adds a `simulate_ascent()` function alongside the existing `simulate_descent()`. This also enables RocketPy integration (RocketPy has built-in motor thrust curve support).
-**Depends on / blocked by:** Motor parts category (new DB entries + new parts.specs schema for motors).
+**Pros:** Eliminates the ±30% label from the UI; enables meaningful apogee prediction; unlocks Monte Carlo sims.
+**Cons:** Requires a `motors` parts category (manufacturers, designations, thrust curves — significant data entry into `parts.js`); adds powered-phase simulation complexity to `simulation.js`.
+**Context:** v1 uses `motor_total_impulse_ns` as a user-entered scalar in `rocket_specs`. v2 needs a `motors` category in `parts.js` with thrust curve data (RASP format from ThrustCurve.org). The physics engine adds a `simulateAscent()` function alongside the existing `simulateDescent()`. This also enables RocketPy integration. Parts catalog work is the main bottleneck — the physics change itself is ~200 LOC.
+**Effort:** XL → with CC+gstack: L
+**Priority:** P1
+**Depends on:** Motor parts catalog entries in parts.js
 
 ---
 
-## v2 — Ops & Maintenance
+### TODO: Dynamic snatch load model for shock cords
+**What:** Replace the static `mass × G_factor × 9.81` shock load formula with a dynamic impulse-based model that integrates deployment force over cord stretch duration.
+**Why:** The static formula assumes instantaneous load application. In reality, the cord stretches over time, and the peak snatch force depends on deployment velocity, cord spring constant, and damping. Kevlar's low elongation makes this especially relevant — the static formula may underestimate or overestimate depending on conditions.
+**Pros:** More accurate safety factor; directly comparable to test data from cord manufacturers.
+**Cons:** Requires deployment velocity (= drogue descent rate at main deploy altitude — we have this from the sim) and accurate spring constants (k values) per cord. Significantly more complex than the current model.
+**Context:** Current v1 implementation uses `peak_load_lbs = mass_kg × G_factor × 9.81 / 4.448` with a material-tiered safety factor threshold (nylon ≥4, kevlar ≥8). A dynamic model would compute `F_snatch = m × v² / (2 × δ_max)` where δ_max = cord_length × elongation_pct. This is a `simulation.js`-only change once elongation data is in parts.js.
+**Effort:** M → with CC+gstack: S
+**Priority:** P2
+**Depends on:** elongation_pct already added to parts.js in v1.1 shock cord feature
 
-### TODO: Parts DB admin interface
-**What:** A lightweight way to update parts.specs JSONB when manufacturers update specs.
-**Why:** The v1 parts DB is seeded via SQL/Alembic seed data and changes only on deploy. When Featherweight releases a Raven4 firmware update that changes voltage range, or Fruity Chutes repackages their 36" chute, the DB goes stale. Currently requires a developer to write SQL.
-**Pros:** Non-developer (e.g., domain expert) can keep parts up to date without touching code; reduces time-to-accuracy when specs change.
-**Cons:** Builds another surface to maintain; requires access control.
-**Context:** Supabase Table Editor can already edit JSONB fields directly — this may be sufficient for v2. If not, a simple password-protected FastAPI admin endpoint (POST /admin/parts) with a hardcoded admin token from environment variable is the minimal solution. No separate admin UI framework needed.
-**Depends on / blocked by:** v1 ship. Supabase Table Editor may already cover this — evaluate at v1 launch before building.
+---
+
+## v2 — Flight Visualization & Diagnostics
+
+*(No open items — P1 deploy sanity banners and P2 full ascent arc shipped in v1.2.0.0)*
+
+---
+
+## v2 — Parts Catalog
+
+### TODO: Parts catalog update tooling
+**What:** A lightweight way to update `src/data/parts.js` when manufacturers publish new specs or products.
+**Why:** The v1 parts catalog is a hand-maintained static JS array. When Featherweight releases firmware that changes voltage range, or Fruity Chutes repackages their 36" chute, the catalog goes stale. Currently requires a developer to hand-edit the JS object.
+**Pros:** Non-developer domain expert can validate spec changes; reduces time-to-accuracy; catches schema drift early.
+**Cons:** Another tool to maintain.
+**Context:** The simplest approach is a JSON schema (`parts-schema.json`) + a validator script (`scripts/validate-parts.js`) that CI can run. A future enhancement could be a form-based editor that writes valid entries to `parts.js`. No backend needed — the catalog is client-side static data.
+**Effort:** S → with CC+gstack: S
+**Priority:** P3
+**Depends on:** None
+
+---
+

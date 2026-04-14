@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Recovery bay configuration tool for high-power rocketry (HPR). React 18 + Vite SPA. No backend — pure localStorage + URL-encoded share links.
 
-**Version:** 1.0.0.0 (see `RecoverySys/VERSION`)
+**Version:** 1.1.0.0 (see `RecoverySys/VERSION`)
 
 ### Key locations
 
@@ -41,7 +41,7 @@ npm run test:watch # watch mode
 - **safeTimeout:** `useRef` accumulates timer IDs; `useEffect` cleanup prevents stale setState after unmount
 - **Share links:** `btoa(encodeURIComponent(JSON.stringify(config)))` → `?c=` URL param
 - **Parts catalog:** Static JS array in `parts.js`; no backend DB
-- **Testing:** Vitest v4 + @testing-library/react + jsdom; fake timers + `flushPromises` pattern for async component tests
+- **Testing:** Vitest v3 + @testing-library/react + jsdom; fake timers + `flushPromises` pattern for async component tests
 
 ## gstack
 
@@ -75,3 +75,23 @@ Available gstack skills:
 - `/gstack-upgrade` — upgrade gstack
 
 If gstack skills aren't working, run `cd .claude/skills/gstack && ./setup` to build the binary and register skills.
+
+## Skill routing
+
+When the user's request matches an available skill, ALWAYS invoke it using the Skill
+tool as your FIRST action. Do NOT answer directly, do NOT use other tools first.
+The skill has specialized workflows that produce better results than ad-hoc answers.
+
+Key routing rules:
+- Product ideas, "is this worth building", brainstorming → invoke office-hours
+- Bugs, errors, "why is this broken", 500 errors → invoke investigate
+- Ship, deploy, push, create PR → invoke ship
+- QA, test the site, find bugs → invoke qa
+- Code review, check my diff → invoke review
+- Update docs after shipping → invoke document-release
+- Weekly retro → invoke retro
+- Design system, brand → invoke design-consultation
+- Visual audit, design polish → invoke design-review
+- Architecture review → invoke plan-eng-review
+- Save progress, checkpoint, resume → invoke checkpoint
+- Code quality, health check → invoke health
