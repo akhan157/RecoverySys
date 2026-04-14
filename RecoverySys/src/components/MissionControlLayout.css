@@ -606,15 +606,14 @@
 .mc-alert {
   padding: 12px 14px;
   border-bottom: 1px solid var(--mc-border);
-  border-left: 3px solid var(--mc-border);
 }
 
 .mc-alert--critical {
-  border-left-color: var(--mc-amber);
+  background: rgba(245, 166, 35, 0.06);
 }
 
 .mc-alert--ok {
-  border-left-color: var(--mc-green);
+  background: rgba(76, 175, 80, 0.06);
 }
 
 .mc-alert__title {
