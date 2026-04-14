@@ -79,7 +79,7 @@ export default function MissionControlLayout({
   const canRun = !!(
     state.specs.rocket_mass_g &&
     state.specs.motor_total_impulse_ns &&
-    state.config.main_chute
+    (state.config.main_chute || state.config.drogue_chute)
   )
 
   return (

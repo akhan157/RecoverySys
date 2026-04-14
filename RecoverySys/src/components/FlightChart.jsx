@@ -32,9 +32,11 @@ function Axes({ maxAlt, maxTime }) {
   for (let alt = 0; alt <= maxAlt; alt += 1000) yTicks.push(alt)
   if (yTicks[yTicks.length - 1] < maxAlt) yTicks.push(nice1000(maxAlt))
 
+  // Choose X-axis tick interval to keep ~8-12 labels regardless of flight time
+  const xInterval = maxTime <= 60 ? 5 : maxTime <= 120 ? 10 : maxTime <= 300 ? 20 : 30
   const xTicks = []
-  for (let t = 0; t <= maxTime; t += 5) xTicks.push(t)
-  if (xTicks[xTicks.length - 1] < maxTime) xTicks.push(Math.ceil(maxTime / 5) * 5)
+  for (let t = 0; t <= maxTime; t += xInterval) xTicks.push(t)
+  if (xTicks[xTicks.length - 1] < maxTime) xTicks.push(Math.ceil(maxTime / xInterval) * xInterval)
 
   const xS = t => PAD.left + (t / maxTime) * CHART_W
   const yS = a => PAD.top  + CHART_H - (a / maxAlt) * CHART_H
@@ -76,17 +78,13 @@ function Axes({ maxAlt, maxTime }) {
       </text>
 
       {/* X-axis labels */}
-      {xTicks.map((t, i) => {
-        const step = xTicks.length > 10 ? 2 : 1
-        if (i % step !== 0) return null
-        return (
-          <text key={`xl${t}`} x={xS(t)} y={PAD.top + CHART_H + 14}
-            textAnchor="middle" fontSize="9" fontFamily="'Space Grotesk', 'JetBrains Mono', monospace"
-            fill="rgba(255,255,255,0.4)">
-            {t}s
-          </text>
-        )
-      })}
+      {xTicks.map(t => (
+        <text key={`xl${t}`} x={xS(t)} y={PAD.top + CHART_H + 14}
+          textAnchor="middle" fontSize="9" fontFamily="'Space Grotesk', 'JetBrains Mono', monospace"
+          fill="rgba(255,255,255,0.4)">
+          {t}s
+        </text>
+      ))}
 
       {/* Chart border — white/10 like the Stitch export */}
       <rect x={PAD.left} y={PAD.top} width={CHART_W} height={CHART_H}
@@ -217,8 +215,11 @@ export default function FlightChart({ simulation }) {
   const events = []
   if (burnout_t_s != null && burnout_t_s > 0) events.push({ t: burnout_t_s, label: 'BURN' })
   events.push({ t: apogee_t_s ?? 0, label: 'APOG' })
-  const mainPt = timeline.find(p => p.alt <= deploy_ft && p.t > (apogee_t_s ?? 0))
-  if (mainPt) events.push({ t: mainPt.t, label: 'MAIN' })
+  // Only show MAIN deploy marker when a main chute is actually configured
+  if (simulation.main_fps != null) {
+    const mainPt = timeline.find(p => p.alt <= deploy_ft && p.t > (apogee_t_s ?? 0))
+    if (mainPt) events.push({ t: mainPt.t, label: 'MAIN' })
+  }
   const landPt = timeline[timeline.length - 1]
   if (landPt) events.push({ t: landPt.t, label: 'LDG' })
 
