@@ -615,6 +615,10 @@
 }
 
 .mc-alert--critical {
+  background: rgba(231, 76, 60, 0.06);
+}
+
+.mc-alert--warn {
   background: rgba(245, 166, 35, 0.06);
 }
 

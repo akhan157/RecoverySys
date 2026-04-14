@@ -457,7 +457,7 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
             </div>
           ) : (
             state.warnings.map((w, i) => (
-              <div key={i} className={`mc-alert ${w.level === 'error' ? 'mc-alert--critical' : 'mc-alert--critical'}`}>
+              <div key={i} className={`mc-alert ${w.level === 'error' ? 'mc-alert--critical' : 'mc-alert--warn'}`}>
                 <div className="mc-alert__title">
                   ⚠ {w.level === 'error' ? 'CRITICAL_ALERT' : 'NOMINAL_VARIANCE'}
                 </div>
