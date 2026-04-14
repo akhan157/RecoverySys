@@ -100,6 +100,15 @@
   color: var(--mc-text);
 }
 
+/* ── Focus ────────────────────────────────────────────────────────────── */
+
+.mc button:focus-visible,
+.mc a:focus-visible,
+.mc input:focus-visible {
+  outline: 2px solid var(--mc-green);
+  outline-offset: 2px;
+}
+
 /* ── Body ─────────────────────────────────────────────────────────────── */
 
 .mc-body {

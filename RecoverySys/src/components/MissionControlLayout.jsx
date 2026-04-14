@@ -85,9 +85,9 @@ export default function MissionControlLayout({
   return (
     <div className="mc">
       {/* ── Header ──────────────────────────────────────────────────────── */}
-      <div className="mc-header">
+      <header className="mc-header">
         <span className="mc-header__brand">RECOVERYSYS_V1.1</span>
-        <div className="mc-header__tabs">
+        <nav className="mc-header__tabs" aria-label="Main navigation">
           {TABS.map(tab => (
             <button
               key={tab.id}
@@ -97,23 +97,23 @@ export default function MissionControlLayout({
               {tab.id}
             </button>
           ))}
-        </div>
+        </nav>
         <div className="mc-header__right">
-          <button className="mc-header__icon-btn" onClick={() => setDarkMode(d => !d)} title="Toggle theme">
+          <button className="mc-header__icon-btn" onClick={() => setDarkMode(d => !d)} title="Toggle theme" aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}>
             {darkMode ? '☀' : '☾'}
           </button>
         </div>
-      </div>
+      </header>
 
       {/* ── Body ────────────────────────────────────────────────────────── */}
       <div className="mc-body">
         {/* ── Sidebar ───────────────────────────────────────────────────── */}
-        <div className="mc-sidebar">
+        <aside className="mc-sidebar" aria-label="Sidebar">
           <div className="mc-sidebar__identity">
             <div className="mc-sidebar__title">RECOVERY_BAY</div>
             <div className="mc-sidebar__subtitle">OSCILLOSCOPE_ACTIVE</div>
           </div>
-          <div className="mc-sidebar__nav">
+          <nav className="mc-sidebar__nav" aria-label="Tab navigation">
             {TABS.map(item => (
               <button
                 key={item.id}
@@ -124,7 +124,7 @@ export default function MissionControlLayout({
                 {item.label}
               </button>
             ))}
-          </div>
+          </nav>
           <div className="mc-sidebar__bottom">
             <button className="mc-sidebar__cta" onClick={runSim} disabled={!canRun}>
               {state.simRunning ? 'RUNNING...' : 'RUN_SIMULATION'}
@@ -133,10 +133,10 @@ export default function MissionControlLayout({
               ⚠ ALERTS ({state.warnings.length})
             </button>
           </div>
-        </div>
+        </aside>
 
         {/* ── Main Content Area ─────────────────────────────────────────── */}
-        <div className="mc-main">
+        <main className="mc-main" role="main">
           {activeTab === 'DASHBOARD' && (
             <DashboardTab
               state={state}
@@ -186,7 +186,7 @@ export default function MissionControlLayout({
               copyShareLink={copyShareLink}
             />
           )}
-        </div>
+        </main>
       </div>
 
       {/* ── Status Bar ──────────────────────────────────────────────────── */}
