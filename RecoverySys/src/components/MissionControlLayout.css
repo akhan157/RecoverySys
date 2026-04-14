@@ -9,6 +9,7 @@
   --mc-border:    #2a2a2a;
   --mc-border-card:#333333;
   --mc-border-active:#555555;
+  --mc-white:     #ffffff;
   --mc-text:      #e0e0e0;
   --mc-text-dim:  #888888;
   --mc-text-faint:#555555;
@@ -42,7 +43,7 @@
   font-weight: 700;
   font-size: 13px;
   letter-spacing: 0.08em;
-  color: #fff;
+  color: var(--mc-white);
   white-space: nowrap;
 }
 
@@ -70,8 +71,8 @@
 }
 
 .mc-header__tab--active {
-  color: #fff;
-  border-bottom-color: #fff;
+  color: var(--mc-white);
+  border-bottom-color: var(--mc-white);
 }
 
 .mc-header__right {
@@ -139,7 +140,7 @@
   font-size: 13px;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #fff;
+  color: var(--mc-white);
 }
 
 .mc-sidebar__subtitle {
@@ -178,8 +179,8 @@
 }
 
 .mc-sidebar__nav-btn--active {
-  border-left: 3px solid #fff;
-  color: #fff;
+  border-left: 3px solid var(--mc-white);
+  color: var(--mc-white);
   background: rgba(255,255,255,0.03);
 }
 
@@ -201,7 +202,7 @@
 .mc-sidebar__cta {
   background: none;
   border: 1px solid var(--mc-text-dim);
-  color: #fff;
+  color: var(--mc-white);
   font-family: inherit;
   font-size: 11px;
   letter-spacing: 0.06em;
@@ -213,7 +214,7 @@
 
 .mc-sidebar__cta:hover {
   background: rgba(255,255,255,0.05);
-  border-color: #fff;
+  border-color: var(--mc-white);
 }
 
 .mc-sidebar__link {
@@ -327,7 +328,7 @@
 }
 
 .mc-slot--active {
-  border-color: #fff;
+  border-color: var(--mc-white);
 }
 
 .mc-slot--empty {
@@ -363,7 +364,7 @@
 .mc-slot__name {
   font-size: 12px;
   font-weight: 700;
-  color: #fff;
+  color: var(--mc-white);
   letter-spacing: 0.02em;
 }
 
@@ -423,7 +424,7 @@
 .mc-metric__value {
   font-size: 26px;
   font-weight: 700;
-  color: #fff;
+  color: var(--mc-white);
 }
 
 .mc-metric__unit {
@@ -442,13 +443,13 @@
 
 .mc-progress {
   height: 4px;
-  background: #222;
+  background: var(--mc-border);
   margin-top: 8px;
 }
 
 .mc-progress__fill {
   height: 100%;
-  background: #fff;
+  background: var(--mc-white);
   transition: width 300ms;
 }
 
@@ -475,7 +476,7 @@
 .mc-slots-grid__value {
   font-size: 20px;
   font-weight: 700;
-  color: #fff;
+  color: var(--mc-white);
 }
 
 .mc-slots-grid__label {
@@ -508,8 +509,8 @@
 
 .mc-run-btn {
   background: none;
-  border: 1px solid #fff;
-  color: #fff;
+  border: 1px solid var(--mc-white);
+  color: var(--mc-white);
   font-family: inherit;
   font-size: 12px;
   letter-spacing: 0.08em;
@@ -662,7 +663,7 @@
 .mc-inv-item__name {
   font-size: 11px;
   font-weight: 600;
-  color: #fff;
+  color: var(--mc-white);
 }
 
 .mc-inv-item__mfr {
