@@ -50,21 +50,35 @@ export default function MissionControlLayout({
     !!(state.config.main_chute || state.config.drogue_chute)
   )
 
+  const tabBtnId   = id => `mc-tab-${id.toLowerCase()}`
+  const tabPanelId = id => `mc-panel-${id.toLowerCase()}`
+
   return (
     <div className="mc">
+      {/* Skip link — keyboard users can bypass the header on Tab */}
+      <a href="#mc-main" className="mc-skip-link">Skip to main content</a>
+
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="mc-header">
         <h1 className="mc-header__brand">RECOVERYSYS_V1.1</h1>
-        <nav className="mc-header__tabs" aria-label="Main navigation">
-          {TABS.map(tab => (
-            <button
-              key={tab.id}
-              className={`mc-header__tab ${activeTab === tab.id ? 'mc-header__tab--active' : ''}`}
-              onClick={() => setActiveTab(tab.id)}
-            >
-              {tab.id}
-            </button>
-          ))}
+        <nav className="mc-header__tabs" role="tablist" aria-label="Main navigation">
+          {TABS.map(tab => {
+            const isActive = activeTab === tab.id
+            return (
+              <button
+                key={tab.id}
+                id={tabBtnId(tab.id)}
+                role="tab"
+                aria-selected={isActive}
+                aria-controls={tabPanelId(tab.id)}
+                tabIndex={isActive ? 0 : -1}
+                className={`mc-header__tab ${isActive ? 'mc-header__tab--active' : ''}`}
+                onClick={() => setActiveTab(tab.id)}
+              >
+                {tab.id}
+              </button>
+            )
+          })}
         </nav>
         <div className="mc-header__right">
           <button
@@ -80,7 +94,13 @@ export default function MissionControlLayout({
 
       {/* ── Body ────────────────────────────────────────────────────────── */}
       <div className="mc-body">
-        <main className="mc-main" role="main">
+        <main
+          id="mc-main"
+          className="mc-main"
+          role="tabpanel"
+          aria-labelledby={tabBtnId(activeTab)}
+          tabIndex={0}
+        >
           {activeTab === 'DASHBOARD' && (
             <DashboardTab
               state={state}

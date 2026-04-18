@@ -46,7 +46,17 @@ export default function DashboardTab({
               <div
                 key={cat.id}
                 className={`mc-slot ${isEmpty ? 'mc-slot--empty' : ''} ${isActive ? 'mc-slot--active' : ''}`}
+                role="button"
+                tabIndex={0}
+                aria-pressed={isActive}
+                aria-label={`Select ${cat.code} slot${part ? `, currently ${part.name}` : ', empty'}`}
                 onClick={() => setCategory(cat.id)}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    setCategory(cat.id)
+                  }
+                }}
               >
                 <div className="mc-slot__badge">{String(i + 1).padStart(2, '0')}</div>
                 {part && (
@@ -54,6 +64,7 @@ export default function DashboardTab({
                     className="mc-slot__remove"
                     onClick={(e) => { e.stopPropagation(); removePart(cat.id) }}
                     title="Remove"
+                    aria-label={`Remove ${part.name}`}
                   >×</button>
                 )}
                 <div className="mc-slot__label">{cat.code}</div>
