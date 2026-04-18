@@ -1,5 +1,6 @@
 import React from 'react'
 import { slotStatus } from '../lib/compatibility.js'
+import { partSpecLine } from '../lib/format.js'
 
 const ACCENT = {
   ok:      'var(--ok-fg)',
@@ -8,34 +9,7 @@ const ACCENT = {
   neutral: 'transparent',
 }
 
-function slotSpecLine(part) {
-  if (!part) return ''
-  switch (part.category) {
-    case 'main_chute':
-    case 'drogue_chute':
-      return `${part.specs.diameter_in}" Ø  Cd ${part.specs.cd}  packed ${part.specs.packed_diam_in}"  ${part.specs.weight_g}g`
-    case 'shock_cord':
-      return `${part.specs.strength_lbs} lbs  ${part.specs.length_ft}ft  ${part.specs.weight_g}g`
-    case 'chute_protector':
-      return `${part.specs.size_in}" fits ≤${part.specs.max_chute_diam_in}" chute  ${part.specs.weight_g}g`
-    case 'quick_links':
-      return `${part.specs.strength_lbs} lbs  ${part.specs.size_in}" size  ${part.specs.weight_g}g`
-    case 'deployment_bag':
-      return `fits ≤${part.specs.max_chute_diam_in}" chute  ${part.specs.packed_height_in}" packed  ${part.specs.weight_g}g`
-    case 'swivel':
-      return `${part.specs.rated_lbs} lbs WLL  ${part.specs.size_in}" size  ${part.specs.weight_g}g`
-    case 'chute_device': {
-      const altRange = part.specs.deploy_alt_min_ft != null
-        ? `  ${part.specs.deploy_alt_min_ft}–${part.specs.deploy_alt_max_ft}ft`
-        : ''
-      return `${part.specs.weight_g}g${altRange}`
-    }
-    default:
-      return ''
-  }
-}
-
-export default function ConfigSlot({ category, label, placeholder, part, warnings, onRemove, onClickEmpty }) {
+export default function ConfigSlot({ category, placeholder, part, warnings, onRemove, onClickEmpty }) {
   const status = part ? slotStatus(category, warnings) : 'neutral'
   const accent = ACCENT[status]
 
@@ -81,7 +55,7 @@ export default function ConfigSlot({ category, label, placeholder, part, warning
           {part.manufacturer} {part.name}
         </div>
         <div className="mono" style={{ fontSize: '11px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {slotSpecLine(part)}
+          {partSpecLine(part, 'detailed')}
         </div>
       </div>
       <button

@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+.vite/
+
+# Dev cruft — ad-hoc browser-automation scripts, scratch screenshots,
+# visual variant experiments. These never need to ship to prod.
+chart-preview.html
+design-audit-tmp/
+qa-screenshots/
+linkedin-media/
+public/chart-preview.html
+public/variant-*.html
+check-warnings*.js
+click-*.js
+probe.js
+wait-and-check.js
+static-server.mjs
+*.png
+!public/**/*.png
+!src/**/*.png
+
+# Test coverage
+coverage/
+
+# Editor/OS
+.DS_Store
+*.log

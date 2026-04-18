@@ -1,14 +1,21 @@
 /**
  * Category-aware spec summary for a catalog/custom part.
- * Single source of truth — used by both PartsBrowser cards and MissionControl schematic.
+ * Single source of truth — used by PartsBrowser cards, MissionControl bay
+ * schematic, and ConfigSlot rows.
+ *
+ * variant:
+ *   'compact'  — default; minimal: size/strength + weight
+ *   'detailed' — ConfigSlot row; adds packed_diam / Cd inline for chutes
  */
-export function partSpecLine(part) {
+export function partSpecLine(part, variant = 'compact') {
   if (!part?.specs) return ''
   const s = part.specs
   switch (part.category) {
     case 'main_chute':
     case 'drogue_chute':
-      return `${s.diameter_in}" Ø  Cd ${s.cd}  ${s.weight_g}g`
+      return variant === 'detailed'
+        ? `${s.diameter_in}" Ø  Cd ${s.cd}  packed ${s.packed_diam_in}"  ${s.weight_g}g`
+        : `${s.diameter_in}" Ø  Cd ${s.cd}  ${s.weight_g}g`
     case 'chute_protector':
       return `${s.size_in}" fits ≤${s.max_chute_diam_in}" chute  ${s.weight_g}g`
     case 'flight_computer':

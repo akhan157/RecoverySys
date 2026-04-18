@@ -1,403 +1,7 @@
-import React, { useState, useRef, useEffect } from 'react'
-import { parseEng } from '../lib/engParser.js'
-
-const THRUSTCURVE_URL = 'https://www.thrustcurve.org/api/v1/search.json'
-
-// ── Custom motor import (.eng file upload) ──────────────────────────────────
-//
-// Accepts RASP .eng files — the universal format exported by OpenMotor,
-// downloadable from ThrustCurve.org, and readable by OpenRocket/RockSim.
-// On successful parse, shows a preview card with the designation, key stats,
-// and a mini thrust curve sparkline. User confirms to inject into state.
-function CustomMotorImport({ customMotor, onSetCustomMotor, onClearCustomMotor, onToast }) {
-  const fileInputRef = useRef(null)
-  const [preview, setPreview] = useState(null)  // parsed motor waiting for confirm
-
-  const handleFileSelect = (e) => {
-    const file = e.target.files?.[0]
-    if (!file) return
-    const reader = new FileReader()
-    reader.onload = (ev) => {
-      const text = ev.target?.result
-      if (typeof text !== 'string') {
-        onToast('error', 'Could not read file')
-        return
-      }
-      const result = parseEng(text)
-      if (!result.success) {
-        onToast('error', `Parse failed: ${result.error}`)
-        return
-      }
-      setPreview(result.data)
-    }
-    reader.onerror = () => onToast('error', 'Could not read file')
-    reader.readAsText(file)
-    // Reset the input so re-selecting the same file still triggers onChange
-    e.target.value = ''
-  }
-
-  const confirm = () => {
-    onSetCustomMotor(preview)
-    setPreview(null)
-  }
-
-  // Active motor: show a pill matching MotorSearch's selected-state style
-  if (customMotor && !preview) {
-    return (
-      <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-        <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
-          Custom Motor <span style={{ fontWeight: 400, opacity: 0.7 }}>(.eng import)</span>
-        </label>
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '5px 8px',
-          background: 'var(--ok-bg, rgba(74,222,128,0.08))',
-          border: '1px solid var(--ok-fg, #4ade80)',
-          borderRadius: 'var(--radius)',
-        }}>
-          <span style={{ fontSize: '12px' }}>
-            <span className="mono" style={{ color: 'var(--ok-fg, #4ade80)', fontWeight: 700 }}>
-              {customMotor.designation}
-            </span>
-            <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
-              <span className="mono">
-                {Math.round(customMotor.totalImpulse_ns)} Ns / {customMotor.burnTime_s.toFixed(2)}s / peak {Math.round(customMotor.peakThrust_N)} N
-              </span>
-            </span>
-          </span>
-          <button
-            onClick={onClearCustomMotor}
-            title="Clear custom motor"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: '15px', padding: '0 2px', lineHeight: 1 }}
-          >×</button>
-        </div>
-      </div>
-    )
-  }
-
-  // Preview waiting for confirm
-  if (preview) {
-    return (
-      <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
-          Custom Motor Preview
-        </label>
-        <div style={{
-          padding: '10px 12px',
-          background: 'var(--bg-panel)',
-          border: '1px solid var(--accent)',
-          borderRadius: 'var(--radius)',
-          display: 'flex', flexDirection: 'column', gap: '8px',
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span className="mono" style={{ fontWeight: 700, fontSize: '14px' }}>{preview.designation}</span>
-            <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>{preview.manufacturer}</span>
-          </div>
-          <div className="mono" style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px' }}>
-            <span>{preview.diameter_mm}×{preview.length_mm} mm</span>
-            <span>{preview.propellant_kg.toFixed(3)} kg prop</span>
-            <span>{Math.round(preview.totalImpulse_ns)} Ns total</span>
-            <span>{preview.total_kg.toFixed(3)} kg total</span>
-            <span>{preview.burnTime_s.toFixed(2)} s burn</span>
-            <span>peak {Math.round(preview.peakThrust_N)} N</span>
-          </div>
-          <ThrustCurveSparkline curve={preview.curve} peak={preview.peakThrust_N} />
-          <div style={{ display: 'flex', gap: '6px' }}>
-            <button
-              onClick={confirm}
-              style={{
-                flex: 1, padding: '6px 10px', fontSize: '12px', fontWeight: 600,
-                background: 'var(--accent)', color: 'var(--accent-text)',
-                border: '1px solid var(--accent)', borderRadius: 'var(--radius)',
-                cursor: 'pointer',
-              }}
-            >
-              Use This Motor
-            </button>
-            <button
-              onClick={() => setPreview(null)}
-              style={{
-                flex: 1, padding: '6px 10px', fontSize: '12px', fontWeight: 500,
-                background: 'transparent', color: 'var(--text-secondary)',
-                border: '1px solid var(--border-default)', borderRadius: 'var(--radius)',
-                cursor: 'pointer',
-              }}
-            >
-              Cancel
-            </button>
-          </div>
-        </div>
-      </div>
-    )
-  }
-
-  // Idle: upload chip
-  return (
-    <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
-        Custom Motor <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional — OpenMotor .eng import)</span>
-      </label>
-      <input
-        ref={fileInputRef}
-        type="file"
-        accept=".eng"
-        onChange={handleFileSelect}
-        style={{ display: 'none' }}
-      />
-      <button
-        className="parts-add-custom"
-        onClick={() => fileInputRef.current?.click()}
-      >
-        + Import Custom Motor (.eng)
-      </button>
-    </div>
-  )
-}
-
-// Mini SVG sparkline of the thrust curve. ~30 lines, no dependency.
-function ThrustCurveSparkline({ curve, peak }) {
-  const W = 260, H = 40, PAD = 2
-  const tMax = curve[curve.length - 1].t
-  const points = curve.map(p => {
-    const x = PAD + (p.t / tMax) * (W - 2 * PAD)
-    const y = H - PAD - (p.thrust_N / peak) * (H - 2 * PAD)
-    return `${x.toFixed(1)},${y.toFixed(1)}`
-  }).join(' ')
-  return (
-    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
-      <rect x="0" y="0" width={W} height={H} fill="var(--bg-app)" stroke="var(--border-subtle)" />
-      <polyline points={points} fill="none" stroke="var(--accent)" strokeWidth="1.5" />
-    </svg>
-  )
-}
-
-function MotorSearch({ onSetSpec }) {
-  const [query,    setQuery]    = useState('')
-  const [results,  setResults]  = useState([])
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState(null)
-  const [selected, setSelected] = useState(null)
-  const [open,     setOpen]     = useState(false)
-  const debounceRef             = useRef(null)
-  const abortRef                = useRef(null)   // AbortController for in-flight fetch
-  const containerRef            = useRef(null)
-
-  // Close dropdown on outside click
-  useEffect(() => {
-    const handler = (e) => {
-      if (containerRef.current && !containerRef.current.contains(e.target)) setOpen(false)
-    }
-    document.addEventListener('mousedown', handler)
-    return () => document.removeEventListener('mousedown', handler)
-  }, [])
-
-  // Cancel any pending debounce + in-flight fetch on unmount
-  useEffect(() => {
-    return () => { clearTimeout(debounceRef.current); abortRef.current?.abort() }
-  }, [])
-
-  const handleInput = (q) => {
-    setQuery(q)
-    clearTimeout(debounceRef.current)
-    // Cancel any in-flight request immediately (prevents stale results overwriting fresh ones)
-    abortRef.current?.abort()
-    if (!q || q.trim().length < 2) { setResults([]); setOpen(false); setError(null); return }
-    debounceRef.current = setTimeout(async () => {
-      const controller = new AbortController()
-      abortRef.current = controller
-      setLoading(true)
-      setError(null)
-      try {
-        const url = `${THRUSTCURVE_URL}?commonName=${encodeURIComponent(q.trim())}&maxResults=15`
-        const res = await fetch(url, { signal: controller.signal })
-        if (!res.ok) throw new Error(`HTTP ${res.status}`)
-        const data = await res.json()
-        setResults(data.results ?? [])
-        setOpen(true)
-      } catch (err) {
-        if (err.name === 'AbortError') return   // stale request — silently drop
-        setError('ThrustCurve unavailable — enter values manually')
-        setResults([])
-        setOpen(false)
-      } finally {
-        // Only clear the spinner if this request was NOT aborted.
-        // If aborted, a newer request is already in flight and manages its own loading state.
-        // Without this guard, the abort path clears the spinner while the fresh request still runs.
-        if (!controller.signal.aborted) setLoading(false)
-      }
-    }, 350)
-  }
-
-  const select = (motor) => {
-    // Guard: validate API fields before writing to specs (corrupted entries return NaN)
-    const impulse = Number(motor.totImpulseNs)
-    if (!isFinite(impulse) || impulse <= 0) {
-      setError(`Motor "${motor.designation}" has invalid impulse data — enter manually`)
-      return
-    }
-    setSelected(motor)
-    setOpen(false)
-    setQuery('')
-    setResults([])
-    onSetSpec('motor_total_impulse_ns', String(Math.round(impulse)))
-    const burn = Number(motor.burnTimeS)
-    if (isFinite(burn) && burn > 0) onSetSpec('burn_time_s', String(burn.toFixed(2)))
-  }
-
-  const clear = () => { abortRef.current?.abort(); setSelected(null); setQuery(''); setResults([]); setOpen(false); setError(null) }
-
-  const inputStyle = {
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    fontWeight: 600,
-    fontSize: '13px',
-    color: 'var(--text-primary)',
-    border: '1px solid var(--border-default)',
-    borderRadius: 0,
-    padding: '5px 7px',
-    width: '100%',
-    outline: 'none',
-    background: 'var(--input-bg)',
-    boxSizing: 'border-box',
-  }
-
-  return (
-    <div ref={containerRef} style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
-      <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
-        Motor <span style={{ fontWeight: 400, opacity: 0.7 }}>(ThrustCurve search)</span>
-      </label>
-
-      {selected ? (
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '5px 8px',
-          background: 'var(--ok-bg, rgba(74,222,128,0.08))',
-          border: '1px solid var(--ok-fg, #4ade80)',
-          borderRadius: 'var(--radius)',
-        }}>
-          <span style={{ fontSize: '12px' }}>
-            <span className="mono" style={{ color: 'var(--ok-fg, #4ade80)', fontWeight: 700 }}>{selected.designation}</span>
-            <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
-              {selected.manufacturerAbbrev} — <span className="mono">{Math.round(selected.totImpulseNs)} Ns{selected.burnTimeS != null ? ` / ${Number(selected.burnTimeS).toFixed(1)}s` : ''}</span>
-            </span>
-          </span>
-          <button
-            onClick={clear}
-            title="Clear motor selection"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: '15px', padding: '0 2px', lineHeight: 1 }}
-          >×</button>
-        </div>
-      ) : (
-        <div style={{ position: 'relative' }}>
-          <input
-            type="text"
-            value={query}
-            placeholder="e.g. J350, K185, L1000…"
-            onChange={e => handleInput(e.target.value)}
-            style={inputStyle}
-            onFocus={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)' }}
-            onBlur={e => { e.target.style.borderColor = 'var(--border-default)'; e.target.style.boxShadow = '' }}
-          />
-          {loading && (
-            <span style={{
-              position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-              width: '11px', height: '11px', borderRadius: '50%',
-              border: '2px solid var(--border-default)',
-              borderTopColor: 'var(--accent)',
-              animation: 'spin 0.7s linear infinite',
-              display: 'inline-block',
-            }} />
-          )}
-        </div>
-      )}
-
-      {error && <span style={{ fontSize: '10px', color: 'var(--error-fg)', lineHeight: 1.3 }}>{error}</span>}
-
-      {/* Results dropdown */}
-      {open && results.length > 0 && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% - 2px)', left: 0, right: 0, zIndex: 200,
-          background: 'var(--bg-panel)',
-          border: '1px solid var(--accent)',
-          maxHeight: '200px', overflowY: 'auto',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-        }}>
-          {results.map((m, i) => (
-            <button
-              key={m.motorId ?? i}
-              onMouseDown={e => { e.preventDefault(); select(m) }}
-              style={{
-                display: 'block', width: '100%', textAlign: 'left',
-                padding: '7px 10px', background: 'none', border: 'none',
-                borderBottom: i < results.length - 1 ? '1px solid var(--border-subtle)' : 'none',
-                cursor: 'pointer', color: 'var(--text-primary)', fontSize: '12px',
-              }}
-              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-right)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'none'}
-            >
-              <span className="mono" style={{ fontWeight: 700 }}>{m.designation}</span>
-              <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
-                {m.manufacturerAbbrev} — <span className="mono">{Math.round(m.totImpulseNs)} Ns{m.burnTimeS != null ? ` / ${Number(m.burnTimeS).toFixed(1)}s` : ''}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      )}
-
-      {open && !loading && results.length === 0 && query.trim().length >= 2 && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% - 2px)', left: 0, right: 0, zIndex: 200,
-          background: 'var(--bg-panel)', border: '1px solid var(--border-default)',
-          padding: '8px 10px', fontSize: '12px', color: 'var(--text-tertiary)',
-        }}>
-          No available motors found for "{query}"
-        </div>
-      )}
-    </div>
-  )
-}
-
-function SpecInput({ label, id, value, unit, placeholder, onChange, min = 0, max, error = false, errorText }) {
-  const restingBorder = error ? 'var(--error-fg)' : 'var(--border-default)'
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <label htmlFor={id} style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
-        {label}
-      </label>
-      <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-        <input
-          id={id}
-          type="number"
-          min={min}
-          max={max}
-          value={value ?? ''}
-          placeholder={placeholder}
-          onChange={e => onChange(e.target.value)}
-          style={{
-            fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-            fontWeight: 600,
-            fontSize: '13px',
-            color: error ? 'var(--error-fg)' : 'var(--text-primary)',
-            border: `1px solid ${restingBorder}`,
-            borderRadius: 0,
-            padding: '5px 7px',
-            width: '100%',
-            outline: 'none',
-            background: 'var(--input-bg)',
-            transition: 'border-color 0.18s ease',
-          }}
-          onFocus={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)' }}
-          onBlur={e => { e.target.style.borderColor = restingBorder; e.target.style.boxShadow = '' }}
-        />
-        {unit && (
-          <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', flexShrink: 0 }}>{unit}</span>
-        )}
-      </div>
-      {error && errorText && (
-        <span style={{ fontSize: '10px', color: 'var(--error-fg)', lineHeight: 1.3 }}>{errorText}</span>
-      )}
-    </div>
-  )
-}
+import React from 'react'
+import SpecInput from './specs/SpecInput.jsx'
+import MotorSearch from './specs/MotorSearch.jsx'
+import CustomMotorImport from './specs/CustomMotorImport.jsx'
 
 // Auto G-factor: 20G for L1/L2 (<10 kg), 30G for L3 (≥10 kg). Matches NAR/TRA guidelines.
 function autoGFactor(mass_g) {
@@ -406,23 +10,26 @@ function autoGFactor(mass_g) {
   return mass_kg >= 10000 ? 30 : 20
 }
 
-export default function RocketSpecs({ specs, onSetSpec, customMotor, onSetCustomMotor, onClearCustomMotor, onToast }) {
-  const gAuto    = autoGFactor(specs.rocket_mass_g)
-  // Use != '' instead of truthy check so the string '0' is treated as user-entered,
+export default function RocketSpecs({
+  specs, onSetSpec,
+  customMotor, onSetCustomMotor, onClearCustomMotor, onToast,
+}) {
+  const gAuto = autoGFactor(specs.rocket_mass_g)
+  // Use !== '' (not truthy check) so the string '0' is treated as user-entered,
   // not silently replaced with gAuto (which would suppress the "Below 12G" NAR warning).
   const gDisplay = (specs.ejection_g_factor != null && specs.ejection_g_factor !== '')
     ? parseFloat(specs.ejection_g_factor)
     : gAuto
-  const gIsLow   = gDisplay < 12   // below NAR minimum
+  const gIsLow = gDisplay < 12   // below NAR minimum
 
   // Bay volume — computed from airframe ID + bay length; obstructions subtracted for usable
   const airframe_id     = parseFloat(specs.airframe_id_in)
   const bay_length      = parseFloat(specs.bay_length_in)
   const obstruction_vol = parseFloat(specs.bay_obstruction_vol_in3) || 0
-  const bayVolume       = (airframe_id > 0 && bay_length > 0)
+  const bayVolume = (airframe_id > 0 && bay_length > 0)
     ? Math.PI * Math.pow(airframe_id / 2, 2) * bay_length
     : null
-  const usableVolume    = bayVolume != null ? Math.max(0, bayVolume - obstruction_vol) : null
+  const usableVolume = bayVolume != null ? Math.max(0, bayVolume - obstruction_vol) : null
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
@@ -448,52 +55,19 @@ export default function RocketSpecs({ specs, onSetSpec, customMotor, onSetCustom
         {/* ThrustCurve.org search — for commercial motors */}
         <MotorSearch onSetSpec={onSetSpec} />
 
-        <SpecInput
-          id="impulse"
-          label="Motor Impulse"
-          value={specs.motor_total_impulse_ns}
-          unit="Ns"
-          placeholder="e.g. 640"
-          onChange={v => onSetSpec('motor_total_impulse_ns', v)}
-        />
-        <SpecInput
-          id="burn"
-          label="Burn Time"
-          value={specs.burn_time_s}
-          unit="s"
-          placeholder="e.g. 1.8"
-          onChange={v => onSetSpec('burn_time_s', v)}
-        />
-        <SpecInput
-          id="airframe-id"
-          label="Airframe ID"
-          value={specs.airframe_id_in}
-          unit="in"
-          placeholder="e.g. 3.9"
-          onChange={v => onSetSpec('airframe_id_in', v)}
-        />
-        <SpecInput
-          id="bay-length"
-          label="Recovery Bay Length"
-          value={specs.bay_length_in}
-          unit="in"
-          placeholder="e.g. 18"
-          onChange={v => onSetSpec('bay_length_in', v)}
-        />
-        <SpecInput
-          id="bay-obstruction"
-          label="Obstruction Volume"
-          value={specs.bay_obstruction_vol_in3}
-          unit="in³"
-          placeholder="0"
-          onChange={v => onSetSpec('bay_obstruction_vol_in3', v)}
-        />
+        <SpecInput id="impulse"   label="Motor Impulse" value={specs.motor_total_impulse_ns} unit="Ns"  placeholder="e.g. 640" onChange={v => onSetSpec('motor_total_impulse_ns', v)} />
+        <SpecInput id="burn"      label="Burn Time"     value={specs.burn_time_s}            unit="s"   placeholder="e.g. 1.8" onChange={v => onSetSpec('burn_time_s', v)} />
+        <SpecInput id="airframe-id" label="Airframe ID" value={specs.airframe_id_in}         unit="in"  placeholder="e.g. 3.9" onChange={v => onSetSpec('airframe_id_in', v)} />
+        <SpecInput id="bay-length"  label="Recovery Bay Length" value={specs.bay_length_in}  unit="in"  placeholder="e.g. 18"  onChange={v => onSetSpec('bay_length_in', v)} />
+        <SpecInput id="bay-obstruction" label="Obstruction Volume" value={specs.bay_obstruction_vol_in3} unit="in³" placeholder="0" onChange={v => onSetSpec('bay_obstruction_vol_in3', v)} />
 
         {/* Bay volume readout — computed from ID + length; always shown when both are filled */}
         {bayVolume != null && (
-          <div style={{ gridColumn: '1 / -1', display: 'flex', gap: '16px', alignItems: 'center',
+          <div style={{
+            gridColumn: '1 / -1', display: 'flex', gap: '16px', alignItems: 'center',
             padding: '6px 10px', background: 'var(--bg-right)', border: '1px solid var(--border-subtle)',
-            borderRadius: 'var(--radius)', fontSize: '11px', color: 'var(--text-tertiary)' }}>
+            borderRadius: 'var(--radius)', fontSize: '11px', color: 'var(--text-tertiary)',
+          }}>
             <span>Bay <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>{bayVolume.toFixed(1)} in³</strong></span>
             {obstruction_vol > 0 && <>
               <span style={{ color: 'var(--border-default)' }}>–</span>
@@ -504,14 +78,8 @@ export default function RocketSpecs({ specs, onSetSpec, customMotor, onSetCustom
           </div>
         )}
 
-        <SpecInput
-          id="cd"
-          label="Drag Coeff (Cd)"
-          value={specs.drag_cd}
-          unit=""
-          placeholder="0.50"
-          onChange={v => onSetSpec('drag_cd', v)}
-        />
+        <SpecInput id="cd" label="Drag Coeff (Cd)" value={specs.drag_cd} unit="" placeholder="0.50" onChange={v => onSetSpec('drag_cd', v)} />
+
         {/* ── Wind Profile (multi-layer) ──────────────────────────────── */}
         <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', letterSpacing: '0.05em', fontWeight: 600, marginTop: '4px' }}>
@@ -520,32 +88,23 @@ export default function RocketSpecs({ specs, onSetSpec, customMotor, onSetCustom
 
           {/* Surface layer */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            <SpecInput id="wind" label="Surface Speed" value={specs.wind_speed_mph} unit="mph" placeholder="e.g. 10"
-              onChange={v => onSetSpec('wind_speed_mph', v)} />
-            <SpecInput id="wind-dir" label="Surface Dir" value={specs.wind_direction_deg} unit="°" placeholder="0=N 90=E"
-              onChange={v => onSetSpec('wind_direction_deg', v)} />
-            <SpecInput id="wind-surface-alt" label="Surface Alt" value={specs.wind_surface_alt_ft} unit="ft" placeholder="0"
-              onChange={v => onSetSpec('wind_surface_alt_ft', v)} />
+            <SpecInput id="wind"              label="Surface Speed" value={specs.wind_speed_mph}       unit="mph" placeholder="e.g. 10"   onChange={v => onSetSpec('wind_speed_mph', v)} />
+            <SpecInput id="wind-dir"          label="Surface Dir"   value={specs.wind_direction_deg}   unit="°"   placeholder="0=N 90=E"  onChange={v => onSetSpec('wind_direction_deg', v)} />
+            <SpecInput id="wind-surface-alt"  label="Surface Alt"   value={specs.wind_surface_alt_ft}  unit="ft"  placeholder="0"         onChange={v => onSetSpec('wind_surface_alt_ft', v)} />
           </div>
 
           {/* Mid-altitude layer */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            <SpecInput id="wind-mid" label="Mid Speed" value={specs.wind_mid_speed_mph} unit="mph" placeholder="e.g. 15"
-              onChange={v => onSetSpec('wind_mid_speed_mph', v)} />
-            <SpecInput id="wind-mid-dir" label="Mid Dir" value={specs.wind_mid_direction_deg} unit="°" placeholder="0=N"
-              onChange={v => onSetSpec('wind_mid_direction_deg', v)} />
-            <SpecInput id="wind-mid-alt" label="Mid Alt" value={specs.wind_mid_alt_ft} unit="ft" placeholder="e.g. 5000"
-              onChange={v => onSetSpec('wind_mid_alt_ft', v)} />
+            <SpecInput id="wind-mid"     label="Mid Speed" value={specs.wind_mid_speed_mph}     unit="mph" placeholder="e.g. 15"   onChange={v => onSetSpec('wind_mid_speed_mph', v)} />
+            <SpecInput id="wind-mid-dir" label="Mid Dir"   value={specs.wind_mid_direction_deg} unit="°"   placeholder="0=N"       onChange={v => onSetSpec('wind_mid_direction_deg', v)} />
+            <SpecInput id="wind-mid-alt" label="Mid Alt"   value={specs.wind_mid_alt_ft}        unit="ft"  placeholder="e.g. 5000" onChange={v => onSetSpec('wind_mid_alt_ft', v)} />
           </div>
 
           {/* Aloft layer */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            <SpecInput id="wind-aloft" label="Aloft Speed" value={specs.wind_aloft_speed_mph} unit="mph" placeholder="e.g. 30"
-              onChange={v => onSetSpec('wind_aloft_speed_mph', v)} />
-            <SpecInput id="wind-aloft-dir" label="Aloft Dir" value={specs.wind_aloft_direction_deg} unit="°" placeholder="0=N"
-              onChange={v => onSetSpec('wind_aloft_direction_deg', v)} />
-            <SpecInput id="wind-aloft-alt" label="Aloft Alt" value={specs.wind_aloft_alt_ft} unit="ft" placeholder="e.g. 15000"
-              onChange={v => onSetSpec('wind_aloft_alt_ft', v)} />
+            <SpecInput id="wind-aloft"     label="Aloft Speed" value={specs.wind_aloft_speed_mph}     unit="mph" placeholder="e.g. 30"    onChange={v => onSetSpec('wind_aloft_speed_mph', v)} />
+            <SpecInput id="wind-aloft-dir" label="Aloft Dir"   value={specs.wind_aloft_direction_deg} unit="°"   placeholder="0=N"        onChange={v => onSetSpec('wind_aloft_direction_deg', v)} />
+            <SpecInput id="wind-aloft-alt" label="Aloft Alt"   value={specs.wind_aloft_alt_ft}        unit="ft"  placeholder="e.g. 15000" onChange={v => onSetSpec('wind_aloft_alt_ft', v)} />
           </div>
 
           <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
@@ -553,30 +112,10 @@ export default function RocketSpecs({ specs, onSetSpec, customMotor, onSetCustom
             Direction = where wind blows FROM (meteorological). Monte Carlo runs 500 iterations with ±30% speed, ±15° direction variance.
           </div>
         </div>
-        <SpecInput
-          id="launch-lat"
-          label="Launch Lat"
-          value={specs.launch_lat}
-          unit=""
-          placeholder="e.g. 42.3601"
-          onChange={v => onSetSpec('launch_lat', v)}
-        />
-        <SpecInput
-          id="launch-lon"
-          label="Launch Lon"
-          value={specs.launch_lon}
-          unit=""
-          placeholder="e.g. -71.0589"
-          onChange={v => onSetSpec('launch_lon', v)}
-        />
-        <SpecInput
-          id="deploy"
-          label="Main Deploy Alt"
-          value={specs.main_deploy_alt_ft}
-          unit="ft"
-          placeholder="500"
-          onChange={v => onSetSpec('main_deploy_alt_ft', v)}
-        />
+
+        <SpecInput id="launch-lat" label="Launch Lat"     value={specs.launch_lat}         unit=""  placeholder="e.g. 42.3601"  onChange={v => onSetSpec('launch_lat', v)} />
+        <SpecInput id="launch-lon" label="Launch Lon"     value={specs.launch_lon}         unit=""  placeholder="e.g. -71.0589" onChange={v => onSetSpec('launch_lon', v)} />
+        <SpecInput id="deploy"     label="Main Deploy Alt" value={specs.main_deploy_alt_ft} unit="ft" placeholder="500"          onChange={v => onSetSpec('main_deploy_alt_ft', v)} />
         <SpecInput
           id="g-factor"
           label="Ejection G-Factor"

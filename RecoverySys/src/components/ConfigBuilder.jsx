@@ -23,7 +23,6 @@ export default function ConfigBuilder({
               </div>
               <ConfigSlot
                 category={cat.id}
-                label={cat.label}
                 placeholder={cat.placeholder}
                 part={config[cat.id]}
                 warnings={warnings}
