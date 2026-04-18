@@ -95,21 +95,32 @@ export default function DashboardTab({
         <h2 className="mc-panel-header">CONFIG_SUMMARY</h2>
         <div className="mc-summary">
           {/* Total Mass — gauge range scales to L3 (≥10 kg) if rocket is that big */}
-          <div className="mc-metric">
-            <div className="mc-metric__label">TOTAL_MASS</div>
-            <div className="mc-metric__value">
-              {(totalMass / 1000).toFixed(2)}<span className="mc-metric__unit">KG</span>
-            </div>
-            <div className="mc-progress">
-              <div
-                className="mc-progress__fill"
-                style={{ width: `${Math.min(100, (totalMass / 5000) * 100)}%` }}
-              />
-            </div>
-            <div className="mc-progress__labels">
-              <span>0.0KG</span><span>MAX 5.0KG</span>
-            </div>
-          </div>
+          {(() => {
+            // Bucket the scale so the label stays stable while the user edits parts:
+            // 5 kg (H/I-class default) → 10 kg (J/K) → 20 kg (L3) → 40 kg (L3 heavy)
+            const gaugeMax_g =
+              totalMass <= 5000  ? 5000  :
+              totalMass <= 10000 ? 10000 :
+              totalMass <= 20000 ? 20000 : 40000
+            const gaugeMax_kg = (gaugeMax_g / 1000).toFixed(1)
+            return (
+              <div className="mc-metric">
+                <div className="mc-metric__label">TOTAL_MASS</div>
+                <div className="mc-metric__value">
+                  {(totalMass / 1000).toFixed(2)}<span className="mc-metric__unit">KG</span>
+                </div>
+                <div className="mc-progress">
+                  <div
+                    className="mc-progress__fill"
+                    style={{ width: `${Math.min(100, (totalMass / gaugeMax_g) * 100)}%` }}
+                  />
+                </div>
+                <div className="mc-progress__labels">
+                  <span>0.0KG</span><span>MAX {gaugeMax_kg}KG</span>
+                </div>
+              </div>
+            )
+          })()}
 
           {/* Sim results in summary */}
           {state.simulation && (

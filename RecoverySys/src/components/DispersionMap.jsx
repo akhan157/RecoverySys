@@ -62,17 +62,22 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
 
   const drift = useMemo(
     () => computeDrift({ simulation, specs }),
-    [simulation, specs]  // eslint-disable-line react-hooks/exhaustive-deps
+    [simulation, specs]
   )
 
   const monteCarlo = useMemo(
     () => runDispersionMonteCarlo({ simulation, specs }),
-    [simulation, specs]  // eslint-disable-line react-hooks/exhaustive-deps
+    [simulation, specs]
   )
 
   const launch_lat = parseFloat(specs.launch_lat)
   const launch_lon = parseFloat(specs.launch_lon)
   const hasCoords  = isFinite(launch_lat) && isFinite(launch_lon)
+
+  // Latch latest coords for the mount effect without re-running it on every
+  // coord edit — the overlay effect below re-fits bounds when they change.
+  const coordsRef = useRef({ hasCoords, launch_lat, launch_lon })
+  coordsRef.current = { hasCoords, launch_lat, launch_lon }
 
   // Mount / destroy map when panel opens/closes
   useEffect(() => {
@@ -90,8 +95,9 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
         document.head.appendChild(link)
       }
 
-      const center = hasCoords ? [launch_lat, launch_lon] : [39.5, -98.35]
-      const zoom   = hasCoords ? 13 : 4
+      const { hasCoords: hc, launch_lat: lat, launch_lon: lon } = coordsRef.current
+      const center = hc ? [lat, lon] : [39.5, -98.35]
+      const zoom   = hc ? 13 : 4
 
       const map = Lf.map(mapRef.current, {
         center, zoom,
@@ -119,7 +125,7 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
       scatterRendererRef.current = null
       setMapReady(false)
     }
-  }, [open])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open])
 
   // Update overlays whenever simulation / drift / monteCarlo changes
   useEffect(() => {
@@ -252,7 +258,7 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
       }
     })
     return () => { cancelled = true }
-  }, [open, mapReady, drift, monteCarlo, launch_lat, launch_lon, hasCoords])  // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, mapReady, drift, monteCarlo, launch_lat, launch_lon, hasCoords])
 
   const canShow = !!simulation && !!drift
 
