@@ -61,6 +61,16 @@
   color: var(--error-fg);
 }
 
+/* ── Category filter chips ──────────────────────────────────
+   Ensures 44px min-height on touch devices while keeping the
+   compact 30px look on desktop where pointer precision is fine. */
+@media (hover: none) and (pointer: coarse) {
+  .parts-category-chip {
+    min-height: 44px !important;
+    padding: 10px 14px !important;
+  }
+}
+
 /* ── "Add Custom" chip ──────────────────────────────────────── */
 
 .parts-add-custom {

@@ -61,6 +61,16 @@
   height: 100%;
   display: flex;
   flex-direction: column;
+  /* Fade in the real UI when React replaces the pre-hydration skeleton. Makes
+     the transition imperceptible instead of a hard pop. Respects reduced-motion. */
+  animation: mc-fade-in 180ms ease-out;
+}
+@keyframes mc-fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mc { animation: none; }
 }
 
 /* ── Header ───────────────────────────────────────────────────────────── */
@@ -82,6 +92,8 @@
   letter-spacing: 0.08em;
   color: var(--mc-white);
   white-space: nowrap;
+  margin: 0;           /* reset h1 default margin */
+  font-family: inherit;
 }
 
 .mc-header__tabs {
@@ -207,6 +219,7 @@
 
 .mc-panel-header {
   font-size: 10px;
+  font-weight: 400;
   letter-spacing: 0.08em;
   color: var(--mc-text-dim);
   padding: 10px 14px;
@@ -214,6 +227,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
+  margin: 0;              /* reset h2 default margin */
+  font-family: inherit;
   flex-shrink: 0;
 }
 

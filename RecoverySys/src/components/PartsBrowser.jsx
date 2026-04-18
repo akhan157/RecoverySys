@@ -326,6 +326,7 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
             return (
               <button
                 key={cat.id}
+                className="parts-category-chip"
                 onClick={() => onSelectCategory(cat.id)}
                 title={tooltip}
                 style={{

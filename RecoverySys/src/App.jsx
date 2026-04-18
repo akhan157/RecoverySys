@@ -1,4 +1,14 @@
 import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } from 'react'
+
+// Prefetch the Leaflet chunk during browser idle time after initial load so
+// clicking the DISPERSION tab feels instant instead of waiting for the bundle.
+// Uses requestIdleCallback to avoid blocking the main thread during hydration.
+function prefetchLeaflet() {
+  if (typeof window === 'undefined') return
+  const run = () => { import('leaflet').catch(() => { /* offline — retry on-demand */ }) }
+  if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: 3000 })
+  else setTimeout(run, 1500)
+}
 import { PARTS, CATEGORIES, SLOT_IDS, EMPTY_CONFIG } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import { checkCompatibility } from './lib/compatibility.js'
@@ -178,6 +188,9 @@ export default function App() {
   useEffect(() => {
     return () => timeoutIds.current.forEach(clearTimeout)
   }, [])
+
+  // Warm the Leaflet chunk during idle time so the Dispersion tab opens instantly.
+  useEffect(() => { prefetchLeaflet() }, [])
 
   // ── Dark mode ─────────────────────────────────────────────────────────────
   const [darkMode, setDarkMode] = React.useState(() => {

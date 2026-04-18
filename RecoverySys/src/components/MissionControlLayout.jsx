@@ -56,7 +56,7 @@ export default function MissionControlLayout({
     <div className="mc">
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="mc-header">
-        <span className="mc-header__brand">RECOVERYSYS_V1.1</span>
+        <h1 className="mc-header__brand">RECOVERYSYS_V1.1</h1>
         <nav className="mc-header__tabs" aria-label="Main navigation">
           {TABS.map(tab => (
             <button
@@ -186,7 +186,7 @@ function DashboardTab({
     <div className="mc-dashboard">
       {/* ── Parts Catalog (left) ─────────────────────────────────────── */}
       <div className="mc-parts-panel">
-        <div className="mc-panel-header">PARTS_CATALOG_EXPLORER</div>
+        <h2 className="mc-panel-header">PARTS_CATALOG_EXPLORER</h2>
         <div className="mc-parts-scroll">
           <PartsBrowser
             parts={allParts}
@@ -205,10 +205,10 @@ function DashboardTab({
 
       {/* ── Bay Schematic (center) ───────────────────────────────────── */}
       <div className="mc-schematic">
-        <div className="mc-panel-header">
+        <h2 className="mc-panel-header">
           BAY_SCHEMATIC_REALTIME_RENDER
           <span className="mc-panel-header__right">LAYER: 01_INTERNAL &nbsp; SCALE: 1:10</span>
-        </div>
+        </h2>
         <div className="mc-bay-grid">
           {CATEGORIES.map((cat, i) => {
             const part = state.config[cat.id]
@@ -253,7 +253,7 @@ function DashboardTab({
 
       {/* ── Config Summary (right) ───────────────────────────────────── */}
       <div className="mc-config-summary">
-        <div className="mc-panel-header">CONFIG_SUMMARY</div>
+        <h2 className="mc-panel-header">CONFIG_SUMMARY</h2>
         <div className="mc-summary">
           {/* Total Mass */}
           <div className="mc-metric">
@@ -345,12 +345,12 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
       <div className="mc-sim__top">
         {/* Flight Chart */}
         <div className="mc-sim__chart">
-          <div className="mc-panel-header">
+          <h2 className="mc-panel-header">
             FLIGHT_PROFILE // DESCENT_PHASE_V4.2
             <span className="mc-panel-header__right">
               {sim ? `REF_ID: STR-SIM-${String(Math.abs((sim.apogee_ft || 0) * 7 + (sim.drift_ft || 0)) % 9999).padStart(4, '0')}` : 'AWAITING_DATA'}
             </span>
-          </div>
+          </h2>
           <div className="mc-sim__chart-area">
             <FlightChart simulation={sim} />
           </div>
@@ -365,7 +365,7 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
 
         {/* Simulation Data */}
         <div className="mc-sim__data">
-          <div className="mc-panel-header">SIMULATION_DATA</div>
+          <h2 className="mc-panel-header">SIMULATION_DATA</h2>
           <div className="mc-sim__data-grid">
             <MetricCard label="APOGEE_ALTITUDE" value={sim ? sim.apogee_ft.toLocaleString() : '—'} unit="ft" />
             <MetricCard label="MAIN_DESCENT" value={sim?.main_fps != null ? sim.main_fps.toFixed(1) : '—'} unit="ft/s"
@@ -406,7 +406,7 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
       <div className="mc-sim__bottom">
         {/* Compatibility Analysis + Suggest */}
         <div className="mc-sim__compat">
-          <div className="mc-panel-header">COMPATIBILITY_ANALYSIS</div>
+          <h2 className="mc-panel-header">COMPATIBILITY_ANALYSIS</h2>
           {state.warnings.length === 0 ? (
             <div className="mc-alert mc-alert--ok">
               <div className="mc-alert__title">✓ ALL_SYSTEMS_NOMINAL</div>
@@ -432,12 +432,12 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
 
         {/* Parts Inventory */}
         <div className="mc-sim__inventory">
-          <div className="mc-panel-header">
+          <h2 className="mc-panel-header">
             PART_SPECIFICATIONS // ACTIVE_INVENTORY
             <span className="mc-panel-header__right">
               {CATEGORIES.filter(c => state.config[c.id]).length}_COMPONENTS_LOADED
             </span>
-          </div>
+          </h2>
           <div className="mc-inv-grid">
             {CATEGORIES.map(cat => {
               const part = state.config[cat.id]
@@ -469,12 +469,12 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
 function DispersionTab({ state }) {
   return (
     <div className="mc-dispersion">
-      <div className="mc-panel-header">
+      <h2 className="mc-panel-header">
         DISPERSION_MAP // LANDING_PREDICTION
         <span className="mc-panel-header__right">
           {state.simulation ? 'DATA_LOADED' : 'AWAITING_SIMULATION'}
         </span>
-      </div>
+      </h2>
       <div className="mc-dispersion__content">
         <DispersionMap
           simulation={state.simulation}
@@ -503,7 +503,7 @@ function DispersionTab({ state }) {
 function SpecsTab({ state, setSpec, removePart, setCategory, saveConfig, copyShareLink, setCustomMotor, clearCustomMotor, addToast }) {
   return (
     <div className="mc-specs-panel">
-      <div className="mc-panel-header">ROCKET_SPECIFICATIONS // MISSION_PARAMETERS</div>
+      <h2 className="mc-panel-header">ROCKET_SPECIFICATIONS // MISSION_PARAMETERS</h2>
       <div className="mc-specs-content">
         <ConfigBuilder
           categories={CATEGORIES}
@@ -534,9 +534,9 @@ function SpecsTab({ state, setSpec, removePart, setCategory, saveConfig, copySha
 function ExportTab({ state, saveConfig, copyShareLink }) {
   return (
     <div className="mc-export">
-      <div className="mc-panel-header" style={{ borderBottom: '1px solid var(--mc-border)' }}>
+      <h2 className="mc-panel-header" style={{ borderBottom: '1px solid var(--mc-border)' }}>
         EXPORT // SHARE_CONFIGURATION
-      </div>
+      </h2>
       <div className="mc-export__content">
         <div className="mc-export__section">
           <div className="mc-metric__label">SAVE_TO_BROWSER</div>
