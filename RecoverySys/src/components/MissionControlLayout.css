@@ -481,7 +481,8 @@
 .mc-sim__chart-area svg {
   width: 100%;
   height: 100%;
-  max-height: 340px;
+  /* Preserve aspect ratio; scale to fit the container instead of capping at 340px.
+     The SVG viewBox (400×260) keeps the chart proportional regardless of pane size. */
 }
 
 .mc-sim__data {
@@ -739,11 +740,12 @@
 }
 
 .mc-export__content {
-  padding: 20px;
+  padding: 32px 40px;
   display: flex;
   flex-direction: column;
-  gap: 24px;
-  max-width: 500px;
+  gap: 32px;
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .mc-export__section {
@@ -788,10 +790,29 @@
 /* ── Responsive: Mobile ──────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
-  .mc-header { padding: 0 12px; gap: 8px; }
-  .mc-header__tabs { margin-left: 0; overflow-x: auto; -webkit-overflow-scrolling: touch; }
-  .mc-header__tab { padding: 14px 10px; font-size: 10px; white-space: nowrap; }
-  .mc-header__brand { font-size: 11px; }
+  .mc-header { padding: 0 12px; gap: 8px; position: relative; }
+  /* Fade-out gradient on the right edge of the nav tabs hints that more tabs
+     are available by scrolling horizontally. Pointer-events none so it doesn't
+     block clicks. */
+  .mc-header__tabs {
+    margin-left: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
+    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
+  }
+  .mc-header__tabs::-webkit-scrollbar { display: none; }
+  .mc-header__tab {
+    padding: 14px 10px;
+    font-size: 10px;
+    white-space: nowrap;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+  }
+  .mc-header__brand { font-size: 10px; letter-spacing: 0.06em; }
 
   .mc-bay-grid { grid-template-columns: 1fr; gap: 8px; padding: 12px; }
 
@@ -806,5 +827,26 @@
   .mc-sim__bottom { flex-direction: column; min-height: auto; max-height: none; }
   .mc-sim__compat { border-right: none; border-bottom: 1px solid var(--mc-border); }
 
-  .mc-statusbar { font-size: 9px; gap: 12px; overflow-x: auto; }
+  /* Status bar on mobile grows to honor the 44px touch-target minimum for
+     RUN_SIM — it's the only visible run button because the sidebar collapses.
+     Item text scrolls horizontally if metrics overflow. */
+  .mc-statusbar {
+    height: 48px;
+    font-size: 10px;
+    gap: 12px;
+    padding: 0 12px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .mc-statusbar::-webkit-scrollbar { display: none; }
+  .mc-statusbar__item { flex-shrink: 0; }
+  .mc-statusbar__run {
+    min-height: 44px;
+    min-width: 88px;
+    padding: 6px 14px;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+  .mc-statusbar__badge { padding: 4px 8px; flex-shrink: 0; }
 }
