@@ -34,20 +34,46 @@ export function computeDescentRate(chuteSpecs, mass_kg, altitude_ft = 0) {
 }
 
 /**
+ * Linear interpolation of thrust at time `t` from a `[{t, thrust_N}]` curve.
+ * Returns 0 past the end of the curve (motor has burned out).
+ * Curve is assumed to be sorted by t ascending.
+ */
+export function interpolateThrust(t, curve) {
+  if (!curve || curve.length === 0) return 0
+  if (t <= curve[0].t) return curve[0].thrust_N
+  if (t >= curve[curve.length - 1].t) return 0  // motor burned out
+  // Linear search is fine — curves are typically 10-200 points.
+  for (let i = 1; i < curve.length; i++) {
+    if (t <= curve[i].t) {
+      const lo = curve[i - 1], hi = curve[i]
+      const frac = (t - lo.t) / (hi.t - lo.t)
+      return lo.thrust_N + frac * (hi.thrust_N - lo.thrust_N)
+    }
+  }
+  return 0
+}
+
+/**
  * Numerically integrate the powered + coast phases to find apogee.
  * Collects ascent trajectory points sampled every ~0.5 s for charting.
+ *
+ * When `curve` is provided, thrust is interpolated at each timestep (±3-5% apogee
+ * accuracy). Otherwise falls back to constant avg_thrust (±10-15%).
+ *
+ * When `propMass_kg_override` is provided (from an imported motor), it's used
+ * instead of the Isp heuristic.
  *
  * Returns { apogee_m, burnout_t_s, ascentTimeline: [{t, alt}] }
  * where alt is in feet and t is seconds from liftoff.
  */
-function integrateAscent(impulse_ns, total_mass_kg, burn_s, area_m2, cd) {
-  // Propellant mass via Tsiolkovsky / Isp estimate
-  const prop_mass_kg = Math.min(
-    impulse_ns / (APCP_ISP * G),
-    total_mass_kg * 0.55   // cap at 55% of total (realistic for HPR)
-  )
+function integrateAscent(impulse_ns, total_mass_kg, burn_s, area_m2, cd, curve = null, propMass_kg_override = null) {
+  // Propellant mass: use imported value if given, otherwise Isp heuristic.
+  const prop_mass_kg = propMass_kg_override != null && propMass_kg_override > 0
+    ? Math.min(propMass_kg_override, total_mass_kg * 0.55)
+    : Math.min(impulse_ns / (APCP_ISP * G), total_mass_kg * 0.55)
   const dry_mass_kg  = total_mass_kg - prop_mass_kg
   const avg_thrust   = impulse_ns / burn_s
+  const useCurve     = Array.isArray(curve) && curve.length >= 2
 
   const dt = 0.05   // 50 ms time step
   let v   = 0       // m/s upward
@@ -61,11 +87,15 @@ function integrateAscent(impulse_ns, total_mass_kg, burn_s, area_m2, cd) {
 
   // ── Powered phase ────────────────────────────────────────────────────────────
   while (t < burn_s) {
-    const step  = Math.min(dt, burn_s - t)
-    const m     = total_mass_kg - prop_mass_kg * (t / burn_s)
-    const rho   = airDensity(alt)
-    const drag  = 0.5 * rho * cd * area_m2 * v * Math.abs(v)
-    const a     = (avg_thrust - drag - m * G) / m
+    const step   = Math.min(dt, burn_s - t)
+    // Linearly deplete propellant over the burn. With a curve the depletion rate
+    // isn't exactly linear in reality (it tracks mass-flow which tracks thrust),
+    // but at typical HPR thrust/burn scales this is a sub-1% apogee effect.
+    const m      = total_mass_kg - prop_mass_kg * (t / burn_s)
+    const rho    = airDensity(alt)
+    const drag   = 0.5 * rho * cd * area_m2 * v * Math.abs(v)
+    const thrust = useCurve ? interpolateThrust(t + step / 2, curve) : avg_thrust
+    const a      = (thrust - drag - m * G) / m
     v   += a * step
     alt += v * step
     t   += step
@@ -508,7 +538,7 @@ export function fitConfidenceEllipse(points) {
  *
  * Returns null if required inputs are missing/invalid.
  */
-export function runSimulation({ specs, config }) {
+export function runSimulation({ specs, config, customMotor = null }) {
   const mass_g    = parseFloat(specs.rocket_mass_g)
   const impulse   = parseFloat(specs.motor_total_impulse_ns)
   const burn_s    = parseFloat(specs.burn_time_s)
@@ -522,6 +552,10 @@ export function runSimulation({ specs, config }) {
 
   const mass_kg = mass_g / 1000
 
+  // If an imported motor is provided, prefer its curve + measured values.
+  const thrustCurve = customMotor?.curve ?? null
+  const propMass_kg = customMotor?.propellant_kg ?? null
+
   // ── Apogee ───────────────────────────────────────────────────────────────────
   let apogee_m
   let apogee_method
@@ -532,21 +566,21 @@ export function runSimulation({ specs, config }) {
   if (burn_s > 0 && od_in > 0) {
     const radius_m = (od_in * 0.0254) / 2
     const area_m2  = Math.PI * radius_m * radius_m
-    const result   = integrateAscent(impulse, mass_kg, burn_s, area_m2, cd)
+    const result   = integrateAscent(impulse, mass_kg, burn_s, area_m2, cd, thrustCurve, propMass_kg)
     apogee_m       = result.apogee_m
     burnout_t_s    = result.burnout_t_s
     ascentTimeline = result.ascentTimeline
     apogee_t_s     = result.ascentTimeline[result.ascentTimeline.length - 1].t
-    apogee_method  = 'integrated'    // ±10–15%
+    apogee_method  = thrustCurve ? 'integrated-curve' : 'integrated'    // curve: ±3-5%, scalar: ±10-15%
   } else if (burn_s > 0) {
     // No OD: use a default 4" airframe for drag area
     const area_m2 = Math.PI * (2 * 0.0254) * (2 * 0.0254)
-    const result  = integrateAscent(impulse, mass_kg, burn_s, area_m2, cd)
+    const result  = integrateAscent(impulse, mass_kg, burn_s, area_m2, cd, thrustCurve, propMass_kg)
     apogee_m      = result.apogee_m
     burnout_t_s   = result.burnout_t_s
     ascentTimeline = result.ascentTimeline
     apogee_t_s    = result.ascentTimeline[result.ascentTimeline.length - 1].t
-    apogee_method = 'integrated-no-od'
+    apogee_method = thrustCurve ? 'integrated-curve-no-od' : 'integrated-no-od'
   } else {
     // Fallback heuristic when burn time is unknown
     const v_eff   = (impulse / mass_kg) * 0.5

@@ -1,6 +1,175 @@
 import React, { useState, useRef, useEffect } from 'react'
+import { parseEng } from '../lib/engParser.js'
 
 const THRUSTCURVE_URL = 'https://www.thrustcurve.org/api/v1/search.json'
+
+// ── Custom motor import (.eng file upload) ──────────────────────────────────
+//
+// Accepts RASP .eng files — the universal format exported by OpenMotor,
+// downloadable from ThrustCurve.org, and readable by OpenRocket/RockSim.
+// On successful parse, shows a preview card with the designation, key stats,
+// and a mini thrust curve sparkline. User confirms to inject into state.
+function CustomMotorImport({ customMotor, onSetCustomMotor, onClearCustomMotor, onToast }) {
+  const fileInputRef = useRef(null)
+  const [preview, setPreview] = useState(null)  // parsed motor waiting for confirm
+
+  const handleFileSelect = (e) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = (ev) => {
+      const text = ev.target?.result
+      if (typeof text !== 'string') {
+        onToast('error', 'Could not read file')
+        return
+      }
+      const result = parseEng(text)
+      if (!result.success) {
+        onToast('error', `Parse failed: ${result.error}`)
+        return
+      }
+      setPreview(result.data)
+    }
+    reader.onerror = () => onToast('error', 'Could not read file')
+    reader.readAsText(file)
+    // Reset the input so re-selecting the same file still triggers onChange
+    e.target.value = ''
+  }
+
+  const confirm = () => {
+    onSetCustomMotor(preview)
+    setPreview(null)
+  }
+
+  // Active motor: show a pill matching MotorSearch's selected-state style
+  if (customMotor && !preview) {
+    return (
+      <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+        <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
+          Custom Motor <span style={{ fontWeight: 400, opacity: 0.7 }}>(.eng import)</span>
+        </label>
+        <div style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+          padding: '5px 8px',
+          background: 'var(--ok-bg, rgba(74,222,128,0.08))',
+          border: '1px solid var(--ok-fg, #4ade80)',
+          borderRadius: 'var(--radius)',
+        }}>
+          <span style={{ fontSize: '12px' }}>
+            <span className="mono" style={{ color: 'var(--ok-fg, #4ade80)', fontWeight: 700 }}>
+              {customMotor.designation}
+            </span>
+            <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
+              <span className="mono">
+                {Math.round(customMotor.totalImpulse_ns)} Ns / {customMotor.burnTime_s.toFixed(2)}s / peak {Math.round(customMotor.peakThrust_N)} N
+              </span>
+            </span>
+          </span>
+          <button
+            onClick={onClearCustomMotor}
+            title="Clear custom motor"
+            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: '15px', padding: '0 2px', lineHeight: 1 }}
+          >×</button>
+        </div>
+      </div>
+    )
+  }
+
+  // Preview waiting for confirm
+  if (preview) {
+    return (
+      <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '6px' }}>
+        <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
+          Custom Motor Preview
+        </label>
+        <div style={{
+          padding: '10px 12px',
+          background: 'var(--bg-panel)',
+          border: '1px solid var(--accent)',
+          borderRadius: 'var(--radius)',
+          display: 'flex', flexDirection: 'column', gap: '8px',
+        }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
+            <span className="mono" style={{ fontWeight: 700, fontSize: '14px' }}>{preview.designation}</span>
+            <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>{preview.manufacturer}</span>
+          </div>
+          <div className="mono" style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px' }}>
+            <span>{preview.diameter_mm}×{preview.length_mm} mm</span>
+            <span>{preview.propellant_kg.toFixed(3)} kg prop</span>
+            <span>{Math.round(preview.totalImpulse_ns)} Ns total</span>
+            <span>{preview.total_kg.toFixed(3)} kg total</span>
+            <span>{preview.burnTime_s.toFixed(2)} s burn</span>
+            <span>peak {Math.round(preview.peakThrust_N)} N</span>
+          </div>
+          <ThrustCurveSparkline curve={preview.curve} peak={preview.peakThrust_N} />
+          <div style={{ display: 'flex', gap: '6px' }}>
+            <button
+              onClick={confirm}
+              style={{
+                flex: 1, padding: '6px 10px', fontSize: '12px', fontWeight: 600,
+                background: 'var(--accent)', color: 'var(--accent-text)',
+                border: '1px solid var(--accent)', borderRadius: 'var(--radius)',
+                cursor: 'pointer',
+              }}
+            >
+              Use This Motor
+            </button>
+            <button
+              onClick={() => setPreview(null)}
+              style={{
+                flex: 1, padding: '6px 10px', fontSize: '12px', fontWeight: 500,
+                background: 'transparent', color: 'var(--text-secondary)',
+                border: '1px solid var(--border-default)', borderRadius: 'var(--radius)',
+                cursor: 'pointer',
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Idle: upload chip
+  return (
+    <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+      <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
+        Custom Motor <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional — OpenMotor .eng import)</span>
+      </label>
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept=".eng"
+        onChange={handleFileSelect}
+        style={{ display: 'none' }}
+      />
+      <button
+        className="parts-add-custom"
+        onClick={() => fileInputRef.current?.click()}
+      >
+        + Import Custom Motor (.eng)
+      </button>
+    </div>
+  )
+}
+
+// Mini SVG sparkline of the thrust curve. ~30 lines, no dependency.
+function ThrustCurveSparkline({ curve, peak }) {
+  const W = 260, H = 40, PAD = 2
+  const tMax = curve[curve.length - 1].t
+  const points = curve.map(p => {
+    const x = PAD + (p.t / tMax) * (W - 2 * PAD)
+    const y = H - PAD - (p.thrust_N / peak) * (H - 2 * PAD)
+    return `${x.toFixed(1)},${y.toFixed(1)}`
+  }).join(' ')
+  return (
+    <svg width={W} height={H} viewBox={`0 0 ${W} ${H}`} style={{ display: 'block' }}>
+      <rect x="0" y="0" width={W} height={H} fill="var(--bg-app)" stroke="var(--border-subtle)" />
+      <polyline points={points} fill="none" stroke="var(--accent)" strokeWidth="1.5" />
+    </svg>
+  )
+}
 
 function MotorSearch({ onSetSpec }) {
   const [query,    setQuery]    = useState('')
@@ -237,7 +406,7 @@ function autoGFactor(mass_g) {
   return mass_kg >= 10000 ? 30 : 20
 }
 
-export default function RocketSpecs({ specs, onSetSpec }) {
+export default function RocketSpecs({ specs, onSetSpec, customMotor, onSetCustomMotor, onClearCustomMotor, onToast }) {
   const gAuto    = autoGFactor(specs.rocket_mass_g)
   // Use != '' instead of truthy check so the string '0' is treated as user-entered,
   // not silently replaced with gAuto (which would suppress the "Below 12G" NAR warning).
@@ -268,7 +437,15 @@ export default function RocketSpecs({ specs, onSetSpec }) {
           onChange={v => onSetSpec('rocket_mass_g', v)}
         />
 
-        {/* Motor search spans full width */}
+        {/* Custom motor (.eng import) — preferred over search for HPR custom motors */}
+        <CustomMotorImport
+          customMotor={customMotor}
+          onSetCustomMotor={onSetCustomMotor}
+          onClearCustomMotor={onClearCustomMotor}
+          onToast={onToast}
+        />
+
+        {/* ThrustCurve.org search — for commercial motors */}
         <MotorSearch onSetSpec={onSetSpec} />
 
         <SpecInput

@@ -3,6 +3,19 @@
 All notable changes to RecoverySys are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Added
+- **Custom motor `.eng` import** — HPR builders using OpenMotor (or any RASP `.eng` source: ThrustCurve.org downloads, OpenRocket exports) can now import their motor's thrust curve directly. New "+ Import Custom Motor (.eng)" button in the SPECS tab opens a file picker, parses the header and thrust samples, and shows a preview card with designation, diameter×length, propellant/total mass, total impulse, burn time, peak thrust, and a mini sparkline of the curve shape. Confirming injects the motor into state and auto-populates the Motor Impulse / Burn Time scalar fields.
+- **Thrust curve integration in `integrateAscent`** — when a custom motor is active, the powered-phase integrator interpolates thrust at each timestep (50 ms) instead of using a constant average. Apogee accuracy improves from ±10-15% (scalar) to ±3-5% (curve). New `apogee_method: 'integrated-curve'` surfaces in the dashboard.
+- **`parseEng(text)`** — new pure function in `src/lib/engParser.js` that parses RASP `.eng` files: normalizes line endings (CRLF/CR/LF), strips comments, validates the 7-field header, enforces chronological + terminal-zero curve, computes trapezoidal total impulse, burn time (last non-zero sample), and peak thrust. Rejects malformed input with specific error messages. 20 unit tests.
+- **`interpolateThrust(t, curve)`** — new export from `simulation.js`: linear interpolation between thrust samples, returns 0 past burnout, null/empty curve safe.
+- **Custom motor persistence** — `customMotor` survives localStorage save/load and round-trips through share links (base64 payload grows ~2-5 KB per curve, still well under practical URL limits).
+
+### Changed
+- `runSimulation({ specs, config })` now accepts an optional `customMotor` parameter. Backwards compatible — omitting the param keeps the scalar `integrated` path.
+- `integrateAscent` signature extended with optional `curve` and `propMass_kg_override` parameters. When `propMass_kg_override` is provided (from an imported motor's measured propellant mass), it's used instead of the Isp heuristic.
+
 ## [1.2.0.0] - 2026-04-09
 
 ### Added

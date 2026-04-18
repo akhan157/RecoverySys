@@ -22,6 +22,7 @@ export default function MissionControlLayout({
   state, allParts, customParts,
   selectPart, removePart, setSpec, setCategory, runSim,
   saveConfig, copyShareLink, addCustomPart, deleteCustomPart,
+  setCustomMotor, clearCustomMotor, addToast,
   darkMode, setDarkMode,
 }) {
   const [activeTab, setActiveTab] = useState('DASHBOARD')
@@ -118,6 +119,9 @@ export default function MissionControlLayout({
               setCategory={setCategory}
               saveConfig={saveConfig}
               copyShareLink={copyShareLink}
+              setCustomMotor={setCustomMotor}
+              clearCustomMotor={clearCustomMotor}
+              addToast={addToast}
             />
           )}
           {activeTab === 'EXPORT' && (
@@ -496,7 +500,7 @@ function DispersionTab({ state }) {
 // SPECS TAB — rocket specs form + config slots + warnings
 // ═══════════════════════════════════════════════════════════════════════════
 
-function SpecsTab({ state, setSpec, removePart, setCategory, saveConfig, copyShareLink }) {
+function SpecsTab({ state, setSpec, removePart, setCategory, saveConfig, copyShareLink, setCustomMotor, clearCustomMotor, addToast }) {
   return (
     <div className="mc-specs-panel">
       <div className="mc-panel-header">ROCKET_SPECIFICATIONS // MISSION_PARAMETERS</div>
@@ -513,6 +517,10 @@ function SpecsTab({ state, setSpec, removePart, setCategory, saveConfig, copySha
           onSave={saveConfig}
           onShare={copyShareLink}
           onSelectCategory={setCategory}
+          customMotor={state.customMotor}
+          onSetCustomMotor={setCustomMotor}
+          onClearCustomMotor={clearCustomMotor}
+          onToast={addToast}
         />
       </div>
     </div>

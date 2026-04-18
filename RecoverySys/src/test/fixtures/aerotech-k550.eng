@@ -1,0 +1,18 @@
+; AeroTech K550W
+; Total impulse: ~1596 Ns (K class, 1281-2560 Ns)
+; Burn time: ~2.9 s
+; Peak thrust: ~850 N
+; Source: approximated from ThrustCurve.org published data
+K550W 54 410 P .919 1.838 AT
+   0.04  220
+   0.10  620
+   0.20  850
+   0.40  790
+   0.80  720
+   1.20  660
+   1.60  600
+   2.00  540
+   2.40  450
+   2.70  300
+   2.85  120
+   2.90    0

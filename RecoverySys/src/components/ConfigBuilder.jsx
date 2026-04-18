@@ -7,6 +7,7 @@ export default function ConfigBuilder({
   categories, config, specs, warnings,
   saveState, shareState,
   onRemovePart, onSetSpec, onSave, onShare, onSelectCategory,
+  customMotor, onSetCustomMotor, onClearCustomMotor, onToast,
 }) {
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -43,7 +44,14 @@ export default function ConfigBuilder({
       <div style={{ borderTop: '1px solid var(--border-subtle)', margin: '0 -16px' }} />
 
       {/* Rocket Specs */}
-      <RocketSpecs specs={specs} onSetSpec={onSetSpec} />
+      <RocketSpecs
+        specs={specs}
+        onSetSpec={onSetSpec}
+        customMotor={customMotor}
+        onSetCustomMotor={onSetCustomMotor}
+        onClearCustomMotor={onClearCustomMotor}
+        onToast={onToast}
+      />
 
       {/* Divider */}
       <div style={{ borderTop: '1px solid var(--border-subtle)', margin: '0 -16px' }} />

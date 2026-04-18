@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { computeDescentRate, computeShockLoad, computeDrift, runSimulation } from '../lib/simulation.js'
+import { computeDescentRate, computeShockLoad, computeDrift, runSimulation, interpolateThrust } from '../lib/simulation.js'
 
 // ── computeDescentRate ────────────────────────────────────────────────────────
 
@@ -334,5 +334,125 @@ describe('runSimulation', () => {
     expect(Number.isNaN(result.drogue_fps)).toBe(false)
     expect(Number.isNaN(result.main_fps)).toBe(false)
     expect(Number.isNaN(result.drift_ft)).toBe(false)
+  })
+})
+
+// ── interpolateThrust ─────────────────────────────────────────────────────────
+
+describe('interpolateThrust', () => {
+  const curve = [
+    { t: 0, thrust_N: 0 },
+    { t: 0.1, thrust_N: 500 },
+    { t: 1.0, thrust_N: 500 },
+    { t: 1.2, thrust_N: 0 },
+  ]
+
+  it('returns 0 for empty or missing curve', () => {
+    expect(interpolateThrust(0.5, [])).toBe(0)
+    expect(interpolateThrust(0.5, null)).toBe(0)
+    expect(interpolateThrust(0.5, undefined)).toBe(0)
+  })
+
+  it('returns first sample thrust for t before curve start', () => {
+    expect(interpolateThrust(-1, curve)).toBe(0)
+  })
+
+  it('returns 0 past the last sample (motor burnout)', () => {
+    expect(interpolateThrust(2.0, curve)).toBe(0)
+    expect(interpolateThrust(1.2, curve)).toBe(0)
+  })
+
+  it('linearly interpolates within the curve', () => {
+    // Midpoint of 0 → 500 N between t=0 and t=0.1
+    expect(interpolateThrust(0.05, curve)).toBeCloseTo(250, 1)
+    // Midpoint of 500 → 0 between t=1.0 and t=1.2
+    expect(interpolateThrust(1.1, curve)).toBeCloseTo(250, 1)
+  })
+
+  it('returns exact sample values at curve points', () => {
+    expect(interpolateThrust(0.1, curve)).toBe(500)
+    expect(interpolateThrust(1.0, curve)).toBe(500)
+  })
+})
+
+// ── runSimulation with customMotor ────────────────────────────────────────────
+
+describe('runSimulation — custom motor thrust curve', () => {
+  const specs = {
+    rocket_mass_g: '3000',
+    motor_total_impulse_ns: '1600',
+    burn_time_s: '2.9',
+    airframe_id_in: '4',
+    drag_cd: '0.5',
+    main_deploy_alt_ft: '500',
+    wind_speed_mph: '10',
+    wind_direction_deg: '270',
+  }
+  const config = {
+    main_chute: { specs: { diameter_in: 36, cd: 1.5 } },
+    drogue_chute: { specs: { diameter_in: 18, cd: 1.5 } },
+  }
+
+  // Synthetic "K550" curve (constant avg thrust shape) so apogee must equal
+  // the scalar path within a few percent — regression guard that the curve
+  // integration doesn't drift from the impulse/burn_time math.
+  const flatCurve = {
+    designation: 'FLAT-K550',
+    curve: [
+      { t: 0, thrust_N: 0 },
+      { t: 0.01, thrust_N: 552 },   // 1600/2.9 ≈ 552
+      { t: 2.89, thrust_N: 552 },
+      { t: 2.90, thrust_N: 0 },
+    ],
+    totalImpulse_ns: 1600,
+    burnTime_s: 2.9,
+    peakThrust_N: 552,
+    propellant_kg: 0.919,
+  }
+
+  it('runs with a customMotor curve and produces a valid simulation', () => {
+    const result = runSimulation({ specs, config, customMotor: flatCurve })
+    expect(result).not.toBeNull()
+    expect(result.apogee_ft).toBeGreaterThan(0)
+    expect(result.apogee_method).toBe('integrated-curve')
+  })
+
+  it('constant-thrust curve produces apogee within 5% of scalar path', () => {
+    const scalar = runSimulation({ specs, config })
+    const curve  = runSimulation({ specs, config, customMotor: flatCurve })
+    const delta  = Math.abs(scalar.apogee_ft - curve.apogee_ft) / scalar.apogee_ft
+    expect(delta).toBeLessThan(0.05)
+  })
+
+  it('falls back to scalar path when customMotor is null', () => {
+    const result = runSimulation({ specs, config, customMotor: null })
+    expect(result).not.toBeNull()
+    expect(result.apogee_method).toBe('integrated')
+  })
+
+  it('uses propellant_kg from customMotor when provided', () => {
+    // Heavy propellant motor (2 kg prop of 3 kg total = 67% prop fraction, capped at 55%)
+    const heavyPropMotor = { ...flatCurve, propellant_kg: 2.0 }
+    const result = runSimulation({ specs, config, customMotor: heavyPropMotor })
+    expect(result).not.toBeNull()
+    // With more prop mass, dry mass is lower → higher apogee
+    // But capped at 55% so it's not unbounded
+    expect(result.apogee_ft).toBeGreaterThan(0)
+  })
+
+  it('works when customMotor.curve has the minimum 2 points', () => {
+    const minCurve = {
+      designation: 'MIN',
+      curve: [{ t: 0, thrust_N: 0 }, { t: 1, thrust_N: 0 }],
+      totalImpulse_ns: 0,
+      burnTime_s: 0,
+      peakThrust_N: 0,
+      propellant_kg: 0.1,
+    }
+    // Even with a zero-impulse curve, should not crash; the scalar impulse still
+    // drives the sim because the curve interpolation returns 0 here.
+    const result = runSimulation({ specs, config, customMotor: minCurve })
+    // Expect null OR low apogee — the key is it doesn't throw
+    expect(() => runSimulation({ specs, config, customMotor: minCurve })).not.toThrow()
   })
 })

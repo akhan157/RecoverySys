@@ -64,6 +64,23 @@ function loadCustomParts() {
   } catch { return [] }
 }
 
+// Defensive shape-check for customMotor loaded from localStorage or a share link.
+// Returns null if the payload is missing required fields or malformed — the user's
+// manually-entered motor_total_impulse_ns/burn_time_s stay as the fallback.
+function rehydrateCustomMotor(m) {
+  if (!m || typeof m !== 'object') return null
+  if (typeof m.designation !== 'string' || m.designation.length === 0) return null
+  if (!Array.isArray(m.curve) || m.curve.length < 2) return null
+  // Validate a sample: each point must have numeric t and thrust_N
+  for (const p of m.curve) {
+    if (!p || typeof p.t !== 'number' || typeof p.thrust_N !== 'number') return null
+    if (!isFinite(p.t) || !isFinite(p.thrust_N)) return null
+  }
+  if (!isFinite(m.totalImpulse_ns) || m.totalImpulse_ns <= 0) return null
+  if (!isFinite(m.burnTime_s) || m.burnTime_s <= 0) return null
+  return m
+}
+
 function buildInitialState() {
   const saved = loadSaved()
   const custom = loadCustomParts()
@@ -72,6 +89,10 @@ function buildInitialState() {
   return {
     config: Object.fromEntries(SLOT_IDS.map(id => [id, rehydrate(saved?.config?.[id])])),
     specs: { ...DEFAULT_SPECS, ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)) },
+    // Imported .eng motor file data: null when using the ThrustCurve search or manual entry.
+    // Shape: { designation, curve: [{t, thrust_N}], totalImpulse_ns, burnTime_s,
+    //         peakThrust_N, propellant_kg, total_kg, diameter_mm, length_mm, delays, manufacturer }
+    customMotor: rehydrateCustomMotor(saved?.customMotor),
     activeCategory: SLOT_IDS[0],
     simulation: null,
     simRunning: false,
@@ -90,6 +111,23 @@ function reducer(state, action) {
       return { ...state, config: { ...state.config, [action.category]: null }, simulation: null }
     case 'SET_SPEC':
       return { ...state, specs: { ...state.specs, [action.key]: action.value }, simulation: null }
+    // Loading a custom motor also mirrors its totalImpulse/burnTime into specs so
+    // that canRun + the status-bar MOTOR display keep working unchanged.
+    case 'SET_CUSTOM_MOTOR':
+      return {
+        ...state,
+        customMotor: action.motor,
+        specs: {
+          ...state.specs,
+          motor_total_impulse_ns: String(Math.round(action.motor.totalImpulse_ns)),
+          burn_time_s: String(action.motor.burnTime_s.toFixed(2)),
+        },
+        simulation: null,
+      }
+    // Clearing the motor keeps the scalar specs — user may have typed them manually
+    // before or want to continue with ThrustCurve search.
+    case 'CLEAR_CUSTOM_MOTOR':
+      return { ...state, customMotor: null, simulation: null }
     case 'SET_CATEGORY':
       return { ...state, activeCategory: action.category }
     case 'SET_WARNINGS':
@@ -110,7 +148,13 @@ function reducer(state, action) {
     // Doing this in one action prevents the receiver's localStorage-restored values
     // from bleeding through for slots/keys that are null or absent in the payload.
     case 'LOAD_SHARE':
-      return { ...state, config: action.config, specs: action.specs, simulation: null }
+      return {
+        ...state,
+        config: action.config,
+        specs: action.specs,
+        customMotor: action.customMotor ?? null,
+        simulation: null,
+      }
     default:
       return state
   }
@@ -194,9 +238,14 @@ export default function App() {
   const removePart    = useCallback((category) => dispatch({ type: 'REMOVE_PART', category }), [])
   const setSpec       = useCallback((key, value) => dispatch({ type: 'SET_SPEC', key, value }), [])
   const setCategory   = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
+  const setCustomMotor   = useCallback((motor) => dispatch({ type: 'SET_CUSTOM_MOTOR', motor }), [])
+  const clearCustomMotor = useCallback(() => dispatch({ type: 'CLEAR_CUSTOM_MOTOR' }), [])
+  const addToast = useCallback((level, message) => {
+    dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
+  }, [])
   const runSim = useCallback(() => {
     dispatch({ type: 'START_SIM' })
-    const result = runSimulation({ specs: state.specs, config: state.config })
+    const result = runSimulation({ specs: state.specs, config: state.config, customMotor: state.customMotor })
     dispatch({ type: 'SET_SIM', simulation: result })
     // runSimulation returns null for: apogee ≤ deploy_ft, degenerate drogue specs,
     // NaN propagation. Without a surface here the user sees an empty chart with no
@@ -207,13 +256,16 @@ export default function App() {
         level: 'error',
       }})
     }
-  }, [state.specs, state.config])
+  }, [state.specs, state.config, state.customMotor])
 
   const saveConfig = useCallback(() => {
     dispatch({ type: 'SET_SAVE_STATE', state: 'saving' })
     let ok = false
     try {
-      localStorage.setItem('recoverysys-config', JSON.stringify({ config: state.config, specs: state.specs }))
+      localStorage.setItem(
+        'recoverysys-config',
+        JSON.stringify({ config: state.config, specs: state.specs, customMotor: state.customMotor }),
+      )
       ok = true
     } catch { /* storage full */ }
     if (ok) {
@@ -223,7 +275,7 @@ export default function App() {
       dispatch({ type: 'SET_SAVE_STATE', state: 'idle' })
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Save failed — storage full', level: 'error' } })
     }
-  }, [state.config, state.specs, safeTimeout])
+  }, [state.config, state.specs, state.customMotor, safeTimeout])
 
   const copyShareLink = useCallback(() => {
     try {
@@ -231,7 +283,7 @@ export default function App() {
       const configIds = Object.fromEntries(
         Object.entries(state.config).map(([cat, part]) => [cat, part ? { id: part.id } : null])
       )
-      const payload = { config: configIds, specs: state.specs }
+      const payload = { config: configIds, specs: state.specs, customMotor: state.customMotor }
       const encoded = btoa(encodeURIComponent(JSON.stringify(payload)))
       const url = `${location.origin}${location.pathname}?c=${encodeURIComponent(encoded)}`
       // Only show "Copied!" after the write actually succeeds.
@@ -248,7 +300,7 @@ export default function App() {
       // Synchronous failure — clipboard API unavailable
       dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { message: 'Copy failed — try again', level: 'error' } })
     }
-  }, [state.config, state.specs, safeTimeout])
+  }, [state.config, state.specs, state.customMotor, safeTimeout])
 
   const removeToast = useCallback((id) => dispatch({ type: 'REMOVE_TOAST', id }), [])
 
@@ -303,7 +355,10 @@ export default function App() {
         })
       }
 
-      dispatch({ type: 'LOAD_SHARE', config: newConfig, specs: newSpecs })
+      // Pass customMotor through rehydrate to defensively reject malformed payloads
+      const sharedMotor = rehydrateCustomMotor(payload.customMotor)
+
+      dispatch({ type: 'LOAD_SHARE', config: newConfig, specs: newSpecs, customMotor: sharedMotor })
 
       if (catalogMissing > 0) {
         dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
@@ -336,6 +391,9 @@ export default function App() {
         copyShareLink={copyShareLink}
         addCustomPart={addCustomPart}
         deleteCustomPart={deleteCustomPart}
+        setCustomMotor={setCustomMotor}
+        clearCustomMotor={clearCustomMotor}
+        addToast={addToast}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
       />
