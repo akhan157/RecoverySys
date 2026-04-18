@@ -62,12 +62,24 @@
 }
 
 /* ── Category filter chips ──────────────────────────────────
-   Ensures 44px min-height on touch devices while keeping the
-   compact 30px look on desktop where pointer precision is fine. */
+   Base styles live here so touch-target overrides below win on normal
+   specificity (previously the component set these inline, forcing
+   !important on the media query). */
+.parts-category-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 12px;
+  transition: all 150ms ease;
+  white-space: nowrap;
+}
 @media (hover: none) and (pointer: coarse) {
   .parts-category-chip {
-    min-height: 44px !important;
-    padding: 10px 14px !important;
+    min-height: 44px;
+    padding: 10px 14px;
   }
 }
 

@@ -178,6 +178,7 @@ export default function App() {
   const toastCounter      = useRef(0)
   const timeoutIds        = useRef([])
   const restoredToastFired = useRef(false)   // guard against React 18 StrictMode double-invoke
+  const leafletPrefetched  = useRef(false)
 
   const safeTimeout = useCallback((fn, ms) => {
     const id = setTimeout(fn, ms)
@@ -189,8 +190,11 @@ export default function App() {
     return () => timeoutIds.current.forEach(clearTimeout)
   }, [])
 
-  // Warm the Leaflet chunk during idle time so the Dispersion tab opens instantly.
-  useEffect(() => { prefetchLeaflet() }, [])
+  useEffect(() => {
+    if (leafletPrefetched.current) return   // StrictMode double-invoke idempotent
+    leafletPrefetched.current = true
+    prefetchLeaflet()
+  }, [])
 
   // ── Dark mode ─────────────────────────────────────────────────────────────
   const [darkMode, setDarkMode] = React.useState(() => {

@@ -9,7 +9,18 @@
     <script>(function(){try{var t=localStorage.getItem('recoverysys-theme');if(t==='dark'||(t==null&&matchMedia('(prefers-color-scheme: dark)').matches))document.documentElement.setAttribute('data-theme','dark');}catch(e){}})()</script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+    <!-- Async-load Google Fonts so the skeleton + app paint first. display=swap
+         means the browser uses the system fallback (JetBrains Mono → ui-monospace,
+         Inter → system-ui) until the web fonts arrive, then swaps them in. Without
+         this, the <link rel="stylesheet"> would block paint until the Google CSS
+         responds, typically adding 100-300ms to first paint. -->
+    <link
+      rel="preload"
+      as="style"
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap"
+      onload="this.onload=null;this.rel='stylesheet'"
+    />
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" /></noscript>
 
     <!-- Pre-hydration shell — React replaces #root on mount. These styles are
          only active until the app boots; once it does, our full stylesheet

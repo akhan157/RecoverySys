@@ -330,19 +330,10 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
                 onClick={() => onSelectCategory(cat.id)}
                 title={tooltip}
                 style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: '5px',
-                  padding: '5px 12px',
                   background: isActive ? 'var(--accent)' : 'var(--bg-panel)',
                   color: isActive ? 'var(--accent-text)' : 'var(--text-secondary)',
                   border: `1px solid ${isActive ? 'var(--accent)' : 'var(--border-default)'}`,
-                  borderRadius: '20px',
-                  cursor: 'pointer',
-                  fontSize: '12px',
                   fontWeight: isActive ? 600 : 400,
-                  transition: 'all 150ms ease',
-                  whiteSpace: 'nowrap',
                 }}
               >
                 {cat.label}

@@ -92,8 +92,7 @@
   letter-spacing: 0.08em;
   color: var(--mc-white);
   white-space: nowrap;
-  margin: 0;           /* reset h1 default margin */
-  font-family: inherit;
+  font-family: inherit;   /* <h1> inherits body mono font instead of UA-default serif */
 }
 
 .mc-header__tabs {
@@ -219,7 +218,7 @@
 
 .mc-panel-header {
   font-size: 10px;
-  font-weight: 400;
+  font-weight: 400;        /* <h2> defaults to bold; keep label look subtle */
   letter-spacing: 0.08em;
   color: var(--mc-text-dim);
   padding: 10px 14px;
@@ -227,7 +226,6 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin: 0;              /* reset h2 default margin */
   font-family: inherit;
   flex-shrink: 0;
 }
