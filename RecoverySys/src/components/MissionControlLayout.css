@@ -714,7 +714,9 @@
 
 .mc-dispersion__content {
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding: 0;
 }
 

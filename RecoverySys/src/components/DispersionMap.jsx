@@ -257,7 +257,7 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
   const canShow = !!simulation && !!drift
 
   return (
-    <div style={{ borderTop: '1px solid var(--border-default)' }}>
+    <div style={{ borderTop: '1px solid var(--border-default)', display: 'flex', flexDirection: 'column', height: '100%', minHeight: 0 }}>
 
       {/* Toggle header */}
       <button
@@ -279,7 +279,7 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
       </button>
 
       {open && (
-        <div>
+        <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
           {/* Drift stats bar */}
           {canShow && (
             <div style={{
@@ -340,11 +340,12 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
             </div>
           )}
 
-          {/* Map container */}
+          {/* Map container — fills available vertical space */}
           <div
             ref={mapRef}
             style={{
-              height: '300px',
+              flex: 1,
+              minHeight: '300px',
               background: 'var(--bg-right)',
               display: hasCoords ? 'block' : 'none',
             }}
