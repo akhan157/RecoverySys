@@ -8,6 +8,7 @@ import {
   loadTheme, saveTheme,
 } from './lib/storage.js'
 import { encodeSharePayload, buildShareUrl, decodeSharePayload, SHARE_PARAM } from './lib/shareLink.js'
+import { SAVE_STATES, SHARE_STATES, TOAST_LEVELS } from './lib/constants.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 
@@ -63,8 +64,8 @@ function buildInitialState() {
     simRunning: false,
     warnings: [],
     toasts: [],
-    saveState: 'idle',
-    shareState: 'idle',
+    saveState: SAVE_STATES.IDLE,
+    shareState: SHARE_STATES.IDLE,
   }
 }
 
@@ -208,19 +209,19 @@ export default function App() {
     // NaN propagation. Without a surface here the user sees an empty chart with
     // no explanation — indistinguishable from "haven't run yet".
     if (result === null) {
-      addToast('error', 'Simulation failed — main deploy altitude may exceed apogee, or chute specs are invalid. Lower deploy altitude or increase motor impulse.')
+      addToast(TOAST_LEVELS.ERROR, 'Simulation failed — main deploy altitude may exceed apogee, or chute specs are invalid. Lower deploy altitude or increase motor impulse.')
     }
   }, [state.specs, state.config, state.customMotor, addToast])
 
   const saveConfig = useCallback(() => {
-    dispatch({ type: 'SET_SAVE_STATE', state: 'saving' })
+    dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVING })
     const ok = saveConfigToStorage({ config: state.config, specs: state.specs, customMotor: state.customMotor })
     if (ok) {
-      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'saved' }), 400)
-      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: 'idle' }), 2400)
+      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVED }), 400)
+      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE  }), 2400)
     } else {
-      dispatch({ type: 'SET_SAVE_STATE', state: 'idle' })
-      addToast('error', 'Save failed — storage full')
+      dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE })
+      addToast(TOAST_LEVELS.ERROR, 'Save failed — storage full')
     }
   }, [state.config, state.specs, state.customMotor, safeTimeout, addToast])
 
@@ -230,14 +231,14 @@ export default function App() {
       const url = buildShareUrl(encoded)
       // Only show "Copied!" after the write actually succeeds.
       navigator.clipboard.writeText(url).then(() => {
-        dispatch({ type: 'SET_SHARE_STATE', state: 'copied' })
-        safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: 'idle' }), 2000)
+        dispatch({ type: 'SET_SHARE_STATE', state: SHARE_STATES.COPIED })
+        safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: SHARE_STATES.IDLE }), 2000)
       }).catch(() => {
-        addToast('error', 'Copy failed — try again')
+        addToast(TOAST_LEVELS.ERROR, 'Copy failed — try again')
       })
     } catch {
       // Synchronous failure — clipboard API unavailable
-      addToast('error', 'Copy failed — try again')
+      addToast(TOAST_LEVELS.ERROR, 'Copy failed — try again')
     }
   }, [state.config, state.specs, state.customMotor, safeTimeout, addToast])
 
@@ -251,7 +252,7 @@ export default function App() {
       if (new URLSearchParams(location.search).get(SHARE_PARAM)) return   // share link active — URL state takes precedence
       const raw = localStorage.getItem('recoverysys-config')
       if (raw && JSON.parse(raw)) {
-        addToast('ok', 'Restored your last session.')
+        addToast(TOAST_LEVELS.OK, 'Restored your last session.')
       }
     } catch { /* silent */ }
   }, [addToast])
@@ -271,10 +272,10 @@ export default function App() {
       customMotor: decoded.customMotor,
     })
     if (decoded.catalogMissing > 0) {
-      addToast('warn', `${decoded.catalogMissing} part${decoded.catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`)
+      addToast(TOAST_LEVELS.WARN, `${decoded.catalogMissing} part${decoded.catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`)
     }
     if (decoded.customMissing > 0) {
-      addToast('warn', `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be shared — add them manually.`)
+      addToast(TOAST_LEVELS.WARN, `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be shared — add them manually.`)
     }
     // allParts / addToast intentionally read once at mount — link is parsed exactly once.
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -1,10 +1,11 @@
 import React from 'react'
+import { WARN_LEVELS } from '../lib/constants.js'
 
 export default function WarningBox({ warnings }) {
   if (!warnings || warnings.length === 0) return null
 
-  const hasError = warnings.some(w => w.level === 'error')
-  const level    = hasError ? 'error' : 'warn'
+  const hasError = warnings.some(w => w.level === WARN_LEVELS.ERROR)
+  const level    = hasError ? WARN_LEVELS.ERROR : WARN_LEVELS.WARN
 
   const styles = {
     error: {
@@ -19,8 +20,8 @@ export default function WarningBox({ warnings }) {
     },
   }[level]
 
-  const errorCount = warnings.filter(w => w.level === 'error').length
-  const warnCount  = warnings.filter(w => w.level === 'warn').length
+  const errorCount = warnings.filter(w => w.level === WARN_LEVELS.ERROR).length
+  const warnCount  = warnings.filter(w => w.level === WARN_LEVELS.WARN).length
 
   let header
   if (hasError) {
@@ -42,8 +43,8 @@ export default function WarningBox({ warnings }) {
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
         {warnings.map((w, i) => (
           <div key={i} style={{ display: 'flex', gap: '6px', fontSize: '11px', color: 'var(--text-secondary)', alignItems: 'flex-start' }}>
-            <span style={{ color: w.level === 'error' ? 'var(--error-fg)' : 'var(--warn-fg)', flexShrink: 0 }}>
-              {w.level === 'error' ? '✕' : '⚠'}
+            <span style={{ color: w.level === WARN_LEVELS.ERROR ? 'var(--error-fg)' : 'var(--warn-fg)', flexShrink: 0 }}>
+              {w.level === WARN_LEVELS.ERROR ? '✕' : '⚠'}
             </span>
             <span>{w.message}</span>
           </div>

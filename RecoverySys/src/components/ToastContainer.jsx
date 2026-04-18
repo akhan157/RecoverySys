@@ -1,10 +1,11 @@
 import React, { useEffect } from 'react'
+import { TOAST_LEVELS } from '../lib/constants.js'
 
 // Per-level design-system token pairs
 const LEVEL_STYLES = {
-  ok:    { background: 'var(--cta-bg)',   color: 'var(--cta-fg)'   },
-  warn:  { background: 'var(--warn-bg)',  color: 'var(--warn-fg)'  },
-  error: { background: 'var(--error-bg)', color: 'var(--error-fg)' },
+  [TOAST_LEVELS.OK]:    { background: 'var(--cta-bg)',   color: 'var(--cta-fg)'   },
+  [TOAST_LEVELS.WARN]:  { background: 'var(--warn-bg)',  color: 'var(--warn-fg)'  },
+  [TOAST_LEVELS.ERROR]: { background: 'var(--error-bg)', color: 'var(--error-fg)' },
 }
 
 function Toast({ toast, onRemove }) {
@@ -13,12 +14,12 @@ function Toast({ toast, onRemove }) {
     return () => clearTimeout(t)
   }, [toast.id, onRemove])
 
-  const levelStyle = LEVEL_STYLES[toast.level] ?? LEVEL_STYLES.error
+  const levelStyle = LEVEL_STYLES[toast.level] ?? LEVEL_STYLES[TOAST_LEVELS.ERROR]
 
   return (
     <div
       role="alert"
-      aria-live={toast.level === 'error' ? 'assertive' : 'polite'}
+      aria-live={toast.level === TOAST_LEVELS.ERROR ? 'assertive' : 'polite'}
       className="toast-enter"
       style={{
         ...levelStyle,

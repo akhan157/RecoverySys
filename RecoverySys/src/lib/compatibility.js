@@ -1,4 +1,5 @@
 import { computeDescentRate } from './simulation.js'
+import { WARN_LEVELS } from './constants.js'
 
 const G_ACCEL = 9.81
 
@@ -35,19 +36,19 @@ export function checkCompatibility({ config, specs }) {
       const fps = computeDescentRate({ diameter_in, cd }, mass_kg, deploy_alt)
       if (fps > 20) {
         warnings.push({
-          level: 'error',
+          level: WARN_LEVELS.ERROR,
           slot: 'main_chute',
           message: `Main descent rate ${fps.toFixed(1)} fps exceeds 20 fps — hard landing risk`,
         })
       } else if (fps > 15) {
         warnings.push({
-          level: 'warn',
+          level: WARN_LEVELS.WARN,
           slot: 'main_chute',
           message: `Main descent rate ${fps.toFixed(1)} fps is above 15 fps — consider a larger chute`,
         })
       } else if (fps < 5) {
         warnings.push({
-          level: 'warn',
+          level: WARN_LEVELS.WARN,
           slot: 'main_chute',
           message: `Main descent rate ${fps.toFixed(1)} fps is very slow — high drift risk`,
         })
@@ -64,13 +65,13 @@ export function checkCompatibility({ config, specs }) {
       const fps = computeDescentRate({ diameter_in, cd }, mass_kg)
       if (fps < 30) {
         warnings.push({
-          level: 'warn',
+          level: WARN_LEVELS.WARN,
           slot: 'drogue_chute',
           message: `Drogue descent rate ${fps.toFixed(1)} fps is too slow — excessive drift before main deploy`,
         })
       } else if (fps > 150) {
         warnings.push({
-          level: 'warn',
+          level: WARN_LEVELS.WARN,
           slot: 'drogue_chute',
           message: `Drogue descent rate ${fps.toFixed(1)} fps is very fast — high ejection shock load`,
         })
@@ -88,13 +89,13 @@ export function checkCompatibility({ config, specs }) {
 
     if (strength_lbs < required_lbs) {
       warnings.push({
-        level: 'error',
+        level: WARN_LEVELS.ERROR,
         slot: 'shock_cord',
         message: `Shock cord rated ${strength_lbs} lbs may fail at ejection (need ~${Math.ceil(required_lbs)} lbs at ${g_factor}G for ${mass_kg.toFixed(1)} kg rocket)`,
       })
     } else if (strength_lbs < required_lbs * 1.5) {
       warnings.push({
-        level: 'warn',
+        level: WARN_LEVELS.WARN,
         slot: 'shock_cord',
         message: `Shock cord rated ${strength_lbs} lbs — marginal safety factor at ${g_factor}G ejection load (~${Math.ceil(required_lbs)} lbs required)`,
       })
@@ -108,7 +109,7 @@ export function checkCompatibility({ config, specs }) {
       const recommended_lbs = Math.ceil(required_lbs * 2)
       if (strength_lbs < recommended_lbs) {
         warnings.push({
-          level: 'warn',
+          level: WARN_LEVELS.WARN,
           slot: 'shock_cord',
           message: `Kevlar is nearly inelastic — snatch force at chute deployment can be 3–5× higher than static load. For L3, use a Kevlar cord rated ≥${recommended_lbs} lbs (2× minimum) or switch to tubular nylon.`,
         })
@@ -122,7 +123,7 @@ export function checkCompatibility({ config, specs }) {
       const min_length = mass_kg >= 10 ? 15 : mass_kg >= 2.5 ? 10 : 5
       if (length_ft < min_length) {
         warnings.push({
-          level: 'warn',
+          level: WARN_LEVELS.WARN,
           slot: 'shock_cord',
           message: `Harness length ${length_ft}ft may be insufficient — minimum ${min_length}ft recommended for this rocket class`,
         })
@@ -136,7 +137,7 @@ export function checkCompatibility({ config, specs }) {
     const { diameter_in } = config.main_chute.specs
     if (diameter_in > max_chute_diam_in) {
       warnings.push({
-        level: 'error',
+        level: WARN_LEVELS.ERROR,
         slot: 'chute_protector',
         message: `${config.chute_protector.name} (max ${max_chute_diam_in}" chute) is too small for ${diameter_in}" main — chute may be scorched`,
       })
@@ -149,13 +150,13 @@ export function checkCompatibility({ config, specs }) {
     const required_lbs = (mass_kg * G_ACCEL * g_factor) / 4.448
     if (ql_lbs < required_lbs) {
       warnings.push({
-        level: 'error',
+        level: WARN_LEVELS.ERROR,
         slot: 'quick_links',
         message: `Quick links rated ${ql_lbs} lbs may fail at ejection (need ~${Math.ceil(required_lbs)} lbs at ${g_factor}G)`,
       })
     } else if (ql_lbs < required_lbs * 1.5) {
       warnings.push({
-        level: 'warn',
+        level: WARN_LEVELS.WARN,
         slot: 'quick_links',
         message: `Quick links rated ${ql_lbs} lbs — marginal safety factor at ${g_factor}G ejection load`,
       })
@@ -164,18 +165,18 @@ export function checkCompatibility({ config, specs }) {
 
   // ── Quick links vs shock cord strength ───────────────────────────────────────
   // Skip if the mass-check above already issued an error on this slot (avoids duplicate errors)
-  if (config.quick_links && config.shock_cord && !warnings.some(w => w.slot === 'quick_links' && w.level === 'error')) {
+  if (config.quick_links && config.shock_cord && !warnings.some(w => w.slot === 'quick_links' && w.level === WARN_LEVELS.ERROR)) {
     const ql_lbs = config.quick_links.specs.strength_lbs
     const sc_lbs = config.shock_cord.specs.strength_lbs
     if (ql_lbs < sc_lbs) {
       warnings.push({
-        level: 'error',
+        level: WARN_LEVELS.ERROR,
         slot: 'quick_links',
         message: `Quick links rated ${ql_lbs} lbs are weaker than shock cord (${sc_lbs} lbs) — links will fail first`,
       })
     } else if (ql_lbs < sc_lbs * 1.2) {
       warnings.push({
-        level: 'warn',
+        level: WARN_LEVELS.WARN,
         slot: 'quick_links',
         message: `Quick links (${ql_lbs} lbs) are only marginally stronger than shock cord (${sc_lbs} lbs)`,
       })
@@ -190,13 +191,13 @@ export function checkCompatibility({ config, specs }) {
     const { deploy_alt_min_ft, deploy_alt_max_ft } = config.chute_device.specs
     if (deploy_ft > deploy_alt_max_ft) {
       warnings.push({
-        level: 'error',
+        level: WARN_LEVELS.ERROR,
         slot: 'chute_device',
         message: `${config.chute_device.name} max altitude is ${deploy_alt_max_ft.toLocaleString()} ft — deploy altitude ${deploy_ft.toLocaleString()} ft exceeds it`,
       })
     } else if (deploy_ft < deploy_alt_min_ft) {
       warnings.push({
-        level: 'warn',
+        level: WARN_LEVELS.WARN,
         slot: 'chute_device',
         message: `${config.chute_device.name} minimum altitude is ${deploy_alt_min_ft} ft — deploy altitude ${deploy_ft} ft is below it`,
       })
@@ -209,7 +210,7 @@ export function checkCompatibility({ config, specs }) {
     const chute_d = config.main_chute.specs.diameter_in
     if (chute_d > bag_max) {
       warnings.push({
-        level: 'warn',
+        level: WARN_LEVELS.WARN,
         slot: 'deployment_bag',
         message: `${config.deployment_bag.name} (max ${bag_max}" chute) may be too small for ${chute_d}" main — chute may not pack cleanly`,
       })
@@ -222,13 +223,13 @@ export function checkCompatibility({ config, specs }) {
     const req_lbs   = (mass_kg * G_ACCEL * g_factor) / 4.448
     if (rated < req_lbs) {
       warnings.push({
-        level: 'error',
+        level: WARN_LEVELS.ERROR,
         slot: 'swivel',
         message: `Swivel rated ${rated} lbs may fail at ejection (need ~${Math.ceil(req_lbs)} lbs at ${g_factor}G for ${mass_kg.toFixed(1)} kg rocket)`,
       })
     } else if (rated < req_lbs * 1.5) {
       warnings.push({
-        level: 'warn',
+        level: WARN_LEVELS.WARN,
         slot: 'swivel',
         message: `Swivel rated ${rated} lbs — marginal safety factor at ${g_factor}G ejection load (~${Math.ceil(req_lbs)} lbs required)`,
       })
@@ -242,7 +243,7 @@ export function checkCompatibility({ config, specs }) {
       const pd = item?.specs.packed_diam_in
       if (pd && pd > airframe_id) {
         warnings.push({
-          level: 'error',
+          level: WARN_LEVELS.ERROR,
           slot,
           message: `${item.name} packed diameter ${pd}" exceeds airframe ID ${airframe_id}" — won't fit in tube`,
         })
@@ -277,13 +278,13 @@ export function checkCompatibility({ config, specs }) {
       const pct = usable_volume > 0 ? Math.round((stacked_vol / usable_volume) * 100) : 100
       if (stacked_vol > usable_volume) {
         warnings.push({
-          level: 'error',
+          level: WARN_LEVELS.ERROR,
           slot: 'bay_volume',
           message: `Packed chutes total ~${stacked_vol.toFixed(0)} in³ but only ${usable_volume.toFixed(0)} in³ usable in bay${obstrNote} — won't close`,
         })
       } else if (stacked_vol > usable_volume * 0.85) {
         warnings.push({
-          level: 'warn',
+          level: WARN_LEVELS.WARN,
           slot: 'bay_volume',
           message: `Bay is ${pct}% full (~${stacked_vol.toFixed(0)} in³ of ${usable_volume.toFixed(0)} in³ usable${obstrNote}) — very tight`,
         })
@@ -294,7 +295,7 @@ export function checkCompatibility({ config, specs }) {
   // ── Single-deploy warning ────────────────────────────────────────────────────
   if (config.main_chute && !config.drogue_chute) {
     warnings.push({
-      level: 'warn',
+      level: WARN_LEVELS.WARN,
       slot: 'drogue_chute',
       message: 'No drogue chute — single deploy. Rocket will free-fall to main deploy altitude.',
     })
@@ -310,7 +311,7 @@ export function checkCompatibility({ config, specs }) {
   )
   if (!config.main_chute && hasAnyComponent) {
     warnings.push({
-      level: 'error',
+      level: WARN_LEVELS.ERROR,
       slot: 'main_chute',
       message: 'No main parachute selected — recovery system incomplete',
     })
@@ -325,7 +326,7 @@ export function checkCompatibility({ config, specs }) {
  */
 export function slotStatus(slot, warnings) {
   const slotWarnings = warnings.filter(w => w.slot === slot)
-  if (slotWarnings.some(w => w.level === 'error')) return 'error'
-  if (slotWarnings.some(w => w.level === 'warn'))  return 'warn'
+  if (slotWarnings.some(w => w.level === WARN_LEVELS.ERROR)) return 'error'
+  if (slotWarnings.some(w => w.level === WARN_LEVELS.WARN))  return 'warn'
   return 'ok'
 }

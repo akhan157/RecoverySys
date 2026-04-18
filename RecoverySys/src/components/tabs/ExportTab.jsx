@@ -1,4 +1,5 @@
 import React from 'react'
+import { SAVE_STATES, SHARE_STATES } from '../../lib/constants.js'
 
 export default function ExportTab({ state, saveConfig, copyShareLink }) {
   return (
@@ -14,7 +15,7 @@ export default function ExportTab({ state, saveConfig, copyShareLink }) {
             Your config will persist across sessions on this device.
           </div>
           <button className="mc-run-btn" onClick={saveConfig}>
-            {state.saveState === 'saving' ? 'SAVING...' : state.saveState === 'saved' ? '✓ SAVED' : 'SAVE_CONFIG →'}
+            {state.saveState === SAVE_STATES.SAVING ? 'SAVING...' : state.saveState === SAVE_STATES.SAVED ? '✓ SAVED' : 'SAVE_CONFIG →'}
           </button>
         </div>
         <div className="mc-export__section">
@@ -24,7 +25,7 @@ export default function ExportTab({ state, saveConfig, copyShareLink }) {
             it will see your exact recovery bay setup. No account required.
           </div>
           <button className="mc-run-btn" onClick={copyShareLink}>
-            {state.shareState === 'copied' ? '✓ COPIED_TO_CLIPBOARD' : 'COPY_SHARE_LINK →'}
+            {state.shareState === SHARE_STATES.COPIED ? '✓ COPIED_TO_CLIPBOARD' : 'COPY_SHARE_LINK →'}
           </button>
         </div>
       </div>

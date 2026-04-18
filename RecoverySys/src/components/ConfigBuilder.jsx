@@ -2,6 +2,7 @@ import React from 'react'
 import ConfigSlot from './ConfigSlot.jsx'
 import RocketSpecs from './RocketSpecs.jsx'
 import WarningBox from './WarningBox.jsx'
+import { SAVE_STATES, SHARE_STATES } from '../lib/constants.js'
 
 export default function ConfigBuilder({
   categories, config, specs, warnings,
@@ -61,7 +62,7 @@ export default function ConfigBuilder({
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
           <button
             onClick={onSave}
-            disabled={saveState === 'saving'}
+            disabled={saveState === SAVE_STATES.SAVING}
             style={{
               height: '32px',
               padding: '0 16px',
@@ -69,17 +70,17 @@ export default function ConfigBuilder({
               color: 'var(--cta-fg)',
               border: 'none',
               borderRadius: 'var(--radius)',
-              cursor: saveState === 'saving' ? 'default' : 'pointer',
+              cursor: saveState === SAVE_STATES.SAVING ? 'default' : 'pointer',
               fontSize: '13px',
               fontWeight: 500,
-              opacity: saveState === 'saving' ? 0.7 : 1,
+              opacity: saveState === SAVE_STATES.SAVING ? 0.7 : 1,
               transition: 'transform 150ms ease, opacity 150ms ease',
             }}
-            onMouseEnter={e => { if (saveState !== 'saving') { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.opacity = '0.9' } }}
+            onMouseEnter={e => { if (saveState !== SAVE_STATES.SAVING) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.opacity = '0.9' } }}
             onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.opacity = '' }}
-            onMouseDown={e => { if (saveState !== 'saving') e.currentTarget.style.transform = 'translateY(0)' }}
+            onMouseDown={e => { if (saveState !== SAVE_STATES.SAVING) e.currentTarget.style.transform = 'translateY(0)' }}
           >
-            {saveState === 'saving' ? 'Saving…' : saveState === 'saved' ? 'Saved ✓' : 'Save Config'}
+            {saveState === SAVE_STATES.SAVING ? 'Saving…' : saveState === SAVE_STATES.SAVED ? 'Saved ✓' : 'Save Config'}
           </button>
 
           <button
@@ -99,7 +100,7 @@ export default function ConfigBuilder({
             onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'var(--border-default)' }}
             onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0)' }}
           >
-            {shareState === 'copied' ? 'Copied!' : 'Copy Share Link'}
+            {shareState === SHARE_STATES.COPIED ? 'Copied!' : 'Copy Share Link'}
           </button>
         </div>
       </div>

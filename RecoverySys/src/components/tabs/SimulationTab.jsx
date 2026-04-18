@@ -1,5 +1,6 @@
 import React from 'react'
 import { CATEGORIES } from '../../data/parts.js'
+import { WARN_LEVELS } from '../../lib/constants.js'
 import FlightChart from '../FlightChart.jsx'
 import SuggestPanel from '../SuggestPanel.jsx'
 import MetricCard from '../MetricCard.jsx'
@@ -88,9 +89,9 @@ export default function SimulationTab({ state, allParts, selectPart, runSim, can
             </div>
           ) : (
             state.warnings.map((w, i) => (
-              <div key={i} className={`mc-alert ${w.level === 'error' ? 'mc-alert--critical' : 'mc-alert--warn'}`}>
+              <div key={i} className={`mc-alert ${w.level === WARN_LEVELS.ERROR ? 'mc-alert--critical' : 'mc-alert--warn'}`}>
                 <div className="mc-alert__title">
-                  ⚠ {w.level === 'error' ? 'CRITICAL_ALERT' : 'NOMINAL_VARIANCE'}
+                  ⚠ {w.level === WARN_LEVELS.ERROR ? 'CRITICAL_ALERT' : 'NOMINAL_VARIANCE'}
                 </div>
                 <div className="mc-alert__body">{w.message}</div>
               </div>

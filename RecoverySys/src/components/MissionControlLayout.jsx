@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { CATEGORIES } from '../data/parts.js'
+import { WARN_LEVELS } from '../lib/constants.js'
 import DashboardTab from './tabs/DashboardTab.jsx'
 import SimulationTab from './tabs/SimulationTab.jsx'
 import DispersionTab from './tabs/DispersionTab.jsx'
@@ -39,7 +40,7 @@ export default function MissionControlLayout({
   }, [state.config])
 
   const hasWarnings = state.warnings.length > 0
-  const hasErrors = state.warnings.some(w => w.level === 'error')
+  const hasErrors = state.warnings.some(w => w.level === WARN_LEVELS.ERROR)
 
   // Mirror runSimulation's preconditions exactly — inputs are strings from <input>,
   // so '0' and '-5' are truthy. parseFloat(...) > 0 matches what simulation.js rejects.
