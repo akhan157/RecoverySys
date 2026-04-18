@@ -1,45 +1,12 @@
 import React, { useState, useMemo } from 'react'
-import { CATEGORIES } from '../data/parts.js'
+import { CATEGORIES, CATEGORY_BY_ID } from '../data/parts.js'
+import { partSpecLine } from '../lib/format.js'
 import PartsBrowser from './PartsBrowser.jsx'
 import ConfigBuilder from './ConfigBuilder.jsx'
-import SimPanel from './SimPanel.jsx'
 import SuggestPanel from './SuggestPanel.jsx'
 import DispersionMap from './DispersionMap.jsx'
 import FlightChart from './FlightChart.jsx'
 import './MissionControlLayout.css'
-
-// ── Helpers ──────────────────────────────────────────────────────────────
-
-function partSpecLine(part) {
-  if (!part?.specs) return ''
-  const s = part.specs
-  const bits = []
-  if (s.diameter_in) bits.push(`${s.diameter_in}"`)
-  if (s.cd)         bits.push(`Cd ${s.cd}`)
-  if (s.weight_g)   bits.push(`${s.weight_g}g`)
-  if (s.length_ft)  bits.push(`${s.length_ft}ft`)
-  if (s.strength_lbs) bits.push(`${s.strength_lbs} lbs`)
-  if (s.wll_lbs)    bits.push(`WLL ${s.wll_lbs}`)
-  if (s.voltage)    bits.push(`${s.voltage}V`)
-  return bits.join('  ')
-}
-
-const SLOT_LABELS = {
-  main_chute:      'MAIN_CHUTE',
-  drogue_chute:    'DROGUE_CHUTE',
-  shock_cord:      'SHOCK_CORD',
-  chute_protector: 'CHUTE_PROTECTOR',
-  deployment_bag:  'DEPLOY_BAG',
-  quick_links:     'QUICK_LINKS',
-  swivel:          'SWIVEL',
-  chute_device:    'CHUTE_DEVICE',
-}
-
-const SLOT_ICONS = {
-  main_chute: '△', drogue_chute: '△', shock_cord: '⟐',
-  chute_protector: '◇', deployment_bag: '◻', quick_links: '⊕',
-  swivel: '⊞', chute_device: '⊙',
-}
 
 const TABS = [
   { id: 'DASHBOARD',  icon: '⊞', label: 'DASHBOARD' },
@@ -52,10 +19,10 @@ const TABS = [
 // ── Main Component ───────────────────────────────────────────────────────
 
 export default function MissionControlLayout({
-  state, dispatch, allParts, customParts,
+  state, allParts, customParts,
   selectPart, removePart, setSpec, setCategory, runSim,
   saveConfig, copyShareLink, addCustomPart, deleteCustomPart,
-  darkMode, setDarkMode, safeTimeout,
+  darkMode, setDarkMode,
 }) {
   const [activeTab, setActiveTab] = useState('DASHBOARD')
 
@@ -76,10 +43,12 @@ export default function MissionControlLayout({
   const hasWarnings = state.warnings.length > 0
   const hasErrors = state.warnings.some(w => w.level === 'error')
 
-  const canRun = !!(
-    state.specs.rocket_mass_g &&
-    state.specs.motor_total_impulse_ns &&
-    (state.config.main_chute || state.config.drogue_chute)
+  // Mirror runSimulation's preconditions exactly — inputs are strings from <input>,
+  // so '0' and '-5' are truthy. parseFloat(...) > 0 matches what simulation.js rejects.
+  const canRun = (
+    parseFloat(state.specs.rocket_mass_g) > 0 &&
+    parseFloat(state.specs.motor_total_impulse_ns) > 0 &&
+    !!(state.config.main_chute || state.config.drogue_chute)
   )
 
   return (
@@ -171,7 +140,7 @@ export default function MissionControlLayout({
           {state.simRunning ? '⟳ RUNNING...' : '▶ RUN_SIM'}
         </button>
         <div className="mc-statusbar__item">
-          MOTOR: {state.specs.motor_total_impulse_ns ? `${state.specs.motor_total_impulse_ns}Ns` : 'NOT_SET'}
+          MOTOR: {parseFloat(state.specs.motor_total_impulse_ns) > 0 ? `${state.specs.motor_total_impulse_ns}Ns` : 'NOT_SET'}
         </div>
         <div className="mc-statusbar__item">
           DESCENT_RATE: {state.simulation?.main_fps != null ? `${state.simulation.main_fps.toFixed(1)} FT/S` : '—'}
@@ -255,7 +224,7 @@ function DashboardTab({
                     title="Remove"
                   >×</button>
                 )}
-                <div className="mc-slot__label">{SLOT_LABELS[cat.id] || cat.id.toUpperCase()}</div>
+                <div className="mc-slot__label">{cat.code}</div>
                 <div className="mc-slot__name">
                   {part ? part.name : 'NO_COMPONENT_LOADED'}
                 </div>
@@ -309,10 +278,15 @@ function DashboardTab({
               <div className="mc-metric">
                 <div className="mc-metric__label">DESCENT_RATE</div>
                 <div className="mc-metric__value">
-                  {state.simulation.main_fps.toFixed(1)}<span className="mc-metric__unit">FT/S</span>
+                  {state.simulation.main_fps != null
+                    ? state.simulation.main_fps.toFixed(1)
+                    : '—'}
+                  <span className="mc-metric__unit">FT/S</span>
                 </div>
                 <div className="mc-metric__sub">
-                  {state.simulation.main_fps > 15 ? 'ABOVE_NOMINAL' : 'WITHIN_LIMITS'}
+                  {state.simulation.main_fps == null
+                    ? 'DROGUE_ONLY'
+                    : state.simulation.main_fps > 15 ? 'ABOVE_NOMINAL' : 'WITHIN_LIMITS'}
                 </div>
               </div>
             </>
@@ -466,7 +440,7 @@ function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
               if (!part) return null
               return (
                 <div key={cat.id} className="mc-inv-item">
-                  <div className="mc-inv-item__icon">{SLOT_ICONS[cat.id] || '◻'}</div>
+                  <div className="mc-inv-item__icon">{cat.icon}</div>
                   <div>
                     <div className="mc-inv-item__name">{part.name}</div>
                     <div className="mc-inv-item__mfr">{part.manufacturer?.toUpperCase() || 'GENERIC'}</div>

@@ -565,7 +565,7 @@ export function runSimulation({ specs, config }) {
     ? computeDescentRate(config.drogue_chute.specs, mass_kg, mid_drogue_ft)
     : 100    // ballistic near-free-fall
   // Guard: 0 fps (degenerate chute specs) causes division-by-zero → Infinity → infinite loop
-  // in buildTimeline. Return null to surface a simFailed state rather than hanging the tab.
+  // in buildTimeline. Return null so the caller can surface a failure state.
   if (drogue_fps_raw <= 0) return null
   const drogue_fps = drogue_fps_raw
 

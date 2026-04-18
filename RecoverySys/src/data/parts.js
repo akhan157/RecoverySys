@@ -1,13 +1,21 @@
+// Single source of truth for recovery bay slots.
+// Any new slot is added here and automatically flows to: DEFAULT_CONFIG, compatibility rules,
+// bay schematic icons/labels, parts catalog tabs, and share-link validation.
 export const CATEGORIES = [
-  { id: 'main_chute',       label: 'Main Chute',            placeholder: 'No main chute selected — required' },
-  { id: 'drogue_chute',     label: 'Drogue Chute',          placeholder: 'No drogue chute selected' },
-  { id: 'shock_cord',       label: 'Shock Cord',            placeholder: 'No shock cord selected' },
-  { id: 'chute_protector',  label: 'Chute Protector',       placeholder: 'No chute protector selected' },
-  { id: 'deployment_bag',   label: 'Deploy Bag',            placeholder: 'No deployment bag selected' },
-  { id: 'quick_links',      label: 'Quick Links',           placeholder: 'No quick links selected' },
-  { id: 'swivel',           label: 'Swivel',                placeholder: 'No swivel selected' },
-  { id: 'chute_device',     label: 'Chute-Mounted Device',  placeholder: 'No chute-mounted device selected' },
+  { id: 'main_chute',       label: 'Main Chute',           code: 'MAIN_CHUTE',       icon: '△', placeholder: 'No main chute selected — required' },
+  { id: 'drogue_chute',     label: 'Drogue Chute',         code: 'DROGUE_CHUTE',     icon: '△', placeholder: 'No drogue chute selected' },
+  { id: 'shock_cord',       label: 'Shock Cord',           code: 'SHOCK_CORD',       icon: '⟐', placeholder: 'No shock cord selected' },
+  { id: 'chute_protector',  label: 'Chute Protector',      code: 'CHUTE_PROTECTOR',  icon: '◇', placeholder: 'No chute protector selected' },
+  { id: 'deployment_bag',   label: 'Deploy Bag',           code: 'DEPLOY_BAG',       icon: '◻', placeholder: 'No deployment bag selected' },
+  { id: 'quick_links',      label: 'Quick Links',          code: 'QUICK_LINKS',      icon: '⊕', placeholder: 'No quick links selected' },
+  { id: 'swivel',           label: 'Swivel',               code: 'SWIVEL',           icon: '⊞', placeholder: 'No swivel selected' },
+  { id: 'chute_device',     label: 'Chute-Mounted Device', code: 'CHUTE_DEVICE',     icon: '⊙', placeholder: 'No chute-mounted device selected' },
 ]
+
+// Derived lookups — keep downstream code readable while CATEGORIES stays the only source.
+export const CATEGORY_BY_ID = Object.fromEntries(CATEGORIES.map(c => [c.id, c]))
+export const SLOT_IDS       = CATEGORIES.map(c => c.id)
+export const EMPTY_CONFIG   = Object.fromEntries(SLOT_IDS.map(id => [id, null]))
 
 export const PARTS = [
   // ── Main Parachutes (148 parts — Fruity Chutes, Rocketman, Spherachutes, b2 Rocketry, Front Range)

@@ -1,0 +1,80 @@
+/* ── Part cards ─────────────────────────────────────────────── */
+
+.parts-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  padding: 8px 10px;
+  background: var(--bg-panel);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius);
+  cursor: pointer;
+  text-align: left;
+  gap: 3px;
+  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+}
+.parts-card:hover:not([aria-pressed="true"]) {
+  transform: translateY(-1px);
+  border-color: var(--accent);
+  box-shadow: 0 2px 8px var(--accent-ring);
+}
+.parts-card[aria-pressed="true"] {
+  background: var(--ok-bg);
+  border-color: var(--ok-fg);
+}
+
+/* Custom parts: brighter border to distinguish from catalog */
+.parts-card--custom {
+  width: 100%;
+  padding: 8px 24px 8px 10px;
+  border-color: var(--accent);
+  transition: transform 150ms ease, box-shadow 150ms ease;
+}
+.parts-card--custom:hover:not([aria-pressed="true"]) {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 8px var(--accent-ring);
+}
+
+/* ── Delete badge on custom cards ───────────────────────────── */
+
+.parts-card__delete {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 16px;
+  height: 16px;
+  background: var(--bg-right);
+  border: 1px solid var(--border-default);
+  border-radius: 3px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 10px;
+  color: var(--text-tertiary);
+  line-height: 1;
+  padding: 0;
+  transition: border-color 150ms ease, color 150ms ease;
+}
+.parts-card__delete:hover {
+  border-color: var(--error-fg);
+  color: var(--error-fg);
+}
+
+/* ── "Add Custom" chip ──────────────────────────────────────── */
+
+.parts-add-custom {
+  height: 28px;
+  padding: 0 12px;
+  background: transparent;
+  color: var(--accent);
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 500;
+  transition: background 150ms ease;
+}
+.parts-add-custom:hover {
+  background: var(--accent-tint);
+}

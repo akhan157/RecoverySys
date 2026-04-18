@@ -1,36 +1,8 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useMemo } from 'react'
 import { slotStatus } from '../lib/compatibility.js'
+import { partSpecLine } from '../lib/format.js'
 import CompatDot from './CompatDot.jsx'
-
-function partSpecLine(part) {
-  switch (part.category) {
-    case 'main_chute':
-    case 'drogue_chute':
-      return `${part.specs.diameter_in}" Ø  Cd ${part.specs.cd}  ${part.specs.weight_g}g`
-    case 'chute_protector':
-      return `${part.specs.size_in}" fits ≤${part.specs.max_chute_diam_in}" chute  ${part.specs.weight_g}g`
-    case 'flight_computer':
-      return `${part.specs.min_voltage}–${part.specs.max_voltage}V  ${part.specs.weight_g}g`
-    case 'battery':
-      return `${part.specs.voltage}V  ${part.specs.capacity_mah}mAh  ${part.specs.weight_g}g`
-    case 'shock_cord':
-      return `${part.specs.strength_lbs} lbs  ${part.specs.length_ft}ft  ${part.specs.weight_g}g`
-    case 'quick_links':
-      return `${part.specs.strength_lbs} lbs  ${part.specs.size_in}" size  ${part.specs.weight_g}g`
-    case 'deployment_bag':
-      return `fits ≤${part.specs.max_chute_diam_in}" chute  ${part.specs.packed_height_in}" packed  ${part.specs.weight_g}g`
-    case 'swivel':
-      return `${part.specs.rated_lbs} lbs WLL  ${part.specs.size_in}" size  ${part.specs.weight_g}g`
-    case 'chute_device': {
-      const altRange = part.specs.deploy_alt_min_ft != null
-        ? `  ${part.specs.deploy_alt_min_ft}–${part.specs.deploy_alt_max_ft}ft`
-        : ''
-      return `${part.specs.weight_g}g${altRange}`
-    }
-    default:
-      return ''
-  }
-}
+import './PartsBrowser.css'
 
 function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen, hasSelected }) {
   const [open, setOpen] = useState(defaultOpen || hasSelected)
@@ -83,36 +55,10 @@ function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen, hasSelected }
             return (
               <button
                 key={part.id}
+                className="parts-card"
                 onClick={() => onSelectPart(part)}
                 aria-label={`${part.name} — ${partSpecLine(part)}${isSelected ? ' (selected)' : ''}`}
                 aria-pressed={isSelected}
-                style={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  justifyContent: 'center',
-                  padding: '8px 10px',
-                  background: isSelected ? 'var(--ok-bg)' : 'var(--bg-panel)',
-                  border: `1px solid ${isSelected ? 'var(--ok-fg)' : 'var(--border-default)'}`,
-                  borderRadius: 'var(--radius)',
-                  cursor: 'pointer',
-                  textAlign: 'left',
-                  gap: '3px',
-                  transition: 'transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease',
-                }}
-                onMouseEnter={e => {
-                  if (e.currentTarget.getAttribute('aria-pressed') !== 'true') {
-                    e.currentTarget.style.transform = 'translateY(-1px)'
-                    e.currentTarget.style.borderColor = 'var(--accent)'
-                    e.currentTarget.style.boxShadow = '0 2px 8px var(--accent-ring)'
-                  }
-                }}
-                onMouseLeave={e => {
-                  if (e.currentTarget.getAttribute('aria-pressed') !== 'true') {
-                    e.currentTarget.style.transform = ''
-                    e.currentTarget.style.borderColor = 'var(--border-default)'
-                    e.currentTarget.style.boxShadow = ''
-                  }
-                }}
               >
                 <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.3 }}>
                   {part.name}
@@ -159,21 +105,10 @@ function CustomGroup({ parts, config, onSelectPart, onDelete }) {
                 style={{ position: 'relative' }}
               >
                 <button
+                  className="parts-card parts-card--custom"
                   onClick={() => onSelectPart(part)}
                   aria-label={`${part.name} — ${partSpecLine(part) || 'custom'}${isSelected ? ' (selected)' : ''}`}
                   aria-pressed={isSelected}
-                  style={{
-                    width: '100%',
-                    display: 'flex', flexDirection: 'column', justifyContent: 'center',
-                    padding: '8px 24px 8px 10px',
-                    background: isSelected ? 'var(--ok-bg)' : 'var(--bg-panel)',
-                    border: `1px solid ${isSelected ? 'var(--ok-fg)' : 'var(--accent)'}`,
-                    borderRadius: 'var(--radius)',
-                    cursor: 'pointer', textAlign: 'left', gap: '3px',
-                    transition: 'transform 150ms ease, box-shadow 150ms ease',
-                  }}
-                  onMouseEnter={e => { if (!isSelected) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.boxShadow = '0 2px 8px var(--accent-ring)' } }}
-                  onMouseLeave={e => { if (!isSelected) { e.currentTarget.style.transform = ''; e.currentTarget.style.boxShadow = '' } }}
                 >
                   <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.3 }}>{part.name}</div>
                   <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, lineHeight: 1.2 }}>{partSpecLine(part)}</div>
@@ -181,20 +116,10 @@ function CustomGroup({ parts, config, onSelectPart, onDelete }) {
                 {/* Delete button — positioned over card, stops propagation */}
                 <button
                   type="button"
+                  className="parts-card__delete"
                   onClick={e => { e.stopPropagation(); onDelete(part.id) }}
                   title="Delete custom part"
                   aria-label={`Delete ${part.name}`}
-                  style={{
-                    position: 'absolute', top: '4px', right: '4px',
-                    width: '16px', height: '16px',
-                    background: 'var(--bg-right)', border: '1px solid var(--border-default)',
-                    borderRadius: '3px', cursor: 'pointer',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1,
-                    padding: 0,
-                  }}
-                  onMouseEnter={e => { e.currentTarget.style.borderColor = 'var(--error-fg)'; e.currentTarget.style.color = 'var(--error-fg)' }}
-                  onMouseLeave={e => { e.currentTarget.style.borderColor = 'var(--border-default)'; e.currentTarget.style.color = 'var(--text-tertiary)' }}
                 >
                   ×
                 </button>
@@ -349,17 +274,31 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
   useEffect(() => { setShowForm(false) }, [activeCategory])
 
   const isChute = activeCategory === 'main_chute' || activeCategory === 'drogue_chute'
-  const categoryCustomParts = customParts.filter(p => p.category === activeCategory)
 
-  // Exclude custom parts from the catalog list (they appear in the Custom group instead)
-  const catalogParts = parts.filter(p => p.category === activeCategory && !customParts.some(cp => cp.id === p.id))
+  // Pre-group warnings by slot once so we avoid an O(categories × warnings) scan on every render.
+  const warningsBySlot = useMemo(() => {
+    const map = {}
+    for (const w of warnings) {
+      if (!map[w.slot]) map[w.slot] = []
+      map[w.slot].push(w)
+    }
+    return map
+  }, [warnings])
 
-  // Group catalog parts by manufacturer
-  const byMfr = {}
-  catalogParts.forEach(p => {
-    if (!byMfr[p.manufacturer]) byMfr[p.manufacturer] = []
-    byMfr[p.manufacturer].push(p)
-  })
+  // Custom-part ID set for O(1) exclusion from the catalog list.
+  const customIds = useMemo(() => new Set(customParts.map(p => p.id)), [customParts])
+
+  const { categoryCustomParts, byMfr } = useMemo(() => {
+    const categoryCustomParts = customParts.filter(p => p.category === activeCategory)
+    const byMfr = {}
+    for (const p of parts) {
+      if (p.category !== activeCategory) continue
+      if (customIds.has(p.id)) continue     // shown in Custom group instead
+      if (!byMfr[p.manufacturer]) byMfr[p.manufacturer] = []
+      byMfr[p.manufacturer].push(p)
+    }
+    return { categoryCustomParts, byMfr }
+  }, [parts, activeCategory, customParts, customIds])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -380,7 +319,7 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
             const isActive = cat.id === activeCategory
             const selected = config[cat.id]
             const status   = selected ? slotStatus(cat.id, warnings) : 'neutral'
-            const slotWarnings = warnings.filter(w => w.slot === cat.id)
+            const slotWarnings = warningsBySlot[cat.id] ?? []
             const tooltip  = (status === 'warn' || status === 'error') && slotWarnings.length > 0
               ? slotWarnings.map(w => w.message).join('\n')
               : undefined
@@ -428,18 +367,8 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
           {!showForm ? (
             <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-subtle)' }}>
               <button
+                className="parts-add-custom"
                 onClick={() => setShowForm(true)}
-                style={{
-                  height: '28px', padding: '0 12px',
-                  background: 'transparent',
-                  color: 'var(--accent)',
-                  border: '1px dashed var(--accent)',
-                  borderRadius: 'var(--radius)',
-                  cursor: 'pointer', fontSize: '12px', fontWeight: 500,
-                  transition: 'background 150ms ease',
-                }}
-                onMouseEnter={e => { e.currentTarget.style.background = 'var(--accent-tint)' }}
-                onMouseLeave={e => { e.currentTarget.style.background = 'transparent' }}
               >
                 + Add Custom Chute
               </button>

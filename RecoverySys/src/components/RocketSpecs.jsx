@@ -187,7 +187,8 @@ function MotorSearch({ onSetSpec }) {
   )
 }
 
-function SpecInput({ label, id, value, unit, placeholder, onChange }) {
+function SpecInput({ label, id, value, unit, placeholder, onChange, min = 0, max, error = false, errorText }) {
+  const restingBorder = error ? 'var(--error-fg)' : 'var(--border-default)'
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <label htmlFor={id} style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
@@ -197,7 +198,8 @@ function SpecInput({ label, id, value, unit, placeholder, onChange }) {
         <input
           id={id}
           type="number"
-          min="0"
+          min={min}
+          max={max}
           value={value ?? ''}
           placeholder={placeholder}
           onChange={e => onChange(e.target.value)}
@@ -205,8 +207,8 @@ function SpecInput({ label, id, value, unit, placeholder, onChange }) {
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
             fontWeight: 600,
             fontSize: '13px',
-            color: 'var(--text-primary)',
-            border: '1px solid var(--border-default)',
+            color: error ? 'var(--error-fg)' : 'var(--text-primary)',
+            border: `1px solid ${restingBorder}`,
             borderRadius: 0,
             padding: '5px 7px',
             width: '100%',
@@ -215,12 +217,15 @@ function SpecInput({ label, id, value, unit, placeholder, onChange }) {
             transition: 'border-color 0.18s ease',
           }}
           onFocus={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)' }}
-          onBlur={e => { e.target.style.borderColor = 'var(--border-default)'; e.target.style.boxShadow = '' }}
+          onBlur={e => { e.target.style.borderColor = restingBorder; e.target.style.boxShadow = '' }}
         />
         {unit && (
           <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', flexShrink: 0 }}>{unit}</span>
         )}
       </div>
+      {error && errorText && (
+        <span style={{ fontSize: '10px', color: 'var(--error-fg)', lineHeight: 1.3 }}>{errorText}</span>
+      )}
     </div>
   )
 }
@@ -395,43 +400,18 @@ export default function RocketSpecs({ specs, onSetSpec }) {
           placeholder="500"
           onChange={v => onSetSpec('main_deploy_alt_ft', v)}
         />
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-          <label htmlFor="g-factor" style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
-            Ejection G-Factor
-          </label>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-            <input
-              id="g-factor"
-              type="number"
-              min="1"
-              max="100"
-              value={specs.ejection_g_factor ?? ''}
-              placeholder={`auto (${gAuto}G)`}
-              onChange={e => onSetSpec('ejection_g_factor', e.target.value)}
-              style={{
-                fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-                fontWeight: 600,
-                fontSize: '13px',
-                color: gIsLow ? 'var(--error-fg)' : 'var(--text-primary)',
-                border: `1px solid ${gIsLow ? 'var(--error-fg)' : 'var(--border-default)'}`,
-                borderRadius: 0,
-                padding: '5px 7px',
-                width: '100%',
-                outline: 'none',
-                background: 'var(--input-bg)',
-                transition: 'border-color 0.18s ease',
-              }}
-              onFocus={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)' }}
-              onBlur={e => { e.target.style.borderColor = gIsLow ? 'var(--error-fg)' : 'var(--border-default)'; e.target.style.boxShadow = '' }}
-            />
-            <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', flexShrink: 0 }}>G</span>
-          </div>
-          {gIsLow && (
-            <span style={{ fontSize: '10px', color: 'var(--error-fg)', lineHeight: 1.3 }}>
-              Below 12G NAR minimum
-            </span>
-          )}
-        </div>
+        <SpecInput
+          id="g-factor"
+          label="Ejection G-Factor"
+          value={specs.ejection_g_factor}
+          unit="G"
+          placeholder={`auto (${gAuto}G)`}
+          onChange={v => onSetSpec('ejection_g_factor', v)}
+          min={1}
+          max={100}
+          error={gIsLow}
+          errorText="Below 12G NAR minimum"
+        />
       </div>
       <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', lineHeight: 1.4 }}>
         {specs.burn_time_s

@@ -52,9 +52,13 @@ function ellipseToPolygon(cx, cy, rx_m, ry_m, angle_deg, segments = 64) {
 export default function DispersionMap({ simulation, specs, forceOpen = false }) {
   const [open, setOpen]       = useState(forceOpen)
   const [mapReady, setMapReady] = useState(false)
-  const mapRef    = useRef(null)
-  const leafRef   = useRef(null)
-  const layersRef = useRef([])
+  const mapRef              = useRef(null)
+  const leafRef             = useRef(null)
+  const layersRef           = useRef([])
+  // Persistent canvas renderer for scatter dots. Reusing one renderer across effect
+  // runs avoids allocating a new <canvas> DOM node every time specs change and
+  // prevents the Leaflet "renderer becomes its own map layer" leak.
+  const scatterRendererRef  = useRef(null)
 
   const drift = useMemo(
     () => computeDrift({ simulation, specs }),
@@ -110,6 +114,9 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
         leafRef.current.remove()
         leafRef.current = null
       }
+      // Renderer's DOM canvas is torn down together with the map; clear the ref
+      // so we allocate a fresh renderer the next time the panel opens.
+      scatterRendererRef.current = null
       setMapReady(false)
     }
   }, [open])  // eslint-disable-line react-hooks/exhaustive-deps
@@ -152,16 +159,30 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
       if (land_lat != null && land_lon != null) {
         // ── Monte Carlo scatter ─────────────────────────────────────
         if (monteCarlo && monteCarlo.scatter.length > 0) {
-          // Scatter dots
+          // Render all scatter dots to a single <canvas> element (one DOM node for
+          // all 500 points) and bundle them in a FeatureGroup so teardown is one
+          // clearLayers() call instead of 500 individual remove()s.
+          //
+          // Reuse one renderer across effect runs — allocating a fresh Lf.canvas()
+          // each time would leak DOM <canvas> nodes because Leaflet implicitly adds
+          // a path's renderer as its own map layer and never detaches it when the
+          // path is removed.
+          if (!scatterRendererRef.current || !map.hasLayer(scatterRendererRef.current)) {
+            scatterRendererRef.current = Lf.canvas({ padding: 0.5 })
+            scatterRendererRef.current.addTo(map)
+          }
+          const scatterGroup = Lf.featureGroup()
           for (const pt of monteCarlo.scatter) {
-            add(Lf.circleMarker([pt.lat, pt.lon], {
+            Lf.circleMarker([pt.lat, pt.lon], {
+              renderer: scatterRendererRef.current,
               radius: 1.5,
               color: '#ef4444',
               fillColor: '#ef4444',
               fillOpacity: 0.25,
               weight: 0,
-            }))
+            }).addTo(scatterGroup)
           }
+          add(scatterGroup)
 
           // 2σ confidence ellipse
           if (monteCarlo.ellipse) {
@@ -208,15 +229,21 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
         add(Lf.marker([land_lat, land_lon], { icon: landIcon })
               .bindPopup(`<b>Predicted Landing</b><br>${drift_ft.toLocaleString()} ft downwind`))
 
-        // Fit bounds to include scatter or at minimum launch + landing
+        // Fit bounds to include scatter or at minimum launch + landing.
+        // Single-pass reduce — spread-based Math.min(...arr) can blow the stack
+        // on large scatter arrays (tens of thousands of points).
         if (monteCarlo && monteCarlo.scatter.length > 0) {
-          const allLats = [launch_lat, land_lat, ...monteCarlo.scatter.map(p => p.lat)]
-          const allLons = [launch_lon, land_lon, ...monteCarlo.scatter.map(p => p.lon)]
-          const bounds = [
-            [Math.min(...allLats), Math.min(...allLons)],
-            [Math.max(...allLats), Math.max(...allLons)],
-          ]
-          map.fitBounds(bounds, { padding: [40, 40] })
+          let minLat = Math.min(launch_lat, land_lat)
+          let maxLat = Math.max(launch_lat, land_lat)
+          let minLon = Math.min(launch_lon, land_lon)
+          let maxLon = Math.max(launch_lon, land_lon)
+          for (const p of monteCarlo.scatter) {
+            if (p.lat < minLat) minLat = p.lat
+            else if (p.lat > maxLat) maxLat = p.lat
+            if (p.lon < minLon) minLon = p.lon
+            else if (p.lon > maxLon) maxLon = p.lon
+          }
+          map.fitBounds([[minLat, minLon], [maxLat, maxLon]], { padding: [40, 40] })
         } else {
           map.fitBounds([[launch_lat, launch_lon], [land_lat, land_lon]], { padding: [40, 40] })
         }

@@ -18,18 +18,24 @@
   --mc-red:       #e74c3c;
   --mc-accent:    #4caf50;
 
-  /* ── Remap legacy theme vars to MC palette ─────────────────────────── */
+  /* Remap theme vars to MC palette so inputs, panels, and charts inside
+     the MC layout stay dark regardless of the app's light/dark toggle. */
+  --bg-app:           var(--mc-bg);
+  --bg-panel:         var(--mc-bg-panel);
+  --bg-right:         var(--mc-bg-main);
+  --bg-hover:         var(--mc-bg-panel);
+  --input-bg:         var(--mc-bg-panel);
   --text-primary:     var(--mc-text);
   --text-secondary:   var(--mc-text-dim);
   --text-tertiary:    var(--mc-text-faint);
+  --text-placeholder: var(--mc-text-faint);
   --border-default:   var(--mc-border);
   --border-subtle:    var(--mc-border);
-  --bg-panel:         var(--mc-bg-panel);
-  --bg-right:         var(--mc-bg-main);
-  --bg-left:          var(--mc-bg-sidebar);
   --accent:           var(--mc-green);
   --accent-text:      #000000;
+  --accent-tint:      rgba(76, 175, 80, 0.08);
   --accent-ring:      rgba(76, 175, 80, 0.15);
+  --header-bg:        var(--mc-bg);
   --ok-fg:            var(--mc-green);
   --ok-bg:            rgba(76, 175, 80, 0.08);
   --warn-fg:          var(--mc-amber);
@@ -37,11 +43,17 @@
   --warn-border:      rgba(245, 166, 35, 0.3);
   --error-fg:         var(--mc-red);
   --error-bg:         rgba(231, 76, 60, 0.08);
+  --neutral-dot:      var(--mc-text-faint);
   --radius:           4px;
   --cta-bg:           var(--mc-green);
   --cta-fg:           #000000;
   --chart-bg:         var(--mc-bg-panel);
   --chart-border:     var(--mc-border);
+  --chart-grid:       var(--mc-border);
+  --chart-axis:       var(--mc-text-faint);
+  --chart-path:       var(--mc-text);
+  --chart-marker:     var(--mc-text-dim);
+  --chart-label:      var(--mc-text-dim);
 
   font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', monospace;
   color: var(--mc-text);

@@ -1,5 +1,5 @@
 import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } from 'react'
-import { PARTS, CATEGORIES } from './data/parts.js'
+import { PARTS, CATEGORIES, SLOT_IDS, EMPTY_CONFIG } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import { checkCompatibility } from './lib/compatibility.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
@@ -70,26 +70,15 @@ function buildInitialState() {
   const allParts = [...custom, ...PARTS]
   const rehydrate = (part) => part ? allParts.find(p => p.id === part.id) ?? null : null
   return {
-    config: {
-      main_chute:      rehydrate(saved?.config?.main_chute),
-      drogue_chute:    rehydrate(saved?.config?.drogue_chute),
-      shock_cord:      rehydrate(saved?.config?.shock_cord),
-      chute_protector: rehydrate(saved?.config?.chute_protector),
-      deployment_bag:  rehydrate(saved?.config?.deployment_bag),
-      quick_links:     rehydrate(saved?.config?.quick_links),
-      swivel:          rehydrate(saved?.config?.swivel),
-      chute_device:    rehydrate(saved?.config?.chute_device),
-    },
-    specs:          { ...DEFAULT_SPECS, ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)) },
-    activeCategory: CATEGORIES[0].id,
-    mobileTab:      'parts',
-    simulation:     null,
-    simFailed:      false,
-    simRunning:     false,
-    warnings:       [],
-    toasts:         [],
-    saveState:      'idle',
-    shareState:     'idle',
+    config: Object.fromEntries(SLOT_IDS.map(id => [id, rehydrate(saved?.config?.[id])])),
+    specs: { ...DEFAULT_SPECS, ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)) },
+    activeCategory: SLOT_IDS[0],
+    simulation: null,
+    simRunning: false,
+    warnings: [],
+    toasts: [],
+    saveState: 'idle',
+    shareState: 'idle',
   }
 }
 
@@ -103,14 +92,12 @@ function reducer(state, action) {
       return { ...state, specs: { ...state.specs, [action.key]: action.value }, simulation: null }
     case 'SET_CATEGORY':
       return { ...state, activeCategory: action.category }
-    case 'SET_MOBILE_TAB':
-      return { ...state, mobileTab: action.tab }
     case 'SET_WARNINGS':
       return { ...state, warnings: action.warnings }
     case 'START_SIM':
-      return { ...state, simRunning: true, simFailed: false }
+      return { ...state, simRunning: true }
     case 'SET_SIM':
-      return { ...state, simulation: action.simulation, simFailed: action.simulation === null, simRunning: false }
+      return { ...state, simulation: action.simulation, simRunning: false }
     case 'ADD_TOAST':
       return { ...state, toasts: [...state.toasts, { ...action.toast, id: action.id }] }
     case 'REMOVE_TOAST':
@@ -207,11 +194,19 @@ export default function App() {
   const removePart    = useCallback((category) => dispatch({ type: 'REMOVE_PART', category }), [])
   const setSpec       = useCallback((key, value) => dispatch({ type: 'SET_SPEC', key, value }), [])
   const setCategory   = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
-  const setMobileTab  = useCallback((tab) => dispatch({ type: 'SET_MOBILE_TAB', tab }), [])
   const runSim = useCallback(() => {
     dispatch({ type: 'START_SIM' })
     const result = runSimulation({ specs: state.specs, config: state.config })
     dispatch({ type: 'SET_SIM', simulation: result })
+    // runSimulation returns null for: apogee ≤ deploy_ft, degenerate drogue specs,
+    // NaN propagation. Without a surface here the user sees an empty chart with no
+    // explanation — indistinguishable from "haven't run yet".
+    if (result === null) {
+      dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: {
+        message: 'Simulation failed — main deploy altitude may exceed apogee, or chute specs are invalid. Lower deploy altitude or increase motor impulse.',
+        level: 'error',
+      }})
+    }
   }, [state.specs, state.config])
 
   const saveConfig = useCallback(() => {
@@ -275,15 +270,13 @@ export default function App() {
     if (!c) return
     try {
       const payload = JSON.parse(decodeURIComponent(atob(decodeURIComponent(c))))
-      const validCategories = new Set(CATEGORIES.map(cat => cat.id))
+      const validCategories = new Set(SLOT_IDS)
       const validSpecKeys   = new Set(Object.keys(DEFAULT_SPECS))
 
       // Build a complete config + specs from the payload, then dispatch LOAD_SHARE in
       // one atomic action. This prevents the receiver's localStorage-restored state
       // from bleeding through for slots (null in payload) or spec keys absent from payload.
-      // Build a clean-slate config (all slots null) derived from CATEGORIES so it
-      // stays in sync automatically if new slots are ever added.
-      const newConfig = Object.fromEntries(CATEGORIES.map(cat => [cat.id, null]))
+      const newConfig = { ...EMPTY_CONFIG }
       let catalogMissing = 0
       let customMissing  = 0
 
@@ -332,7 +325,6 @@ export default function App() {
     <>
       <MissionControlLayout
         state={state}
-        dispatch={dispatch}
         allParts={allParts}
         customParts={customParts}
         selectPart={selectPart}
@@ -346,7 +338,6 @@ export default function App() {
         deleteCustomPart={deleteCustomPart}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
-        safeTimeout={safeTimeout}
       />
       <ToastContainer toasts={state.toasts} onRemove={removeToast} />
     </>

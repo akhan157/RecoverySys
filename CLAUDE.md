@@ -13,12 +13,12 @@ Recovery bay configuration tool for high-power rocketry (HPR). React 18 + Vite S
 | Path | What |
 |------|------|
 | `RecoverySys/src/App.jsx` | Root component — state machine, safeTimeout, share link, session restore |
-| `RecoverySys/src/lib/ork.js` | OpenRocket `.ork` export (JSZip + XML generation) |
-| `RecoverySys/src/lib/simulation.js` | ISA atmospheric model, apogee heuristic, descent/drift calc |
+| `RecoverySys/src/lib/simulation.js` | ISA atmospheric model, apogee integration, descent + drift, Monte Carlo dispersion |
 | `RecoverySys/src/lib/compatibility.js` | Compat rules engine — packing, volume, drogue-without-main |
+| `RecoverySys/src/lib/format.js` | Shared category-aware part spec formatter |
 | `RecoverySys/src/data/parts.js` | 189-part catalog (chutes, altimeters, misc recovery) |
-| `RecoverySys/src/components/` | ConfigSlot, PartsBrowser, SimPanel, FlightChart, CompatDot |
-| `RecoverySys/src/test/` | Vitest test suite (56 tests) |
+| `RecoverySys/src/components/` | MissionControlLayout (root), PartsBrowser, FlightChart, DispersionMap, CompatDot |
+| `RecoverySys/src/test/` | Vitest test suite |
 | `RecoverySys/DESIGN.md` | Design system — color tokens, typography, spacing, interaction states |
 | `RecoverySys/TODOS.md` | Deferred v2 work items |
 | `DESIGN.md` | Full design system reference (authoritative) |
