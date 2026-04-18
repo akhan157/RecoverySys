@@ -8,7 +8,10 @@ import {
   loadTheme, saveTheme,
 } from './lib/storage.js'
 import { encodeSharePayload, buildShareUrl, decodeSharePayload, SHARE_PARAM } from './lib/shareLink.js'
-import { SAVE_STATES, SHARE_STATES, TOAST_LEVELS } from './lib/constants.js'
+import {
+  SAVE_STATES, SHARE_STATES, TOAST_LEVELS,
+  SAVE_FLASH_MS, SAVE_RESET_MS, SHARE_RESET_MS,
+} from './lib/constants.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 
@@ -217,8 +220,8 @@ export default function App() {
     dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVING })
     const ok = saveConfigToStorage({ config: state.config, specs: state.specs, customMotor: state.customMotor })
     if (ok) {
-      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVED }), 400)
-      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE  }), 2400)
+      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVED }), SAVE_FLASH_MS)
+      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE  }), SAVE_RESET_MS)
     } else {
       dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE })
       addToast(TOAST_LEVELS.ERROR, 'Save failed — storage full')
@@ -232,7 +235,7 @@ export default function App() {
       // Only show "Copied!" after the write actually succeeds.
       navigator.clipboard.writeText(url).then(() => {
         dispatch({ type: 'SET_SHARE_STATE', state: SHARE_STATES.COPIED })
-        safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: SHARE_STATES.IDLE }), 2000)
+        safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: SHARE_STATES.IDLE }), SHARE_RESET_MS)
       }).catch(() => {
         addToast(TOAST_LEVELS.ERROR, 'Copy failed — try again')
       })

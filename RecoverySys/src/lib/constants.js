@@ -31,3 +31,9 @@ export const TOAST_LEVELS = Object.freeze({
   WARN:  'warn',
   ERROR: 'error',
 })
+
+// Timing for the Save Config / Copy Share Link button state transitions.
+// Tuned so the flash is perceptible but the reset doesn't feel laggy.
+export const SAVE_FLASH_MS  = 400    // idle → saving → saved (flash duration)
+export const SAVE_RESET_MS  = 2400   // saved → idle  (how long the green checkmark lingers)
+export const SHARE_RESET_MS = 2000   // copied → idle (how long "Copied!" shows)
