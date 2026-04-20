@@ -21,7 +21,7 @@ export default function MissionControlLayout({
   selectPart, removePart, setSpec, setCategory, runSim,
   saveConfig, copyShareLink, addCustomPart, deleteCustomPart,
   setCustomMotor, clearCustomMotor, addToast,
-  darkMode, setDarkMode,
+  /* darkMode/setDarkMode removed: MC layout is dark-only */
 }) {
   const [activeTab, setActiveTab] = useState('DASHBOARD')
 
@@ -81,14 +81,7 @@ export default function MissionControlLayout({
           })}
         </nav>
         <div className="mc-header__right">
-          <button
-            className="mc-header__icon-btn"
-            onClick={() => setDarkMode(d => !d)}
-            title="Toggle theme"
-            aria-label={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
-          >
-            {darkMode ? '☀' : '☾'}
-          </button>
+          {/* Theme toggle hidden: MC layout is dark-only by design */}
         </div>
       </header>
 
