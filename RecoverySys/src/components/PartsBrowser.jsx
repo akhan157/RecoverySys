@@ -182,6 +182,7 @@ function CustomChuteForm({ category, onAdd, onCancel }) {
         <input
           style={inputStyle}
           placeholder={'e.g. My 54" Toroidal'}
+          aria-label="Custom chute name"
           value={form.name}
           onChange={e => set('name', e.target.value)}
           onFocus={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)' }}
