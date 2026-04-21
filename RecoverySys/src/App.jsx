@@ -178,6 +178,14 @@ export default function App() {
     })
   }, [state.config])
 
+  const editCustomPart = useCallback((updatedPart) => {
+    setCustomParts(prev => prev.map(p => p.id === updatedPart.id ? updatedPart : p))
+    // Update the config slot if the edited part is currently selected
+    Object.entries(state.config).forEach(([category, selected]) => {
+      if (selected?.id === updatedPart.id) dispatch({ type: 'SELECT_PART', category, part: updatedPart })
+    })
+  }, [state.config])
+
   // ── Compatibility ─────────────────────────────────────────────────────────
   useEffect(() => {
     clearTimeout(debounceRef.current)
@@ -277,8 +285,16 @@ export default function App() {
     if (decoded.catalogMissing > 0) {
       addToast(TOAST_LEVELS.WARN, `${decoded.catalogMissing} part${decoded.catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`)
     }
+    if (decoded.inlinedCustomParts?.length > 0) {
+      setCustomParts(prev => {
+        const existingIds = new Set(prev.map(p => p.id))
+        const newParts = decoded.inlinedCustomParts.filter(p => !existingIds.has(p.id))
+        return newParts.length > 0 ? [...prev, ...newParts] : prev
+      })
+      addToast(TOAST_LEVELS.OK, `Imported ${decoded.inlinedCustomParts.length} custom part${decoded.inlinedCustomParts.length > 1 ? 's' : ''} from share link.`)
+    }
     if (decoded.customMissing > 0) {
-      addToast(TOAST_LEVELS.WARN, `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be shared — add them manually.`)
+      addToast(TOAST_LEVELS.WARN, `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be loaded.`)
     }
     // allParts / addToast intentionally read once at mount — link is parsed exactly once.
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -300,6 +316,7 @@ export default function App() {
         copyShareLink={copyShareLink}
         addCustomPart={addCustomPart}
         deleteCustomPart={deleteCustomPart}
+        editCustomPart={editCustomPart}
         setCustomMotor={setCustomMotor}
         clearCustomMotor={clearCustomMotor}
         addToast={addToast}

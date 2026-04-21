@@ -351,7 +351,7 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
             ref={mapRef}
             style={{
               flex: 1,
-              minHeight: '300px',
+              minHeight: 'calc(100vh - 160px)',
               background: 'var(--bg-right)',
               display: hasCoords ? 'block' : 'none',
             }}

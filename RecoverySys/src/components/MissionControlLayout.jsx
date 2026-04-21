@@ -19,7 +19,7 @@ const TABS = [
 export default function MissionControlLayout({
   state, allParts, customParts,
   selectPart, removePart, setSpec, setCategory, runSim,
-  saveConfig, copyShareLink, addCustomPart, deleteCustomPart,
+  saveConfig, copyShareLink, addCustomPart, deleteCustomPart, editCustomPart,
   setCustomMotor, clearCustomMotor, addToast,
   /* darkMode/setDarkMode removed: MC layout is dark-only */
 }) {
@@ -110,6 +110,7 @@ export default function MissionControlLayout({
               runSim={runSim}
               addCustomPart={addCustomPart}
               deleteCustomPart={deleteCustomPart}
+              editCustomPart={editCustomPart}
             />
           )}
           {activeTab === 'SIMULATION' && (

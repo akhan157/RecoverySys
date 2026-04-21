@@ -8,7 +8,7 @@ export default function DashboardTab({
   state, allParts, customParts, filledSlots, totalMass,
   hasWarnings, hasErrors, canRun,
   selectPart, removePart, setCategory, runSim,
-  addCustomPart, deleteCustomPart,
+  addCustomPart, deleteCustomPart, editCustomPart,
 }) {
   return (
     <div className="mc-dashboard">
@@ -27,6 +27,7 @@ export default function DashboardTab({
             onSelectPart={selectPart}
             onAddCustomPart={addCustomPart}
             onDeleteCustomPart={deleteCustomPart}
+            onEditCustomPart={editCustomPart}
           />
         </div>
       </div>
