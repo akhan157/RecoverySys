@@ -204,6 +204,19 @@ describe('checkCompatibility', () => {
     })
     expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
   })
+
+  it('shock cord packed_height_in counts toward bay volume', () => {
+    // bay: 3.9" ID × 4" → cross_area ≈ 11.95 in², usable ≈ 47.8 in³
+    // main: packed_length_in=3 → vol ≈ 35.9 in³ (75%)  — below 85% alone
+    // shock_cord(packed_height_in=1.5) → +17.9 in³ → total ≈ 53.8 in³ > 47.8 → error
+    const tightMain = { name: 'Main', specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 3 } }
+    const cord = { name: '1" Nylon 20ft', specs: { material: 'nylon', elongation_pct: 22, strength_lbs: 2000, length_ft: 20, weight_g: 200, packed_height_in: 1.5 } }
+    const warnings = checkCompatibility({
+      config: { main_chute: tightMain, shock_cord: cord },
+      specs: { ...baseSpecs, bay_length_in: '4' },
+    })
+    expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
+  })
 })
 
 describe('slotStatus', () => {

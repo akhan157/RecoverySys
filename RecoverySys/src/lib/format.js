@@ -12,10 +12,13 @@ export function partSpecLine(part, variant = 'compact') {
   const s = part.specs
   switch (part.category) {
     case 'main_chute':
-    case 'drogue_chute':
-      return variant === 'detailed'
+    case 'drogue_chute': {
+      const base = variant === 'detailed'
         ? `${s.diameter_in}" Ø  Cd ${s.cd}  packed ${s.packed_diam_in}"  ${s.weight_g}g`
         : `${s.diameter_in}" Ø  Cd ${s.cd}  ${s.weight_g}g`
+      const meta = [s.shape, s.material].filter(Boolean).join(' / ')
+      return meta ? `${base}  ${meta}` : base
+    }
     case 'chute_protector':
       return `${s.size_in}" fits ≤${s.max_chute_diam_in}" chute  ${s.weight_g}g`
     case 'flight_computer':

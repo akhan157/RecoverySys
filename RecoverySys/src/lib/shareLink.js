@@ -8,10 +8,15 @@ import { rehydrateCustomMotor } from './storage.js'
 
 export const SHARE_PARAM = 'c'
 
-// Serialize only { id } for each selected part — full objects bloat the URL.
+// Serialize part references: catalog parts as { id }, custom parts as full objects.
 export function encodeSharePayload({ config, specs, customMotor }) {
   const configIds = Object.fromEntries(
-    Object.entries(config).map(([cat, part]) => [cat, part ? { id: part.id } : null])
+    Object.entries(config).map(([cat, part]) => {
+      if (!part) return [cat, null]
+      // Inline custom parts so recipients can rehydrate without sender's localStorage
+      if (part.id?.startsWith('custom-')) return [cat, part]
+      return [cat, { id: part.id }]
+    })
   )
   const payload = { config: configIds, specs, customMotor }
   return btoa(encodeURIComponent(JSON.stringify(payload)))
@@ -36,15 +41,28 @@ export function decodeSharePayload(encoded, { allParts, slotIds, defaultSpecs, e
     const newConfig = { ...emptyConfig }
     let catalogMissing = 0
     let customMissing = 0
+    const inlinedCustomParts = []
+
+    const isValidCustom = (p) =>
+      p && typeof p.id === 'string' && typeof p.name === 'string' &&
+      typeof p.category === 'string' && p.specs !== null && typeof p.specs === 'object'
 
     if (payload.config) {
       Object.entries(payload.config).forEach(([cat, part]) => {
         if (!validCategories.has(cat)) return
         if (part) {
-          const found = allParts.find(p => p.id === part.id)
-          if (found) newConfig[cat] = found
-          else if (part.id?.startsWith('custom-')) customMissing++
-          else catalogMissing++
+          if (part.id?.startsWith('custom-') && isValidCustom(part)) {
+            // Full custom part inlined in the share link — use directly
+            newConfig[cat] = part
+            if (!inlinedCustomParts.find(p => p.id === part.id)) {
+              inlinedCustomParts.push(part)
+            }
+          } else {
+            const found = allParts.find(p => p.id === part.id)
+            if (found) newConfig[cat] = found
+            else if (part.id?.startsWith('custom-')) customMissing++
+            else catalogMissing++
+          }
         }
         // null part → slot stays null (no bleed-through from receiver's localStorage)
       })
@@ -64,6 +82,7 @@ export function decodeSharePayload(encoded, { allParts, slotIds, defaultSpecs, e
       customMotor: rehydrateCustomMotor(payload.customMotor),
       catalogMissing,
       customMissing,
+      inlinedCustomParts,
     }
   } catch { return null }
 }
