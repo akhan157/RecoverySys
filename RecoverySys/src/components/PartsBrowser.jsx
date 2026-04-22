@@ -228,10 +228,10 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
       } else {
         const v = parseFloat(form[f.key])
         if (f.required) {
-          if (!isFinite(v) || v <= 0) { setError(`${f.label} must be a finite number > 0`); return }
+          if (!isFinite(v) || v < (f.min ?? 0)) { setError(`${f.label} must be a finite number ≥ ${f.min ?? 0}`); return }
           specs[f.key] = v
         } else if (form[f.key] !== '') {
-          if (!isFinite(v)) { setError(`${f.label} must be a valid number`); return }
+          if (!isFinite(v) || (f.min != null && v < f.min)) { setError(`${f.label} must be a valid number ≥ ${f.min}`); return }
           specs[f.key] = v
         }
       }
@@ -456,6 +456,7 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
           </div>
         ) : (
           <CustomPartForm
+            key={editingPart?.id ?? 'new'}
             category={activeCategory}
             categoryLabel={activeCategoryLabel}
             editingPart={editingPart}
