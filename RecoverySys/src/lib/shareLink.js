@@ -44,7 +44,7 @@ export function decodeSharePayload(encoded, { allParts, slotIds, defaultSpecs, e
     const inlinedCustomParts = []
 
     const isValidCustom = (p) =>
-      p && typeof p.id === 'string' && typeof p.name === 'string' &&
+      p && typeof p.id === 'string' && typeof p.name === 'string' && p.name.length <= 200 &&
       typeof p.category === 'string' && p.specs !== null && typeof p.specs === 'object'
 
     if (payload.config) {

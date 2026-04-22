@@ -286,12 +286,16 @@ export default function App() {
       addToast(TOAST_LEVELS.WARN, `${decoded.catalogMissing} part${decoded.catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`)
     }
     if (decoded.inlinedCustomParts?.length > 0) {
+      let importedCount = 0
       setCustomParts(prev => {
         const existingIds = new Set(prev.map(p => p.id))
         const newParts = decoded.inlinedCustomParts.filter(p => !existingIds.has(p.id))
-        return newParts.length > 0 ? [...prev, ...newParts] : prev
+        importedCount = newParts.length
+        return importedCount > 0 ? [...prev, ...newParts] : prev
       })
-      addToast(TOAST_LEVELS.OK, `Imported ${decoded.inlinedCustomParts.length} custom part${decoded.inlinedCustomParts.length > 1 ? 's' : ''} from share link.`)
+      if (importedCount > 0) {
+        addToast(TOAST_LEVELS.OK, `Imported ${importedCount} custom part${importedCount > 1 ? 's' : ''} from share link.`)
+      }
     }
     if (decoded.customMissing > 0) {
       addToast(TOAST_LEVELS.WARN, `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be loaded.`)
