@@ -1,0 +1,480 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoverySys — Instrument Panel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+<style>
+  :root {
+    --bg-app:     #0f1014;
+    --bg-right:   #13161b;
+    --bg-panel:   #171a1f;
+    --bg-inner:   #1e2128;
+    --border:     #272c38;
+    --border-sub: #1e2230;
+    --fg:         #e8eaf0;
+    --fg-2:       #9aa0b0;
+    --fg-3:       #7b8496;
+    --accent:     #c9cdd8;
+    --ok:         #4caf50;
+    --ok-bg:      #0d2b0d;
+    --warn:       #ffb74d;
+    --warn-bg:    #2b1f00;
+    --err:        #ef5350;
+    --chart-path: #ffffff;
+    --chart-grid: #252525;
+    --header-bg:  #0d0f13;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg-app); color: var(--fg);
+    font-family: Inter, system-ui, -apple-system, sans-serif;
+    font-size: 13px; line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  code, pre { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+  .page { max-width: 1320px; margin: 0 auto; padding: 0 24px; }
+
+  /* Top bar — matches app */
+  .topbar {
+    display: flex; align-items: center; gap: 24px;
+    height: 48px; padding: 0 4px;
+    border-bottom: 1px solid var(--border); background: var(--header-bg);
+    margin: 0 -24px; padding-left: 24px; padding-right: 24px;
+  }
+  .brand { font-family: 'JetBrains Mono', monospace; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; }
+  .tabs { display: flex; margin-left: 16px; }
+  .tab {
+    padding: 14px 18px; font-size: 11px; letter-spacing: 0.06em;
+    color: var(--fg-3); font-family: 'JetBrains Mono', monospace;
+  }
+  .tab.active { color: var(--fg); border-bottom: 2px solid var(--fg); }
+  .topbar-right { margin-left: auto; display: flex; gap: 16px; align-items: center; font-size: 10px; letter-spacing: 0.08em; color: var(--fg-3); font-family: 'JetBrains Mono', monospace; }
+  .ok-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--ok); display: inline-block; box-shadow: 0 0 4px var(--ok); vertical-align: middle; margin-right: 6px; }
+  .open-link {
+    color: var(--fg); text-decoration: none; font-size: 10px; letter-spacing: 0.08em;
+    padding: 6px 12px; border: 1px solid var(--border);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .open-link:hover { border-color: var(--fg); }
+
+  /* Hero */
+  .hero {
+    display: grid; grid-template-columns: 3fr 2fr; gap: 24px;
+    padding: 48px 0 32px;
+  }
+  .hero-left h1 {
+    margin: 0 0 12px;
+    font-family: Inter, system-ui, sans-serif;
+    font-size: 40px; font-weight: 700; letter-spacing: -0.015em; line-height: 1.2;
+  }
+  .hero-left h1 span { display: block; }
+  .hero-left p {
+    margin: 16px 0 0; max-width: 540px; font-size: 14px; line-height: 1.65; color: var(--fg-2);
+  }
+  .hero-meta {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.1em; color: var(--fg-3);
+    margin-bottom: 16px; display: flex; gap: 12px; align-items: center;
+  }
+  .badge-ok {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px;
+    padding: 4px 10px; border: 1px solid var(--ok); background: var(--ok-bg); color: var(--ok);
+    letter-spacing: 0.08em;
+  }
+  .hero-actions { margin-top: 28px; display: flex; gap: 16px; align-items: center; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--fg); color: var(--bg-app); font-family: 'JetBrains Mono', monospace;
+    padding: 10px 18px; border: 1px solid var(--fg); text-decoration: none;
+    font-size: 12px; letter-spacing: 0.06em; font-weight: 600;
+  }
+  .btn-primary:hover { background: var(--fg-2); border-color: var(--fg-2); }
+  .link-sub { color: var(--fg-3); font-size: 11px; text-decoration: none; font-family: 'JetBrains Mono', monospace; letter-spacing: 0.04em; }
+  .link-sub:hover { color: var(--fg); }
+
+  /* Instrument readout (right side of hero) */
+  .readout {
+    background: var(--bg-panel); border: 1px solid var(--border); padding: 16px;
+  }
+  .readout-head {
+    display: flex; justify-content: space-between; align-items: baseline;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 10px; letter-spacing: 0.1em; color: var(--fg-3);
+    padding-bottom: 12px; border-bottom: 1px solid var(--border);
+    margin-bottom: 12px;
+  }
+  .metrics {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 1px; background: var(--border);
+  }
+  .metric { background: var(--bg-panel); padding: 12px; }
+  .metric-label { font-family: 'JetBrains Mono', monospace; font-size: 9px; letter-spacing: 0.1em; color: var(--fg-3); }
+  .metric-value {
+    font-family: 'JetBrains Mono', monospace; font-size: 22px; font-weight: 600; margin-top: 6px; color: var(--fg);
+  }
+  .metric-value .unit { font-size: 10px; color: var(--fg-3); margin-left: 4px; letter-spacing: 0.1em; }
+  .metric-bar { height: 3px; background: var(--bg-inner); margin-top: 8px; overflow: hidden; }
+  .metric-bar > div { height: 100%; background: var(--fg); }
+
+  /* Section header */
+  .sec-header {
+    padding: 40px 0 16px;
+    display: flex; justify-content: space-between; align-items: baseline;
+    border-bottom: 1px solid var(--border); margin-bottom: 20px;
+  }
+  .sec-header h2 {
+    margin: 0; font-family: 'JetBrains Mono', monospace;
+    font-size: 11px; font-weight: 600; letter-spacing: 0.1em; color: var(--fg);
+  }
+  .sec-header .meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--fg-3); }
+
+  /* Preview grid (2x2) */
+  .previews {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  }
+  .preview {
+    background: var(--bg-panel); border: 1px solid var(--border);
+    display: flex; flex-direction: column;
+  }
+  .preview-head {
+    padding: 10px 16px; border-bottom: 1px solid var(--border); background: var(--header-bg);
+    display: flex; justify-content: space-between; align-items: center;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.1em;
+  }
+  .preview-head .tag { color: var(--fg); }
+  .preview-head .status { color: var(--fg-3); display: flex; gap: 6px; align-items: center; }
+  .preview-body { padding: 16px; min-height: 200px; }
+  .preview-caption { padding: 12px 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--fg-2); line-height: 1.55; }
+
+  /* Preview 1 — Parts list */
+  .parts-list { display: flex; flex-direction: column; gap: 0; }
+  .parts-row {
+    display: grid; grid-template-columns: 14px 1fr 60px 60px;
+    align-items: center; gap: 10px; padding: 8px 10px;
+    border-bottom: 1px solid var(--border-sub);
+    font-family: 'JetBrains Mono', monospace; font-size: 11px;
+  }
+  .parts-row:last-child { border-bottom: none; }
+  .parts-row.selected { background: var(--bg-inner); border-left: 2px solid var(--fg); padding-left: 8px; }
+  .cat-dot { width: 8px; height: 8px; border-radius: 50%; }
+  .cat-chute { background: #60a5fa; }
+  .cat-alt { background: #a78bfa; }
+  .cat-beacon { background: #fbbf24; }
+  .cat-cord { background: #34d399; }
+  .cat-hw { background: #f87171; }
+  .parts-row .name { color: var(--fg); font-family: Inter, sans-serif; font-size: 12px; }
+  .parts-row .num { color: var(--fg-3); text-align: right; }
+
+  /* Preview 2 — Flight chart SVG */
+  .chart-wrap { width: 100%; height: 200px; }
+
+  /* Preview 3 — Dispersion map */
+  .map-wrap {
+    width: 100%; height: 200px; background:
+      repeating-linear-gradient(0deg, #1a1d26 0 1px, transparent 1px 32px),
+      repeating-linear-gradient(90deg, #1a1d26 0 1px, transparent 1px 32px),
+      radial-gradient(circle at 40% 50%, #22262f 0%, #13161b 70%);
+    position: relative; overflow: hidden;
+  }
+  .map-svg { position: absolute; inset: 0; }
+
+  /* Preview 4 — Export code */
+  pre.code-block {
+    margin: 0; padding: 14px; background: var(--bg-inner); border: 1px solid var(--border-sub);
+    font-size: 11px; line-height: 1.6; color: var(--fg-2); overflow: hidden;
+  }
+  pre.code-block .kw { color: #a78bfa; }
+  pre.code-block .attr { color: var(--warn); }
+  pre.code-block .val { color: #34d399; }
+  pre.code-block .cmt { color: var(--fg-3); }
+
+  /* Compat strip */
+  .compat-strip {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px;
+    padding: 16px; border: 1px solid var(--border); background: var(--bg-panel);
+  }
+  .chip {
+    padding: 12px 14px; font-size: 12px; font-family: Inter, sans-serif;
+    border: 1px solid; display: flex; align-items: flex-start; gap: 8px; line-height: 1.45;
+  }
+  .chip .icon { font-family: 'JetBrains Mono', monospace; font-weight: 700; font-size: 13px; }
+  .chip-warn { border-color: var(--warn); background: var(--warn-bg); color: var(--warn); }
+  .chip-ok   { border-color: var(--ok);   background: var(--ok-bg);   color: var(--ok);   }
+
+  /* Footer */
+  .foot {
+    margin-top: 40px; padding: 20px 0 32px;
+    border-top: 1px solid var(--border);
+    display: flex; justify-content: space-between;
+    font-family: 'JetBrains Mono', monospace; font-size: 10px; letter-spacing: 0.08em; color: var(--fg-3);
+  }
+  .foot a { color: var(--fg-3); text-decoration: none; }
+  .foot a:hover { color: var(--fg); }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="topbar">
+    <div class="brand">RECOVERYSYS_V1.1</div>
+    <div class="tabs">
+      <div class="tab active">DASHBOARD</div>
+      <div class="tab">SIMULATION</div>
+      <div class="tab">DISPERSION</div>
+      <div class="tab">SPECS</div>
+      <div class="tab">EXPORT</div>
+    </div>
+    <div class="topbar-right">
+      <span><span class="ok-dot"></span>READY</span>
+      <a href="/" class="open-link">[ OPEN_APP → ]</a>
+    </div>
+  </div>
+
+  <section class="hero">
+    <div class="hero-left">
+      <div class="hero-meta">
+        <span class="badge-ok"><span class="ok-dot"></span> V1.1 · STABLE</span>
+        <span>BUILD 1.1.0.0 · MIT LICENSED</span>
+      </div>
+      <h1>
+        <span>Recovery bay configuration.</span>
+        <span>Flight simulation.</span>
+        <span>Landing dispersion analysis.</span>
+      </h1>
+      <p>
+        An open-source browser tool for L1, L2, and L3 high-power rocketry builders.
+        Lays out a recovery bay from a parts catalog, predicts apogee with an ISA
+        atmospheric model, and estimates landing dispersion under wind. Runs entirely
+        in your browser. No backend, no account, no telemetry.
+      </p>
+      <div class="hero-actions">
+        <a href="/" class="btn-primary">OPEN_APP →</a>
+        <a href="#source" class="link-sub">view source ↗</a>
+        <a href="#docs" class="link-sub">docs ↗</a>
+      </div>
+    </div>
+
+    <aside class="readout">
+      <div class="readout-head">
+        <span>SAMPLE_READOUT · AEROTECH_K550W · 3.04KG</span>
+        <span>LIVE</span>
+      </div>
+      <div class="metrics">
+        <div class="metric">
+          <div class="metric-label">TOTAL_MASS</div>
+          <div class="metric-value">3.04<span class="unit">KG</span></div>
+          <div class="metric-bar"><div style="width: 60%;"></div></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">APOGEE</div>
+          <div class="metric-value">6,757<span class="unit">FT</span></div>
+          <div class="metric-bar"><div style="width: 72%;"></div></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">DESCENT_RATE</div>
+          <div class="metric-value">18.2<span class="unit">FT/S</span></div>
+          <div class="metric-bar"><div style="width: 45%;"></div></div>
+        </div>
+        <div class="metric">
+          <div class="metric-label">DRIFT_95%</div>
+          <div class="metric-value">847<span class="unit">FT</span></div>
+          <div class="metric-bar"><div style="width: 38%;"></div></div>
+        </div>
+      </div>
+    </aside>
+  </section>
+
+  <div class="sec-header">
+    <h2>§1–4 MODULE_OVERVIEW</h2>
+    <div class="meta">TAP ANY MODULE FOR DETAIL</div>
+  </div>
+
+  <div class="previews">
+    <!-- §1 PARTS CATALOG -->
+    <div class="preview">
+      <div class="preview-head">
+        <span class="tag">§1 · PARTS_CATALOG</span>
+        <span class="status"><span class="ok-dot"></span> 189 PARTS LOADED</span>
+      </div>
+      <div class="preview-body">
+        <div class="parts-list">
+          <div class="parts-row"><span class="cat-dot cat-chute"></span><span class="name">Fruity Chutes Iris Ultra 48"</span><span class="num">48 in</span><span class="num">280 g</span></div>
+          <div class="parts-row"><span class="cat-dot cat-chute"></span><span class="name">Rocketman R14</span><span class="num">14 in</span><span class="num">85 g</span></div>
+          <div class="parts-row selected"><span class="cat-dot cat-alt"></span><span class="name">AltusMetrum TeleMega v3.0</span><span class="num">0.84"</span><span class="num">52 g</span></div>
+          <div class="parts-row"><span class="cat-dot cat-alt"></span><span class="name">Featherweight Raven 4</span><span class="num">0.56"</span><span class="num">15 g</span></div>
+          <div class="parts-row"><span class="cat-dot cat-beacon"></span><span class="name">Eggfinder TRS v3</span><span class="num">0.62"</span><span class="num">32 g</span></div>
+          <div class="parts-row"><span class="cat-dot cat-cord"></span><span class="name">Tubular Nylon 1" · 30ft</span><span class="num">1 in</span><span class="num">205 g</span></div>
+        </div>
+      </div>
+      <div class="preview-caption">
+        189 components: parachutes, altimeters, GPS beacons, shock cords, hardware. Filter by category, diameter, impulse class. Add custom parts.
+      </div>
+    </div>
+
+    <!-- §2 FLIGHT CHART -->
+    <div class="preview">
+      <div class="preview-head">
+        <span class="tag">§2 · FLIGHT_CHART</span>
+        <span class="status"><span class="ok-dot"></span> APOGEE 6,757 FT</span>
+      </div>
+      <div class="preview-body">
+        <svg class="chart-wrap" viewBox="0 0 480 200" preserveAspectRatio="none">
+          <!-- grid -->
+          <g stroke="#252c38" stroke-width="1">
+            <line x1="0" y1="40"  x2="480" y2="40"/>
+            <line x1="0" y1="80"  x2="480" y2="80"/>
+            <line x1="0" y1="120" x2="480" y2="120"/>
+            <line x1="0" y1="160" x2="480" y2="160"/>
+            <line x1="120" y1="0" x2="120" y2="200"/>
+            <line x1="240" y1="0" x2="240" y2="200"/>
+            <line x1="360" y1="0" x2="360" y2="200"/>
+          </g>
+          <!-- flight path: ascent curve, apogee, drogue descent, main descent -->
+          <path d="M 0 190 Q 60 100 140 30 L 150 28 Q 170 60 200 110 L 360 170 L 470 190"
+                fill="none" stroke="#ffffff" stroke-width="1.75" stroke-linejoin="round"/>
+          <!-- deploy markers (vertical dashed lines) -->
+          <line x1="150" y1="10" x2="150" y2="195" stroke="#ef5350" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/>
+          <line x1="360" y1="10" x2="360" y2="195" stroke="#4caf50" stroke-width="1" stroke-dasharray="3 3" opacity="0.7"/>
+          <!-- markers -->
+          <circle cx="150" cy="28" r="3" fill="#ef5350"/>
+          <circle cx="360" cy="170" r="3" fill="#4caf50"/>
+          <!-- labels -->
+          <text x="6" y="195" fill="#7b8496" font-family="JetBrains Mono" font-size="8">0</text>
+          <text x="6" y="12" fill="#7b8496" font-family="JetBrains Mono" font-size="8">7k ft</text>
+          <text x="470" y="195" fill="#7b8496" font-family="JetBrains Mono" font-size="8" text-anchor="end">60s</text>
+          <text x="153" y="18" fill="#ef5350" font-family="JetBrains Mono" font-size="8">APOGEE</text>
+          <text x="363" y="160" fill="#4caf50" font-family="JetBrains Mono" font-size="8">MAIN · 700ft</text>
+        </svg>
+      </div>
+      <div class="preview-caption">
+        ISA atmospheric model. Trapezoidal ascent integration at 50ms timestep. ±3–5% apogee accuracy with a loaded thrust curve.
+      </div>
+    </div>
+
+    <!-- §3 DISPERSION MAP -->
+    <div class="preview">
+      <div class="preview-head">
+        <span class="tag">§3 · DISPERSION_MAP</span>
+        <span class="status"><span class="ok-dot"></span> 200 SAMPLES · 95% ELLIPSE</span>
+      </div>
+      <div class="preview-body" style="padding: 0;">
+        <div class="map-wrap">
+          <svg class="map-svg" viewBox="0 0 480 200">
+            <!-- terrain contours -->
+            <g stroke="#262a34" stroke-width="1" fill="none" opacity="0.7">
+              <ellipse cx="180" cy="120" rx="140" ry="70"/>
+              <ellipse cx="180" cy="120" rx="100" ry="50"/>
+              <ellipse cx="180" cy="120" rx="60" ry="30"/>
+            </g>
+            <!-- 95% ellipse -->
+            <ellipse cx="240" cy="100" rx="95" ry="42" fill="none" stroke="#4caf50" stroke-width="1.2" stroke-dasharray="4 4"/>
+            <!-- scatter -->
+            <g fill="#c9cdd8" opacity="0.85">
+              <!-- deterministic sample of points, not random -->
+              <circle cx="218" cy="92" r="1.5"/>
+              <circle cx="245" cy="88" r="1.5"/>
+              <circle cx="260" cy="105" r="1.5"/>
+              <circle cx="231" cy="112" r="1.5"/>
+              <circle cx="252" cy="95" r="1.5"/>
+              <circle cx="270" cy="115" r="1.5"/>
+              <circle cx="225" cy="105" r="1.5"/>
+              <circle cx="288" cy="98" r="1.5"/>
+              <circle cx="235" cy="122" r="1.5"/>
+              <circle cx="205" cy="100" r="1.5"/>
+              <circle cx="275" cy="85" r="1.5"/>
+              <circle cx="240" cy="110" r="1.5"/>
+              <circle cx="258" cy="118" r="1.5"/>
+              <circle cx="195" cy="112" r="1.5"/>
+              <circle cx="265" cy="100" r="1.5"/>
+              <circle cx="248" cy="78" r="1.5"/>
+              <circle cx="222" cy="125" r="1.5"/>
+              <circle cx="285" cy="112" r="1.5"/>
+              <circle cx="212" cy="118" r="1.5"/>
+              <circle cx="278" cy="92" r="1.5"/>
+              <circle cx="230" cy="98" r="1.5"/>
+              <circle cx="255" cy="82" r="1.5"/>
+              <circle cx="270" cy="125" r="1.5"/>
+              <circle cx="199" cy="95" r="1.5"/>
+              <circle cx="243" cy="120" r="1.5"/>
+            </g>
+            <!-- launch marker -->
+            <g>
+              <circle cx="150" cy="140" r="6" fill="none" stroke="#ef5350" stroke-width="1.5"/>
+              <circle cx="150" cy="140" r="2" fill="#ef5350"/>
+              <text x="160" y="144" fill="#ef5350" font-family="JetBrains Mono" font-size="9">LAUNCH</text>
+            </g>
+            <!-- compass -->
+            <g transform="translate(430, 30)" font-family="JetBrains Mono" font-size="9" fill="#7b8496">
+              <circle r="14" fill="none" stroke="#7b8496" stroke-width="0.5"/>
+              <text x="-3" y="-18">N</text>
+              <line x1="0" y1="-13" x2="0" y2="-6" stroke="#e8eaf0" stroke-width="1"/>
+            </g>
+            <!-- scale -->
+            <g transform="translate(20, 185)" font-family="JetBrains Mono" font-size="8" fill="#7b8496">
+              <line x1="0" y1="0" x2="40" y2="0" stroke="#7b8496" stroke-width="1"/>
+              <text x="0" y="-4">500 ft</text>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="preview-caption">
+        Monte Carlo landing dispersion with wind shear. 200-sample scatter plus 95% confidence ellipse, rendered on Leaflet topographic tiles.
+      </div>
+    </div>
+
+    <!-- §4 EXPORT -->
+    <div class="preview">
+      <div class="preview-head">
+        <span class="tag">§4 · EXPORT</span>
+        <span class="status"><span class="ok-dot"></span> SHARE_LINK · 4.2 KB</span>
+      </div>
+      <div class="preview-body">
+<pre class="code-block"><span class="cmt">// shareable URL · round-trip lossless</span>
+recoverysys.app/<span class="val">?c=eyJtb3Rvci...</span>
+
+<span class="cmt">// OpenRocket .ork export</span>
+&lt;<span class="kw">openrocket</span> <span class="attr">version</span>=<span class="val">"1.10"</span>&gt;
+  &lt;<span class="kw">rocket</span> <span class="attr">mass</span>=<span class="val">"3.04kg"</span>&gt;
+    &lt;<span class="kw">stage</span>&gt;
+      &lt;<span class="kw">motor</span> <span class="attr">designation</span>=<span class="val">"K550W"</span>/&gt;
+      &lt;<span class="kw">chute</span> <span class="attr">main</span>=<span class="val">"Iris_48"</span>/&gt;
+    &lt;/<span class="kw">stage</span>&gt;
+  &lt;/<span class="kw">rocket</span>&gt;
+&lt;/<span class="kw">openrocket</span>&gt;</pre>
+      </div>
+      <div class="preview-caption">
+        Export to OpenRocket .ork, copy a shareable URL, or save locally. All config round-trips losslessly — no backend involved.
+      </div>
+    </div>
+  </div>
+
+  <div class="sec-header">
+    <h2>§5 COMPATIBILITY_CHECKS</h2>
+    <div class="meta">LIVE · 03 RULES FLAGGED</div>
+  </div>
+
+  <div class="compat-strip">
+    <div class="chip chip-warn"><span class="icon">⚠</span><span>MAIN packing volume exceeds bay by 12%. Consider a smaller chute or longer bay.</span></div>
+    <div class="chip chip-ok"><span class="icon">✓</span><span>Drogue descent rate 62 ft/s — within safe deployment range for 3kg airframe.</span></div>
+    <div class="chip chip-warn"><span class="icon">⚠</span><span>Shock cord length &lt; 3× rocket length (advisory). Recommend ≥ 18ft.</span></div>
+  </div>
+
+  <div class="foot">
+    <div>MIT_LICENSED · NO_TELEMETRY · NO_BACKEND · OFFLINE_CAPABLE</div>
+    <div>
+      <a href="#">github.com/akhan157/RecoverySys</a>
+      &nbsp;·&nbsp;
+      <a href="#">docs</a>
+    </div>
+  </div>
+
+</div>
+</body>
+</html>

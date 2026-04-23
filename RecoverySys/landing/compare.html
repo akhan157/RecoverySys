@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RecoverySys — Landing Page Variants</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; background: #0a0a0a; color: #e8eaf0; font-family: 'JetBrains Mono', ui-monospace, monospace; }
+  header {
+    padding: 20px 32px; border-bottom: 1px solid #2a2a2a;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  header h1 { margin: 0; font-size: 14px; font-weight: 700; letter-spacing: 0.08em; }
+  header .meta { font-size: 10px; color: #8b8f9a; letter-spacing: 0.1em; }
+  .row {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    height: calc(100vh - 62px);
+  }
+  .col {
+    border-right: 1px solid #2a2a2a; display: flex; flex-direction: column;
+  }
+  .col:last-child { border-right: none; }
+  .col-head {
+    padding: 14px 20px; border-bottom: 1px solid #2a2a2a; background: #111;
+    display: flex; justify-content: space-between; align-items: center;
+  }
+  .col-title { font-size: 12px; font-weight: 700; letter-spacing: 0.08em; }
+  .col-meta { font-size: 10px; color: #8b8f9a; letter-spacing: 0.08em; }
+  .col-meta a { color: #5cff5c; text-decoration: none; margin-left: 12px; }
+  .col-meta a:hover { text-decoration: underline; }
+  iframe { flex: 1; border: none; width: 100%; background: #000; }
+</style>
+</head>
+<body>
+<header>
+  <h1>RECOVERYSYS · LANDING PAGE VARIANTS</h1>
+  <div class="meta">2 variants · ← scroll each frame independently →</div>
+</header>
+<div class="row">
+  <div class="col">
+    <div class="col-head">
+      <div class="col-title">VARIANT A · MISSION CONTROL TERMINAL</div>
+      <div class="col-meta">pure black · mono-only · spec-sheet <a href="variant-a.html" target="_blank">open ↗</a></div>
+    </div>
+    <iframe src="variant-a.html" title="Variant A"></iframe>
+  </div>
+  <div class="col">
+    <div class="col-head">
+      <div class="col-title">VARIANT C · INSTRUMENT PANEL HYBRID</div>
+      <div class="col-meta">dark slate · Inter + mono · app-faithful <a href="variant-c.html" target="_blank">open ↗</a></div>
+    </div>
+    <iframe src="variant-c.html" title="Variant C"></iframe>
+  </div>
+</div>
+</body>
+</html>
