@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>RecoverySys — Recovery Bay Configuration + Flight Simulation</title>
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<meta name="description" content="Browser tool for L1/L2/L3 high-power rocketry. Configure a recovery bay, simulate the flight, and plot landing dispersion. Free. No account." />
+<link rel="stylesheet" href="assets/colors_and_type.css" />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" />
+<style>
+  html, body { margin: 0; padding: 0; background: #050505; }
+  body { overflow-x: hidden; }
+  #root { width: 100vw; }
+  :root { --lp-heading-font: 'Space Grotesk', sans-serif; }
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
+<script src="https://unpkg.com/react@18.3.1/umd/react.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" crossorigin="anonymous"></script>
+</head>
+<body>
+<div id="root"></div>
+
+<script>
+  // Baked-in chart preferences (area variant, green palette)
+  window.__LP_CHART_VARIANT = 'area';
+  window.__LP_CHART_PALETTE = 'green';
+</script>
+<script type="text/babel" src="assets/landing-scroll-styles.jsx"></script>
+<script type="text/babel" src="assets/flight-chart.jsx"></script>
+<script type="text/babel" src="assets/landing-scroll.jsx"></script>
+
+<script>
+  // Smooth scroll via Lenis, driven by GSAP's ticker and synced with ScrollTrigger.
+  (function () {
+    if (!window.Lenis || !window.gsap || !window.ScrollTrigger) return;
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.2,
+    });
+    window.__lenis = lenis;
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
+  })();
+</script>
+<script type="text/babel">
+ReactDOM.createRoot(document.getElementById('root')).render(<LPScroll />);
+</script>
+</body>
+</html>

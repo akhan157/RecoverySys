@@ -1,0 +1,229 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   RecoverySys — Colors & Type
+   Two live themes in the codebase:
+     1. MISSION CONTROL (live app shell) — dark oscilloscope / NASA ground station
+     2. SLATE          (alt / documented) — white engineering-instrument
+   Use the .mc wrapper for Mission Control; :root for Slate (default body).
+   ───────────────────────────────────────────────────────────────────────── */
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+/* ── SLATE PALETTE (light, documented in root DESIGN.md) ──────────────── */
+:root {
+  --bg-app:           #f4f5f7;
+  --bg-panel:         #ffffff;
+  --bg-right:         #edf0f3;
+  --bg-hover:         #edf0f3;
+  --input-bg:         #f4f5f7;
+
+  --text-primary:     #1a1d23;
+  --text-secondary:   #4a5260;
+  --text-tertiary:    #636c7e;   /* WCAG AA: 5.28:1 on #fff */
+  --text-placeholder: #c8cdd8;
+
+  --border-default:   #dde1e9;
+  --border-subtle:    #eaecf0;
+
+  --accent:           #374151;
+  --accent-text:      #ffffff;
+  --accent-tint:      #f1f2f4;
+  --accent-ring:      rgba(55, 65, 81, 0.12);
+
+  --header-bg:        #1a1d23;
+  --header-border:    #2d3240;
+
+  --ok-fg:            #1a7f37;
+  --ok-bg:            #dafbe1;
+  --warn-fg:          #d48800;
+  --warn-bg:          #fff8e1;
+  --warn-border:      #ffe082;
+  --error-fg:         #c0392b;
+  --error-bg:         #fdecea;
+
+  --cta-bg:           #1a1d23;
+  --cta-fg:           #ffffff;
+  --neutral-dot:      #c8cdd8;
+
+  --radius:           6px;
+  --radius-btn:       4px;
+  --transition:       0.18s ease;
+
+  /* flight chart */
+  --chart-bg:         #ffffff;
+  --chart-border:     #dde1e9;
+  --chart-grid:       #edf0f3;
+  --chart-axis:       #c8cdd8;
+  --chart-path:       #1a1d23;
+  --chart-marker:     #636c7e;
+  --chart-label:      #636c7e;
+
+  /* type */
+  --font-sans:        'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono:        'JetBrains Mono', ui-monospace, monospace;
+}
+
+/* ── SLATE DARK ──────────────────────────────────────────────────────── */
+[data-theme="dark"] {
+  --bg-app:           #0f1014;
+  --bg-panel:         #171a1f;
+  --bg-right:         #13161b;
+  --bg-hover:         #1e2128;
+  --input-bg:         #13161b;
+
+  --text-primary:     #e8eaf0;
+  --text-secondary:   #9aa0b0;
+  --text-tertiary:    #7b8496;
+  --text-placeholder: #353b48;
+
+  --border-default:   #272c38;
+  --border-subtle:    #1e2230;
+
+  --accent:           #c9cdd8;
+  --accent-text:      #1a1d23;
+  --accent-tint:      #1e2128;
+  --accent-ring:      rgba(200, 205, 216, 0.10);
+
+  --header-bg:        #0d0f13;
+  --header-border:    #1e2230;
+
+  --ok-fg:            #4caf50;
+  --ok-bg:            #0d2b0d;
+  --warn-fg:          #ffb74d;
+  --warn-bg:          #2b1f00;
+  --warn-border:      #8a5a00;
+  --error-fg:         #ef5350;
+  --error-bg:         #2d0a0a;
+
+  --cta-bg:           #e8eaf0;   /* inverted */
+  --cta-fg:           #1a1d23;
+  --neutral-dot:      #353b48;
+
+  --chart-bg:         #0f1014;
+  --chart-border:     #272c38;
+  --chart-grid:       #1a1d23;
+  --chart-axis:       #353b48;
+  --chart-path:       #ffffff;
+  --chart-marker:     #7b8496;
+  --chart-label:      #7b8496;
+}
+
+/* ── MISSION CONTROL (live app shell) ────────────────────────────────── */
+.mc {
+  --mc-bg:         #0a0a0a;
+  --mc-bg-panel:   #111111;
+  --mc-bg-main:    #0d0d0d;
+  --mc-bg-sidebar: #0f0f0f;
+  --mc-border:     #2a2a2a;
+  --mc-border-card:#333333;
+  --mc-border-active:#555555;
+  --mc-white:      #ffffff;
+  --mc-text:       #e0e0e0;
+  --mc-text-dim:   #888888;
+  --mc-text-faint: #555555;
+  --mc-green:      #4caf50;
+  --mc-amber:      #f5a623;
+  --mc-red:        #e74c3c;
+  --mc-accent:     #4caf50;
+
+  font-family: var(--font-mono);
+  color: var(--mc-text);
+  background: var(--mc-bg);
+}
+
+/* ── Base ────────────────────────────────────────────────────────────── */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--bg-app);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* ── Semantic type classes ───────────────────────────────────────────── */
+.mono {
+  font-family: var(--font-mono);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.section-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-tertiary);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mc-label {              /* Mission Control section label */
+  font-size: 9px;
+  color: var(--mc-text-faint);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mc-value {              /* Mission Control metric value */
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--mc-white);
+  font-variant-numeric: tabular-nums;
+}
+
+.mc-unit {
+  font-size: 11px;
+  color: var(--mc-text-dim);
+  font-weight: 400;
+  margin-left: 4px;
+}
+
+/* Display hierarchy */
+.h1 { font-family: var(--font-mono); font-size: 26px; font-weight: 700; color: var(--text-primary); letter-spacing: 0; }
+.h2 { font-family: var(--font-mono); font-size: 20px; font-weight: 700; color: var(--text-primary); }
+.h3 { font-family: var(--font-sans); font-size: 13px; font-weight: 600; color: var(--text-primary); }
+.body { font-family: var(--font-sans); font-size: 13px; font-weight: 400; color: var(--text-primary); line-height: 1.45; }
+.small { font-family: var(--font-sans); font-size: 11px; font-weight: 400; color: var(--text-secondary); }
+.code { font-family: var(--font-mono); font-size: 13px; font-weight: 600; }
+
+/* ── Focus ───────────────────────────────────────────────────────────── */
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.mc button:focus-visible,
+.mc input:focus-visible,
+.mc a:focus-visible {
+  outline: 2px solid var(--mc-green);
+  outline-offset: 2px;
+}
+
+/* ── Animations (reference) ──────────────────────────────────────────── */
+@keyframes dot-pulse {
+  0%   { transform: scale(1); }
+  50%  { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}
+.dot-pulse { animation: dot-pulse 300ms ease-in-out; }
+
+@keyframes spin { to { transform: rotate(360deg); } }
+.spinner {
+  display: inline-block;
+  width: 12px; height: 12px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  vertical-align: middle;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.toast-enter { animation: toast-in 200ms ease-out forwards; }
