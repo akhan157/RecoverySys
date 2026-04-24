@@ -78,8 +78,8 @@ const DEMO_SPECS = {
   main_deploy_alt_ft:     '700',
   ejection_g_factor:      '',
   bay_obstruction_vol_in3: '',
-  launch_lat:             '40.7128',
-  launch_lon:             '-74.0060',
+  launch_lat:             '35.3456',    // FAR (Friends of Amateur Rocketry), Mojave
+  launch_lon:             '-117.8083',
   wind_surface_alt_ft:    '',
   wind_mid_speed_mph:     '',
   wind_mid_direction_deg: '',
