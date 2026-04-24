@@ -14,6 +14,7 @@ import {
 } from './lib/constants.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
+import DemoBanner from './components/DemoBanner.jsx'
 
 // Prefetch the Leaflet chunk during browser idle time after initial load so
 // clicking the DISPERSION tab feels instant instead of waiting for the bundle.
@@ -41,6 +42,44 @@ const DEFAULT_SPECS = {
   launch_lat:             '',   // launch site latitude (decimal degrees)
   launch_lon:             '',   // launch site longitude (decimal degrees)
   // Wind layers — mid & aloft (surface uses wind_speed_mph / wind_direction_deg above)
+  wind_surface_alt_ft:    '',
+  wind_mid_speed_mph:     '',
+  wind_mid_direction_deg: '',
+  wind_mid_alt_ft:        '',
+  wind_aloft_speed_mph:   '',
+  wind_aloft_direction_deg: '',
+  wind_aloft_alt_ft:      '',
+}
+
+// ── Demo config ──────────────────────────────────────────────────────────────
+// Loaded when the app is opened with ?demo=1 (e.g. from the landing page LAUNCH
+// button). Showcases a typical L2 single-deploy w/ Chute Release setup so first
+// visitors see the tool in action instead of a blank slate.
+const DEMO_PART_IDS = {
+  main_chute:      'fr3-16-60',       // Front Range 60" Elliptical
+  drogue_chute:    'cfc-018-n',       // Fruity Chutes 18" Classic Elliptical
+  shock_cord:      'sc-kev-half-20',  // 1/2" Kevlar, 20 ft
+  chute_protector: 'tfr-nomex-12',    // 12" Nomex protector
+  deployment_bag:  'dbag-12',         // 12" deployment bag
+  quick_links:     'ql-14-zinc',      // 1/4" zinc quick link
+  swivel:          'sw-bb-half',      // 1/2" ball-bearing swivel
+  chute_device:    'jl-chute-release',// Jolly Logic Chute Release
+}
+
+const DEMO_SPECS = {
+  rocket_mass_g:          '4500',
+  motor_total_impulse_ns: '2560',     // mid-J motor
+  burn_time_s:            '1.8',
+  airframe_id_in:         '4',
+  bay_length_in:          '12',
+  drag_cd:                '0.6',
+  wind_speed_mph:         '8',
+  wind_direction_deg:     '270',
+  main_deploy_alt_ft:     '700',
+  ejection_g_factor:      '',
+  bay_obstruction_vol_in3: '',
+  launch_lat:             '40.7128',
+  launch_lon:             '-74.0060',
   wind_surface_alt_ft:    '',
   wind_mid_speed_mph:     '',
   wind_mid_direction_deg: '',
@@ -122,6 +161,17 @@ function reducer(state, action) {
         specs: action.specs,
         customMotor: action.customMotor ?? null,
         simulation: null,
+      }
+    // Demo "Start Fresh" — wipe slots, reset specs to defaults, clear sim.
+    // Custom parts and toasts are preserved.
+    case 'CLEAR_ALL':
+      return {
+        ...state,
+        config: { ...EMPTY_CONFIG },
+        specs: { ...DEFAULT_SPECS },
+        customMotor: null,
+        simulation: null,
+        warnings: [],
       }
     default:
       return state
@@ -260,7 +310,9 @@ export default function App() {
     if (restoredToastFired.current) return   // idempotent under React 18 StrictMode double-invoke
     restoredToastFired.current = true
     try {
-      if (new URLSearchParams(location.search).get(SHARE_PARAM)) return   // share link active — URL state takes precedence
+      const params = new URLSearchParams(location.search)
+      if (params.get(SHARE_PARAM)) return   // share link active — URL state takes precedence
+      if (params.get('demo') === '1') return // demo will override saved session — no "restored" toast
       const raw = localStorage.getItem('recoverysys-config')
       if (raw && JSON.parse(raw)) {
         addToast(TOAST_LEVELS.OK, 'Restored your last session.')
@@ -304,9 +356,54 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
+  // ── Demo mode ─────────────────────────────────────────────────────────────
+  // Triggered by ?demo=1 (e.g. landing page LAUNCH button). Loads a sample
+  // L2 config so first-time visitors see the tool populated. The banner offers
+  // a one-click "Start Fresh" to clear everything.
+  const [demoMode, setDemoMode] = useState(
+    () => typeof window !== 'undefined' && new URLSearchParams(location.search).get('demo') === '1'
+  )
+  const demoLoaded = useRef(false)
+
+  useEffect(() => {
+    if (demoLoaded.current) return        // StrictMode-safe single load
+    if (!demoMode) return
+    if (new URLSearchParams(location.search).get(SHARE_PARAM)) return  // share link wins
+    demoLoaded.current = true
+
+    const config = Object.fromEntries(
+      SLOT_IDS.map(slot => [slot, allParts.find(p => p.id === DEMO_PART_IDS[slot]) ?? null])
+    )
+    // Run sim synchronously before dispatching so both config and results land in
+    // the same render batch. Using safeTimeout would be killed by StrictMode's
+    // unmount/remount cycle clearing all tracked timeouts.
+    const result = runSimulation({ specs: DEMO_SPECS, config, customMotor: null })
+    dispatch({
+      type: 'LOAD_SHARE',
+      config,
+      specs: { ...DEMO_SPECS },
+      customMotor: null,
+    })
+    if (result) dispatch({ type: 'SET_SIM', simulation: result })
+    // allParts read once at mount — demo is loaded exactly once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [demoMode])
+
+  const exitDemo = useCallback(() => {
+    dispatch({ type: 'CLEAR_ALL' })
+    setDemoMode(false)
+    // Strip ?demo=1 from URL so a refresh won't re-load the demo.
+    try {
+      const url = new URL(location.href)
+      url.searchParams.delete('demo')
+      history.replaceState(null, '', url.pathname + url.search + url.hash)
+    } catch { /* silent — browsers without history API */ }
+  }, [])
+
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
+      {demoMode && <DemoBanner onExit={exitDemo} />}
       <MissionControlLayout
         state={state}
         allParts={allParts}
