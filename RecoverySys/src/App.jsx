@@ -257,6 +257,9 @@ export default function App() {
   const setCategory      = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
   const setCustomMotor   = useCallback((motor) => dispatch({ type: 'SET_CUSTOM_MOTOR', motor }), [])
   const clearCustomMotor = useCallback(() => dispatch({ type: 'CLEAR_CUSTOM_MOTOR' }), [])
+  const loadConfig = useCallback(({ config, specs, customMotor }) => {
+    dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
+  }, [])
 
   const addToast = useCallback((level, message) => {
     dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
@@ -266,9 +269,6 @@ export default function App() {
     dispatch({ type: 'START_SIM' })
     const result = runSimulation({ specs: state.specs, config: state.config, customMotor: state.customMotor })
     dispatch({ type: 'SET_SIM', simulation: result })
-    // runSimulation returns null for: apogee ≤ deploy_ft, degenerate drogue specs,
-    // NaN propagation. Without a surface here the user sees an empty chart with
-    // no explanation — indistinguishable from "haven't run yet".
     if (result === null) {
       addToast(TOAST_LEVELS.ERROR, 'Simulation failed — main deploy altitude may exceed apogee, or chute specs are invalid. Lower deploy altitude or increase motor impulse.')
     }
@@ -420,6 +420,7 @@ export default function App() {
         editCustomPart={editCustomPart}
         setCustomMotor={setCustomMotor}
         clearCustomMotor={clearCustomMotor}
+        loadConfig={loadConfig}
         addToast={addToast}
         darkMode={darkMode}
         setDarkMode={setDarkMode}

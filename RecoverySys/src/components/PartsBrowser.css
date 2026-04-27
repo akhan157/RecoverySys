@@ -100,3 +100,41 @@
 .parts-add-custom:hover {
   background: var(--accent-tint);
 }
+
+/* ── Search input ──────────────────────────────────────────── */
+
+.parts-search-input {
+  flex: 1;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  background: var(--input-bg);
+  border: 1px solid var(--border-default);
+  border-radius: 0;
+  padding: 5px 7px;
+  outline: none;
+  transition: border-color 0.18s ease;
+}
+.parts-search-input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-ring);
+}
+.parts-search-input::placeholder {
+  color: var(--text-tertiary);
+  font-weight: 400;
+}
+
+.parts-search-clear {
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--text-tertiary);
+  font-size: 16px;
+  line-height: 1;
+  padding: 2px 4px;
+  transition: color 150ms ease;
+}
+.parts-search-clear:hover {
+  color: var(--text-primary);
+}

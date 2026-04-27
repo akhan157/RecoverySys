@@ -414,7 +414,7 @@ describe('runSimulation — custom motor thrust curve', () => {
     const result = runSimulation({ specs, config, customMotor: flatCurve })
     expect(result).not.toBeNull()
     expect(result.apogee_ft).toBeGreaterThan(0)
-    expect(result.apogee_method).toBe('integrated-curve')
+    expect(result.apogee_method).toBe('rk4-curve')
   })
 
   it('constant-thrust curve produces apogee within 5% of scalar path', () => {
@@ -427,7 +427,7 @@ describe('runSimulation — custom motor thrust curve', () => {
   it('falls back to scalar path when customMotor is null', () => {
     const result = runSimulation({ specs, config, customMotor: null })
     expect(result).not.toBeNull()
-    expect(result.apogee_method).toBe('integrated')
+    expect(result.apogee_method).toBe('rk4')
   })
 
   it('uses propellant_kg from customMotor when provided', () => {

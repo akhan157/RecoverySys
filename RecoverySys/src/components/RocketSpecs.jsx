@@ -42,6 +42,7 @@ export default function RocketSpecs({
           unit="g"
           placeholder="e.g. 2500"
           onChange={v => onSetSpec('rocket_mass_g', v)}
+          help="Total liftoff weight including motor, recovery hardware, and airframe"
         />
 
         {/* Custom motor (.eng import) — preferred over search for HPR custom motors */}
@@ -55,11 +56,11 @@ export default function RocketSpecs({
         {/* ThrustCurve.org search — for commercial motors */}
         <MotorSearch onSetSpec={onSetSpec} />
 
-        <SpecInput id="impulse"   label="Motor Impulse" value={specs.motor_total_impulse_ns} unit="Ns"  placeholder="e.g. 640" onChange={v => onSetSpec('motor_total_impulse_ns', v)} />
-        <SpecInput id="burn"      label="Burn Time"     value={specs.burn_time_s}            unit="s"   placeholder="e.g. 1.8" onChange={v => onSetSpec('burn_time_s', v)} />
-        <SpecInput id="airframe-id" label="Airframe ID" value={specs.airframe_id_in}         unit="in"  placeholder="e.g. 3.9" onChange={v => onSetSpec('airframe_id_in', v)} />
-        <SpecInput id="bay-length"  label="Recovery Bay Length" value={specs.bay_length_in}  unit="in"  placeholder="e.g. 18"  onChange={v => onSetSpec('bay_length_in', v)} />
-        <SpecInput id="bay-obstruction" label="Obstruction Volume" value={specs.bay_obstruction_vol_in3} unit="in³" placeholder="0" onChange={v => onSetSpec('bay_obstruction_vol_in3', v)} />
+        <SpecInput id="impulse"   label="Motor Impulse" value={specs.motor_total_impulse_ns} unit="Ns"  placeholder="e.g. 640" onChange={v => onSetSpec('motor_total_impulse_ns', v)} help="Total impulse in Newton-seconds — from motor data sheet or ThrustCurve.org" />
+        <SpecInput id="burn"      label="Burn Time"     value={specs.burn_time_s}            unit="s"   placeholder="e.g. 1.8" onChange={v => onSetSpec('burn_time_s', v)} help="Motor burn duration in seconds — from motor data. Enables accurate apogee prediction." />
+        <SpecInput id="airframe-id" label="Airframe ID" value={specs.airframe_id_in}         unit="in"  placeholder="e.g. 3.9" onChange={v => onSetSpec('airframe_id_in', v)} help="Inner diameter of the airframe tube at the recovery bay (e.g. 3.9 for a 4-inch tube)" />
+        <SpecInput id="bay-length"  label="Recovery Bay Length" value={specs.bay_length_in}  unit="in"  placeholder="e.g. 18"  onChange={v => onSetSpec('bay_length_in', v)} help="Axial length of the recovery bay section — used for packing volume checks" />
+        <SpecInput id="bay-obstruction" label="Obstruction Volume" value={specs.bay_obstruction_vol_in3} unit="in³" placeholder="0" onChange={v => onSetSpec('bay_obstruction_vol_in3', v)} help="Volume of avionics sleds, hardpoints, or wiring inside the bay that reduce packing space" />
 
         {/* Bay volume readout — computed from ID + length; always shown when both are filled */}
         {bayVolume != null && (
@@ -78,7 +79,7 @@ export default function RocketSpecs({
           </div>
         )}
 
-        <SpecInput id="cd" label="Drag Coeff (Cd)" value={specs.drag_cd} unit="" placeholder="0.50" onChange={v => onSetSpec('drag_cd', v)} />
+        <SpecInput id="cd" label="Drag Coeff (Cd)" value={specs.drag_cd} unit="" placeholder="0.50" onChange={v => onSetSpec('drag_cd', v)} help="Subsonic drag coefficient — typically 0.4-0.6 for HPR rockets. Sim adjusts for transonic effects automatically." />
 
         {/* ── Wind Profile (multi-layer) ──────────────────────────────── */}
         <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -88,8 +89,8 @@ export default function RocketSpecs({
 
           {/* Surface layer */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            <SpecInput id="wind"              label="Surface Speed" value={specs.wind_speed_mph}       unit="mph" placeholder="e.g. 10"   onChange={v => onSetSpec('wind_speed_mph', v)} />
-            <SpecInput id="wind-dir"          label="Surface Dir"   value={specs.wind_direction_deg}   unit="°"   placeholder="0=N 90=E"  onChange={v => onSetSpec('wind_direction_deg', v)} />
+            <SpecInput id="wind"              label="Surface Speed" value={specs.wind_speed_mph}       unit="mph" placeholder="e.g. 10"   onChange={v => onSetSpec('wind_speed_mph', v)} help="Surface wind speed in mph" />
+            <SpecInput id="wind-dir"          label="Surface Dir"   value={specs.wind_direction_deg}   unit="°"   placeholder="0=N 90=E"  onChange={v => onSetSpec('wind_direction_deg', v)} help="Direction wind blows FROM — 0=N, 90=E, 180=S, 270=W (meteorological convention)" />
             <SpecInput id="wind-surface-alt"  label="Surface Alt"   value={specs.wind_surface_alt_ft}  unit="ft"  placeholder="0"         onChange={v => onSetSpec('wind_surface_alt_ft', v)} />
           </div>
 
@@ -113,9 +114,9 @@ export default function RocketSpecs({
           </div>
         </div>
 
-        <SpecInput id="launch-lat" label="Launch Lat"     value={specs.launch_lat}         unit=""  placeholder="e.g. 42.3601"  onChange={v => onSetSpec('launch_lat', v)} />
-        <SpecInput id="launch-lon" label="Launch Lon"     value={specs.launch_lon}         unit=""  placeholder="e.g. -71.0589" onChange={v => onSetSpec('launch_lon', v)} />
-        <SpecInput id="deploy"     label="Main Deploy Alt" value={specs.main_deploy_alt_ft} unit="ft" placeholder="500"          onChange={v => onSetSpec('main_deploy_alt_ft', v)} />
+        <SpecInput id="launch-lat" label="Launch Lat"     value={specs.launch_lat}         unit=""  placeholder="e.g. 42.3601"  onChange={v => onSetSpec('launch_lat', v)} help="Launch site latitude in decimal degrees — enables drift map and Monte Carlo dispersion" />
+        <SpecInput id="launch-lon" label="Launch Lon"     value={specs.launch_lon}         unit=""  placeholder="e.g. -71.0589" onChange={v => onSetSpec('launch_lon', v)} help="Launch site longitude in decimal degrees" />
+        <SpecInput id="deploy"     label="Main Deploy Alt" value={specs.main_deploy_alt_ft} unit="ft" placeholder="500"          onChange={v => onSetSpec('main_deploy_alt_ft', v)} help="Altitude for main chute deployment — typically 500-1000 ft AGL. Lower = less drift, higher = more margin for inflation." />
         <SpecInput
           id="g-factor"
           label="Ejection G-Factor"
@@ -127,6 +128,7 @@ export default function RocketSpecs({
           max={100}
           error={gIsLow}
           errorText="Below 12G NAR minimum"
+          help="Peak G-force at ejection — leave blank for auto (20G L1/L2, 30G L3). BP charges: 20-30G. CO2/Tender Descender: 8-12G."
         />
       </div>
       <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', lineHeight: 1.4 }}>

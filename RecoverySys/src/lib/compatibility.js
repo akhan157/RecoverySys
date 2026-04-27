@@ -1,7 +1,7 @@
 import { computeDescentRate } from './simulation.js'
 import { WARN_LEVELS } from './constants.js'
 
-const G_ACCEL = 9.81
+const G_ACCEL = 9.80665
 
 /**
  * Evaluate all compatibility rules for the current config + specs.
@@ -25,6 +25,30 @@ export function checkCompatibility({ config, specs }) {
   // or 30G for L3-class rockets (≥10 kg). Matches NAR/TRA guidelines.
   const g_factor_user = parseFloat(specs.ejection_g_factor)
   const g_factor      = (g_factor_user > 0) ? Math.max(5, g_factor_user) : (mass_kg != null && mass_kg >= 10 ? 30 : 20)
+
+  // ── Deploy altitude sanity ───────────────────────────────────────────────────
+  const deploy_ft_raw = parseFloat(specs.main_deploy_alt_ft)
+  if (isFinite(deploy_ft_raw)) {
+    if (deploy_ft_raw <= 0) {
+      warnings.push({
+        level: WARN_LEVELS.ERROR,
+        slot: 'main_chute',
+        message: `Deploy altitude ${deploy_ft_raw} ft is invalid — must be above ground level`,
+      })
+    } else if (deploy_ft_raw < 200) {
+      warnings.push({
+        level: WARN_LEVELS.WARN,
+        slot: 'main_chute',
+        message: `Deploy altitude ${deploy_ft_raw} ft is dangerously low — minimum 200 ft recommended for reliable chute inflation`,
+      })
+    } else if (deploy_ft_raw > 10000) {
+      warnings.push({
+        level: WARN_LEVELS.WARN,
+        slot: 'main_chute',
+        message: `Deploy altitude ${deploy_ft_raw.toLocaleString()} ft is unusually high — verify this is intentional`,
+      })
+    }
+  }
 
   // ── Main chute ──────────────────────────────────────────────────────────────
   if (config.main_chute) {
@@ -56,13 +80,47 @@ export function checkCompatibility({ config, specs }) {
     }
   }
 
+  // ── Landing kinetic energy ────────────────────────────────────────────────
+  // KE = 0.5 * m * v². NAR/TRA guideline: < 75 ft-lbf for safe recovery.
+  if (mass_kg) {
+    const FT_PER_M = 3.28084
+    let landing_fps = null
+    if (config.main_chute) {
+      const deploy_alt = parseFloat(specs.main_deploy_alt_ft) || 500
+      landing_fps = computeDescentRate(config.main_chute.specs, mass_kg, deploy_alt)
+    } else if (config.drogue_chute) {
+      landing_fps = computeDescentRate(config.drogue_chute.specs, mass_kg)
+    }
+    if (landing_fps && landing_fps > 0) {
+      const landing_mps = landing_fps / FT_PER_M
+      const ke_ftlbf = 0.5 * mass_kg * landing_mps * landing_mps * 0.7376
+      if (ke_ftlbf > 100) {
+        warnings.push({
+          level: WARN_LEVELS.ERROR,
+          slot: 'main_chute',
+          message: `Landing KE ~${Math.round(ke_ftlbf)} ft-lbf exceeds 100 ft-lbf — high risk of damage or injury`,
+        })
+      } else if (ke_ftlbf > 75) {
+        warnings.push({
+          level: WARN_LEVELS.WARN,
+          slot: 'main_chute',
+          message: `Landing KE ~${Math.round(ke_ftlbf)} ft-lbf exceeds 75 ft-lbf guideline — consider a larger main chute`,
+        })
+      }
+    }
+  }
+
   // ── Drogue chute ────────────────────────────────────────────────────────────
   if (config.drogue_chute) {
     const { diameter_in, cd } = config.drogue_chute.specs
 
-    // Drogue descent rate — should be fast (50–120 fps) to minimize drift before main deploy
+    // Drogue descent rate — evaluate at mid-altitude between a typical apogee and deploy.
+    // Without running the full sim here, use 5000 ft as a reasonable mid-drogue altitude
+    // for the density correction (air is ~15% thinner → descent ~8% faster than sea level).
     if (mass_kg) {
-      const fps = computeDescentRate({ diameter_in, cd }, mass_kg)
+      const deploy_alt = parseFloat(specs.main_deploy_alt_ft) || 500
+      const mid_drogue_ft = Math.max(deploy_alt, 5000)
+      const fps = computeDescentRate({ diameter_in, cd }, mass_kg, mid_drogue_ft)
       if (fps < 30) {
         warnings.push({
           level: WARN_LEVELS.WARN,
@@ -79,39 +137,99 @@ export function checkCompatibility({ config, specs }) {
     }
   }
 
+  // ── Main chute opening shock ──────────────────────────────────────────────
+  // When drogue is fast and main chute opens, the transient snatch force can
+  // exceed the steady-state terminal load by 2-4×. Estimate opening shock as:
+  //   F_open = q × Cd × A × Cx   where q = 0.5 × rho × v²
+  //   Cx ≈ 1.8 (opening shock factor for flat/conical HPR chutes)
+  // Compare against shock cord and quick link ratings.
+  if (config.drogue_chute && config.main_chute && mass_kg) {
+    const deploy_alt = parseFloat(specs.main_deploy_alt_ft) || 500
+    const drogue_at_deploy = computeDescentRate(config.drogue_chute.specs, mass_kg, deploy_alt)
+    const drogue_mps = drogue_at_deploy / 3.28084
+    // ISA density: P/(R*T) with P = 101325*(T/288.15)^5.2559, R = 287.058
+    const _T = 288.15 - 0.0065 * Math.min(deploy_alt / 3.28084, 11000)
+    const rho_deploy = (101325 * Math.pow(_T / 288.15, 5.2559)) / (287.058 * _T)
+    const main_r_m   = (config.main_chute.specs.diameter_in * 0.0254) / 2
+    const main_area   = Math.PI * main_r_m * main_r_m
+    // Shape-specific opening shock factor (Cx)
+    const CX_BY_SHAPE = { flat: 1.8, elliptical: 1.6, conical: 1.5, cruciform: 2.2, toroidal: 1.4 }
+    const Cx = CX_BY_SHAPE[config.main_chute.specs.shape] || 1.8
+    const F_open_N   = 0.5 * rho_deploy * drogue_mps * drogue_mps * config.main_chute.specs.cd * main_area * Cx
+    const F_open_lbs = F_open_N / 4.448
+
+    // Warn if opening shock exceeds cord or link rating
+    const cord_lbs = config.shock_cord?.specs.strength_lbs
+    const ql_lbs   = config.quick_links?.specs.strength_lbs
+    const weakest  = Math.min(cord_lbs || Infinity, ql_lbs || Infinity)
+    if (weakest < Infinity && F_open_lbs > weakest) {
+      warnings.push({
+        level: WARN_LEVELS.ERROR,
+        slot: 'main_chute',
+        message: `Main chute opening shock ~${Math.round(F_open_lbs)} lbs at ${drogue_at_deploy.toFixed(0)} fps may exceed hardware rated ${Math.round(weakest)} lbs — consider a deployment bag or reefing`,
+      })
+    } else if (weakest < Infinity && F_open_lbs > weakest * 0.7) {
+      warnings.push({
+        level: WARN_LEVELS.WARN,
+        slot: 'main_chute',
+        message: `Main chute opening shock ~${Math.round(F_open_lbs)} lbs at ${drogue_at_deploy.toFixed(0)} fps is close to hardware limit (${Math.round(weakest)} lbs)`,
+      })
+    }
+  }
+
   // ── Shock cord strength ──────────────────────────────────────────────────────
   if (config.shock_cord && mass_kg) {
     const { strength_lbs, material, length_ft } = config.shock_cord.specs
-    const is_l3 = mass_kg >= 10  // L3-class threshold: ~22 lbs / 10 kg
 
     // G-factor: use user-supplied value (from RocketSpecs), or auto-default (30G L3, 20G L1/L2)
     const required_lbs = (mass_kg * G_ACCEL * g_factor) / 4.448
+
+    // Compute strain energy for display: E = F²/(2k) where k = (strength × 4.448)/(length × 0.3048 × elongation/100)
+    const { elongation_pct: elong } = config.shock_cord.specs
+    let strainNote = ''
+    if (elong > 0 && length_ft > 0) {
+      const peak_N = mass_kg * g_factor * G_ACCEL
+      const k = (strength_lbs * 4.448) / (length_ft * 0.3048 * (elong / 100))
+      const strain_J = (peak_N * peak_N) / (2 * k)
+      strainNote = ` Strain energy: ${strain_J.toFixed(1)} J.`
+    }
 
     if (strength_lbs < required_lbs) {
       warnings.push({
         level: WARN_LEVELS.ERROR,
         slot: 'shock_cord',
-        message: `Shock cord rated ${strength_lbs} lbs may fail at ejection (need ~${Math.ceil(required_lbs)} lbs at ${g_factor}G for ${mass_kg.toFixed(1)} kg rocket)`,
+        message: `Shock cord rated ${strength_lbs} lbs may fail at ejection (need ~${Math.ceil(required_lbs)} lbs at ${g_factor}G for ${mass_kg.toFixed(1)} kg rocket).${strainNote}`,
       })
     } else if (strength_lbs < required_lbs * 1.5) {
       warnings.push({
         level: WARN_LEVELS.WARN,
         slot: 'shock_cord',
-        message: `Shock cord rated ${strength_lbs} lbs — marginal safety factor at ${g_factor}G ejection load (~${Math.ceil(required_lbs)} lbs required)`,
+        message: `Shock cord rated ${strength_lbs} lbs — marginal safety factor at ${g_factor}G ejection load (~${Math.ceil(required_lbs)} lbs required).${strainNote}`,
       })
     }
 
-    // Kevlar inelasticity advisory for L3 rockets
-    // Kevlar stretches only ~3% vs nylon's ~15% — snatch force at chute deployment
-    // can be 3–5× higher than an equivalent-rated nylon cord.
-    // NAR/TRA recommend Kevlar cords be rated ≥2× the calculated minimum for L3.
-    if (material === 'kevlar' && is_l3) {
-      const recommended_lbs = Math.ceil(required_lbs * 2)
-      if (strength_lbs < recommended_lbs) {
+    // Dynamic snatch force multiplier from cord elongation.
+    // When a cord goes taut at velocity v, the peak dynamic load scales inversely
+    // with how much the cord stretches: F_dynamic ≈ F_static × sqrt(1 / elongation).
+    // Nylon (22% elongation): multiplier ≈ 2.1×
+    // Kevlar (3% elongation): multiplier ≈ 5.8×
+    // This replaces the old hardcoded 2× Kevlar rule with actual physics.
+    const { elongation_pct } = config.shock_cord.specs
+    if (elongation_pct > 0) {
+      const snatch_multiplier = Math.sqrt(1 / (elongation_pct / 100))
+      const dynamic_load_lbs = required_lbs * snatch_multiplier
+      if (strength_lbs < dynamic_load_lbs) {
+        const mult_str = snatch_multiplier.toFixed(1)
+        warnings.push({
+          level: material === 'kevlar' ? WARN_LEVELS.ERROR : WARN_LEVELS.WARN,
+          slot: 'shock_cord',
+          message: `${material === 'kevlar' ? 'Kevlar' : 'Cord'} with ${elongation_pct}% elongation amplifies snatch force ~${mult_str}× (${Math.round(dynamic_load_lbs)} lbs dynamic vs. ${Math.ceil(required_lbs)} lbs static). Cord rated ${strength_lbs} lbs may fail. ${material === 'kevlar' ? 'Switch to tubular nylon or rate ≥' + Math.ceil(dynamic_load_lbs) + ' lbs.' : 'Consider a longer cord or higher rating.'}`,
+        })
+      } else if (strength_lbs < dynamic_load_lbs * 1.5) {
         warnings.push({
           level: WARN_LEVELS.WARN,
           slot: 'shock_cord',
-          message: `Kevlar is nearly inelastic — snatch force at chute deployment can be 3–5× higher than static load. For L3, use a Kevlar cord rated ≥${recommended_lbs} lbs (2× minimum) or switch to tubular nylon.`,
+          message: `Snatch force at ${elongation_pct}% elongation is ~${snatch_multiplier.toFixed(1)}× static load (~${Math.round(dynamic_load_lbs)} lbs) — marginal safety factor for ${strength_lbs} lbs cord`,
         })
       }
     }
@@ -129,6 +247,18 @@ export function checkCompatibility({ config, specs }) {
         })
       }
     }
+  }
+
+  // ── Chute material vs cord material mismatch ─────────────────────────────────
+  // Nylon chute + Kevlar cord = mismatched elasticity. Kevlar won't stretch to
+  // absorb opening shock, transferring full snatch load to the nylon canopy
+  // attachment points — a known failure mode (canopy rips at shroud lines).
+  if (config.shock_cord?.specs.material === 'kevlar' && config.main_chute?.specs.material === 'nylon') {
+    warnings.push({
+      level: WARN_LEVELS.WARN,
+      slot: 'shock_cord',
+      message: 'Kevlar cord with nylon chute — mismatched elasticity. Kevlar transfers full snatch load to nylon canopy attachment points. Consider tubular nylon cord or adding a Kevlar shock cord protector/bungee section.',
+    })
   }
 
   // ── Chute protector vs main chute ────────────────────────────────────────────
@@ -183,6 +313,21 @@ export function checkCompatibility({ config, specs }) {
     }
   }
 
+  // ── Quick link size vs shock cord width ──────────────────────────────────────
+  // Quick link opening must be large enough for the cord to thread through.
+  // A link's size_in is its wire gauge — the opening is roughly 3× that.
+  if (config.quick_links && config.shock_cord?.specs.width_in) {
+    const ql_opening = config.quick_links.specs.size_in * 3  // approximate opening
+    const cord_width = config.shock_cord.specs.width_in
+    if (ql_opening < cord_width) {
+      warnings.push({
+        level: WARN_LEVELS.ERROR,
+        slot: 'quick_links',
+        message: `Quick link opening (~${ql_opening.toFixed(2)}") is too small for ${cord_width}" cord — cord won't thread through`,
+      })
+    }
+  }
+
   // ── Chute-mounted device vs main deploy altitude ─────────────────────────────
   // Devices like the Jolly Logic Chute Release have a max programmable altitude.
   // Warn if the planned deploy altitude is outside the device's operable range.
@@ -213,6 +358,17 @@ export function checkCompatibility({ config, specs }) {
         level: WARN_LEVELS.WARN,
         slot: 'deployment_bag',
         message: `${config.deployment_bag.name} (max ${bag_max}" chute) may be too small for ${chute_d}" main — chute may not pack cleanly`,
+      })
+    }
+    // Axial length check: chute packed length should fit inside the bag's depth.
+    // Bag packed_height_in is outer height; internal depth is ~80% of that.
+    const bag_depth = config.deployment_bag.specs.packed_height_in * 0.8
+    const chute_len = config.main_chute.specs.packed_length_in
+    if (bag_depth > 0 && chute_len > 0 && chute_len > bag_depth * 1.5) {
+      warnings.push({
+        level: WARN_LEVELS.WARN,
+        slot: 'deployment_bag',
+        message: `Main chute packed length ${chute_len}" may not fit in ${config.deployment_bag.name} (est. ${bag_depth.toFixed(1)}" internal depth) — chute may stick out, defeating controlled deployment`,
       })
     }
   }
@@ -253,9 +409,13 @@ export function checkCompatibility({ config, specs }) {
 
   // ── Bay volume / stacked volume ──────────────────────────────────────────────
   // Chutes stack axially and fill the tube cross-section — volume = bay_cross_area × packed_length.
-  // Bags, cords, and hardware omitted (no reliable packed_length independent of install).
-  // Use 85% warn / 100% error thresholds.
+  // Real packing is 60-75% efficient due to irregular shapes and dead space around
+  // components. A 0.70 packing efficiency factor converts ideal linear stacking to
+  // realistic usable volume.
   if (bay_volume > 0) {
+    const PACKING_EFFICIENCY = 0.70  // real-world packing is ~70% of ideal linear stacking
+    const effective_usable = usable_volume * PACKING_EFFICIENCY
+
     const chuteVol = (chuteSpecs) => {
       if (!chuteSpecs?.packed_length_in) return 0
       return bay_cross_area * chuteSpecs.packed_length_in
@@ -277,18 +437,18 @@ export function checkCompatibility({ config, specs }) {
 
     if (stacked_vol > 0) {
       const obstrNote = obstruction_vol > 0 ? ` (${obstruction_vol.toFixed(1)} in³ obstructions subtracted)` : ''
-      const pct = usable_volume > 0 ? Math.round((stacked_vol / usable_volume) * 100) : 100
-      if (stacked_vol > usable_volume) {
+      const pct = usable_volume > 0 ? Math.round((stacked_vol / effective_usable) * 100) : 100
+      if (stacked_vol > effective_usable) {
         warnings.push({
           level: WARN_LEVELS.ERROR,
           slot: 'bay_volume',
-          message: `Packed chutes total ~${stacked_vol.toFixed(0)} in³ but only ${usable_volume.toFixed(0)} in³ usable in bay${obstrNote} — won't close`,
+          message: `Packed components ~${stacked_vol.toFixed(0)} in³ exceed ~${effective_usable.toFixed(0)} in³ effective bay capacity (70% packing efficiency of ${usable_volume.toFixed(0)} in³${obstrNote}) — won't close`,
         })
-      } else if (stacked_vol > usable_volume * 0.85) {
+      } else if (stacked_vol > effective_usable * 0.85) {
         warnings.push({
           level: WARN_LEVELS.WARN,
           slot: 'bay_volume',
-          message: `Bay is ${pct}% full (~${stacked_vol.toFixed(0)} in³ of ${usable_volume.toFixed(0)} in³ usable${obstrNote}) — very tight`,
+          message: `Bay is ${pct}% of effective capacity (~${stacked_vol.toFixed(0)} in³ of ~${effective_usable.toFixed(0)} in³ at 70% packing efficiency${obstrNote}) — very tight`,
         })
       }
     }
@@ -300,6 +460,18 @@ export function checkCompatibility({ config, specs }) {
       level: WARN_LEVELS.WARN,
       slot: 'drogue_chute',
       message: 'No drogue chute — single deploy. Rocket will free-fall to main deploy altitude.',
+    })
+  }
+
+  // ── Dual-deploy transition gap warning ──────────────────────────────────────
+  // Between drogue release and main inflation, the rocket is in freefall.
+  // A deployment bag gives controlled line-stretch deployment, reducing this gap.
+  // Without one, the main may open at drogue descent speed → high opening shock.
+  if (config.drogue_chute && config.main_chute && !config.deployment_bag) {
+    warnings.push({
+      level: WARN_LEVELS.WARN,
+      slot: 'deployment_bag',
+      message: 'Dual-deploy without a deployment bag — main chute opens uncontrolled at drogue speed. A d-bag reduces opening shock by 30-40% via controlled line deployment.',
     })
   }
 

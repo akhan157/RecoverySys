@@ -146,11 +146,11 @@ function CustomGroup({ parts, config, onSelectPart, onDelete, onEdit }) {
 
 // ── Per-category field schemas for custom part creation ──────────────────────
 const CHUTE_FIELDS = [
-  { key: 'diameter_in', label: 'Diameter (in)', type: 'number', required: true, min: 1, step: 1 },
-  { key: 'cd', label: 'Drag Coeff (Cd)', type: 'number', required: true, min: 0.1, step: 0.01 },
-  { key: 'packed_diam_in', label: 'Packed Diam (in)', type: 'number', required: true, min: 0.1, step: 0.1 },
-  { key: 'packed_length_in', label: 'Packed Length (in)', type: 'number', required: true, min: 0.1, step: 0.1 },
-  { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, step: 1 },
+  { key: 'diameter_in', label: 'Diameter (in)', type: 'number', required: true, min: 6, max: 200, step: 1 },
+  { key: 'cd', label: 'Drag Coeff (Cd)', type: 'number', required: true, min: 0.3, max: 2.5, step: 0.01 },
+  { key: 'packed_diam_in', label: 'Packed Diam (in)', type: 'number', required: true, min: 0.5, max: 20, step: 0.1 },
+  { key: 'packed_length_in', label: 'Packed Length (in)', type: 'number', required: true, min: 0.5, max: 30, step: 0.1 },
+  { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, max: 5000, step: 1 },
   { key: 'shape', label: 'Shape', type: 'select', options: ['', 'elliptical', 'flat', 'toroidal', 'cruciform'], required: false },
   { key: 'material', label: 'Material', type: 'select', options: ['', 'nylon', 'ripstop nylon', 'silicone-coated nylon'], required: false },
 ]
@@ -160,11 +160,11 @@ const CATEGORY_FIELD_SCHEMAS = {
   drogue_chute: CHUTE_FIELDS,
   shock_cord: [
     { key: 'material', label: 'Material', type: 'select', options: ['nylon', 'kevlar'], required: true },
-    { key: 'elongation_pct', label: 'Elongation (%)', type: 'number', required: true, min: 0, step: 1 },
-    { key: 'strength_lbs', label: 'Strength (lbs)', type: 'number', required: true, min: 1, step: 1 },
-    { key: 'length_ft', label: 'Length (ft)', type: 'number', required: true, min: 1, step: 1 },
-    { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, step: 1 },
-    { key: 'packed_height_in', label: 'Packed Height (in)', type: 'number', required: true, min: 0.1, step: 0.1 },
+    { key: 'elongation_pct', label: 'Elongation (%)', type: 'number', required: true, min: 1, max: 50, step: 1 },
+    { key: 'strength_lbs', label: 'Strength (lbs)', type: 'number', required: true, min: 50, max: 20000, step: 1 },
+    { key: 'length_ft', label: 'Length (ft)', type: 'number', required: true, min: 1, max: 100, step: 1 },
+    { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, max: 5000, step: 1 },
+    { key: 'packed_height_in', label: 'Packed Height (in)', type: 'number', required: true, min: 0.1, max: 20, step: 0.1 },
   ],
   chute_protector: [
     { key: 'size_in', label: 'Size (in)', type: 'number', required: true, min: 1, step: 1 },
@@ -228,10 +228,12 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
       } else {
         const v = parseFloat(form[f.key])
         if (f.required) {
-          if (!isFinite(v) || v < (f.min ?? 0)) { setError(`${f.label} must be a finite number ≥ ${f.min ?? 0}`); return }
+          if (!isFinite(v) || v < (f.min ?? 0)) { setError(`${f.label} must be ≥ ${f.min ?? 0}`); return }
+          if (f.max != null && v > f.max) { setError(`${f.label} must be ≤ ${f.max}`); return }
           specs[f.key] = v
         } else if (form[f.key] !== '') {
-          if (!isFinite(v) || (f.min != null && v < f.min)) { setError(`${f.label} must be a valid number ≥ ${f.min}`); return }
+          if (!isFinite(v) || (f.min != null && v < f.min)) { setError(`${f.label} must be ≥ ${f.min}`); return }
+          if (f.max != null && v > f.max) { setError(`${f.label} must be ≤ ${f.max}`); return }
           specs[f.key] = v
         }
       }
@@ -358,9 +360,10 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
 export default function PartsBrowser({ parts, categories, activeCategory, config, warnings, customParts = [], onSelectCategory, onSelectPart, onAddCustomPart, onDeleteCustomPart, onEditCustomPart }) {
   const [showForm, setShowForm] = useState(false)
   const [editingPart, setEditingPart] = useState(null)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  // Close the form and clear edit state when switching categories
-  useEffect(() => { setShowForm(false); setEditingPart(null) }, [activeCategory])
+  // Close the form, clear edit state, and clear search when switching categories
+  useEffect(() => { setShowForm(false); setEditingPart(null); setSearchQuery('') }, [activeCategory])
 
   const activeCategoryLabel = categories.find(c => c.id === activeCategory)?.label || 'Part'
 
@@ -377,17 +380,29 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
   // Custom-part ID set for O(1) exclusion from the catalog list.
   const customIds = useMemo(() => new Set(customParts.map(p => p.id)), [customParts])
 
-  const { categoryCustomParts, byMfr } = useMemo(() => {
+  const query = searchQuery.trim().toLowerCase()
+
+  const { categoryCustomParts, byMfr, flatFiltered } = useMemo(() => {
     const categoryCustomParts = customParts.filter(p => p.category === activeCategory)
     const byMfr = {}
+    const flatFiltered = []
     for (const p of parts) {
       if (p.category !== activeCategory) continue
-      if (customIds.has(p.id)) continue     // shown in Custom group instead
-      if (!byMfr[p.manufacturer]) byMfr[p.manufacturer] = []
-      byMfr[p.manufacturer].push(p)
+      if (customIds.has(p.id)) continue
+      if (query) {
+        const match = p.name.toLowerCase().includes(query) || p.manufacturer.toLowerCase().includes(query)
+        if (match) flatFiltered.push(p)
+      } else {
+        if (!byMfr[p.manufacturer]) byMfr[p.manufacturer] = []
+        byMfr[p.manufacturer].push(p)
+      }
     }
-    return { categoryCustomParts, byMfr }
-  }, [parts, activeCategory, customParts, customIds])
+    // Also filter custom parts when searching
+    const filteredCustom = query
+      ? categoryCustomParts.filter(p => p.name.toLowerCase().includes(query) || (p.manufacturer || '').toLowerCase().includes(query))
+      : categoryCustomParts
+    return { categoryCustomParts: filteredCustom, byMfr, flatFiltered }
+  }, [parts, activeCategory, customParts, customIds, query])
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
@@ -433,6 +448,25 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
         </div>
       </div>
 
+      {/* Search input */}
+      <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 4 }}>
+        <input
+          type="text"
+          value={searchQuery}
+          onChange={e => setSearchQuery(e.target.value)}
+          placeholder="Search parts..."
+          aria-label="Search parts"
+          className="parts-search-input"
+        />
+        {searchQuery && (
+          <button
+            onClick={() => setSearchQuery('')}
+            className="parts-search-clear"
+            aria-label="Clear search"
+          >&times;</button>
+        )}
+      </div>
+
       {/* Custom parts group + add/edit form (all categories) */}
       <>
         {categoryCustomParts.length > 0 && (
@@ -467,19 +501,52 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
         )}
       </>
 
-      {/* Catalog parts — collapsible manufacturer groups */}
+      {/* Catalog parts */}
       <div>
-        {Object.entries(byMfr).map(([mfr, mfrParts], i) => (
-          <MfrGroup
-            key={activeCategory + '-' + mfr}
-            mfr={mfr}
-            parts={mfrParts}
-            config={config}
-            onSelectPart={onSelectPart}
-            defaultOpen={i === 0}
-            hasSelected={mfrParts.some(p => config[p.category]?.id === p.id)}
-          />
-        ))}
+        {query ? (
+          /* Search active: flat 2-column grid, no manufacturer grouping */
+          flatFiltered.length > 0 ? (
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', padding: '8px 12px' }}>
+              {flatFiltered.map(part => {
+                const isSelected = config[part.category]?.id === part.id
+                return (
+                  <button
+                    key={part.id}
+                    className="parts-card"
+                    aria-pressed={isSelected}
+                    onClick={() => onSelectPart(part)}
+                    style={isSelected ? { background: 'var(--ok-bg)', borderColor: 'var(--ok-fg)' } : undefined}
+                  >
+                    <div style={{ fontSize: '12px', fontWeight: 500, lineHeight: 1.3 }}>{part.name}</div>
+                    <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
+                      {partSpecLine(part)}
+                    </div>
+                    <div style={{ fontSize: '9px', color: 'var(--text-tertiary)', marginTop: '2px', fontStyle: 'italic' }}>
+                      {part.manufacturer}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          ) : (
+            <div style={{ padding: '16px 12px', fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+              No parts match "{searchQuery}"
+            </div>
+          )
+        ) : (
+          /* Normal: collapsible manufacturer groups */
+          Object.entries(byMfr).map(([mfr, mfrParts], i) => (
+            <MfrGroup
+              key={activeCategory + '-' + mfr}
+              mfr={mfr}
+              parts={mfrParts}
+              config={config}
+              onSelectPart={onSelectPart}
+              defaultOpen={i === 0}
+              hasSelected={mfrParts.some(p => config[p.category]?.id === p.id)}
+            />
+          ))
+        )}
       </div>
     </div>
   )

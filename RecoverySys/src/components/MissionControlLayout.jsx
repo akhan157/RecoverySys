@@ -6,13 +6,18 @@ import SimulationTab from './tabs/SimulationTab.jsx'
 import DispersionTab from './tabs/DispersionTab.jsx'
 import SpecsTab from './tabs/SpecsTab.jsx'
 import ExportTab from './tabs/ExportTab.jsx'
+import CompareTab from './tabs/CompareTab.jsx'
+import FlightLogTab from './tabs/FlightLogTab.jsx'
+import PrintChecklist from './PrintChecklist.jsx'
 import './MissionControlLayout.css'
 
 const TABS = [
   { id: 'DASHBOARD',  label: 'DASHBOARD' },
+  { id: 'SPECS',      label: 'ROCKET_SPECS' },
   { id: 'SIMULATION', label: 'SIMULATION' },
   { id: 'DISPERSION', label: 'DISPERSION' },
-  { id: 'SPECS',      label: 'ROCKET_SPECS' },
+  { id: 'COMPARE',    label: 'COMPARE' },
+  { id: 'FLIGHT_LOG', label: 'FLIGHT_LOG' },
   { id: 'EXPORT',     label: 'EXPORT' },
 ]
 
@@ -20,7 +25,7 @@ export default function MissionControlLayout({
   state, allParts, customParts,
   selectPart, removePart, setSpec, setCategory, runSim,
   saveConfig, copyShareLink, addCustomPart, deleteCustomPart, editCustomPart,
-  setCustomMotor, clearCustomMotor, addToast,
+  setCustomMotor, clearCustomMotor, loadConfig, addToast,
   /* darkMode/setDarkMode removed: MC layout is dark-only */
 }) {
   const [activeTab, setActiveTab] = useState('DASHBOARD')
@@ -54,6 +59,7 @@ export default function MissionControlLayout({
   const tabPanelId = id => `mc-panel-${id.toLowerCase()}`
 
   return (
+    <>
     <div className="mc">
       {/* Skip link — keyboard users can bypass the header on Tab */}
       <a href="#mc-main" className="mc-skip-link">Skip to main content</a>
@@ -116,8 +122,6 @@ export default function MissionControlLayout({
           {activeTab === 'SIMULATION' && (
             <SimulationTab
               state={state}
-              allParts={allParts}
-              selectPart={selectPart}
               runSim={runSim}
               canRun={canRun}
             />
@@ -136,8 +140,10 @@ export default function MissionControlLayout({
               addToast={addToast}
             />
           )}
+          {activeTab === 'COMPARE' && <CompareTab state={state} />}
+          {activeTab === 'FLIGHT_LOG' && <FlightLogTab state={state} />}
           {activeTab === 'EXPORT' && (
-            <ExportTab state={state} saveConfig={saveConfig} copyShareLink={copyShareLink} />
+            <ExportTab state={state} saveConfig={saveConfig} copyShareLink={copyShareLink} onLoadConfig={loadConfig} />
           )}
         </main>
       </div>
@@ -162,10 +168,19 @@ export default function MissionControlLayout({
         </div>
         {state.simulation?.shock_load && (
           <div className="mc-statusbar__item">
-            SHOCK_LOAD: {state.simulation.shock_load.peak_load_lbs.toFixed(0)} LBS
+            SF: {state.simulation.shock_load.safety_factor.toFixed(1)}&times;{' '}
+            <span style={{
+              color: state.simulation.shock_load.sf_status === 'pass' ? 'var(--mc-green)'
+                : state.simulation.shock_load.sf_status === 'warn' ? 'var(--mc-amber)'
+                : 'var(--mc-red)',
+              fontWeight: 600,
+            }}>
+              {state.simulation.shock_load.sf_status === 'pass' ? 'PASS' : state.simulation.shock_load.sf_status === 'warn' ? 'WARN' : 'FAIL'}
+            </span>
           </div>
         )}
         <div className="mc-statusbar__right">
+          {totalMass > 0 && <span>RCS: {totalMass}g</span>}
           <span>SLOTS: {filledSlots}/08</span>
           {hasErrors ? (
             <span className="mc-statusbar__badge mc-statusbar__badge--warn">
@@ -177,5 +192,12 @@ export default function MissionControlLayout({
         </div>
       </div>
     </div>
+    <PrintChecklist
+      specs={state.specs}
+      config={state.config}
+      simulation={state.simulation}
+      warnings={state.warnings}
+    />
+    </>
   )
 }

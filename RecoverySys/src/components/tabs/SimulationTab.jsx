@@ -1,11 +1,9 @@
 import React from 'react'
-import { CATEGORIES } from '../../data/parts.js'
 import { WARN_LEVELS } from '../../lib/constants.js'
 import FlightChart from '../FlightChart.jsx'
-import SuggestPanel from '../SuggestPanel.jsx'
 import MetricCard from '../MetricCard.jsx'
 
-export default function SimulationTab({ state, allParts, selectPart, runSim, canRun }) {
+export default function SimulationTab({ state, runSim, canRun }) {
   const sim = state.simulation
   const shock = sim?.shock_load
 
@@ -49,8 +47,11 @@ export default function SimulationTab({ state, allParts, selectPart, runSim, can
             {sim?.drogue_fps && (
               <MetricCard label="DROGUE_DESCENT" value={sim.drogue_fps.toFixed(1)} unit="ft/s" />
             )}
+            {sim?.landing_ke_ftlbf != null && (
+              <MetricCard label="LANDING_KE" value={sim.landing_ke_ftlbf} unit="ft-lbf" />
+            )}
 
-            {/* Shock Cord Load */}
+            {/* Shock Cord Load — peak load + safety factor (strain energy in compat warnings) */}
             {shock && (
               <>
                 <MetricCard label="PEAK_LOAD" value={shock.peak_load_lbs.toFixed(0)} unit="lbs" />
@@ -61,25 +62,14 @@ export default function SimulationTab({ state, allParts, selectPart, runSim, can
                   status={shock.sf_status === 'pass' ? 'ok' : shock.sf_status === 'warn' ? 'marginal' : 'fail'}
                   statusLabel={shock.sf_status === 'pass' ? 'OK' : shock.sf_status === 'warn' ? 'MARGINAL' : 'FAIL'}
                 />
-                <MetricCard label="STRAIN_ENERGY" value={shock.strain_energy_J.toFixed(1)} unit="J" />
               </>
             )}
-
-            {/* Sync status */}
-            <div className="mc-sim__data-card">
-              <div className="mc-metric__label">REALTIME_SYNC</div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginTop: 4 }}>
-                <span style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--mc-green)', display: 'inline-block' }} />
-                <span style={{ fontSize: 10, color: 'var(--mc-text-dim)' }}>ACTIVE</span>
-              </div>
-            </div>
           </div>
         </div>
       </div>
 
-      {/* ── Bottom: Compat + Suggest + Inventory ─────────────────────── */}
+      {/* ── Bottom: Compatibility Analysis ───────────────────────────── */}
       <div className="mc-sim__bottom">
-        {/* Compatibility Analysis + Suggest */}
         <div className="mc-sim__compat">
           <h2 className="mc-panel-header">COMPATIBILITY_ANALYSIS</h2>
           {state.warnings.length === 0 ? (
@@ -97,40 +87,6 @@ export default function SimulationTab({ state, allParts, selectPart, runSim, can
               </div>
             ))
           )}
-          <SuggestPanel
-            parts={allParts}
-            specs={state.specs}
-            config={state.config}
-            onSelectPart={selectPart}
-          />
-        </div>
-
-        {/* Parts Inventory */}
-        <div className="mc-sim__inventory">
-          <h2 className="mc-panel-header">
-            PART_SPECIFICATIONS // ACTIVE_INVENTORY
-            <span className="mc-panel-header__right">
-              {CATEGORIES.filter(c => state.config[c.id]).length}_COMPONENTS_LOADED
-            </span>
-          </h2>
-          <div className="mc-inv-grid">
-            {CATEGORIES.map(cat => {
-              const part = state.config[cat.id]
-              if (!part) return null
-              return (
-                <div key={cat.id} className="mc-inv-item">
-                  <div className="mc-inv-item__icon">{cat.icon}</div>
-                  <div>
-                    <div className="mc-inv-item__name">{part.name}</div>
-                    <div className="mc-inv-item__mfr">{part.manufacturer?.toUpperCase() || 'GENERIC'}</div>
-                  </div>
-                  <div className="mc-inv-item__mass">
-                    {part.specs?.weight_g ? `${(part.specs.weight_g / 1000).toFixed(3)}kg` : '—'}
-                  </div>
-                </div>
-              )
-            })}
-          </div>
         </div>
       </div>
     </div>

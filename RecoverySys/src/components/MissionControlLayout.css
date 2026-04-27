@@ -893,3 +893,66 @@
   }
   .mc-statusbar__badge { padding: 4px 8px; flex-shrink: 0; }
 }
+
+/* ── Print Styles ────────────────────────────────────────────────────────── */
+
+/* Screen: hide the print checklist */
+.print-checklist { display: none; }
+
+@media print {
+  /* Hide the app UI, show only the checklist */
+  .mc { display: none !important; }
+
+  .print-checklist {
+    display: block !important;
+    font-family: 'Courier New', Courier, monospace;
+    color: #000;
+    background: #fff;
+    padding: 0.5in;
+    font-size: 11pt;
+    line-height: 1.5;
+  }
+
+  .print-checklist h1 {
+    font-size: 16pt;
+    margin: 0 0 4pt;
+  }
+  .print-checklist h2 {
+    font-size: 13pt;
+    margin-top: 16pt;
+    border-bottom: 1pt solid #000;
+    padding-bottom: 4pt;
+  }
+  .print-checklist table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 8pt 0;
+  }
+  .print-checklist td,
+  .print-checklist th {
+    border: 0.5pt solid #999;
+    padding: 4pt 6pt;
+    text-align: left;
+    font-size: 10pt;
+  }
+  .print-checklist th {
+    font-weight: 700;
+    background: #f0f0f0;
+  }
+  .print-checklist ul,
+  .print-checklist ol {
+    padding-left: 20pt;
+  }
+  .print-checklist li {
+    margin: 4pt 0;
+    page-break-inside: avoid;
+  }
+  .print-checklist .print-warning {
+    color: #c00;
+    font-weight: 600;
+  }
+  .print-checklist .print-subtitle {
+    font-size: 9pt;
+    color: #666;
+  }
+}
