@@ -630,7 +630,7 @@ function LPScroll() {
 
       {/* Top chrome — sticky header */}
       <nav className="lps-nav">
-        <div className="lps-brand"><span className="lps-brand-dot" /> RECOVERYSYS <span className="lps-brand-v">v1.1</span></div>
+        <div className="lps-brand"><span className="lps-brand-dot" /> RECOVERYSYS <span className="lps-brand-v">v1.2</span></div>
         <div className="lps-nav-links">
           <a href="#parts">PARTS</a>
           <a href="#sim">SIMULATION</a>
@@ -638,7 +638,7 @@ function LPScroll() {
           <a href="#validation">VALIDATION</a>
         </div>
         <div className="lps-nav-right">
-          <span className="lps-nav-meta">BUILD_20260422</span>
+          <span className="lps-nav-meta">BUILD_20260427</span>
           <a href="https://github.com/akhan157/RecoverySys" className="lps-btn lps-btn--ghost">GITHUB →</a>
           <a href="../?demo=1" className="lps-btn lps-btn--green">LAUNCH ▶</a>
         </div>
@@ -665,10 +665,10 @@ function LPScroll() {
               FLIGHT_SIMULATION
             </h1>
             <p className="lps-hero-sub">
-              Browser tool for L1 / L2 / L3 high-power rocketry. Lays out a recovery bay
-              from a 189-part catalog, predicts apogee with an ISA atmospheric model, and
-              plots landing dispersion on a live map. Free. No account. Runs entirely in
-              your tab.
+              Browser tool for L1 / L2 / L3 high-power rocketry. Configure a recovery bay
+              from a 189-part catalog, predict apogee with an RK4 engine and Mach-dependent
+              drag, and plot landing dispersion via 500-iteration Monte Carlo. Free. No account.
+              Runs entirely in your browser.
             </p>
             <div className="lps-hero-ctas">
               <a href="../?demo=1" className="lps-btn lps-btn--green lps-btn--lg">▶ RUN_A_SIMULATION</a>
@@ -776,10 +776,10 @@ function LPScroll() {
           <div className="lps-sim-copy">
             <h2 className="lps-section-title lps-reveal">Flight<br/> <span className="lps-green">simulation.</span></h2>
             <p className="lps-section-sub lps-words">
-              Enter your motor, mass, and recovery setup. The simulator calculates
-              apogee, descent rate under drogue and main, and peak shock load using
-              standard atmosphere and drag equations. Each result links to the formula
-              it came from.
+              4th-order Runge-Kutta ascent integration with Mach-dependent drag,
+              Tsiolkovsky mass depletion, and full ISA atmosphere. Computes apogee,
+              descent rates, shock load with safety factor, and landing kinetic energy.
+              Import .eng thrust curves for ±2-3% apogee accuracy.
             </p>
             <div className="lps-sim-stats">
               {[
@@ -815,10 +815,10 @@ function LPScroll() {
           <div className="lps-disp-copy">
             <h2 className="lps-section-title lps-reveal">Landing<br/><span className="lps-amber-accent">dispersion.</span></h2>
             <p className="lps-section-sub lps-words">
-              A Monte Carlo run perturbs wind, drag, and deploy timing across
-              500 trials. The map shows where each trial lands, plotted against
-              confidence ellipses at 50, 75, and 95 percent. Waiver breaches
-              are counted so you know before you fly.
+              Multi-parameter Monte Carlo perturbs wind (±30%), drag coefficient
+              (±10%), mass (±2%), deploy altitude (±50ft), and motor impulse (±3%)
+              across 500 iterations. Landing scatter with 95% confidence ellipse
+              on Leaflet tiles so you know the landing zone before you fly.
             </p>
 
             <div className="lps-disp-stats-strip">
@@ -1007,25 +1007,25 @@ function LPScroll() {
       <section className="lps-validation" id="validation">
         <div className="lps-section-head">
           <span>LIVE_COMPATIBILITY</span>
-          <span>23 RULES · REALTIME</span>
+          <span>20+ RULES · REALTIME</span>
         </div>
         <div className="lps-val-inner">
           <div>
             <h2 className="lps-section-title lps-reveal">Compatibility<br/><span className="lps-amber-accent">checks.</span></h2>
             <p className="lps-section-sub lps-words">
-              Every change to the bay re-runs 23 rules in the background: Nomex
-              sized to the chute, shock cord rated for the peak shock, altimeter
-              deploy range matched to apogee, battery headroom, and more. Issues
-              surface as warnings before they matter on the pad.
+              Every change re-runs 20+ rules: landing KE vs NAR/TRA guidelines,
+              opening shock at main deploy, dynamic snatch force from cord elongation,
+              packing volume with 70% efficiency factor, deploy altitude sanity, cord/chute
+              material mismatch, and more. Issues surface before they matter on the pad.
             </p>
           </div>
           <div className="lps-val-rows">
             {[
-              { lvl: 'ok', t: '✓ VALIDATION_PASSED', b: 'Main, drogue, cord, bag, swivel — all within limits.' },
-              { lvl: 'ok', t: '✓ ALT_BATT_OK', b: 'Redundant 9V — both rails above 8.4V nominal.' },
-              { lvl: 'warn', t: '▲ NOMEX_9 < CHUTE_96', b: '9" blanket rated ≤ 60". Recommend upgrading to 12".' },
-              { lvl: 'warn', t: '▲ DROGUE_DEPLOY_WINDOW_TIGHT', b: 'Pyro-A fires at apogee ± 0.8s. Consider ± 1.5s margin.' },
-              { lvl: 'crit', t: '■ CORD < PEAK_SHOCK', b: '384 lbs exceeds 3/32" Kevlar working load of 260 lbs.' },
+              { lvl: 'ok', t: '✓ LANDING_KE_OK', b: 'Landing KE 42 ft-lbf — within 75 ft-lbf NAR/TRA guideline.' },
+              { lvl: 'ok', t: '✓ SAFETY_FACTOR_PASS', b: 'Shock cord SF 4.2× — passes nylon threshold of 4.0×.' },
+              { lvl: 'warn', t: '▲ OPENING_SHOCK', b: 'Main chute opening shock ~320 lbs at 62 fps approaching cord limit (500 lbs).' },
+              { lvl: 'warn', t: '▲ DUAL_DEPLOY_NO_DBAG', b: 'No deployment bag — main opens uncontrolled at drogue speed.' },
+              { lvl: 'crit', t: '■ SNATCH_FORCE', b: 'Kevlar 3% elongation amplifies snatch 5.8× — dynamic load 1290 lbs exceeds 1500 lbs rating.' },
             ].map((r, i) => {
               const color = r.lvl === 'crit' ? '#e74c3c' : r.lvl === 'warn' ? '#f5a623' : '#4caf50';
               const bg = r.lvl === 'crit' ? 'rgba(231,76,60,0.06)' : r.lvl === 'warn' ? 'rgba(245,166,35,0.06)' : 'rgba(76,175,80,0.06)';
@@ -1067,7 +1067,7 @@ function LPScroll() {
         </div>
         <div className="lps-footer-bot">
           <span>© 2026 RECOVERYSYS · MIT</span>
-          <span>BUILD_20260422</span>
+          <span>BUILD_20260427</span>
           <span>NODE 7A3F-22 · NOMINAL</span>
         </div>
       </footer>
