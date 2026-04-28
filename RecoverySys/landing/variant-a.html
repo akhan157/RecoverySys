@@ -650,12 +650,12 @@
       <div class="panel" data-panel="1">
         <div class="panel-left">
           <div class="panel-tag"><span class="line"></span>FEAT_02 · FLIGHT</div>
-          <h2>ISA model.<br/>±3–5% apogee.</h2>
-          <p class="desc">Trapezoidal ascent integration at 50ms timesteps. Standard atmosphere through 120,000 ft. Drogue and main descent with quadratic drag. Event markers at apogee, drogue, main deploy, and landing.</p>
+          <h2>RK4 engine.<br/>±2–3% apogee.</h2>
+          <p class="desc">4th-order Runge-Kutta ascent integration at 20ms timesteps with Mach-dependent drag and Tsiolkovsky mass depletion. Full ISA atmosphere. Multi-parameter Monte Carlo dispersion with 500 iterations.</p>
           <div class="spec-list">
-            <div class="sp"><span class="lbl">TIMESTEP</span><span class="val">50 ms</span></div>
-            <div class="sp"><span class="lbl">ATMOSPHERIC</span><span class="val">ISA · 0–120 kFT</span></div>
-            <div class="sp"><span class="lbl">APOGEE_ERR</span><span class="val">±3–5% (curve loaded)</span></div>
+            <div class="sp"><span class="lbl">INTEGRATOR</span><span class="val">RK4 · 20 ms</span></div>
+            <div class="sp"><span class="lbl">ATMOSPHERIC</span><span class="val">ISA · density + speed of sound</span></div>
+            <div class="sp"><span class="lbl">APOGEE_ERR</span><span class="val">±2–3% (curve) · ±5–8% (scalar)</span></div>
           </div>
         </div>
         <div class="panel-right">
@@ -732,7 +732,7 @@
         <div class="panel-left">
           <div class="panel-tag"><span class="line"></span>FEAT_04 · DISPERSION</div>
           <h2>Monte Carlo.<br/>Wind shear model.</h2>
-          <p class="desc">200-sample landing-dispersion scatter with a 95% confidence ellipse, rendered on Leaflet topographic tiles. Wind shear modeled per altitude band. Helps you pick a launch direction before you cut the heavy shock cord.</p>
+          <p class="desc">500-iteration multi-parameter dispersion scatter with a 95% confidence ellipse, rendered on Leaflet topographic tiles. Wind shear modeled per altitude band. Helps you pick a launch direction before you cut the heavy shock cord.</p>
           <div class="spec-list">
             <div class="sp"><span class="lbl">SAMPLES</span><span class="val">200</span></div>
             <div class="sp"><span class="lbl">WIND_MODEL</span><span class="val">SHEAR · PER ALT BAND</span></div>
@@ -791,7 +791,7 @@
               <div class="chip warn"><span class="ic">⚠</span><span><b>MAIN packing volume</b> exceeds bay by 12%. Consider a smaller chute or longer bay section.</span></div>
               <div class="chip ok"><span class="ic">✓</span><span><b>Drogue descent rate</b> 62 ft/s — within safe deployment range for 3kg airframe.</span></div>
               <div class="chip warn"><span class="ic">⚠</span><span><b>Shock cord length</b> &lt; 3× rocket length (advisory). Recommend ≥ 18 ft for this class.</span></div>
-              <div class="chip err"><span class="ic">✕</span><span><b>Altimeter redundancy</b> missing. Only one altimeter configured for L3 flight.</span></div>
+              <div class="chip ok"><span class="ic">✓</span><span><b>Landing KE</b> 42 ft-lbf — within 75 ft-lbf NAR/TRA guideline.</span></div>
               <div class="chip ok"><span class="ic">✓</span><span><b>Drogue deploy altitude</b> at apogee — standard dual-deploy configuration.</span></div>
             </div>
           </div>
@@ -1112,7 +1112,7 @@
       <div class="capture-text">
         <div class="panel-tag"><span class="line"></span>CAPTURE_02 · DISPERSION</div>
         <h2>Landing footprint.<br/>Real topo tiles.</h2>
-        <p class="desc">Overlays 200 Monte Carlo landings on topographic tiles of your actual launch site. Drogue and main vectors, 95% confidence ellipse, mean landing point. Pan, zoom, share the URL so your recovery crew drives to the right field.</p>
+        <p class="desc">Overlays 500 Monte Carlo landings on topographic tiles of your actual launch site. Drogue and main vectors, 95% confidence ellipse, mean landing point. Pan, zoom, share the URL so your recovery crew drives to the right field.</p>
         <div class="spec-list">
           <div class="sp"><span class="lbl">SITE</span><span class="val">FRIENDS OF AMATEUR ROCKETRY</span></div>
           <div class="sp"><span class="lbl">MC_SAMPLES</span><span class="val">200</span></div>
@@ -1316,10 +1316,10 @@
                 <span class="msg"><b>Main descent rate</b> 22.4 ft/s exceeds 20 ft/s — hard landing risk</span>
                 <span class="lvl">ERROR</span>
               </div>
-              <div class="ca-compat__chip is-err">
+              <div class="ca-compat__chip is-ok">
                 <span class="dot"></span>
-                <span class="msg"><b>Altimeter redundancy</b> missing — only 1 altimeter configured for L3 flight</span>
-                <span class="lvl">ERROR</span>
+                <span class="msg"><b>Landing KE</b> 42 ft-lbf — within 75 ft-lbf NAR/TRA guideline</span>
+                <span class="lvl">OK</span>
               </div>
               <div class="ca-compat__chip is-warn">
                 <span class="dot"></span>
@@ -1353,7 +1353,7 @@
               </div>
               <div class="ca-compat__chip is-ok">
                 <span class="dot"></span>
-                <span class="msg"><b>GPS beacon frequency</b> 70 cm band — matches ground station</span>
+                <span class="msg"><b>Safety factor</b> 4.2x — PASS (nylon threshold 4.0x)</span>
                 <span class="lvl">OK</span>
               </div>
             </div>
