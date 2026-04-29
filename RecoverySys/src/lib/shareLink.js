@@ -58,7 +58,7 @@ export function decodeSharePayload(encoded, { allParts, slotIds, defaultSpecs, e
               inlinedCustomParts.push(part)
             }
           } else {
-            const found = allParts.find(p => p.id === part.id)
+            const found = allParts.find(p => p.id === part.id && p.category === cat)
             if (found) newConfig[cat] = found
             else if (part.id?.startsWith('custom-')) customMissing++
             else catalogMissing++

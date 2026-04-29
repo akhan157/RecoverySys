@@ -17,6 +17,7 @@ export default function ConfigSlot({ category, placeholder, part, warnings, onRe
     return (
       <button
         onClick={onClickEmpty}
+        aria-label={`Add ${placeholder}`}
         style={{
           display: 'flex',
           alignItems: 'center',

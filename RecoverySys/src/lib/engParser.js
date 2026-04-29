@@ -45,11 +45,14 @@ export function parseEng(text) {
   // Normalize line endings (Windows CRLF, old Mac CR → LF)
   const normalized = text.replace(/\r\n?/g, '\n')
 
-  // Strip comments (lines starting with ';') and blank lines; keep original indices for diagnostics
+  // Strip comments (per RASP spec, ';' starts a comment anywhere on a line) and blank lines.
   const lines = normalized
     .split('\n')
-    .map(l => l.trim())
-    .filter(l => l.length > 0 && !l.startsWith(';'))
+    .map(l => {
+      const c = l.indexOf(';')
+      return (c >= 0 ? l.slice(0, c) : l).trim()
+    })
+    .filter(l => l.length > 0)
 
   if (lines.length < 2) {
     return { success: false, error: 'File has no header and data lines' }

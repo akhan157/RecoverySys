@@ -66,7 +66,7 @@ export default function CompatDot({ status, tooltip }) {
           fontSize: '11px',
           color: 'var(--text-secondary)',
           maxWidth: '240px',
-          whiteSpace: 'normal',
+          whiteSpace: 'pre-line',
           boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
           zIndex: 100,
           lineHeight: 1.4,

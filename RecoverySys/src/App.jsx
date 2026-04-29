@@ -93,7 +93,7 @@ function buildInitialState() {
   const saved = loadSaved()
   const custom = loadCustomParts()
   const allParts = [...custom, ...PARTS]
-  const rehydrate = (part) => part ? allParts.find(p => p.id === part.id) ?? null : null
+  const rehydrate = (part) => part ? allParts.find(p => p.id === part.id && p.category === part.category) ?? null : null
   return {
     config: Object.fromEntries(SLOT_IDS.map(id => [id, rehydrate(saved?.config?.[id])])),
     specs: { ...DEFAULT_SPECS, ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)) },
@@ -372,7 +372,7 @@ export default function App() {
     demoLoaded.current = true
 
     const config = Object.fromEntries(
-      SLOT_IDS.map(slot => [slot, allParts.find(p => p.id === DEMO_PART_IDS[slot]) ?? null])
+      SLOT_IDS.map(slot => [slot, allParts.find(p => p.id === DEMO_PART_IDS[slot] && p.category === slot) ?? null])
     )
     // Run sim synchronously before dispatching so both config and results land in
     // the same render batch. Using safeTimeout would be killed by StrictMode's

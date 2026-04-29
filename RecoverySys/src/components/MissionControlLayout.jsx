@@ -182,7 +182,7 @@ export default function MissionControlLayout({
         <div className="mc-statusbar__right">
           {totalMass > 0 && <span>RCS: {totalMass}g</span>}
           <span>SLOTS: {filledSlots}/08</span>
-          {hasErrors ? (
+          {hasErrors || hasWarnings ? (
             <span className="mc-statusbar__badge mc-statusbar__badge--warn">
               {state.warnings.length} WARNING{state.warnings.length !== 1 ? 'S' : ''}
             </span>

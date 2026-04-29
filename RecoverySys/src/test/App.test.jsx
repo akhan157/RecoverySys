@@ -122,7 +122,7 @@ describe('App — status bar warning badge', () => {
     setLocalStorage({
       config: {
         main_chute:      null,
-        drogue_chute:    { id: 'fr3-12-12' },  // Front Range 12" Elliptical
+        drogue_chute:    { id: 'fr3-12-12', category: 'drogue_chute' },  // Front Range 12" Elliptical
         shock_cord:      null,
         chute_protector: null,
         quick_links:     null,

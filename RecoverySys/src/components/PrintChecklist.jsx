@@ -1,6 +1,7 @@
 import React from 'react'
 import { CATEGORIES } from '../data/parts.js'
 import { partSpecLine } from '../lib/format.js'
+import { WARN_LEVELS } from '../lib/constants.js'
 
 // Physical packing order (bottom of bay → top). Only selected parts are shown.
 const PACKING_ORDER = [
@@ -82,7 +83,7 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
         ) : (
           <ul>
             {warnings.map((w, i) => (
-              <li key={i} className={w.level === 'error' ? 'print-warning' : ''}>
+              <li key={i} className={w.level === WARN_LEVELS.ERROR ? 'print-warning' : ''}>
                 <strong>{CATEGORY_LABELS[w.slot] || w.slot}:</strong> {w.message}
               </li>
             ))}

@@ -44,7 +44,7 @@ export default function MotorSearch({ onSetSpec }) {
         const res = await fetch(url, { signal: controller.signal })
         if (!res.ok) throw new Error(`HTTP ${res.status}`)
         const data = await res.json()
-        setResults(data.results ?? [])
+        setResults(Array.isArray(data?.results) ? data.results : [])
         setOpen(true)
       } catch (err) {
         if (err.name === 'AbortError') return   // stale request — silently drop
