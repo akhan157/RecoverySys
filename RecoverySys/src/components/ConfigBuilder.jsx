@@ -3,6 +3,7 @@ import ConfigSlot from './ConfigSlot.jsx'
 import RocketSpecs from './RocketSpecs.jsx'
 import WarningBox from './WarningBox.jsx'
 import SectionLabel from './primitives/SectionLabel.jsx'
+import Button from './primitives/Button.jsx'
 import { SAVE_STATES, SHARE_STATES } from '../lib/constants.js'
 
 export default function ConfigBuilder({
@@ -61,48 +62,17 @@ export default function ConfigBuilder({
       <div>
         <div className="section-label" style={{ marginBottom: '10px' }}>Actions</div>
         <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-          <button
+          <Button
+            variant="primary"
             onClick={onSave}
-            disabled={saveState === SAVE_STATES.SAVING}
-            style={{
-              height: '32px',
-              padding: '0 16px',
-              background: 'var(--cta-bg)',
-              color: 'var(--cta-fg)',
-              border: 'none',
-              borderRadius: 'var(--radius)',
-              cursor: saveState === SAVE_STATES.SAVING ? 'default' : 'pointer',
-              fontSize: '13px',
-              fontWeight: 500,
-              opacity: saveState === SAVE_STATES.SAVING ? 0.7 : 1,
-              transition: 'transform 150ms ease, opacity 150ms ease',
-            }}
-            onMouseEnter={e => { if (saveState !== SAVE_STATES.SAVING) { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.opacity = '0.9' } }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.opacity = '' }}
-            onMouseDown={e => { if (saveState !== SAVE_STATES.SAVING) e.currentTarget.style.transform = 'translateY(0)' }}
+            loading={saveState === SAVE_STATES.SAVING}
           >
             {saveState === SAVE_STATES.SAVING ? 'Saving…' : saveState === SAVE_STATES.SAVED ? 'Saved ✓' : 'Save Config'}
-          </button>
+          </Button>
 
-          <button
-            onClick={onShare}
-            style={{
-              height: '32px',
-              padding: '0 16px',
-              background: 'transparent',
-              color: 'var(--text-primary)',
-              border: '1px solid var(--border-default)',
-              borderRadius: 'var(--radius)',
-              cursor: 'pointer',
-              fontSize: '13px',
-              transition: 'transform 150ms ease, border-color 200ms ease',
-            }}
-            onMouseEnter={e => { e.currentTarget.style.transform = 'translateY(-1px)'; e.currentTarget.style.borderColor = 'var(--accent)' }}
-            onMouseLeave={e => { e.currentTarget.style.transform = ''; e.currentTarget.style.borderColor = 'var(--border-default)' }}
-            onMouseDown={e => { e.currentTarget.style.transform = 'translateY(0)' }}
-          >
+          <Button variant="secondary" onClick={onShare}>
             {shareState === SHARE_STATES.COPIED ? 'Copied!' : 'Copy Share Link'}
-          </button>
+          </Button>
         </div>
       </div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useRef } from 'react'
 import { parseEng } from '../../lib/engParser.js'
 import ThrustCurveSparkline from './ThrustCurveSparkline.jsx'
+import Button from '../primitives/Button.jsx'
 
 // Custom motor import (.eng file upload).
 //
@@ -102,28 +103,12 @@ export default function CustomMotorImport({ customMotor, onSetCustomMotor, onCle
           </div>
           <ThrustCurveSparkline curve={preview.curve} peak={preview.peakThrust_N} />
           <div style={{ display: 'flex', gap: '6px' }}>
-            <button
-              onClick={confirm}
-              style={{
-                flex: 1, padding: '6px 10px', fontSize: '12px', fontWeight: 600,
-                background: 'var(--accent)', color: 'var(--accent-text)',
-                border: '1px solid var(--accent)', borderRadius: 'var(--radius)',
-                cursor: 'pointer',
-              }}
-            >
+            <Button variant="accent" size="sm" onClick={confirm} style={{ flex: 1 }}>
               Use This Motor
-            </button>
-            <button
-              onClick={() => setPreview(null)}
-              style={{
-                flex: 1, padding: '6px 10px', fontSize: '12px', fontWeight: 500,
-                background: 'transparent', color: 'var(--text-secondary)',
-                border: '1px solid var(--border-default)', borderRadius: 'var(--radius)',
-                cursor: 'pointer',
-              }}
-            >
+            </Button>
+            <Button variant="secondary" size="sm" onClick={() => setPreview(null)} style={{ flex: 1 }}>
               Cancel
-            </button>
+            </Button>
           </div>
         </div>
       </div>
