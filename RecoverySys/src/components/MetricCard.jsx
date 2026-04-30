@@ -1,13 +1,11 @@
 import React from 'react'
+import { statusColor } from '../lib/statusColor.js'
 
 // Shared metric card used by the SIMULATION tab's data grid.
 // `status` drives the border/text color of the inline statusLabel chip:
 // 'ok' = green, 'marginal' = amber, 'fail' = red.
 export default function MetricCard({ label, value, unit, warn, status, statusLabel }) {
-  const chipColor =
-    status === 'ok'       ? 'var(--mc-green)' :
-    status === 'marginal' ? 'var(--mc-amber)' :
-    'var(--mc-red)'
+  const chipColor = statusColor(status)
   return (
     <div className="mc-sim__data-card">
       <div className="mc-metric__label">{label}</div>

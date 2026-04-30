@@ -1,11 +1,5 @@
 import React, { useRef, useEffect, useState } from 'react'
-
-const STATUS_COLOR = {
-  ok:      'var(--ok-fg)',
-  warn:    'var(--warn-fg)',
-  error:   'var(--error-fg)',
-  neutral: 'var(--neutral-dot)',
-}
+import { statusColor } from '../lib/statusColor.js'
 
 export default function CompatDot({ status, tooltip }) {
   const [pulse, setPulse] = useState(false)
@@ -49,7 +43,7 @@ export default function CompatDot({ status, tooltip }) {
           width: '8px',
           height: '8px',
           borderRadius: '50%',
-          background: STATUS_COLOR[status] ?? STATUS_COLOR.neutral,
+          background: statusColor(status),
           flexShrink: 0,
         }}
       />
