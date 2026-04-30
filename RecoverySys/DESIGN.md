@@ -1,7 +1,14 @@
 # DESIGN.md — RecoverySys
 
-Established by /plan-design-review on 2026-03-22.
-All UI decisions calibrate against this file.
+Established by /plan-design-review on 2026-03-22. Refreshed 2026-04-30
+(/design-consultation: token reconciliation + UI Primitives mandate).
+
+> **Canonical reference:** the project-root [`DESIGN.md`](../DESIGN.md) is the
+> system-level source of truth (full token tables, motion timing, component
+> contracts). This file describes the implementation conventions specific to
+> the `RecoverySys/` subtree. When the two diverge, root wins.
+
+All UI decisions calibrate against these two files.
 
 ## Aesthetic: Engineering Instrument
 
@@ -196,6 +203,10 @@ Use `--chart-*` CSS tokens so the SVG responds to `[data-theme="dark"]` automati
 - ❌ Card grid layout for any data that should be a list
 - ❌ Smooth scroll or entrance animations on static content
 - ❌ Tooltip on every single element (tooltip fatigue)
+- ❌ Inline `style={{}}` for color / font / padding / border-radius — use the
+  primitives in `components/primitives/` (see root DESIGN.md "UI Primitives" section)
+- ❌ Re-implementing status→color mapping inline — use `lib/statusColor.js` or `<StatusChip>`
+- ❌ Re-allocating style objects inside list `.map()` (allocates fresh objects every render)
 
 ---
 
@@ -224,3 +235,4 @@ See the Responsive Design section in the full design spec (design-20260322 in gs
 | 2026-03-24 | Inter added as body font alongside JetBrains Mono | Inter at 13px is more legible than system-ui at small sizes; loaded via `<link>` (not CSS @import) to avoid render-blocking |
 | 2026-03-24 | --text-tertiary darkened for WCAG AA | `#8c94a3` (3.05:1) fails AA for 10px section labels; `#636c7e` (5.28:1) passes; same fix applied to --chart-label and --chart-marker |
 | 2026-03-24 | MfrGroup `key={activeCategory + '-' + mfr}` | Manufacturer names appear in multiple categories; mfr-only key reuses stale open state on category switch |
+| 2026-04-30 | UI Primitives library mandated | `/design-consultation` refresh; root DESIGN.md added "UI Primitives" section requiring shared `<Button>`, `<TextInput>`, `<NumberInput>`, `<SectionLabel>`, `<StatusChip>`, `<CollapsibleGroup>`, `<MotorPill>` under `components/primitives/`. Pass 2 review documented 221 inline style blocks across 23 files as the active drift |

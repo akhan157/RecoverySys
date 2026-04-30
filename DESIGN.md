@@ -19,7 +19,7 @@ All colors are defined as CSS custom properties in `src/index.css`. The current 
 | `--input-bg` | `#f4f5f7` | Number inputs |
 | `--text-primary` | `#1a1d23` | Main content text |
 | `--text-secondary` | `#4a5260` | Descriptive / supporting text |
-| `--text-tertiary` | `#8c94a3` | Labels, units, placeholders |
+| `--text-tertiary` | `#636c7e` | Labels, units, placeholders (WCAG AA on white = 5.28:1) |
 | `--text-placeholder` | `#c8cdd8` | Empty slot placeholder text |
 | `--border-default` | `#dde1e9` | Panel dividers, input borders |
 | `--border-subtle` | `#eaecf0` | Row dividers, light separators |
@@ -38,7 +38,7 @@ All colors are defined as CSS custom properties in `src/index.css`. The current 
 
 **Do not use raw hex values for semantic states** — always use the token. This ensures ok/warn/error states remain consistent if the palette changes.
 
-**Contrast note:** `--text-tertiary` (#8c94a3) on `--bg-panel` (#ffffff) = 3.2:1 — meets WCAG AA for large/bold text (section labels are uppercase 10px/600 weight). Use `--text-secondary` (#4a5260 = 6.8:1) for body/descriptive text.
+**Contrast note:** `--text-tertiary` (`#636c7e`) on `--bg-panel` (`#ffffff`) = 5.28:1 — passes WCAG AA for normal text. Darkened from the original `#8c94a3` (3.05:1) on 2026-03-24 for a11y. Use `--text-secondary` (`#4a5260` = 6.8:1) for body/descriptive text.
 
 ---
 
@@ -55,7 +55,7 @@ Dark mode is implemented via a `[data-theme="dark"]` attribute on `<html>`. All 
 | `--input-bg` | `#f4f5f7` | `#13161b` | Number inputs |
 | `--text-primary` | `#1a1d23` | `#e8eaf0` | Main content text |
 | `--text-secondary` | `#4a5260` | `#9aa0b0` | Supporting text |
-| `--text-tertiary` | `#8c94a3` | `#5a6070` | Labels, units |
+| `--text-tertiary` | `#636c7e` | `#7b8496` | Labels, units (WCAG AA: light 5.28:1, dark 4.66:1) |
 | `--text-placeholder` | `#c8cdd8` | `#353b48` | Empty slot text |
 | `--border-default` | `#dde1e9` | `#272c38` | Panel dividers, input borders |
 | `--border-subtle` | `#eaecf0` | `#1e2230` | Row dividers |
@@ -355,6 +355,71 @@ Animation: slide-up + fade-in (200ms, `toast-in` keyframe).
 
 ---
 
+## UI Primitives — How Tokens Reach Components
+
+The codebase grew feature-by-feature with `style={{...}}` inline blocks rather than
+shared components. Pass 2's review found 221 inline style blocks across 23 files,
+4 distinct Button visual styles, 5 different Input definitions, and status→color
+logic re-implemented in 5+ places. New work must NOT add to this. This section is
+the rule the rest of the design system rests on.
+
+### Primitives that already exist
+
+Use these directly. Do not reinvent.
+
+| Primitive | File | Purpose |
+|-----------|------|---------|
+| `<CompatDot>` | `src/components/CompatDot.jsx` | 8px status indicator (ok/warn/error/neutral) with hover tooltip |
+| `<ConfigSlot>` | `src/components/ConfigSlot.jsx` | Recovery-bay slot row (filled or empty) |
+| `<MetricCard>` | `src/components/MetricCard.jsx` | Sim result tile with status chip |
+| `<WarningBox>` | `src/components/WarningBox.jsx` | Aggregated warning panel |
+
+### Primitives that need to be extracted
+
+This is the work item #9 from the Pass 1 / Pass 2 rebuild plan. Until extracted,
+the codebase will keep accreting near-duplicates.
+
+| Primitive | Replaces | Use sites today |
+|-----------|----------|-----------------|
+| `<Button variant="primary\|secondary\|ghost\|mc">` | 4 inline button style objects | `PartsBrowser`, `ConfigBuilder`, `RocketSpecs`, `SuggestPanel`, `CustomMotorImport`, `FlightLogTab` |
+| `<TextInput>` / `<NumberInput>` | 5 inline `inputStyle` objects with shared focus-handler pairs | `SpecInput`, `specs/MotorSearch`, `FlightLogTab`, `SuggestPanel`, `PartsBrowser` (custom-part form) |
+| `<SectionLabel>` | 4 ad-hoc patterns (`.section-label` class, `.mc-panel-header` class, raw uppercase `<div>`s with `letterSpacing: 0.06em`) | `DashboardTab`, `CompareTab`, `FlightLogTab`, `SimulationTab`, `ConfigBuilder`, `SuggestPanel` |
+| `<StatusChip>` | Inline `status→color` ternary mapping | `MetricCard`, `MissionControlLayout` SF status block, `FlightLogTab` outcome cell, `PartsBrowser` part header |
+| `<CollapsibleGroup>` | `MfrGroup` + `CustomGroup` near-duplicate components | `PartsBrowser` |
+| `<MotorPill onClear>` | 2 near-identical "selected motor pill" cards (green-bg, mono designation, ✕ clear) | `specs/MotorSearch`, `specs/CustomMotorImport` |
+
+### Rules
+
+- **No inline `style={{}}` for tokens.** Color, font, padding, border-radius read from
+  CSS custom properties via classNames — not as JS objects assembled at render time.
+- **Primitives live under** `src/components/primitives/`. One file per primitive.
+  Each imports tokens from `src/index.css` via classes; never re-declares hex values.
+- **Variants are className combinations,** not separate files: `<Button variant="primary">`
+  toggles `.btn` + `.btn--primary`, not `<PrimaryButton>`.
+- **Status→color** is centralized in `src/lib/statusColor.js` (export `statusColor(level)`
+  and `statusLabel(level)`); every primitive that renders status reads from there.
+- **Component-specific styles** (DispersionMap canvas size, FlightChart SVG geometry,
+  Leaflet popup HTML) stay in their own file. They're not primitives. The line is:
+  if more than two components want the same visual treatment, it becomes a primitive.
+
+### When inline style is acceptable
+
+Genuinely one-off values that don't belong in the token system: a chart's exact
+`width: 340px`, an animated `transform: translateY(${y}px)` calculated at render
+time, a positional `top` value from `getBoundingClientRect`. Color, font family,
+padding, border-radius — never one-off.
+
+### Anti-patterns (already in the codebase, do not propagate)
+
+- `maxHeight: '9999px'` collapse-trick transitions (use `<details>` + `content-visibility: auto`,
+  or measure-and-set via `useLayoutEffect`)
+- Re-allocating style objects inside list `.map()` (PartsBrowser does this for ~189 cards × 6 styles per render)
+- Two parallel design systems — older `--text-primary` token names alongside newer `.mc-*`
+  BEM classes — half the components reach across the boundary via inline styles
+- Status logic duplicated as inline ternary instead of via `<StatusChip>` or `statusColor()`
+
+---
+
 ## What Is NOT in Scope (Design Decisions Deferred)
 
 | Decision | Rationale |
@@ -374,3 +439,5 @@ Animation: slide-up + fade-in (200ms, `toast-in` keyframe).
 | 2026-03-24 | Animation timing table formalized | Micro/short/medium/long tiers documented with easing rules |
 | 2026-03-24 | Empty states documented | Silent empty states for all panels — no onboarding copy for expert audience |
 | 2026-03-24 | Slate palette redesign shipped | New slate/neutral palette replacing warm grey; 2-col desktop layout; responsive chart; pill category tabs; MetricCard results grid; Inter font |
+| 2026-04-30 | UI Primitives section added | Pass 1/Pass 2 reviews found 221 inline `style={{}}` blocks, 4 button variants, 5 input variants, 4 section-header patterns. New section mandates `<Button>`, `<TextInput>`, `<NumberInput>`, `<SectionLabel>`, `<StatusChip>`, `<CollapsibleGroup>`, `<MotorPill>` as the primitives library under `components/primitives/`. The aesthetic stays identical — only the implementation rule changes |
+| 2026-04-30 | `--text-tertiary` drift between DESIGN.md and code reconciled | Root DESIGN.md still listed `#8c94a3` (3.05:1) although code was darkened to `#636c7e` (5.28:1) on 2026-03-24 for WCAG AA. Same fix in dark mode (`#5a6070` → `#7b8496`). RecoverySys/DESIGN.md was already correct; root was stale |

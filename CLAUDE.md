@@ -82,6 +82,23 @@ Available gstack skills:
 
 If gstack skills aren't working, run `cd .claude/skills/gstack && ./setup` to build the binary and register skills.
 
+## Design System
+
+Always read `DESIGN.md` (project root) before any UI / visual change. It is the
+single source of truth for color tokens, typography, spacing, motion timing,
+border-radius, and component primitives. `RecoverySys/DESIGN.md` is the
+implementation-side companion — token values, component specs, mobile layout,
+anti-patterns. When the two disagree, root wins.
+
+UI work rules:
+- Use primitives from `components/primitives/` (or extract one when a pattern
+  recurs) — never reinvent buttons, inputs, status chips inline.
+- No inline `style={{}}` for color, font family, padding, or border-radius.
+  Those flow from CSS custom properties via classNames.
+- Status → color mapping comes from `lib/statusColor.js`, not inline ternaries.
+- When breaking a documented rule for a genuine reason, add a Decisions Log entry
+  in DESIGN.md so future readers know it was deliberate.
+
 ## Skill routing
 
 When the user's request matches an available skill, ALWAYS invoke it using the Skill
