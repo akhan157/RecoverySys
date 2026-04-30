@@ -2,6 +2,7 @@ import React from 'react'
 import ConfigSlot from './ConfigSlot.jsx'
 import RocketSpecs from './RocketSpecs.jsx'
 import WarningBox from './WarningBox.jsx'
+import SectionLabel from './primitives/SectionLabel.jsx'
 import { SAVE_STATES, SHARE_STATES } from '../lib/constants.js'
 
 export default function ConfigBuilder({
@@ -19,9 +20,9 @@ export default function ConfigBuilder({
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
           {categories.map(cat => (
             <div key={cat.id}>
-              <div style={{ fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '4px', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
+              <SectionLabel style={{ marginBottom: '4px', letterSpacing: '0.04em' }}>
                 {cat.label}
-              </div>
+              </SectionLabel>
               <ConfigSlot
                 category={cat.id}
                 placeholder={cat.placeholder}

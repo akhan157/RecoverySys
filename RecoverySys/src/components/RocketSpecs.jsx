@@ -2,6 +2,7 @@ import React from 'react'
 import SpecInput from './specs/SpecInput.jsx'
 import MotorSearch from './specs/MotorSearch.jsx'
 import CustomMotorImport from './specs/CustomMotorImport.jsx'
+import SectionLabel from './primitives/SectionLabel.jsx'
 
 // Auto G-factor: 20G for L1/L2 (<10 kg), 30G for L3 (≥10 kg). Matches NAR/TRA guidelines.
 function autoGFactor(mass_g) {
@@ -83,9 +84,7 @@ export default function RocketSpecs({
 
         {/* ── Wind Profile (multi-layer) ──────────────────────────────── */}
         <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', letterSpacing: '0.05em', fontWeight: 600, marginTop: '4px' }}>
-            WIND PROFILE
-          </div>
+          <SectionLabel style={{ marginTop: '4px' }}>WIND PROFILE</SectionLabel>
 
           {/* Surface layer */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
