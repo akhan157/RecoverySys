@@ -12,6 +12,7 @@ import {
   SAVE_STATES, SHARE_STATES, TOAST_LEVELS,
   SAVE_FLASH_MS, SAVE_RESET_MS, SHARE_RESET_MS,
 } from './lib/constants.js'
+import { getDefaultSpecs } from './lib/schema.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 import DemoBanner from './components/DemoBanner.jsx'
@@ -27,29 +28,9 @@ function prefetchLeaflet() {
 
 // ── State ────────────────────────────────────────────────────────────────────
 
-const DEFAULT_SPECS = {
-  rocket_mass_g:          '',
-  motor_total_impulse_ns: '',
-  burn_time_s:            '',
-  airframe_id_in:         '',
-  bay_length_in:          '',
-  drag_cd:                '',
-  wind_speed_mph:         '',
-  wind_direction_deg:     '',   // 0=N, 90=E, 180=S, 270=W
-  main_deploy_alt_ft:     '500',
-  ejection_g_factor:      '',   // blank = auto (20G for <10 kg, 30G for ≥10 kg L3)
-  bay_obstruction_vol_in3: '',  // obstructions inside the bay (sleds, hardpoints, etc.)
-  launch_lat:             '',   // launch site latitude (decimal degrees)
-  launch_lon:             '',   // launch site longitude (decimal degrees)
-  // Wind layers — mid & aloft (surface uses wind_speed_mph / wind_direction_deg above)
-  wind_surface_alt_ft:    '',
-  wind_mid_speed_mph:     '',
-  wind_mid_direction_deg: '',
-  wind_mid_alt_ft:        '',
-  wind_aloft_speed_mph:   '',
-  wind_aloft_direction_deg: '',
-  wind_aloft_alt_ft:      '',
-}
+// Specs shape now lives in lib/schema.js. We snapshot it once on module load
+// — a fresh object is built so callers can mutate without touching the schema.
+const DEFAULT_SPECS = getDefaultSpecs()
 
 // ── Demo config ──────────────────────────────────────────────────────────────
 // Loaded when the app is opened with ?demo=1 (e.g. from the landing page LAUNCH
@@ -325,7 +306,7 @@ export default function App() {
     const c = new URLSearchParams(location.search).get(SHARE_PARAM)
     if (!c) return
     const decoded = decodeSharePayload(c, {
-      allParts, slotIds: SLOT_IDS, defaultSpecs: DEFAULT_SPECS, emptyConfig: EMPTY_CONFIG,
+      allParts, slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG,
     })
     if (!decoded) return   // malformed — silently ignore
     dispatch({
