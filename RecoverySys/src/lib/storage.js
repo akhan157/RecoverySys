@@ -5,6 +5,9 @@
 // unavailable (Safari private mode, storage full, corrupt JSON) and the app
 // must still boot with sane defaults.
 
+import { SCHEMA_VERSION } from './schema.js'
+import { runMigrations } from './migrations.js'
+
 export const STORAGE_KEYS = Object.freeze({
   CONFIG: 'recoverysys-config',
   CUSTOM_PARTS: 'recoverysys-custom-parts',
@@ -15,13 +18,7 @@ export function loadSaved() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CONFIG)
     if (!raw) return null
-    const saved = JSON.parse(raw)
-    // v1.1.x migration: airframe_od_in → airframe_id_in (wall thickness negligible for sim)
-    if (saved?.specs?.airframe_od_in != null && saved?.specs?.airframe_id_in == null) {
-      saved.specs.airframe_id_in = saved.specs.airframe_od_in
-      delete saved.specs.airframe_od_in   // remove ghost key so it doesn't pollute state.specs
-    }
-    return saved
+    return runMigrations(JSON.parse(raw))
   } catch { return null }
 }
 
@@ -61,11 +58,12 @@ export function rehydrateCustomMotor(m) {
 }
 
 // Persist the full config payload. Returns true if written, false if storage failed.
+// schemaVersion is stamped so future schema changes can run migrations on load.
 export function saveConfigToStorage({ config, specs, customMotor }) {
   try {
     localStorage.setItem(
       STORAGE_KEYS.CONFIG,
-      JSON.stringify({ config, specs, customMotor }),
+      JSON.stringify({ schemaVersion: SCHEMA_VERSION, config, specs, customMotor }),
     )
     return true
   } catch { return false }

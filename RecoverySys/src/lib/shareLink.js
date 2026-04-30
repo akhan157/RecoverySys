@@ -5,7 +5,8 @@
 // re-hydrates parts by looking them up in its own catalog + custom parts list.
 
 import { rehydrateCustomMotor } from './storage.js'
-import { getDefaultSpecs, SPEC_KEYS } from './schema.js'
+import { getDefaultSpecs, SPEC_KEYS, SCHEMA_VERSION } from './schema.js'
+import { runMigrations, isPayloadFromFuture } from './migrations.js'
 
 export const SHARE_PARAM = 'c'
 
@@ -19,7 +20,7 @@ export function encodeSharePayload({ config, specs, customMotor }) {
       return [cat, { id: part.id }]
     })
   )
-  const payload = { config: configIds, specs, customMotor }
+  const payload = { schemaVersion: SCHEMA_VERSION, config: configIds, specs, customMotor }
   return btoa(encodeURIComponent(JSON.stringify(payload)))
 }
 
@@ -35,7 +36,11 @@ export function buildShareUrl(encoded) {
 // - customMissing: count of custom parts (non-shareable — custom parts live in receiver's localStorage)
 export function decodeSharePayload(encoded, { allParts, slotIds, emptyConfig }) {
   try {
-    const payload = JSON.parse(decodeURIComponent(atob(decodeURIComponent(encoded))))
+    const rawPayload = JSON.parse(decodeURIComponent(atob(decodeURIComponent(encoded))))
+    // Refuse links from a newer schema rather than silently dropping fields
+    // — caller treats null as "invalid link" and toasts the user.
+    if (isPayloadFromFuture(rawPayload)) return null
+    const payload = runMigrations(rawPayload)
     const validCategories = new Set(slotIds)
     // Spec key whitelist + default values both come from the central schema
     // (lib/schema.js) — no need to thread them through callers.
