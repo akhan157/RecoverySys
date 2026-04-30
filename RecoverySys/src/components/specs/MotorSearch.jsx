@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import MotorPill from '../primitives/MotorPill.jsx'
+import Input from '../primitives/Input.jsx'
 
 const THRUSTCURVE_URL = 'https://www.thrustcurve.org/api/v1/search.json'
 
@@ -78,20 +79,6 @@ export default function MotorSearch({ onSetSpec }) {
 
   const clear = () => { abortRef.current?.abort(); setSelected(null); setQuery(''); setResults([]); setOpen(false); setError(null) }
 
-  const inputStyle = {
-    fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-    fontWeight: 600,
-    fontSize: '13px',
-    color: 'var(--text-primary)',
-    border: '1px solid var(--border-default)',
-    borderRadius: 0,
-    padding: '5px 7px',
-    width: '100%',
-    outline: 'none',
-    background: 'var(--input-bg)',
-    boxSizing: 'border-box',
-  }
-
   return (
     <div ref={containerRef} style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
       <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
@@ -111,14 +98,11 @@ export default function MotorSearch({ onSetSpec }) {
         />
       ) : (
         <div style={{ position: 'relative' }}>
-          <input
+          <Input
             type="text"
             value={query}
             placeholder="e.g. J350, K185, L1000…"
             onChange={e => handleInput(e.target.value)}
-            style={inputStyle}
-            onFocus={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)' }}
-            onBlur={e => { e.target.style.borderColor = 'var(--border-default)'; e.target.style.boxShadow = '' }}
           />
           {loading && (
             <span style={{
