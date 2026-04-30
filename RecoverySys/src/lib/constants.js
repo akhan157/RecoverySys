@@ -37,3 +37,22 @@ export const TOAST_LEVELS = Object.freeze({
 export const SAVE_FLASH_MS  = 400    // idle → saving → saved (flash duration)
 export const SAVE_RESET_MS  = 2400   // saved → idle  (how long the green checkmark lingers)
 export const SHARE_RESET_MS = 2000   // copied → idle (how long "Copied!" shows)
+
+// Physical constants — single source of truth so simulation, compatibility,
+// and SuggestPanel stay numerically identical. Previously G_ACCEL was
+// declared as 9.80665 in compatibility.js and 9.81 in SuggestPanel.jsx;
+// the rounding difference produced subtly different shock-cord SF math.
+export const PHYSICS = Object.freeze({
+  G:           9.80665,   // m/s²  standard gravity
+  LBS_PER_N:   0.224809,  // pound-force per Newton
+  FT_PER_M:    3.28084,
+  M_PER_FT:    0.3048,
+  IN_TO_M:     0.0254,
+  MPH_TO_FPS:  5280 / 3600,
+  J_TO_FTLBF:  0.737562,
+})
+
+// Build/version metadata. Single string owned here so the UI brand badge,
+// CHANGELOG, and any future telemetry share one truth.
+export const VERSION         = '1.2.0.0'
+export const VERSION_DISPLAY = 'V1.2'

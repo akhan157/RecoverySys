@@ -1,8 +1,9 @@
 import React, { useState, useMemo } from 'react'
 import { computeDescentRate } from '../lib/simulation.js'
+import { PHYSICS } from '../lib/constants.js'
 
-const G_ACCEL   = 9.81
-const LBS_PER_N = 0.22481
+const G_ACCEL   = PHYSICS.G
+const LBS_PER_N = PHYSICS.LBS_PER_N
 
 // ── helpers ──────────────────────────────────────────────────────────────────
 

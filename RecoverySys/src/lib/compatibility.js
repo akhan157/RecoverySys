@@ -1,7 +1,7 @@
 import { computeDescentRate } from './simulation.js'
-import { WARN_LEVELS } from './constants.js'
+import { WARN_LEVELS, PHYSICS } from './constants.js'
 
-const G_ACCEL = 9.80665
+const G_ACCEL = PHYSICS.G
 
 /**
  * Evaluate all compatibility rules for the current config + specs.

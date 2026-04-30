@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { CATEGORIES } from '../data/parts.js'
-import { WARN_LEVELS } from '../lib/constants.js'
+import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
 import DashboardTab from './tabs/DashboardTab.jsx'
 import SimulationTab from './tabs/SimulationTab.jsx'
 import DispersionTab from './tabs/DispersionTab.jsx'
@@ -66,7 +66,7 @@ export default function MissionControlLayout({
 
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="mc-header">
-        <h1 className="mc-header__brand">RECOVERYSYS_V1.1</h1>
+        <h1 className="mc-header__brand">RECOVERYSYS_{VERSION_DISPLAY}</h1>
         <nav className="mc-header__tabs" role="tablist" aria-label="Main navigation">
           {TABS.map(tab => {
             const isActive = activeTab === tab.id
