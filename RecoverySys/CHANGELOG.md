@@ -6,6 +6,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [Unreleased]
 
 ### Added
+- **`lib/schema.js`** — single source of truth for the SPECS object shape. Exports `SPECS_SCHEMA` (per-field type, unit, default, label, min/max), `getDefaultSpecs()`, `SPEC_KEYS`, `coerceSpec()`, and `parseSpec()` (coerce + clamp to schema range). Future field changes are a one-file edit instead of a six-file scavenger hunt.
+- **`lib/migrations.js`** — versioned payload migrations. `runMigrations(payload)` walks ordered migrators keyed by `from` version; share links from a newer schema are rejected via `isPayloadFromFuture()` rather than silently corrupting fields.
+- **Schema-versioned persisted payloads** — both localStorage CONFIG and share links now include `schemaVersion` so future schema changes are detectable on load.
+- **`PHYSICS` constants block** in `lib/constants.js` — single source of truth for `G`, `LBS_PER_N`, `FT_PER_M`, `M_PER_FT`, `IN_TO_M`, `MPH_TO_FPS`, `J_TO_FTLBF`. Plus `VERSION`/`VERSION_DISPLAY` exports.
 - **Custom motor `.eng` import** — HPR builders using OpenMotor (or any RASP `.eng` source: ThrustCurve.org downloads, OpenRocket exports) can now import their motor's thrust curve directly. New "+ Import Custom Motor (.eng)" button in the SPECS tab opens a file picker, parses the header and thrust samples, and shows a preview card with designation, diameter×length, propellant/total mass, total impulse, burn time, peak thrust, and a mini sparkline of the curve shape. Confirming injects the motor into state and auto-populates the Motor Impulse / Burn Time scalar fields.
 - **Thrust curve integration in `integrateAscent`** — when a custom motor is active, the powered-phase integrator interpolates thrust at each timestep (50 ms) instead of using a constant average. Apogee accuracy improves from ±10-15% (scalar) to ±3-5% (curve). New `apogee_method: 'integrated-curve'` surfaces in the dashboard.
 - **`parseEng(text)`** — new pure function in `src/lib/engParser.js` that parses RASP `.eng` files: normalizes line endings (CRLF/CR/LF), strips comments, validates the 7-field header, enforces chronological + terminal-zero curve, computes trapezoidal total impulse, burn time (last non-zero sample), and peak thrust. Rejects malformed input with specific error messages. 20 unit tests.
@@ -15,6 +19,25 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### Changed
 - `runSimulation({ specs, config })` now accepts an optional `customMotor` parameter. Backwards compatible — omitting the param keeps the scalar `integrated` path.
 - `integrateAscent` signature extended with optional `curve` and `propMass_kg_override` parameters. When `propMass_kg_override` is provided (from an imported motor's measured propellant mass), it's used instead of the Isp heuristic.
+- **`ejection_g_factor` handling unified across `compatibility.js`, `simulation.js`, and `SuggestPanel.jsx`** via `parseSpec`. Previously the three files disagreed on what to do with negative input — sim clamped `-50` to 1, compatibility fell back to 20G, SuggestPanel used `-50` directly. All three now route through `parseSpec` which returns `null` for ≤0, letting consumers fall through to the same auto-default (20G for <10kg, 30G for ≥10kg).
+- **Catalog lookups now match on `(id, category)`** in `App.jsx` and `lib/shareLink.js` — prevents the 20 historical ID collisions between `main_chute` and `drogue_chute` variants from silently rehydrating the wrong part on share-link decode.
+- **UI brand badge** reads `VERSION_DISPLAY` from `constants.js` instead of a hardcoded `RECOVERYSYS_V1.1` literal.
+
+### Fixed
+- **Landing page scroll** — removed `html, body { height: 100% }` from `landing/assets/colors_and_type.css` that was making body a fixed-height scroll container competing with Lenis's window scroller. Wheel events were captured but the page never moved.
+- **`engParser` now strips `;` inline comments anywhere on a line** (per the RASP spec — previously only handled full-line comments).
+- **Leaflet CSS** loaded from CDN now has SRI integrity attribute + `crossorigin=anonymous` to fail closed if the CDN is compromised.
+- **`MissionControlLayout` status bar** now shows the WARNING badge when `hasWarnings && !hasErrors` (previously fell through to NOMINAL — silent error suppression).
+- **Tooltip on `CompatDot`** uses `whiteSpace: 'pre-line'` so multi-warning messages joined by `\n` render on separate lines instead of collapsing to spaces.
+- **`MotorSearch`** validates `data.results` is an array before `setResults` (was `data.results ?? []`).
+- **`PrintChecklist`** uses `WARN_LEVELS.ERROR` constant instead of magic string literal `'error'`.
+
+### Removed
+- **`lib/engineApi.js`** — 229-line module deleted. Had zero callers in `src/` (was a future-Python-engine integration that was never wired up). Reading an attacker-controllable URL from `localStorage('recoverysys-engine-url')` and POSTing config data to it was a real exfiltration vector with no rent-paying use.
+- **`flight_computer` and `battery` cases in `format.js`** — neither category exists in the parts catalog.
+
+### Security
+- Share-link decoder now rejects payloads from a newer `schemaVersion` rather than silently dropping fields the receiver doesn't understand.
 
 ## [1.2.0.0] - 2026-04-09
 

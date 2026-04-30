@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Recovery bay configuration tool for high-power rocketry (HPR). React 18 + Vite SPA. No backend — pure localStorage + URL-encoded share links.
 
-**Version:** 1.1.0.0 (see `RecoverySys/VERSION`)
+**Version:** 1.2.0.x (see `RecoverySys/VERSION`)
 
 ### Key locations
 
@@ -17,7 +17,10 @@ Recovery bay configuration tool for high-power rocketry (HPR). React 18 + Vite S
 | `RecoverySys/src/lib/engParser.js` | RASP .eng motor file parser (OpenMotor / ThrustCurve / OpenRocket compatible) |
 | `RecoverySys/src/lib/compatibility.js` | Compat rules engine — packing, volume, drogue-without-main |
 | `RecoverySys/src/lib/format.js` | Shared category-aware part spec formatter |
-| `RecoverySys/src/data/parts.js` | 189-part catalog (chutes, altimeters, misc recovery) |
+| `RecoverySys/src/lib/schema.js` | Single source of truth for SPECS shape — `getDefaultSpecs`, `parseSpec` (clamping coercion), `SPEC_KEYS` |
+| `RecoverySys/src/lib/migrations.js` | Versioned-payload migrations for localStorage + share links |
+| `RecoverySys/src/lib/constants.js` | Frozen state-machine constants + `PHYSICS` block + `VERSION` |
+| `RecoverySys/src/data/parts.js` | 233-part catalog (chutes, shock cord, hardware) |
 | `RecoverySys/src/components/` | MissionControlLayout (root), PartsBrowser, FlightChart, DispersionMap, CompatDot |
 | `RecoverySys/src/test/` | Vitest test suite |
 | `RecoverySys/DESIGN.md` | Design system — color tokens, typography, spacing, interaction states |
@@ -38,10 +41,12 @@ npm run test:watch # watch mode
 
 ### Architecture
 
-- **State:** Single `useReducer` in `App.jsx`, persisted to `localStorage` on every change
+- **State:** Single `useReducer` in `App.jsx`, manually persisted to `localStorage` on save (auto-persist is on the rebuild list)
 - **safeTimeout:** `useRef` accumulates timer IDs; `useEffect` cleanup prevents stale setState after unmount
-- **Share links:** `btoa(encodeURIComponent(JSON.stringify(config)))` → `?c=` URL param
-- **Parts catalog:** Static JS array in `parts.js`; no backend DB
+- **Share links:** `btoa(encodeURIComponent(JSON.stringify(payload)))` → `?c=` URL param. Payloads include `schemaVersion` for forward/backward compatibility
+- **Schema:** `lib/schema.js` is the single source of truth for spec field shape, defaults, units, and clamp ranges. Consumers read user-supplied numeric specs via `parseSpec(key, raw)` so coercion + clamping happens in one place
+- **Migrations:** `lib/migrations.js` registers ordered migrators keyed by `from` version. `runMigrations(payload)` walks the chain on every load; share links from a future schema are rejected rather than silently corrupted
+- **Parts catalog:** Static JS array in `parts.js`; no backend DB. Catalog lookups match on `(id, category)` because the catalog has historical id collisions between `main_chute` and `drogue_chute` variants
 - **Testing:** Vitest v3 + @testing-library/react + jsdom; fake timers + `flushPromises` pattern for async component tests
 
 ## gstack
