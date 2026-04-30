@@ -4,7 +4,7 @@
 // part IDs are serialized (not full objects) so URLs stay compact. Receiver
 // re-hydrates parts by looking them up in its own catalog + custom parts list.
 
-import { rehydrateCustomMotor } from './storage.js'
+import { rehydrateCustomMotor, isValidCustomPart } from './storage.js'
 import { getDefaultSpecs, SPEC_KEYS, SCHEMA_VERSION } from './schema.js'
 import { runMigrations, isPayloadFromFuture } from './migrations.js'
 
@@ -50,15 +50,11 @@ export function decodeSharePayload(encoded, { allParts, slotIds, emptyConfig }) 
     let customMissing = 0
     const inlinedCustomParts = []
 
-    const isValidCustom = (p) =>
-      p && typeof p.id === 'string' && typeof p.name === 'string' && p.name.length <= 200 &&
-      typeof p.category === 'string' && p.specs !== null && typeof p.specs === 'object'
-
     if (payload.config) {
       Object.entries(payload.config).forEach(([cat, part]) => {
         if (!validCategories.has(cat)) return
         if (part) {
-          if (part.id?.startsWith('custom-') && isValidCustom(part)) {
+          if (part.id?.startsWith('custom-') && isValidCustomPart(part)) {
             // Full custom part inlined in the share link — use directly
             newConfig[cat] = part
             if (!inlinedCustomParts.find(p => p.id === part.id)) {

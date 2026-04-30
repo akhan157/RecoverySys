@@ -22,23 +22,29 @@ export function loadSaved() {
   } catch { return null }
 }
 
+// Single validator for custom parts shape. Used by both loadCustomParts
+// (this file) and decodeSharePayload (shareLink.js) — Pass 2 found the rule
+// was duplicated with subtly different limits between the two paths. Now
+// one definition. Cap on name length defends against DoS via crafted
+// payloads from either source.
+const MAX_CUSTOM_NAME_LEN = 200
+
+export function isValidCustomPart(p) {
+  return p &&
+    typeof p === 'object' &&
+    typeof p.id === 'string' && p.id.length > 0 &&
+    typeof p.name === 'string' && p.name.length > 0 && p.name.length <= MAX_CUSTOM_NAME_LEN &&
+    typeof p.category === 'string' &&
+    p.specs !== null && typeof p.specs === 'object'
+}
+
 export function loadCustomParts() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CUSTOM_PARTS)
     if (!raw) return []
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
-    // Reject any entry missing the minimum shape required by PartsBrowser + rehydrate.
-    // Also require specs to be a non-null object — partSpecLine accesses spec fields
-    // directly and will throw if specs is undefined/null (e.g. manual edits).
-    return parsed.filter(p =>
-      p &&
-      typeof p.id === 'string' &&
-      typeof p.name === 'string' &&
-      typeof p.category === 'string' &&
-      p.specs !== null &&
-      typeof p.specs === 'object'
-    )
+    return parsed.filter(isValidCustomPart)
   } catch { return [] }
 }
 
