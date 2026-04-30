@@ -63,8 +63,10 @@ export const SPECS_SCHEMA = Object.freeze({
   },
   ejection_g_factor: {
     type: 'number', unit: 'G', default: '',
-    label: 'Ejection G-factor', min: 0,
-    note: 'Blank = auto (20G for <10kg, 30G for ≥10kg L3-class).',
+    label: 'Ejection G-factor', min: 0, exclusiveMin: true,
+    note: 'Blank or non-positive = auto (20G for <10kg, 30G for ≥10kg L3-class). ' +
+          'parseSpec returns null for ≤0, letting all three consumers ' +
+          '(compatibility, simulation, SuggestPanel) fall through to the same default.',
   },
   bay_obstruction_vol_in3: {
     type: 'number', unit: 'in³', default: '',
@@ -130,6 +132,8 @@ export function isValidSpecKey(key) {
  * declared type. Returns null when coercion fails — consumers that previously
  * used `parseFloat(specs.X) || 0` should switch to `coerceSpec('X', specs.X) ?? 0`
  * so explicit zero is distinguishable from missing.
+ *
+ * Does NOT clamp to schema range — use parseSpec for that.
  */
 export function coerceSpec(key, raw) {
   const def = SPECS_SCHEMA[key]
@@ -140,4 +144,34 @@ export function coerceSpec(key, raw) {
     return Number.isFinite(n) ? n : null
   }
   return raw
+}
+
+/**
+ * Coerce + clamp a spec value to the schema's [min, max] range. This is the
+ * function consumers should use to read user-provided spec values.
+ *
+ * Why clamp at the consumer instead of at SET_SPEC: preserving the user's
+ * exact typed input in the form field is important UX (silently rewriting
+ * "-50" to "0" while they're typing is jarring). Consumer-side clamping
+ * still kills the actual bugs — Pass 2 red-team found that (a) compatibility.js
+ * and simulation.js disagree on what to do with negative ejection_g_factor,
+ * (b) custom drogue with cd ≈ 0 produces denormal floats that crash the
+ * dispersion map, (c) extreme wind values can cause infinite descent loops.
+ * Routing every numeric read through parseSpec makes those impossible.
+ *
+ * Returns null when the input is missing, non-numeric, or violates an
+ * exclusiveMin constraint at exactly the boundary value.
+ */
+export function parseSpec(key, raw) {
+  const def = SPECS_SCHEMA[key]
+  if (!def) return null
+  const n = coerceSpec(key, raw)
+  if (n == null || def.type !== 'number') return n
+  // Reject exactly-zero when the schema forbids it — e.g. cd_drag = 0 makes
+  // descent rate Infinity, which then propagates NaN through Monte Carlo.
+  if (def.exclusiveMin && def.min != null && n <= def.min) return null
+  let clamped = n
+  if (def.min != null && clamped < def.min) clamped = def.min
+  if (def.max != null && clamped > def.max) clamped = def.max
+  return clamped
 }

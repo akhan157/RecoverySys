@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { computeDescentRate } from '../lib/simulation.js'
 import { PHYSICS } from '../lib/constants.js'
+import { parseSpec } from '../lib/schema.js'
 
 const G_ACCEL   = PHYSICS.G
 const LBS_PER_N = PHYSICS.LBS_PER_N
@@ -93,7 +94,10 @@ export default function SuggestPanel({ parts, specs, config, onSelectPart }) {
 
   const mass_kg     = (parseFloat(specs.rocket_mass_g) || 0) / 1000
   const deploy_ft   = parseFloat(specs.main_deploy_alt_ft) || 500
-  const g_factor    = parseFloat(specs.ejection_g_factor) || (mass_kg >= 10 ? 30 : 20)
+  // Use parseSpec so this matches compatibility.js + simulation.js exactly —
+  // negative or zero inputs fall through to the auto default (20G/30G), no
+  // silent disagreement between consumers (Pass 2 red-team finding).
+  const g_factor    = parseSpec('ejection_g_factor', specs.ejection_g_factor) ?? (mass_kg >= 10 ? 30 : 20)
   const targetMain  = parseFloat(mainFps)  || 15
   const targetDrogue = parseFloat(drogueFps) || 80
 

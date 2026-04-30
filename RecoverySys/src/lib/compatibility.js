@@ -1,5 +1,6 @@
 import { computeDescentRate } from './simulation.js'
 import { WARN_LEVELS, PHYSICS } from './constants.js'
+import { parseSpec } from './schema.js'
 
 const G_ACCEL = PHYSICS.G
 
@@ -23,8 +24,13 @@ export function checkCompatibility({ config, specs }) {
 
   // Ejection G-factor: user-supplied value takes precedence; auto-default is 20G (L1/L2)
   // or 30G for L3-class rockets (≥10 kg). Matches NAR/TRA guidelines.
-  const g_factor_user = parseFloat(specs.ejection_g_factor)
-  const g_factor      = (g_factor_user > 0) ? Math.max(5, g_factor_user) : (mass_kg != null && mass_kg >= 10 ? 30 : 20)
+  // parseSpec returns null for ≤0 (treated as "auto") — keeps simulation,
+  // compatibility, and SuggestPanel in lockstep instead of each disagreeing
+  // about what a negative input means.
+  const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
+  const g_factor      = g_factor_user != null
+    ? Math.max(5, g_factor_user)
+    : (mass_kg != null && mass_kg >= 10 ? 30 : 20)
 
   // ── Deploy altitude sanity ───────────────────────────────────────────────────
   const deploy_ft_raw = parseFloat(specs.main_deploy_alt_ft)

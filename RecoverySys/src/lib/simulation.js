@@ -1,3 +1,5 @@
+import { parseSpec } from './schema.js'
+
 /**
  * ── Known constraints & simplifications ─────────────────────────────────────
  *
@@ -649,7 +651,9 @@ export function runSimulation({ specs, config, customMotor = null }) {
   const cd        = parseFloat(specs.drag_cd) || CD_DEFAULT
   const wind_mph  = parseFloat(specs.wind_speed_mph) || 0
   const deploy_ft = parseFloat(specs.main_deploy_alt_ft) || 500
-  const g_factor  = Math.max(1, parseFloat(specs.ejection_g_factor) || 20)
+  // Stays in lockstep with compatibility.js + SuggestPanel.jsx via parseSpec.
+  const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
+  const g_factor      = g_factor_user ?? (mass_g / 1000 >= 10 ? 30 : 20)
 
   if (!mass_g || !impulse || mass_g <= 0 || impulse <= 0) return null
 
