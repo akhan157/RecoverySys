@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react'
 import { parseEng } from '../../lib/engParser.js'
 import ThrustCurveSparkline from './ThrustCurveSparkline.jsx'
 import Button from '../primitives/Button.jsx'
+import MotorPill from '../primitives/MotorPill.jsx'
 
 // Custom motor import (.eng file upload).
 //
@@ -41,36 +42,23 @@ export default function CustomMotorImport({ customMotor, onSetCustomMotor, onCle
     setPreview(null)
   }
 
-  // Active motor — pill matching MotorSearch's selected-state style
+  // Active motor — same pill as MotorSearch's selected state, via shared primitive
   if (customMotor && !preview) {
     return (
       <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '4px' }}>
         <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
           Custom Motor <span style={{ fontWeight: 400, opacity: 0.7 }}>(.eng import)</span>
         </label>
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '5px 8px',
-          background: 'var(--ok-bg, rgba(74,222,128,0.08))',
-          border: '1px solid var(--ok-fg, #4ade80)',
-          borderRadius: 'var(--radius)',
-        }}>
-          <span style={{ fontSize: '12px' }}>
-            <span className="mono" style={{ color: 'var(--ok-fg, #4ade80)', fontWeight: 700 }}>
-              {customMotor.designation}
+        <MotorPill
+          designation={customMotor.designation}
+          meta={
+            <span className="mono">
+              {Math.round(customMotor.totalImpulse_ns)} Ns / {customMotor.burnTime_s.toFixed(2)}s / peak {Math.round(customMotor.peakThrust_N)} N
             </span>
-            <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
-              <span className="mono">
-                {Math.round(customMotor.totalImpulse_ns)} Ns / {customMotor.burnTime_s.toFixed(2)}s / peak {Math.round(customMotor.peakThrust_N)} N
-              </span>
-            </span>
-          </span>
-          <button
-            onClick={onClearCustomMotor}
-            title="Clear custom motor"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: '15px', padding: '0 2px', lineHeight: 1 }}
-          >×</button>
-        </div>
+          }
+          onClear={onClearCustomMotor}
+          clearTitle="Clear custom motor"
+        />
       </div>
     )
   }

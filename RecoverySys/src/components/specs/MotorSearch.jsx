@@ -1,4 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
+import MotorPill from '../primitives/MotorPill.jsx'
 
 const THRUSTCURVE_URL = 'https://www.thrustcurve.org/api/v1/search.json'
 
@@ -98,25 +99,16 @@ export default function MotorSearch({ onSetSpec }) {
       </label>
 
       {selected ? (
-        <div style={{
-          display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '5px 8px',
-          background: 'var(--ok-bg, rgba(74,222,128,0.08))',
-          border: '1px solid var(--ok-fg, #4ade80)',
-          borderRadius: 'var(--radius)',
-        }}>
-          <span style={{ fontSize: '12px' }}>
-            <span className="mono" style={{ color: 'var(--ok-fg, #4ade80)', fontWeight: 700 }}>{selected.designation}</span>
-            <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
+        <MotorPill
+          designation={selected.designation}
+          meta={
+            <>
               {selected.manufacturerAbbrev} — <span className="mono">{Math.round(selected.totImpulseNs)} Ns{selected.burnTimeS != null ? ` / ${Number(selected.burnTimeS).toFixed(1)}s` : ''}</span>
-            </span>
-          </span>
-          <button
-            onClick={clear}
-            title="Clear motor selection"
-            style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-tertiary)', fontSize: '15px', padding: '0 2px', lineHeight: 1 }}
-          >×</button>
-        </div>
+            </>
+          }
+          onClear={clear}
+          clearTitle="Clear motor selection"
+        />
       ) : (
         <div style={{ position: 'relative' }}>
           <input
