@@ -2,145 +2,79 @@ import React, { useState, useEffect, useMemo } from 'react'
 import { slotStatus } from '../lib/compatibility.js'
 import { partSpecLine } from '../lib/format.js'
 import CompatDot from './CompatDot.jsx'
+import CollapsibleGroup from './primitives/CollapsibleGroup.jsx'
 import './PartsBrowser.css'
 
+// Catalog parts grouped by manufacturer. Cards are simple selection buttons.
 function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen, hasSelected }) {
-  const [open, setOpen] = useState(defaultOpen || hasSelected)
-
   return (
-    <div style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-      {/* Manufacturer header */}
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          padding: '8px 16px',
-          background: 'none',
-          border: 'none',
-          cursor: 'pointer',
-          textAlign: 'left',
-        }}
-      >
-        <span className="section-label">{mfr}</span>
-        <svg
-          width="10" height="10" viewBox="0 0 10 10" fill="none"
-          style={{
-            color: 'var(--text-tertiary)',
-            transform: open ? 'rotate(90deg)' : 'rotate(0deg)',
-            transition: 'transform 200ms ease',
-            flexShrink: 0,
-          }}
-        >
-          <path d="M3 2L7 5L3 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-
-      {/* Parts grid — collapsed via max-height; 9999px avoids catalog truncation */}
-      <div style={{
-        overflow: 'hidden',
-        maxHeight: open ? '9999px' : '0',
-        transition: 'max-height 200ms ease',
-      }}>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: '1fr 1fr',
-          gap: '6px',
-          padding: '4px 12px 12px',
-        }}>
-          {parts.map(part => {
-            const isSelected = config[part.category]?.id === part.id
-            return (
-              <button
-                key={part.id}
-                className="parts-card"
-                onClick={() => onSelectPart(part)}
-                aria-label={`${part.name} — ${partSpecLine(part)}${isSelected ? ' (selected)' : ''}`}
-                aria-pressed={isSelected}
-              >
-                <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.3 }}>
-                  {part.name}
-                </div>
-                <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, lineHeight: 1.2 }}>
-                  {partSpecLine(part)}
-                </div>
-              </button>
-            )
-          })}
-        </div>
-      </div>
-    </div>
+    <CollapsibleGroup label={mfr} defaultOpen={defaultOpen || hasSelected}>
+      {parts.map(part => {
+        const isSelected = config[part.category]?.id === part.id
+        return (
+          <button
+            key={part.id}
+            className="parts-card"
+            onClick={() => onSelectPart(part)}
+            aria-label={`${part.name} — ${partSpecLine(part)}${isSelected ? ' (selected)' : ''}`}
+            aria-pressed={isSelected}
+          >
+            <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.3 }}>
+              {part.name}
+            </div>
+            <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, lineHeight: 1.2 }}>
+              {partSpecLine(part)}
+            </div>
+          </button>
+        )
+      })}
+    </CollapsibleGroup>
   )
 }
 
-// Custom parts group — same layout as MfrGroup but cards have edit + delete buttons
+// Custom parts group — same chrome, but cards have edit + delete overlays.
 function CustomGroup({ parts, config, onSelectPart, onDelete, onEdit }) {
-  const [open, setOpen] = useState(true)
-
   return (
-    <div style={{ borderBottom: '1px solid var(--border-subtle)' }}>
-      <button
-        onClick={() => setOpen(o => !o)}
-        style={{
-          width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-          padding: '8px 16px', background: 'none', border: 'none', cursor: 'pointer', textAlign: 'left',
-        }}
-      >
-        <span className="section-label" style={{ color: 'var(--accent)' }}>CUSTOM</span>
-        <svg width="10" height="10" viewBox="0 0 10 10" fill="none"
-          style={{ color: 'var(--text-tertiary)', transform: open ? 'rotate(90deg)' : 'rotate(0deg)', transition: 'transform 200ms ease', flexShrink: 0 }}>
-          <path d="M3 2L7 5L3 8" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      </button>
-
-      <div style={{ overflow: 'hidden', maxHeight: open ? '9999px' : '0', transition: 'max-height 200ms ease' }}>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', padding: '4px 12px 12px' }}>
-          {parts.map(part => {
-            const isSelected = config[part.category]?.id === part.id
-            return (
-              <div
-                key={part.id}
-                style={{ position: 'relative' }}
+    <CollapsibleGroup label="CUSTOM" labelStyle={{ color: 'var(--accent)' }} defaultOpen>
+      {parts.map(part => {
+        const isSelected = config[part.category]?.id === part.id
+        return (
+          <div key={part.id} style={{ position: 'relative' }}>
+            <button
+              className="parts-card parts-card--custom"
+              onClick={() => onSelectPart(part)}
+              aria-label={`${part.name} — ${partSpecLine(part) || 'custom'}${isSelected ? ' (selected)' : ''}`}
+              aria-pressed={isSelected}
+            >
+              <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.3 }}>{part.name}</div>
+              <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, lineHeight: 1.2 }}>{partSpecLine(part)}</div>
+            </button>
+            {/* Edit + Delete buttons — positioned over card */}
+            <div style={{ position: 'absolute', top: '4px', right: '4px', display: 'flex', gap: '2px' }}>
+              <button
+                type="button"
+                className="parts-card__delete"
+                onClick={e => { e.stopPropagation(); onEdit(part) }}
+                title="Edit custom part"
+                aria-label={`Edit ${part.name}`}
+                style={{ fontSize: '11px' }}
               >
-                <button
-                  className="parts-card parts-card--custom"
-                  onClick={() => onSelectPart(part)}
-                  aria-label={`${part.name} — ${partSpecLine(part) || 'custom'}${isSelected ? ' (selected)' : ''}`}
-                  aria-pressed={isSelected}
-                >
-                  <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.3 }}>{part.name}</div>
-                  <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, lineHeight: 1.2 }}>{partSpecLine(part)}</div>
-                </button>
-                {/* Edit + Delete buttons — positioned over card */}
-                <div style={{ position: 'absolute', top: '4px', right: '4px', display: 'flex', gap: '2px' }}>
-                  <button
-                    type="button"
-                    className="parts-card__delete"
-                    onClick={e => { e.stopPropagation(); onEdit(part) }}
-                    title="Edit custom part"
-                    aria-label={`Edit ${part.name}`}
-                    style={{ fontSize: '11px' }}
-                  >
-                    ✎
-                  </button>
-                  <button
-                    type="button"
-                    className="parts-card__delete"
-                    onClick={e => { e.stopPropagation(); onDelete(part.id) }}
-                    title="Delete custom part"
-                    aria-label={`Delete ${part.name}`}
-                  >
-                    ×
-                  </button>
-                </div>
-              </div>
-            )
-          })}
-        </div>
-      </div>
-    </div>
+                ✎
+              </button>
+              <button
+                type="button"
+                className="parts-card__delete"
+                onClick={e => { e.stopPropagation(); onDelete(part.id) }}
+                title="Delete custom part"
+                aria-label={`Delete ${part.name}`}
+              >
+                ×
+              </button>
+            </div>
+          </div>
+        )
+      })}
+    </CollapsibleGroup>
   )
 }
 
