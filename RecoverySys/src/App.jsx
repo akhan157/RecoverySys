@@ -8,7 +8,8 @@ import {
 import useDarkMode from './hooks/useDarkMode.js'
 import useCustomParts from './hooks/useCustomParts.js'
 import useCompatibilityWatcher from './hooks/useCompatibilityWatcher.js'
-import { encodeSharePayload, buildShareUrl, decodeSharePayload, SHARE_PARAM } from './lib/shareLink.js'
+import useShareLinkLoader from './hooks/useShareLinkLoader.js'
+import { encodeSharePayload, buildShareUrl, SHARE_PARAM } from './lib/shareLink.js'
 import {
   SAVE_STATES, SHARE_STATES, TOAST_LEVELS,
   SAVE_FLASH_MS, SAVE_RESET_MS, SHARE_RESET_MS,
@@ -270,41 +271,8 @@ export default function App() {
     } catch { /* silent */ }
   }, [addToast])
 
-  // ── Share link loader ────────────────────────────────────────────────────
-  useEffect(() => {
-    const c = new URLSearchParams(location.search).get(SHARE_PARAM)
-    if (!c) return
-    const decoded = decodeSharePayload(c, {
-      allParts, slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG,
-    })
-    if (!decoded) return   // malformed — silently ignore
-    dispatch({
-      type: 'LOAD_SHARE',
-      config: decoded.config,
-      specs: decoded.specs,
-      customMotor: decoded.customMotor,
-    })
-    if (decoded.catalogMissing > 0) {
-      addToast(TOAST_LEVELS.WARN, `${decoded.catalogMissing} part${decoded.catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`)
-    }
-    if (decoded.inlinedCustomParts?.length > 0) {
-      let importedCount = 0
-      setCustomParts(prev => {
-        const existingIds = new Set(prev.map(p => p.id))
-        const newParts = decoded.inlinedCustomParts.filter(p => !existingIds.has(p.id))
-        importedCount = newParts.length
-        return importedCount > 0 ? [...prev, ...newParts] : prev
-      })
-      if (importedCount > 0) {
-        addToast(TOAST_LEVELS.OK, `Imported ${importedCount} custom part${importedCount > 1 ? 's' : ''} from share link.`)
-      }
-    }
-    if (decoded.customMissing > 0) {
-      addToast(TOAST_LEVELS.WARN, `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be loaded.`)
-    }
-    // allParts / addToast intentionally read once at mount — link is parsed exactly once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  // Share link loader (mount-once: decode ?c=, dispatch LOAD_SHARE, toast).
+  useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch })
 
   // ── Demo mode ─────────────────────────────────────────────────────────────
   // Triggered by ?demo=1 (e.g. landing page LAUNCH button). Loads a sample
