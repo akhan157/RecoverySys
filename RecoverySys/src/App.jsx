@@ -10,6 +10,7 @@ import useCustomParts from './hooks/useCustomParts.js'
 import useCompatibilityWatcher from './hooks/useCompatibilityWatcher.js'
 import useShareLinkLoader from './hooks/useShareLinkLoader.js'
 import useDemoMode from './hooks/useDemoMode.js'
+import usePersistence from './hooks/usePersistence.js'
 import { encodeSharePayload, buildShareUrl, SHARE_PARAM } from './lib/shareLink.js'
 import {
   SAVE_STATES, SHARE_STATES, TOAST_LEVELS,
@@ -197,6 +198,13 @@ export default function App() {
 
   // Debounced compatibility re-evaluation on config/specs change.
   useCompatibilityWatcher({ config: state.config, specs: state.specs, dispatch })
+
+  // Auto-persist config + specs + customMotor to localStorage (Pass 2 fix).
+  usePersistence({
+    config: state.config,
+    specs: state.specs,
+    customMotor: state.customMotor,
+  })
 
   // ── Actions ───────────────────────────────────────────────────────────────
   const selectPart = useCallback((part) => {
