@@ -1,13 +1,13 @@
 import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import { PARTS, CATEGORIES, SLOT_IDS, EMPTY_CONFIG } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
-import { checkCompatibility } from './lib/compatibility.js'
 import {
   loadSaved, loadCustomParts, rehydrateCustomMotor,
   saveConfigToStorage,
 } from './lib/storage.js'
 import useDarkMode from './hooks/useDarkMode.js'
 import useCustomParts from './hooks/useCustomParts.js'
+import useCompatibilityWatcher from './hooks/useCompatibilityWatcher.js'
 import { encodeSharePayload, buildShareUrl, decodeSharePayload, SHARE_PARAM } from './lib/shareLink.js'
 import {
   SAVE_STATES, SHARE_STATES, TOAST_LEVELS,
@@ -164,7 +164,6 @@ function reducer(state, action) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, null, buildInitialState)
-  const debounceRef       = useRef(null)
   const toastCounter      = useRef(0)
   const timeoutIds        = useRef([])
   const restoredToastFired = useRef(false)   // guard against React 18 StrictMode double-invoke
@@ -194,15 +193,8 @@ export default function App() {
     addCustomPart, deleteCustomPart, editCustomPart,
   } = useCustomParts({ config: state.config, dispatch })
 
-  // ── Compatibility ─────────────────────────────────────────────────────────
-  useEffect(() => {
-    clearTimeout(debounceRef.current)
-    debounceRef.current = setTimeout(() => {
-      const warnings = checkCompatibility({ config: state.config, specs: state.specs })
-      dispatch({ type: 'SET_WARNINGS', warnings })
-    }, 300)
-    return () => clearTimeout(debounceRef.current)
-  }, [state.config, state.specs])
+  // Debounced compatibility re-evaluation on config/specs change.
+  useCompatibilityWatcher({ config: state.config, specs: state.specs, dispatch })
 
   // ── Actions ───────────────────────────────────────────────────────────────
   const selectPart = useCallback((part) => {
