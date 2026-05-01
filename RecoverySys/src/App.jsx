@@ -4,9 +4,10 @@ import { runSimulation } from './lib/simulation.js'
 import { checkCompatibility } from './lib/compatibility.js'
 import {
   loadSaved, loadCustomParts, rehydrateCustomMotor,
-  saveConfigToStorage, saveCustomPartsToStorage,
+  saveConfigToStorage,
 } from './lib/storage.js'
 import useDarkMode from './hooks/useDarkMode.js'
+import useCustomParts from './hooks/useCustomParts.js'
 import { encodeSharePayload, buildShareUrl, decodeSharePayload, SHARE_PARAM } from './lib/shareLink.js'
 import {
   SAVE_STATES, SHARE_STATES, TOAST_LEVELS,
@@ -186,31 +187,12 @@ export default function App() {
   // Dark mode (persisted to localStorage; applies data-theme="dark" to <html>)
   const [darkMode, setDarkMode] = useDarkMode()
 
-  // ── Custom parts ──────────────────────────────────────────────────────────
-  const [customParts, setCustomParts] = useState(loadCustomParts)
-  const allParts = useMemo(() => [...customParts, ...PARTS], [customParts])
-
-  useEffect(() => { saveCustomPartsToStorage(customParts) }, [customParts])
-
-  const addCustomPart = useCallback((part) => {
-    setCustomParts(prev => [...prev, part])
-  }, [])
-
-  const deleteCustomPart = useCallback((id) => {
-    setCustomParts(prev => prev.filter(p => p.id !== id))
-    // Clear the config slot if the deleted part is currently selected
-    Object.entries(state.config).forEach(([category, selected]) => {
-      if (selected?.id === id) dispatch({ type: 'REMOVE_PART', category })
-    })
-  }, [state.config])
-
-  const editCustomPart = useCallback((updatedPart) => {
-    setCustomParts(prev => prev.map(p => p.id === updatedPart.id ? updatedPart : p))
-    // Update the config slot if the edited part is currently selected
-    Object.entries(state.config).forEach(([category, selected]) => {
-      if (selected?.id === updatedPart.id) dispatch({ type: 'SELECT_PART', category, part: updatedPart })
-    })
-  }, [state.config])
+  // Custom parts (persisted; merged with PARTS into allParts; CRUD cleans
+  // up matching config slots when parts are deleted or edited).
+  const {
+    customParts, setCustomParts, allParts,
+    addCustomPart, deleteCustomPart, editCustomPart,
+  } = useCustomParts({ config: state.config, dispatch })
 
   // ── Compatibility ─────────────────────────────────────────────────────────
   useEffect(() => {
