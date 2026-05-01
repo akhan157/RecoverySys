@@ -103,7 +103,12 @@ function reducer(state, action) {
     case 'REMOVE_PART':
       return { ...state, config: { ...state.config, [action.category]: null }, simulation: null }
     case 'SET_SPEC':
-      return { ...state, specs: { ...state.specs, [action.key]: action.value }, simulation: null }
+      // Spec edits do NOT wipe the simulation. Pass 2's perf review found
+      // that flagging the sim stale on every keystroke triggered a full
+      // re-render of MissionControlLayout (Dashboard + 189-card PartsBrowser
+      // + FlightChart + DispersionMap). The user has to click RUN_SIM to
+      // refresh anyway; the displayed numbers are "last run", not "live."
+      return { ...state, specs: { ...state.specs, [action.key]: action.value } }
     // Loading a custom motor also mirrors its totalImpulse/burnTime into specs so
     // canRun + the status-bar MOTOR display keep working unchanged.
     case 'SET_CUSTOM_MOTOR':
