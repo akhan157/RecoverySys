@@ -23,6 +23,23 @@
   border-color: var(--ok-fg);
 }
 
+/* Inner card content. These were inline styles allocated fresh on every
+   render — Pass 2 measured ~1100 fresh style objects per render across
+   the 189-card catalog. Moving to classes eliminates the GC pressure
+   and shrinks the JSX bundle. */
+.parts-card__name {
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-primary);
+  line-height: 1.3;
+}
+.parts-card__spec {
+  font-size: 10px;
+  color: var(--text-tertiary);
+  font-weight: 600;
+  line-height: 1.2;
+}
+
 /* Custom parts: brighter border to distinguish from catalog */
 .parts-card--custom {
   width: 100%;

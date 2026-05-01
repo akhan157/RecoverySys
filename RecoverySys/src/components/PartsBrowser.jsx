@@ -19,12 +19,8 @@ function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen, hasSelected }
             aria-label={`${part.name} — ${partSpecLine(part)}${isSelected ? ' (selected)' : ''}`}
             aria-pressed={isSelected}
           >
-            <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.3 }}>
-              {part.name}
-            </div>
-            <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, lineHeight: 1.2 }}>
-              {partSpecLine(part)}
-            </div>
+            <div className="parts-card__name">{part.name}</div>
+            <div className="parts-card__spec mono">{partSpecLine(part)}</div>
           </button>
         )
       })}
@@ -46,8 +42,8 @@ function CustomGroup({ parts, config, onSelectPart, onDelete, onEdit }) {
               aria-label={`${part.name} — ${partSpecLine(part) || 'custom'}${isSelected ? ' (selected)' : ''}`}
               aria-pressed={isSelected}
             >
-              <div style={{ fontSize: '12px', fontWeight: 500, color: 'var(--text-primary)', lineHeight: 1.3 }}>{part.name}</div>
-              <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', fontWeight: 600, lineHeight: 1.2 }}>{partSpecLine(part)}</div>
+              <div className="parts-card__name">{part.name}</div>
+              <div className="parts-card__spec mono">{partSpecLine(part)}</div>
             </button>
             {/* Edit + Delete buttons — positioned over card */}
             <div style={{ position: 'absolute', top: '4px', right: '4px', display: 'flex', gap: '2px' }}>
@@ -451,8 +447,8 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
                     onClick={() => onSelectPart(part)}
                     style={isSelected ? { background: 'var(--ok-bg)', borderColor: 'var(--ok-fg)' } : undefined}
                   >
-                    <div style={{ fontSize: '12px', fontWeight: 500, lineHeight: 1.3 }}>{part.name}</div>
-                    <div className="mono" style={{ fontSize: '10px', color: 'var(--text-tertiary)', marginTop: '2px' }}>
+                    <div className="parts-card__name">{part.name}</div>
+                    <div className="parts-card__spec mono" style={{ marginTop: '2px' }}>
                       {partSpecLine(part)}
                     </div>
                     <div style={{ fontSize: '9px', color: 'var(--text-tertiary)', marginTop: '2px', fontStyle: 'italic' }}>
