@@ -9,6 +9,7 @@ import useDarkMode from './hooks/useDarkMode.js'
 import useCustomParts from './hooks/useCustomParts.js'
 import useCompatibilityWatcher from './hooks/useCompatibilityWatcher.js'
 import useShareLinkLoader from './hooks/useShareLinkLoader.js'
+import useDemoMode from './hooks/useDemoMode.js'
 import { encodeSharePayload, buildShareUrl, SHARE_PARAM } from './lib/shareLink.js'
 import {
   SAVE_STATES, SHARE_STATES, TOAST_LEVELS,
@@ -274,49 +275,11 @@ export default function App() {
   // Share link loader (mount-once: decode ?c=, dispatch LOAD_SHARE, toast).
   useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch })
 
-  // ── Demo mode ─────────────────────────────────────────────────────────────
-  // Triggered by ?demo=1 (e.g. landing page LAUNCH button). Loads a sample
-  // L2 config so first-time visitors see the tool populated. The banner offers
-  // a one-click "Start Fresh" to clear everything.
-  const [demoMode, setDemoMode] = useState(
-    () => typeof window !== 'undefined' && new URLSearchParams(location.search).get('demo') === '1'
-  )
-  const demoLoaded = useRef(false)
-
-  useEffect(() => {
-    if (demoLoaded.current) return        // StrictMode-safe single load
-    if (!demoMode) return
-    if (new URLSearchParams(location.search).get(SHARE_PARAM)) return  // share link wins
-    demoLoaded.current = true
-
-    const config = Object.fromEntries(
-      SLOT_IDS.map(slot => [slot, allParts.find(p => p.id === DEMO_PART_IDS[slot] && p.category === slot) ?? null])
-    )
-    // Run sim synchronously before dispatching so both config and results land in
-    // the same render batch. Using safeTimeout would be killed by StrictMode's
-    // unmount/remount cycle clearing all tracked timeouts.
-    const result = runSimulation({ specs: DEMO_SPECS, config, customMotor: null })
-    dispatch({
-      type: 'LOAD_SHARE',
-      config,
-      specs: { ...DEMO_SPECS },
-      customMotor: null,
-    })
-    if (result) dispatch({ type: 'SET_SIM', simulation: result })
-    // allParts read once at mount — demo is loaded exactly once.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [demoMode])
-
-  const exitDemo = useCallback(() => {
-    dispatch({ type: 'CLEAR_ALL' })
-    setDemoMode(false)
-    // Strip ?demo=1 from URL so a refresh won't re-load the demo.
-    try {
-      const url = new URL(location.href)
-      url.searchParams.delete('demo')
-      history.replaceState(null, '', url.pathname + url.search + url.hash)
-    } catch { /* silent — browsers without history API */ }
-  }, [])
+  // Demo mode: ?demo=1 seeds a sample L2 config + sim so first-time visitors
+  // see the tool populated; share link wins if both are present.
+  const { demoMode, exitDemo } = useDemoMode({
+    allParts, demoPartIds: DEMO_PART_IDS, demoSpecs: DEMO_SPECS, dispatch,
+  })
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
