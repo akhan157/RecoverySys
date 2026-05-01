@@ -5,8 +5,8 @@ import { checkCompatibility } from './lib/compatibility.js'
 import {
   loadSaved, loadCustomParts, rehydrateCustomMotor,
   saveConfigToStorage, saveCustomPartsToStorage,
-  loadTheme, saveTheme,
 } from './lib/storage.js'
+import useDarkMode from './hooks/useDarkMode.js'
 import { encodeSharePayload, buildShareUrl, decodeSharePayload, SHARE_PARAM } from './lib/shareLink.js'
 import {
   SAVE_STATES, SHARE_STATES, TOAST_LEVELS,
@@ -183,13 +183,8 @@ export default function App() {
     prefetchLeaflet()
   }, [])
 
-  // ── Dark mode ─────────────────────────────────────────────────────────────
-  const [darkMode, setDarkMode] = useState(loadTheme)
-  useEffect(() => {
-    if (darkMode) document.documentElement.setAttribute('data-theme', 'dark')
-    else document.documentElement.removeAttribute('data-theme')
-    saveTheme(darkMode)
-  }, [darkMode])
+  // Dark mode (persisted to localStorage; applies data-theme="dark" to <html>)
+  const [darkMode, setDarkMode] = useDarkMode()
 
   // ── Custom parts ──────────────────────────────────────────────────────────
   const [customParts, setCustomParts] = useState(loadCustomParts)
