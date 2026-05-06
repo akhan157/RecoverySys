@@ -31,11 +31,11 @@ export default function SpecInput({
             }}>?</span>
             {showHelp && (
               <span style={{
-                position: 'absolute', left: 18, top: '50%', transform: 'translateY(-50%)',
+                position: 'absolute', left: '-8px', top: '100%', marginTop: 6,
                 background: 'var(--bg-panel)', border: '1px solid var(--border-default)',
-                borderRadius: 4, padding: '6px 8px', fontSize: 11,
-                color: 'var(--text-secondary)', maxWidth: 240, whiteSpace: 'normal',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.12)', zIndex: 100, lineHeight: 1.4,
+                borderRadius: 4, padding: '7px 10px', fontSize: 11,
+                color: 'var(--text-secondary)', width: 300, whiteSpace: 'normal',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.18)', zIndex: 100, lineHeight: 1.5,
               }}>{help}</span>
             )}
           </span>

@@ -451,6 +451,35 @@ const RULES = [
 ]
 
 /**
+ * Compute packing volume stats for the current config + specs.
+ * Returns stacked component volume vs effective bay capacity (after 70% packing efficiency).
+ * Used by Config Summary gauge.
+ */
+export function computePackingVolume({ config, specs }) {
+  const airframe_id    = parseFloat(specs.airframe_id_in)  || 0
+  const bay_length     = parseFloat(specs.bay_length_in)   || 0
+  const bay_cross_area = airframe_id > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) : 0
+  const bay_volume     = bay_cross_area > 0 && bay_length > 0 ? bay_cross_area * bay_length : 0
+  const obstruction    = Math.max(0, parseFloat(specs.bay_obstruction_vol_in3) || 0)
+  const usable         = bay_volume > 0 ? Math.max(0, bay_volume - obstruction) : 0
+  const effective      = usable * PACKING_EFFICIENCY
+
+  const chuteVol = (s) => (s?.packed_length_in ? bay_cross_area * s.packed_length_in : 0)
+  let stacked = chuteVol(config.main_chute?.specs) + chuteVol(config.drogue_chute?.specs)
+  for (const slot of ['chute_protector', 'deployment_bag', 'swivel', 'shock_cord']) {
+    const h = config[slot]?.specs.packed_height_in
+    if (h) stacked += bay_cross_area * h
+  }
+
+  return {
+    stacked_in3:   stacked,
+    effective_in3: effective,
+    bay_known:     bay_volume > 0,
+    fraction:      effective > 0 ? stacked / effective : null,
+  }
+}
+
+/**
  * Evaluate all compatibility rules for the current config + specs.
  *
  * Returns an array of warning objects:

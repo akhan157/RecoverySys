@@ -8,7 +8,7 @@ export default function MetricCard({ label, value, unit, warn, status, statusLab
   return (
     <div className="mc-sim__data-card">
       <div className="mc-metric__label">{label}</div>
-      <div className="mc-metric__value" style={{ fontSize: 22 }}>
+      <div className="mc-metric__value mc-metric__value--compact">
         {value}
         {unit && <span className="mc-metric__unit">{unit}</span>}
         {statusLabel && (

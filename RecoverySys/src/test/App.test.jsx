@@ -11,7 +11,8 @@ Object.assign(navigator, {
 
 // ── localStorage helpers ───────────────────────────────────────────────────────
 
-const STORAGE_KEY = 'recoverysys-config'
+const STORAGE_KEY   = 'recoverysys-config'
+const VISITED_KEY   = 'recoverysys-visited'
 
 function setLocalStorage(value) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
@@ -19,6 +20,13 @@ function setLocalStorage(value) {
 
 function clearLocalStorage() {
   localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(VISITED_KEY)
+}
+
+// Tests run as returning users (visited = '1') so first-visit demo mode
+// doesn't trigger and interfere with unrelated assertions.
+function setReturningUser() {
+  localStorage.setItem(VISITED_KEY, '1')
 }
 
 // ── Saved session payload (uses a real part ID so rehydration works) ──────────
@@ -49,6 +57,7 @@ const SAVED_SESSION = {
 describe('App — restored-session toast', () => {
   beforeEach(() => {
     clearLocalStorage()
+    setReturningUser()
     vi.useFakeTimers()
   })
 
@@ -103,11 +112,12 @@ describe('App — restored-session toast', () => {
   })
 })
 
-// ── Status bar warning badge (Mission Control layout) ────────────────────────
+// ── Validation badge (Dashboard tab) ────────────────────────────────────────
 
 describe('App — status bar warning badge', () => {
   beforeEach(() => {
     clearLocalStorage()
+    setReturningUser()
     vi.useFakeTimers()
   })
 
@@ -140,8 +150,8 @@ describe('App — status bar warning badge', () => {
       vi.advanceTimersByTime(400)
     })
 
-    // Mission Control layout shows warning count in the status bar badge
-    const badge = document.querySelector('.mc-statusbar__badge--warn')
+    // Dashboard tab shows validation badge when compatibility errors exist
+    const badge = document.querySelector('.mc-validation--warn, .mc-validation--error')
     expect(badge).toBeInTheDocument()
   })
 
@@ -155,7 +165,7 @@ describe('App — status bar warning badge', () => {
       vi.advanceTimersByTime(400)
     })
 
-    const badge = document.querySelector('.mc-statusbar__badge--warn')
+    const badge = document.querySelector('.mc-validation--warn, .mc-validation--error')
     expect(badge).not.toBeInTheDocument()
   })
 })

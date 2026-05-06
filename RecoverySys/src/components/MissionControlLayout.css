@@ -61,9 +61,35 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  /* Fade in the real UI when React replaces the pre-hydration skeleton. Makes
-     the transition imperceptible instead of a hard pop. Respects reduced-motion. */
+  position: relative;
+  isolation: isolate;
   animation: mc-fade-in 180ms ease-out;
+}
+
+/* Vignette — CRT-style edge darkening */
+.mc::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9997;
+  background: radial-gradient(ellipse 130% 130% at 50% 50%, transparent 50%, rgba(0,0,0,0.48) 100%);
+}
+
+/* Noise grain — breaks digital flatness on dark surfaces */
+.mc::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 9998;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' width='256' height='256'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+  background-size: 256px 256px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mc::before, .mc::after { display: none; }
 }
 @keyframes mc-fade-in {
   from { opacity: 0; }
@@ -73,27 +99,6 @@
   .mc { animation: none; }
 }
 
-/* ── Skip link (keyboard-only nav bypass) ─────────────────────────────── */
-/* Hidden off-screen until focused, then slides into view for one Tab press. */
-.mc-skip-link {
-  position: absolute;
-  top: -48px;
-  left: 8px;
-  z-index: 1000;
-  background: var(--mc-green);
-  color: #000;
-  padding: 8px 14px;
-  border-radius: 4px;
-  font-size: 12px;
-  font-weight: 600;
-  text-decoration: none;
-  transition: top 150ms ease;
-}
-.mc-skip-link:focus {
-  top: 8px;
-  outline: 2px solid var(--mc-white);
-  outline-offset: 2px;
-}
 
 /* ── Header ───────────────────────────────────────────────────────────── */
 
@@ -114,7 +119,8 @@
   letter-spacing: 0.08em;
   color: var(--mc-white);
   white-space: nowrap;
-  font-family: inherit;   /* <h1> inherits body mono font instead of UA-default serif */
+  font-family: inherit;
+  text-shadow: 0 0 18px rgba(255, 255, 255, 0.2);
 }
 
 .mc-header__tabs {
@@ -143,6 +149,11 @@
 .mc-header__tab--active {
   color: var(--mc-white);
   border-bottom-color: var(--mc-white);
+  text-shadow: 0 0 10px rgba(255, 255, 255, 0.4);
+}
+
+.mc-header__tab:active {
+  opacity: 0.7;
 }
 
 .mc-header__right {
@@ -240,7 +251,7 @@
 
 .mc-panel-header {
   font-size: 10px;
-  font-weight: 400;        /* <h2> defaults to bold; keep label look subtle */
+  font-weight: 500;
   letter-spacing: 0.08em;
   color: var(--mc-text-dim);
   padding: 10px 14px;
@@ -287,6 +298,7 @@
 
 .mc-slot--active {
   border-color: var(--mc-white);
+  box-shadow: 0 0 0 1px var(--mc-white), 0 0 14px rgba(255, 255, 255, 0.07);
 }
 
 .mc-slot--empty {
@@ -294,23 +306,6 @@
   border-color: var(--mc-border);
 }
 
-.mc-slot__badge {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  border: 1px solid var(--mc-green);
-  color: var(--mc-green);
-  font-size: 10px;
-  font-weight: 700;
-  margin-bottom: 6px;
-}
-
-.mc-slot--empty .mc-slot__badge {
-  border-color: var(--mc-text-faint);
-  color: var(--mc-text-faint);
-}
 
 .mc-slot__label {
   font-size: 9px;
@@ -453,6 +448,8 @@
   font-size: 11px;
   color: var(--mc-green);
   letter-spacing: 0.04em;
+  text-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
+  box-shadow: inset 0 0 8px rgba(76, 175, 80, 0.06), 0 0 8px rgba(76, 175, 80, 0.08);
 }
 
 .mc-validation--warn {
@@ -480,6 +477,12 @@
 
 .mc-run-btn:hover {
   background: rgba(255,255,255,0.06);
+}
+
+.mc-run-btn:active:not(:disabled) {
+  transform: scale(0.985);
+  background: rgba(255,255,255,0.04);
+  transition: transform 60ms ease;
 }
 
 .mc-run-btn:disabled {
@@ -518,6 +521,23 @@
   justify-content: center;
   min-height: 0;
   overflow: hidden;
+  position: relative;
+}
+
+/* CRT scanline overlay on the oscilloscope chart */
+.mc-sim__chart-area::after {
+  content: '';
+  position: absolute;
+  inset: 12px;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 3px,
+    rgba(0, 0, 0, 0.07) 3px,
+    rgba(0, 0, 0, 0.07) 4px
+  );
+  z-index: 1;
 }
 
 .mc-sim__chart-area svg {
@@ -642,70 +662,6 @@
   color: var(--mc-text-dim);
 }
 
-/* ── Status Bar ───────────────────────────────────────────────────────── */
-
-.mc-statusbar {
-  height: 28px;
-  background: var(--mc-bg);
-  border-top: 1px solid var(--mc-border);
-  padding: 0 16px;
-  display: flex;
-  align-items: center;
-  gap: 24px;
-  font-size: 10px;
-  color: var(--mc-text-faint);
-  letter-spacing: 0.04em;
-  flex-shrink: 0;
-}
-
-.mc-statusbar__item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.mc-statusbar__right {
-  margin-left: auto;
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.mc-statusbar__badge {
-  padding: 1px 6px;
-  border: 1px solid var(--mc-green);
-  color: var(--mc-green);
-  font-size: 9px;
-  letter-spacing: 0.06em;
-}
-
-.mc-statusbar__badge--warn {
-  border-color: var(--mc-amber);
-  color: var(--mc-amber);
-}
-
-.mc-statusbar__run {
-  background: none;
-  border: 1px solid var(--mc-text-dim);
-  color: var(--mc-white);
-  font-family: inherit;
-  font-size: 10px;
-  letter-spacing: 0.06em;
-  padding: 2px 12px;
-  cursor: pointer;
-  margin-right: 8px;
-}
-
-.mc-statusbar__run:hover {
-  background: rgba(255,255,255,0.08);
-  border-color: var(--mc-white);
-}
-
-.mc-statusbar__run:disabled {
-  border-color: var(--mc-border-card);
-  color: var(--mc-text-faint);
-  cursor: not-allowed;
-}
 
 /* ── Parts Browser Wrapper ────────────────────────────────────────────── */
 
@@ -870,29 +826,236 @@
   .mc-sim__bottom { flex-direction: column; min-height: auto; max-height: none; }
   .mc-sim__compat { border-right: none; border-bottom: 1px solid var(--mc-border); }
 
-  /* Status bar on mobile grows to honor the 44px touch-target minimum for
-     RUN_SIM — it's the only visible run button because the sidebar collapses.
-     Item text scrolls horizontally if metrics overflow. */
-  .mc-statusbar {
-    height: 48px;
-    font-size: 10px;
-    gap: 12px;
-    padding: 0 12px;
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-  }
-  .mc-statusbar::-webkit-scrollbar { display: none; }
-  .mc-statusbar__item { flex-shrink: 0; }
-  .mc-statusbar__run {
-    min-height: 44px;
-    min-width: 88px;
-    padding: 6px 14px;
-    font-size: 12px;
-    flex-shrink: 0;
-  }
-  .mc-statusbar__badge { padding: 4px 8px; flex-shrink: 0; }
 }
+
+/* ── Analysis Tab ────────────────────────────────────────────────────────── */
+
+.mc-analysis {
+  height: 100%;
+  overflow-y: auto;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  align-content: start;
+}
+
+.mc-analysis__empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 320px;
+  gap: 10px;
+}
+
+.mc-analysis__empty-code {
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  color: var(--mc-text-faint);
+}
+
+.mc-analysis__empty-sub {
+  font-size: 11px;
+  color: var(--mc-text-faint);
+  letter-spacing: 0.04em;
+}
+
+.mc-analysis__section {
+  background: var(--mc-bg-panel);
+  border: 1px solid var(--mc-border);
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.mc-analysis__section--wide {
+  grid-column: 1 / -1;
+}
+
+.mc-analysis__body {
+  display: flex;
+  flex-direction: column;
+  padding: 4px 0 8px;
+}
+
+/* ── Analysis rows ─────────────────────────────────────────────────────── */
+
+.mc-anal-row {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--mc-border);
+  transition: background 100ms;
+}
+
+.mc-anal-row:last-child {
+  border-bottom: none;
+}
+
+.mc-anal-row:hover {
+  background: rgba(255,255,255,0.02);
+}
+
+.mc-anal-row--highlight {
+  background: rgba(76, 175, 80, 0.06);
+  border-left: 2px solid var(--mc-green);
+  padding-left: 12px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.mc-anal-row--highlight:hover {
+  background: rgba(76, 175, 80, 0.10);
+}
+
+.mc-anal-row__top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.mc-anal-row__label {
+  font-size: 10px;
+  letter-spacing: 0.07em;
+  color: var(--mc-text-faint);
+  font-weight: 500;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+.mc-anal-row__right {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.mc-anal-row__value {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--mc-white);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.mc-anal-row__badge {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  color: var(--mc-text-dim);
+  white-space: nowrap;
+}
+
+.mc-anal-row__badge--ok   { color: var(--mc-green); }
+.mc-anal-row__badge--warn { color: var(--mc-amber); }
+.mc-anal-row__badge--fail { color: var(--mc-red); }
+
+.mc-anal-row__note {
+  font-size: 11px;
+  color: var(--mc-text-dim);
+  line-height: 1.45;
+  margin-top: 4px;
+  letter-spacing: 0.01em;
+}
+
+/* ── Timeline row variant ──────────────────────────────────────────────── */
+
+.mc-anal-row--timeline .mc-anal-row__marker {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--mc-green);
+  letter-spacing: 0.06em;
+  white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 80px;
+}
+
+.mc-anal-row--timeline .mc-anal-row__event {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--mc-text);
+  letter-spacing: 0.04em;
+  flex: 1;
+  text-align: right;
+}
+
+/* ── Analysis section header: green + left bar (scoped, doesn't affect other panels) */
+
+.mc-analysis .mc-panel-header {
+  color: var(--mc-green);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+}
+
+.mc-analysis .mc-panel-header::before {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 10px;
+  background: var(--mc-green);
+  border-radius: 1px;
+  margin-right: 8px;
+  flex-shrink: 0;
+  vertical-align: middle;
+}
+
+/* ── Packing volume fill gauge ─────────────────────────────────────────── */
+
+.mc-packing-gauge {
+  margin: 8px 14px 2px;
+  height: 5px;
+  background: var(--mc-border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.mc-packing-gauge__fill {
+  height: 100%;
+  border-radius: 3px;
+  transition: width 0.4s ease;
+}
+
+.mc-packing-gauge__fill--ok   { background: var(--mc-green); }
+.mc-packing-gauge__fill--warn { background: var(--mc-amber); }
+.mc-packing-gauge__fill--fail { background: var(--mc-red); }
+
+.mc-packing-gauge__labels {
+  margin: 3px 14px 6px;
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  letter-spacing: 0.05em;
+  color: var(--mc-text-faint);
+}
+
+/* ── Responsive: Analysis Tab ──────────────────────────────────────────── */
+
+@media (max-width: 1100px) {
+  .mc-analysis {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 640px) {
+  .mc-analysis {
+    padding: 12px;
+    gap: 12px;
+  }
+}
+
+/* ── Safety factor status classes ────────────────────────────────────────── */
+
+.mc-sf--pass { color: var(--mc-green); font-weight: 600; text-shadow: 0 0 6px rgba(76, 175, 80, 0.6); }
+.mc-sf--warn { color: var(--mc-amber); font-weight: 600; }
+.mc-sf--fail { color: var(--mc-red);   font-weight: 600; }
+
+/* ── MetricCard value sizes ───────────────────────────────────────────────── */
+
+.mc-metric__value--compact { font-size: 22px; }
 
 /* ── Print Styles ────────────────────────────────────────────────────────── */
 

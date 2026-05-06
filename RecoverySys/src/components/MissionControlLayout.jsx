@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
+import { computePackingVolume } from '../lib/compatibility.js'
 import DashboardTab from './tabs/DashboardTab.jsx'
 import SimulationTab from './tabs/SimulationTab.jsx'
 import DispersionTab from './tabs/DispersionTab.jsx'
@@ -8,6 +9,7 @@ import SpecsTab from './tabs/SpecsTab.jsx'
 import ExportTab from './tabs/ExportTab.jsx'
 import CompareTab from './tabs/CompareTab.jsx'
 import FlightLogTab from './tabs/FlightLogTab.jsx'
+import AnalysisTab from './tabs/AnalysisTab.jsx'
 import PrintChecklist from './PrintChecklist.jsx'
 import './MissionControlLayout.css'
 
@@ -15,6 +17,7 @@ const TABS = [
   { id: 'DASHBOARD',  label: 'DASHBOARD' },
   { id: 'SPECS',      label: 'ROCKET_SPECS' },
   { id: 'SIMULATION', label: 'SIMULATION' },
+  { id: 'ANALYSIS',   label: 'ANALYSIS' },
   { id: 'DISPERSION', label: 'DISPERSION' },
   { id: 'COMPARE',    label: 'COMPARE' },
   { id: 'FLIGHT_LOG', label: 'FLIGHT_LOG' },
@@ -44,6 +47,11 @@ export default function MissionControlLayout({
     return mass
   }, [state.config])
 
+  const packingVolume = useMemo(
+    () => computePackingVolume({ config: state.config, specs: state.specs }),
+    [state.config, state.specs]
+  )
+
   const hasWarnings = state.warnings.length > 0
   const hasErrors = state.warnings.some(w => w.level === WARN_LEVELS.ERROR)
 
@@ -61,9 +69,6 @@ export default function MissionControlLayout({
   return (
     <>
     <div className="mc">
-      {/* Skip link — keyboard users can bypass the header on Tab */}
-      <a href="#mc-main" className="mc-skip-link">Skip to main content</a>
-
       {/* ── Header ──────────────────────────────────────────────────────── */}
       <header className="mc-header">
         <h1 className="mc-header__brand">RECOVERYSYS_{VERSION_DISPLAY}</h1>
@@ -81,7 +86,7 @@ export default function MissionControlLayout({
                 className={`mc-header__tab ${isActive ? 'mc-header__tab--active' : ''}`}
                 onClick={() => setActiveTab(tab.id)}
               >
-                {tab.id}
+                {tab.label}
               </button>
             )
           })}
@@ -106,7 +111,7 @@ export default function MissionControlLayout({
               allParts={allParts}
               customParts={customParts}
               filledSlots={filledSlots}
-              totalMass={totalMass}
+              packingVolume={packingVolume}
               hasWarnings={hasWarnings}
               hasErrors={hasErrors}
               canRun={canRun}
@@ -126,6 +131,7 @@ export default function MissionControlLayout({
               canRun={canRun}
             />
           )}
+          {activeTab === 'ANALYSIS' && <AnalysisTab state={state} />}
           {activeTab === 'DISPERSION' && <DispersionTab state={state} />}
           {activeTab === 'SPECS' && (
             <SpecsTab
@@ -148,49 +154,6 @@ export default function MissionControlLayout({
         </main>
       </div>
 
-      {/* ── Status Bar ──────────────────────────────────────────────────── */}
-      <div className="mc-statusbar">
-        <button
-          className="mc-statusbar__run"
-          onClick={runSim}
-          disabled={!canRun}
-        >
-          {state.simRunning ? '⟳ RUNNING...' : '▶ RUN_SIM'}
-        </button>
-        <div className="mc-statusbar__item">
-          MOTOR: {parseFloat(state.specs.motor_total_impulse_ns) > 0 ? `${state.specs.motor_total_impulse_ns}Ns` : 'NOT_SET'}
-        </div>
-        <div className="mc-statusbar__item">
-          DESCENT_RATE: {state.simulation?.main_fps != null ? `${state.simulation.main_fps.toFixed(1)} FT/S` : '—'}
-        </div>
-        <div className="mc-statusbar__item">
-          DRIFT: {state.simulation?.drift_ft != null ? `${state.simulation.drift_ft.toFixed(0)} FT` : '—'}
-        </div>
-        {state.simulation?.shock_load && (
-          <div className="mc-statusbar__item">
-            SF: {state.simulation.shock_load.safety_factor.toFixed(1)}&times;{' '}
-            <span style={{
-              color: state.simulation.shock_load.sf_status === 'pass' ? 'var(--mc-green)'
-                : state.simulation.shock_load.sf_status === 'warn' ? 'var(--mc-amber)'
-                : 'var(--mc-red)',
-              fontWeight: 600,
-            }}>
-              {state.simulation.shock_load.sf_status === 'pass' ? 'PASS' : state.simulation.shock_load.sf_status === 'warn' ? 'WARN' : 'FAIL'}
-            </span>
-          </div>
-        )}
-        <div className="mc-statusbar__right">
-          {totalMass > 0 && <span>RCS: {totalMass}g</span>}
-          <span>SLOTS: {filledSlots}/08</span>
-          {hasErrors || hasWarnings ? (
-            <span className="mc-statusbar__badge mc-statusbar__badge--warn">
-              {state.warnings.length} WARNING{state.warnings.length !== 1 ? 'S' : ''}
-            </span>
-          ) : (
-            <span className="mc-statusbar__badge">NOMINAL</span>
-          )}
-        </div>
-      </div>
     </div>
     <PrintChecklist
       specs={state.specs}

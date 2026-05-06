@@ -14,7 +14,7 @@ export default function SimulationTab({ state, runSim, canRun }) {
         {/* Flight Chart */}
         <div className="mc-sim__chart">
           <h2 className="mc-panel-header">
-            FLIGHT_PROFILE // DESCENT_PHASE_V4.2
+            FLIGHT_PROFILE // ALT_vs_TIME
             <span className="mc-panel-header__right">
               {sim ? `REF_ID: STR-SIM-${String(Math.abs((sim.apogee_ft || 0) * 7 + (sim.drift_ft || 0)) % 9999).padStart(4, '0')}` : 'AWAITING_DATA'}
             </span>
@@ -71,7 +71,7 @@ export default function SimulationTab({ state, runSim, canRun }) {
       {/* ── Bottom: Compatibility Analysis ───────────────────────────── */}
       <div className="mc-sim__bottom">
         <div className="mc-sim__compat">
-          <h2 className="mc-panel-header">COMPATIBILITY_ANALYSIS</h2>
+          <h2 className="mc-panel-header">COMPAT_ANALYSIS</h2>
           {state.warnings.length === 0 ? (
             <div className="mc-alert mc-alert--ok">
               <div className="mc-alert__title">✓ ALL_SYSTEMS_NOMINAL</div>

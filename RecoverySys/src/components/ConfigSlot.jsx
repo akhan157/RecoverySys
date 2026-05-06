@@ -6,7 +6,7 @@ const ACCENT = {
   ok:      'var(--ok-fg)',
   warn:    'var(--warn-fg)',
   error:   'var(--error-fg)',
-  neutral: 'transparent',
+  neutral: 'var(--border-default)',
 }
 
 export default function ConfigSlot({ category, placeholder, part, warnings, onRemove, onClickEmpty }) {
@@ -45,8 +45,7 @@ export default function ConfigSlot({ category, placeholder, part, warnings, onRe
       display: 'flex',
       alignItems: 'center',
       height: '56px',
-      border: '1px solid var(--border-default)',
-      borderLeft: `3px solid ${accent}`,
+      border: `1px solid ${accent}`,
       padding: '0 12px',
       gap: '8px',
       background: 'var(--bg-panel)',

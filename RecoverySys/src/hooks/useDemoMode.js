@@ -6,7 +6,7 @@ import { SHARE_PARAM } from '../lib/shareLink.js'
 /**
  * Demo mode bootstrap. Triggered by `?demo=1` (e.g. landing-page LAUNCH
  * button). On first render after a demo URL hits, this hook seeds
- * config + specs from a sample L2 single-deploy + chute-release setup,
+ * config + specs from a sample L3 dual-deploy configuration at FAR Mojave,
  * runs the simulation synchronously so chart + metrics are populated
  * in the same paint, and dispatches LOAD_SHARE + SET_SIM.
  *
@@ -25,9 +25,17 @@ import { SHARE_PARAM } from '../lib/shareLink.js'
  * Returns: { demoMode, exitDemo }
  */
 export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch }) {
-  const [demoMode, setDemoMode] = useState(
-    () => typeof window !== 'undefined' && new URLSearchParams(location.search).get('demo') === '1'
-  )
+  const [demoMode, setDemoMode] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const params = new URLSearchParams(location.search)
+    if (params.get('demo') === '1') return true
+    if (params.get(SHARE_PARAM)) return false
+    try {
+      const hasConfig  = !!localStorage.getItem('recoverysys-config')
+      const hasVisited = !!localStorage.getItem('recoverysys-visited')
+      return !hasConfig && !hasVisited
+    } catch { return false }
+  })
   const demoLoaded = useRef(false)
 
   useEffect(() => {
@@ -55,15 +63,17 @@ export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch
   }, [demoMode])
 
   const exitDemo = useCallback(() => {
-    dispatch({ type: 'CLEAR_ALL' })
-    setDemoMode(false)
-    // Strip ?demo=1 so a refresh won't re-load the demo.
+    // Clear the saved config so the page reload starts with a blank slate.
+    // We do this before navigating because dispatch(CLEAR_ALL) + usePersistence
+    // would race against the reload and the demo config might win.
     try {
-      const url = new URL(location.href)
-      url.searchParams.delete('demo')
-      history.replaceState(null, '', url.pathname + url.search + url.hash)
-    } catch { /* silent — browsers without history API */ }
-  }, [dispatch])
+      localStorage.removeItem('recoverysys-config')
+      localStorage.setItem('recoverysys-visited', '1')
+    } catch { /* silent */ }
+    // Hard-navigate to the clean URL (removes ?demo=1, triggers visible reload).
+    // replaceState would silently mutate the URL bar with no perceived navigation.
+    window.location.replace(window.location.pathname)
+  }, [])
 
   return { demoMode, exitDemo }
 }

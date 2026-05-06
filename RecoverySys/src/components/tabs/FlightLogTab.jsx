@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import Input from '../primitives/Input.jsx'
 
 const STORAGE_KEY = 'recoverysys-flight-log'
 
@@ -10,14 +11,6 @@ function loadLog() {
 
 function saveLog(entries) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
-}
-
-const inputStyle = {
-  fontFamily: "'JetBrains Mono', ui-monospace, monospace",
-  fontSize: 12, fontWeight: 500, color: 'var(--text-primary)',
-  background: 'var(--input-bg)', border: '1px solid var(--border-default)',
-  borderRadius: 0, padding: '5px 7px', width: '100%', outline: 'none',
-  boxSizing: 'border-box',
 }
 
 function NewEntryForm({ simulation, specs, onSave }) {
@@ -54,39 +47,42 @@ function NewEntryForm({ simulation, specs, onSave }) {
     setForm(f => ({ ...f, actual_apogee_ft: '', actual_main_fps: '', actual_landing_lat: '', actual_landing_lon: '', notes: '', outcome: 'nominal' }))
   }
 
-  const labelStyle = { fontSize: 10, fontWeight: 600, color: 'var(--text-tertiary)', textTransform: 'uppercase', letterSpacing: '0.04em', marginBottom: 3, display: 'block' }
-
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <div>
-          <label style={labelStyle}>Date</label>
-          <input type="date" style={inputStyle} value={form.date} onChange={e => set('date', e.target.value)} />
+          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>Date</label>
+          <Input type="date" value={form.date} onChange={e => set('date', e.target.value)} />
         </div>
         <div>
-          <label style={labelStyle}>Location</label>
-          <input style={inputStyle} placeholder="e.g. FAR Mojave" value={form.location} onChange={e => set('location', e.target.value)} />
+          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>Location</label>
+          <Input placeholder="e.g. FAR Mojave" value={form.location} onChange={e => set('location', e.target.value)} mono={false} />
         </div>
         <div>
-          <label style={labelStyle}>Actual Apogee (ft)</label>
-          <input type="number" style={inputStyle} placeholder={simulation ? `predicted: ${simulation.apogee_ft}` : ''} value={form.actual_apogee_ft} onChange={e => set('actual_apogee_ft', e.target.value)} />
+          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>Actual Apogee (ft)</label>
+          <Input type="number" placeholder={simulation ? `predicted: ${simulation.apogee_ft}` : ''} value={form.actual_apogee_ft} onChange={e => set('actual_apogee_ft', e.target.value)} />
         </div>
         <div>
-          <label style={labelStyle}>Actual Main Rate (fps)</label>
-          <input type="number" style={inputStyle} placeholder={simulation?.main_fps ? `predicted: ${simulation.main_fps}` : ''} value={form.actual_main_fps} onChange={e => set('actual_main_fps', e.target.value)} />
+          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>Actual Main Rate (fps)</label>
+          <Input type="number" placeholder={simulation?.main_fps ? `predicted: ${simulation.main_fps}` : ''} value={form.actual_main_fps} onChange={e => set('actual_main_fps', e.target.value)} />
         </div>
         <div>
-          <label style={labelStyle}>Landing Lat</label>
-          <input type="number" style={inputStyle} placeholder="decimal degrees" value={form.actual_landing_lat} onChange={e => set('actual_landing_lat', e.target.value)} />
+          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>Landing Lat</label>
+          <Input type="number" placeholder="decimal degrees" value={form.actual_landing_lat} onChange={e => set('actual_landing_lat', e.target.value)} />
         </div>
         <div>
-          <label style={labelStyle}>Landing Lon</label>
-          <input type="number" style={inputStyle} placeholder="decimal degrees" value={form.actual_landing_lon} onChange={e => set('actual_landing_lon', e.target.value)} />
+          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>Landing Lon</label>
+          <Input type="number" placeholder="decimal degrees" value={form.actual_landing_lon} onChange={e => set('actual_landing_lon', e.target.value)} />
         </div>
       </div>
       <div>
-        <label style={labelStyle}>Outcome</label>
-        <select style={inputStyle} value={form.outcome} onChange={e => set('outcome', e.target.value)}>
+        <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>Outcome</label>
+        <select
+          className="parts-search-input"
+          style={{ width: '100%' }}
+          value={form.outcome}
+          onChange={e => set('outcome', e.target.value)}
+        >
           <option value="nominal">Nominal</option>
           <option value="minor_issue">Minor Issue</option>
           <option value="failure">Failure</option>
@@ -94,9 +90,10 @@ function NewEntryForm({ simulation, specs, onSave }) {
         </select>
       </div>
       <div>
-        <label style={labelStyle}>Notes</label>
+        <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>Notes</label>
         <textarea
-          style={{ ...inputStyle, height: 60, resize: 'vertical' }}
+          className="parts-search-input"
+          style={{ width: '100%', height: 60, resize: 'vertical' }}
           placeholder="Post-flight observations, issues, cord condition, chute state..."
           value={form.notes}
           onChange={e => set('notes', e.target.value)}
@@ -137,7 +134,7 @@ function LogEntry({ entry, onDelete }) {
           </span>
         </div>
         <button
-          style={{ background: 'none', border: 'none', color: 'var(--mc-text-dim)', cursor: 'pointer', fontSize: 11 }}
+          style={{ background: 'none', border: 'none', color: 'var(--mc-text-dim)', cursor: 'pointer', fontSize: 11, minWidth: 44, minHeight: 44, display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           onClick={() => onDelete(entry.id)}
           title="Delete entry"
         >&times;</button>
@@ -193,18 +190,16 @@ export default function FlightLogTab({ state }) {
 
   return (
     <div className="mc-export">
-      <h2 className="mc-panel-header" style={{ borderBottom: '1px solid var(--mc-border)' }}>
-        FLIGHT_LOG // POST-FLIGHT_NOTES
-      </h2>
+      <h2 className="mc-panel-header">FLIGHT_LOG</h2>
       <div style={{ padding: '12px', overflowY: 'auto', flex: 1 }}>
-        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: 8 }}>
+        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
           New Entry
         </div>
         <NewEntryForm simulation={state.simulation} specs={state.specs} onSave={addEntry} />
 
         {entries.length > 0 && (
           <>
-            <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '20px 0 8px' }}>
+            <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', margin: '20px 0 8px' }}>
               History ({entries.length} flight{entries.length !== 1 ? 's' : ''})
             </div>
             {entries.map(entry => (

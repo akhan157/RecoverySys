@@ -8,7 +8,7 @@ export default function SpecsTab({
 }) {
   return (
     <div className="mc-specs-panel">
-      <h2 className="mc-panel-header">ROCKET_SPECIFICATIONS // MISSION_PARAMETERS</h2>
+      <h2 className="mc-panel-header">ROCKET_SPECS</h2>
       <div className="mc-specs-content">
         <ConfigBuilder
           categories={CATEGORIES}

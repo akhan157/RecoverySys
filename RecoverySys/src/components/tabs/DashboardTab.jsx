@@ -5,7 +5,7 @@ import PartsBrowser from '../PartsBrowser.jsx'
 import SuggestPanel from '../SuggestPanel.jsx'
 
 export default function DashboardTab({
-  state, allParts, customParts, filledSlots, totalMass,
+  state, allParts, customParts, filledSlots, packingVolume,
   hasWarnings, hasErrors, canRun,
   selectPart, removePart, setCategory, runSim,
   addCustomPart, deleteCustomPart, editCustomPart,
@@ -14,7 +14,7 @@ export default function DashboardTab({
     <div className="mc-dashboard">
       {/* ── Parts Catalog (left) ─────────────────────────────────────── */}
       <div className="mc-parts-panel">
-        <h2 className="mc-panel-header">PARTS_CATALOG_EXPLORER</h2>
+        <h2 className="mc-panel-header">PARTS_CATALOG</h2>
         <div className="mc-parts-scroll">
           <PartsBrowser
             parts={allParts}
@@ -35,7 +35,7 @@ export default function DashboardTab({
       {/* ── Bay Schematic (center) ───────────────────────────────────── */}
       <div className="mc-schematic">
         <h2 className="mc-panel-header">
-          BAY_SCHEMATIC_REALTIME_RENDER
+          BAY_SCHEMATIC
           <span className="mc-panel-header__right">LAYER: 01_INTERNAL &nbsp; SCALE: 1:10</span>
         </h2>
         <div className="mc-bay-grid">
@@ -59,7 +59,6 @@ export default function DashboardTab({
                   }
                 }}
               >
-                <div className="mc-slot__badge">{String(i + 1).padStart(2, '0')}</div>
                 {part && (
                   <button
                     className="mc-slot__remove"
@@ -95,33 +94,30 @@ export default function DashboardTab({
       <div className="mc-config-summary">
         <h2 className="mc-panel-header">CONFIG_SUMMARY</h2>
         <div className="mc-summary">
-          {/* Total Mass — gauge range scales to L3 (≥10 kg) if rocket is that big */}
-          {(() => {
-            // Bucket the scale so the label stays stable while the user edits parts:
-            // 5 kg (H/I-class default) → 10 kg (J/K) → 20 kg (L3) → 40 kg (L3 heavy)
-            const gaugeMax_g =
-              totalMass <= 5000  ? 5000  :
-              totalMass <= 10000 ? 10000 :
-              totalMass <= 20000 ? 20000 : 40000
-            const gaugeMax_kg = (gaugeMax_g / 1000).toFixed(1)
-            return (
-              <div className="mc-metric">
-                <div className="mc-metric__label">TOTAL_MASS</div>
+          {/* Packing Volume — how much bay space the selected components consume */}
+          <div className="mc-metric">
+            <div className="mc-metric__label">PACKING_VOLUME</div>
+            {packingVolume.bay_known ? (
+              <>
                 <div className="mc-metric__value">
-                  {(totalMass / 1000).toFixed(2)}<span className="mc-metric__unit">KG</span>
+                  {packingVolume.stacked_in3.toFixed(1)}
+                  <span className="mc-metric__unit">IN³</span>
                 </div>
                 <div className="mc-progress">
                   <div
                     className="mc-progress__fill"
-                    style={{ width: `${Math.min(100, (totalMass / gaugeMax_g) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (packingVolume.fraction ?? 0) * 100)}%` }}
                   />
                 </div>
                 <div className="mc-progress__labels">
-                  <span>0.0KG</span><span>MAX {gaugeMax_kg}KG</span>
+                  <span>0 IN³</span>
+                  <span>MAX {packingVolume.effective_in3.toFixed(1)} IN³</span>
                 </div>
-              </div>
-            )
-          })()}
+              </>
+            ) : (
+              <div className="mc-metric__sub">ENTER_BAY_SPECS_TO_CALCULATE</div>
+            )}
+          </div>
 
           {/* Sim results in summary */}
           {state.simulation && (

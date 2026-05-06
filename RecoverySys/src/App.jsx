@@ -38,40 +38,51 @@ const DEFAULT_SPECS = getDefaultSpecs()
 
 // ── Demo config ──────────────────────────────────────────────────────────────
 // Loaded when the app is opened with ?demo=1 (e.g. from the landing page LAUNCH
-// button). Showcases a typical L2 single-deploy w/ Chute Release setup so first
-// visitors see the tool in action instead of a blank slate.
+// button). Showcases a typical L3 dual-deploy configuration at FAR Mojave so
+// first-time visitors see the tool populated with a realistic high-power flight.
+//
+// Hardware notes:
+//   - No Nomex protector: largest catalog protector covers ≤72" chutes; 96" main
+//     uses deployment bag for ejection-gas protection instead (industry practice).
+//   - No deployment bag: intentional — triggers the d-bag recommendation notice,
+//     demonstrating the validation system. Adding dbag-18 overflows a 24" bay.
+//   - 1" tubular nylon cord (2000 lbs): keeps cord rating below quick-link rating
+//     (2640 lbs) so no ql-vs-cord error fires. Snatch-force marginal notice fires
+//     because 11 kg × 30G × 2.13× (22% elongation) is close to 2000 lbs at 1.5× SF.
+//
+// Expected validation: 3 yellow notices, 0 red errors.
 const DEMO_PART_IDS = {
-  main_chute:      'fr3-16-60',       // Front Range 60" Elliptical
-  drogue_chute:    'cfc-018-n',       // Fruity Chutes 18" Classic Elliptical
-  shock_cord:      'sc-kev-half-20',  // 1/2" Kevlar, 20 ft
-  chute_protector: 'tfr-nomex-12',    // 12" Nomex protector
-  deployment_bag:  'dbag-12',         // 12" deployment bag
-  quick_links:     'ql-14-zinc',      // 1/4" zinc quick link
-  swivel:          'sw-bb-half',      // 1/2" ball-bearing swivel
+  main_chute:      'ifc-096-n',       // Fruity Chutes 96" Iris Ultra Standard (Nylon), CD 2.2
+  drogue_chute:    'cfc-030-n',       // Fruity Chutes 30" Classic Elliptical (Nylon)
+  shock_cord:      'sc-tub-1-20',     // 1" Tubular Nylon 20ft, 2000 lbs
+  chute_protector: null,              // No protector rated for 96" main in catalog
+  deployment_bag:  null,              // Absent intentionally — triggers d-bag notice
+  quick_links:     'ql-38-zinc',      // 3/8" Zinc Quick Links, 2640 lbs
+  swivel:          'sw-ss-3qtr',      // 3/4" Stainless Ball Bearing Swivel, 3500 lbs
   chute_device:    'jl-chute-release',// Jolly Logic Chute Release
 }
 
 const DEMO_SPECS = {
-  rocket_mass_g:          '4500',
-  motor_total_impulse_ns: '2560',     // mid-J motor
-  burn_time_s:            '1.8',
-  airframe_id_in:         '4',
-  bay_length_in:          '12',
-  drag_cd:                '0.6',
-  wind_speed_mph:         '8',
-  wind_direction_deg:     '270',
+  rocket_mass_g:          '11000',    // 11 kg — typical L3 cert rocket
+  motor_total_impulse_ns: '7450',     // M class (M795 / M1450 range)
+  burn_time_s:            '5.0',
+  airframe_id_in:         '6',        // 6" ID — most common L3 airframe
+  bay_length_in:          '24',       // 24" recovery bay → 87% packing utilization
+  drag_cd:                '0.5',
+  wind_speed_mph:         '10',       // FAR surface — sheltered by Rand/El Paso mountains
+  wind_direction_deg:     '270',      // prevailing westerly
   main_deploy_alt_ft:     '700',
   ejection_g_factor:      '',
   bay_obstruction_vol_in3: '',
-  launch_lat:             '35.3456',    // FAR (Friends of Amateur Rocketry), Mojave
+  launch_lat:             '35.3456',  // FAR (Friends of Amateur Rocketry), Mojave CA
   launch_lon:             '-117.8083',
-  wind_surface_alt_ft:    '',
-  wind_mid_speed_mph:     '',
-  wind_mid_direction_deg: '',
-  wind_mid_alt_ft:        '',
-  wind_aloft_speed_mph:   '',
-  wind_aloft_direction_deg: '',
-  wind_aloft_alt_ft:      '',
+  wind_surface_alt_ft:    '0',
+  wind_mid_speed_mph:     '18',       // mid-level — above terrain shielding
+  wind_mid_direction_deg: '270',
+  wind_mid_alt_ft:        '3000',
+  wind_aloft_speed_mph:   '28',       // aloft — slight directional shift to WSW
+  wind_aloft_direction_deg: '260',
+  wind_aloft_alt_ft:      '8000',
 }
 
 function buildInitialState() {
@@ -204,11 +215,22 @@ export default function App() {
   // Debounced compatibility re-evaluation on config/specs change.
   useCompatibilityWatcher({ config: state.config, specs: state.specs, dispatch })
 
+  // Demo mode: ?demo=1 or first-visit (no saved config, no visited flag) seeds a
+  // sample L3 config + sim so first-time visitors see the tool populated.
+  // Share link wins if both are present. Hoisted above usePersistence so demoMode
+  // is available to disable auto-save during the demo session.
+  const { demoMode, exitDemo } = useDemoMode({
+    allParts, demoPartIds: DEMO_PART_IDS, demoSpecs: DEMO_SPECS, dispatch,
+  })
+
   // Auto-persist config + specs + customMotor to localStorage (Pass 2 fix).
+  // Disabled during demo so the seeded demo config never clobbers the user's
+  // saved config — exitDemo sets recoverysys-visited then hard-navigates.
   usePersistence({
     config: state.config,
     specs: state.specs,
     customMotor: state.customMotor,
+    disabled: demoMode,
   })
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -277,7 +299,7 @@ export default function App() {
     try {
       const params = new URLSearchParams(location.search)
       if (params.get(SHARE_PARAM)) return   // share link active — URL state takes precedence
-      if (params.get('demo') === '1') return // demo will override saved session — no "restored" toast
+      if (demoMode) return                  // demo (explicit or first-visit) — no "restored" toast
       const raw = localStorage.getItem('recoverysys-config')
       if (raw && JSON.parse(raw)) {
         addToast(TOAST_LEVELS.OK, 'Restored your last session.')
@@ -287,12 +309,6 @@ export default function App() {
 
   // Share link loader (mount-once: decode ?c=, dispatch LOAD_SHARE, toast).
   useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch })
-
-  // Demo mode: ?demo=1 seeds a sample L2 config + sim so first-time visitors
-  // see the tool populated; share link wins if both are present.
-  const { demoMode, exitDemo } = useDemoMode({
-    allParts, demoPartIds: DEMO_PART_IDS, demoSpecs: DEMO_SPECS, dispatch,
-  })
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (
