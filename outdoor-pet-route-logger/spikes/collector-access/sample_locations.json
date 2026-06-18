@@ -1,0 +1,18 @@
+{
+  "locations": [
+    {
+      "latitude": 40.7128,
+      "longitude": -74.006,
+      "altitude": 0,
+      "time": 1893455400,
+      "accuracy": 35,
+      "status": 1,
+      "is_own_report": false
+    },
+    {
+      "time": 1893455000,
+      "status": 2,
+      "semantic_name": "Near home"
+    }
+  ]
+}
