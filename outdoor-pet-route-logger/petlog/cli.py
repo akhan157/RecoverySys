@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -16,9 +17,11 @@ from petlog.storage import (
     export_session,
     init_db,
     latest_location_observed_at,
+    now_iso,
     record_collector_result,
     start_session,
     stop_session,
+    summary_for_session,
     summary_for_today,
 )
 
@@ -59,8 +62,15 @@ def build_parser() -> argparse.ArgumentParser:
     check_parser.add_argument("--timeout-seconds", type=int, default=120)
     check_parser.set_defaults(func=cmd_check)
 
+    run_parser = subcommands.add_parser("run")
+    add_collector_args(run_parser)
+    run_parser.add_argument("--interval", required=True, type=parse_interval_seconds)
+    run_parser.add_argument("--max-checks", required=True, type=int)
+    run_parser.set_defaults(func=cmd_run)
+
     summary_parser = subcommands.add_parser("summary")
     summary_parser.add_argument("--today", action="store_true")
+    summary_parser.add_argument("--session", type=int)
     summary_parser.set_defaults(func=cmd_summary)
 
     export_parser = subcommands.add_parser("export")
@@ -68,6 +78,25 @@ def build_parser() -> argparse.ArgumentParser:
     export_parser.set_defaults(func=cmd_export)
 
     return parser
+
+
+def add_collector_args(parser: argparse.ArgumentParser) -> None:
+    parser.add_argument("--collector", default="googlefindmytools")
+    parser.add_argument("--device-number", default="3")
+    parser.add_argument("--tool-dir", type=Path, default=googlefindmytools.DEFAULT_TOOL_DIR)
+    parser.add_argument("--python", type=Path, default=googlefindmytools.DEFAULT_PYTHON)
+    parser.add_argument("--timeout-seconds", type=int, default=120)
+
+
+def parse_interval_seconds(value: str) -> int:
+    units = {"s": 1, "m": 60, "h": 60 * 60}
+    if value.isdigit():
+        return int(value)
+    suffix = value[-1].lower()
+    amount = value[:-1]
+    if suffix not in units or not amount.isdigit():
+        raise argparse.ArgumentTypeError("Expected interval like 30s, 10m, 1h, or seconds")
+    return int(amount) * units[suffix]
 
 
 def cmd_session_start(conn: Any, args: argparse.Namespace) -> int:
@@ -83,6 +112,30 @@ def cmd_session_stop(conn: Any, args: argparse.Namespace) -> int:
 
 
 def cmd_check(conn: Any, args: argparse.Namespace) -> int:
+    response = run_single_check(conn, args)
+    print_json(response)
+    return 0
+
+
+def cmd_run(conn: Any, args: argparse.Namespace) -> int:
+    if args.max_checks <= 0:
+        raise ValueError("--max-checks must be greater than 0")
+    if args.interval < 0:
+        raise ValueError("--interval must be 0 or greater")
+
+    checks = []
+    for index in range(args.max_checks):
+        checks.append(run_single_check(conn, args, scheduled_for=now_iso()))
+        if index < args.max_checks - 1 and args.interval:
+            time.sleep(args.interval)
+
+    print_json({"status": "completed", "checks": checks})
+    return 0
+
+
+def run_single_check(
+    conn: Any, args: argparse.Namespace, *, scheduled_for: str | None = None
+) -> dict[str, Any]:
     session = active_session(conn)
     if session is None:
         raise ValueError("Start an outside session before recording a check")
@@ -114,19 +167,25 @@ def cmd_check(conn: Any, args: argparse.Namespace) -> int:
         outside_session_id=int(session["id"]),
         collector_name="GoogleFindMyTools",
         payload=payload,
+        scheduled_for=scheduled_for,
     )
     public_payload = {key: value for key, value in payload.items() if key != "raw_output"}
     response = {"record": record, "collector_result": public_payload}
     if "raw_output" in payload:
         response["raw_output_stored"] = True
-    print_json(response)
-    return 0
+    return response
 
 
 def cmd_summary(conn: Any, args: argparse.Namespace) -> int:
-    if not args.today:
-        raise ValueError("Only --today is implemented")
-    print_json(summary_for_today(conn))
+    if args.today and args.session is not None:
+        raise ValueError("Use either --today or --session, not both")
+    if args.session is not None:
+        print_json(summary_for_session(conn, args.session))
+        return 0
+    if args.today:
+        print_json(summary_for_today(conn))
+        return 0
+    raise ValueError("Use --today or --session <id>")
     return 0
 
 

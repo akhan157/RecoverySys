@@ -169,7 +169,7 @@ Current status: `GoogleFindMyTools` is the active collector path. Local Google a
 3. Implement check-attempt persistence. Done with `petlog check --collector googlefindmytools`.
 4. Implement location-point classification. Done in `petlog/normalize.py`.
 5. Implement `summary --today`. Done.
-6. Keep long-running `petlog run --interval ...` deferred until manual checks prove the persistence path.
+6. Add bounded reliability runs. Done with `petlog run --interval ... --max-checks ...`.
 
 Current local commands:
 
@@ -177,6 +177,8 @@ Current local commands:
 python -m petlog.cli session start --notes "manual outside session"
 python -m petlog.cli check --collector googlefindmytools --device-number 3
 python -m petlog.cli summary --today
+python -m petlog.cli summary --session 1
+python -m petlog.cli run --collector googlefindmytools --device-number 3 --interval 10m --max-checks 3
 python -m petlog.cli session stop
 python -m petlog.cli export --session 1
 ```
