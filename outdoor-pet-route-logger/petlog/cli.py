@@ -55,11 +55,7 @@ def build_parser() -> argparse.ArgumentParser:
     stop_parser.set_defaults(func=cmd_session_stop)
 
     check_parser = subcommands.add_parser("check")
-    check_parser.add_argument("--collector", default="googlefindmytools")
-    check_parser.add_argument("--device-number", default="3")
-    check_parser.add_argument("--tool-dir", type=Path, default=googlefindmytools.DEFAULT_TOOL_DIR)
-    check_parser.add_argument("--python", type=Path, default=googlefindmytools.DEFAULT_PYTHON)
-    check_parser.add_argument("--timeout-seconds", type=int, default=120)
+    add_collector_args(check_parser)
     check_parser.set_defaults(func=cmd_check)
 
     run_parser = subcommands.add_parser("run")
@@ -86,6 +82,7 @@ def add_collector_args(parser: argparse.ArgumentParser) -> None:
     parser.add_argument("--tool-dir", type=Path, default=googlefindmytools.DEFAULT_TOOL_DIR)
     parser.add_argument("--python", type=Path, default=googlefindmytools.DEFAULT_PYTHON)
     parser.add_argument("--timeout-seconds", type=int, default=120)
+    parser.add_argument("--show-coordinates", action="store_true")
 
 
 def parse_interval_seconds(value: str) -> int:
@@ -169,11 +166,29 @@ def run_single_check(
         payload=payload,
         scheduled_for=scheduled_for,
     )
-    public_payload = {key: value for key, value in payload.items() if key != "raw_output"}
+    public_payload = public_collector_payload(
+        payload, show_coordinates=args.show_coordinates
+    )
     response = {"record": record, "collector_result": public_payload}
     if "raw_output" in payload:
         response["raw_output_stored"] = True
     return response
+
+
+def public_collector_payload(
+    payload: dict[str, Any], *, show_coordinates: bool
+) -> dict[str, Any]:
+    public_payload = {key: value for key, value in payload.items() if key != "raw_output"}
+    if show_coordinates:
+        return public_payload
+    point = public_payload.get("location_point")
+    if isinstance(point, dict):
+        redacted_point = dict(point)
+        redacted_point.pop("lat", None)
+        redacted_point.pop("lon", None)
+        redacted_point["coordinates"] = "redacted"
+        public_payload["location_point"] = redacted_point
+    return public_payload
 
 
 def cmd_summary(conn: Any, args: argparse.Namespace) -> int:

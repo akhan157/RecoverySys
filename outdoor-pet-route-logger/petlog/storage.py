@@ -311,19 +311,17 @@ def summary_where(
     points_predicate: str,
     points_params: tuple[Any, ...],
 ) -> dict[str, Any]:
-    attempts = conn.execute(
+    attempt_rows = conn.execute(
         f"""
         select
-          count(*) as total,
-          sum(case when status = 'ok' then 1 else 0 end) as ok_count,
-          sum(case when status != 'ok' then 1 else 0 end) as failed_count,
-          sum(case when repeated_location_point_id is not null then 1 else 0 end)
-            as repeated_count
+          status,
+          repeated_location_point_id,
+          raw_payload
         from check_attempts
         where {attempts_predicate}
         """,
         attempts_params,
-    ).fetchone()
+    ).fetchall()
     points = conn.execute(
         f"""
         select
@@ -337,13 +335,18 @@ def summary_where(
         """,
         points_params,
     ).fetchone()
-    total_attempts = int(attempts["total"] or 0)
+    attempt_metrics = summarize_attempt_rows(attempt_rows)
+    total_attempts = attempt_metrics["check_attempts"]
     recovery_grade_count = int(points["recovery_grade_count"] or 0)
     return {
         "check_attempts": total_attempts,
-        "ok_checks": int(attempts["ok_count"] or 0),
-        "failed_checks": int(attempts["failed_count"] or 0),
-        "repeated_checks": int(attempts["repeated_count"] or 0),
+        "ok_checks": attempt_metrics["ok_checks"],
+        "failed_checks": attempt_metrics["failed_checks"],
+        "repeated_checks": attempt_metrics["repeated_checks"],
+        "usable_checks": attempt_metrics["usable_checks"],
+        "stale_checks": attempt_metrics["stale_checks"],
+        "freshness_failed_checks": attempt_metrics["freshness_failed_checks"],
+        "recovery_grade_checks": attempt_metrics["recovery_grade_checks"],
         "location_points": int(points["total"] or 0),
         "usable_points": int(points["usable_count"] or 0),
         "stale_points": int(points["stale_count"] or 0),
@@ -353,6 +356,51 @@ def summary_where(
             recovery_grade_count / total_attempts if total_attempts else None
         ),
     }
+
+
+def summarize_attempt_rows(rows: list[sqlite3.Row]) -> dict[str, int]:
+    metrics = {
+        "check_attempts": 0,
+        "ok_checks": 0,
+        "failed_checks": 0,
+        "repeated_checks": 0,
+        "usable_checks": 0,
+        "stale_checks": 0,
+        "freshness_failed_checks": 0,
+        "recovery_grade_checks": 0,
+    }
+    for row in rows:
+        metrics["check_attempts"] += 1
+        if row["status"] == "ok":
+            metrics["ok_checks"] += 1
+        else:
+            metrics["failed_checks"] += 1
+        if row["repeated_location_point_id"] is not None:
+            metrics["repeated_checks"] += 1
+        point = raw_payload_location_point(row["raw_payload"])
+        if not point:
+            continue
+        freshness = point.get("freshness_class")
+        if freshness == "usable":
+            metrics["usable_checks"] += 1
+        elif freshness == "stale":
+            metrics["stale_checks"] += 1
+        elif freshness == "failed":
+            metrics["freshness_failed_checks"] += 1
+        if point.get("recovery_grade"):
+            metrics["recovery_grade_checks"] += 1
+    return metrics
+
+
+def raw_payload_location_point(raw_payload: str | None) -> dict[str, Any] | None:
+    if not raw_payload:
+        return None
+    try:
+        payload = json.loads(raw_payload)
+    except json.JSONDecodeError:
+        return None
+    point = payload.get("location_point") if isinstance(payload, dict) else None
+    return point if isinstance(point, dict) else None
 
 
 def export_session(conn: sqlite3.Connection, session_id: int) -> dict[str, Any]:

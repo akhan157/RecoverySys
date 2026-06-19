@@ -86,6 +86,7 @@ def test_repeated_check_does_not_create_new_location_point(tmp_path):
         "location_point": {
             **first_payload["location_point"],
             "collected_at": "2026-06-18T12:20:00Z",
+            "freshness_class": "failed",
             "new_vs_repeated": "repeated",
             "recovery_grade": False,
         },
@@ -108,6 +109,8 @@ def test_repeated_check_does_not_create_new_location_point(tmp_path):
     assert repeated_record["repeated_location_point_id"] == 1
     assert summary_for_session(conn, session_id)["check_attempts"] == 2
     assert summary_for_session(conn, session_id)["location_points"] == 1
+    assert summary_for_session(conn, session_id)["freshness_failed_checks"] == 1
+    assert summary_for_session(conn, session_id)["freshness_failed_points"] == 0
 
 
 def test_today_summary_uses_checked_at_and_collected_at_date_columns(tmp_path):

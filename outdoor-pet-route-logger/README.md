@@ -183,6 +183,10 @@ python -m petlog.cli session stop
 python -m petlog.cli export --session 1
 ```
 
+`check` and `run` redact coordinates from terminal output by default while keeping raw collector payloads in the local SQLite database. Use `--show-coordinates` only when local coordinate inspection is needed.
+
+Summaries include both check-level and point-level freshness metrics. Repeated stale or failed observations count in `stale_checks` or `freshness_failed_checks` even when they do not create a new `location_points` row.
+
 ### Phase 3: Reliability audit
 
 1. Run real outside sessions.

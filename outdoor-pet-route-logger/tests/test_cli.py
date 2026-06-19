@@ -60,6 +60,10 @@ def test_run_records_bounded_checks_and_session_summary(tmp_path, monkeypatch, c
     run_payload = json.loads(capsys.readouterr().out)
     assert run_payload["status"] == "completed"
     assert len(run_payload["checks"]) == 2
+    first_point = run_payload["checks"][0]["collector_result"]["location_point"]
+    assert first_point["coordinates"] == "redacted"
+    assert "lat" not in first_point
+    assert "lon" not in first_point
     assert run_payload["checks"][0]["record"]["location_point_id"] == 1
     assert run_payload["checks"][1]["record"]["location_point_id"] is None
     assert run_payload["checks"][1]["record"]["repeated_location_point_id"] == 1
@@ -69,3 +73,20 @@ def test_run_records_bounded_checks_and_session_summary(tmp_path, monkeypatch, c
     assert summary["check_attempts"] == 2
     assert summary["location_points"] == 1
     assert summary["repeated_checks"] == 1
+    assert summary["usable_checks"] == 2
+
+
+def test_public_collector_payload_can_show_coordinates():
+    payload = {
+        "status": "ok",
+        "raw_output": "raw",
+        "location_point": {"lat": 40.0, "lon": -73.0, "freshness_class": "usable"},
+    }
+
+    redacted = cli.public_collector_payload(payload, show_coordinates=False)
+    visible = cli.public_collector_payload(payload, show_coordinates=True)
+
+    assert "raw_output" not in redacted
+    assert redacted["location_point"]["coordinates"] == "redacted"
+    assert "lat" not in redacted["location_point"]
+    assert visible["location_point"]["lat"] == 40.0
