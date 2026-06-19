@@ -16,6 +16,14 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 DEFAULT_TOOL_DIR = (
     PROJECT_ROOT / "spikes" / "collector-access" / "vendor" / "GoogleFindMyTools"
 )
+DEFAULT_PYTHON = (
+    PROJECT_ROOT
+    / "spikes"
+    / "collector-access"
+    / ".venv312"
+    / "Scripts"
+    / "python.exe"
+)
 LOCAL_TZ = datetime.now().astimezone().tzinfo
 
 
@@ -23,11 +31,12 @@ def collect(
     *,
     device_number: str = "3",
     tool_dir: Path = DEFAULT_TOOL_DIR,
+    python_executable: Path | None = None,
     timeout_seconds: int = 120,
     previous_observed_at: str | None = None,
 ) -> dict[str, Any]:
     collected_at = datetime.now(timezone.utc)
-    output = run_tool(tool_dir, device_number, timeout_seconds)
+    output = run_tool(tool_dir, device_number, timeout_seconds, python_executable)
     locations = parse_locations(output)
     result = normalize_locations(
         locations,
@@ -40,12 +49,20 @@ def collect(
     return result
 
 
-def run_tool(tool_dir: Path, device_number: str, timeout_seconds: int) -> str:
+def run_tool(
+    tool_dir: Path,
+    device_number: str,
+    timeout_seconds: int,
+    python_executable: Path | None = None,
+) -> str:
     if not tool_dir.exists():
         raise FileNotFoundError(f"GoogleFindMyTools directory not found: {tool_dir}")
+    python = python_executable or (DEFAULT_PYTHON if DEFAULT_PYTHON.exists() else Path(sys.executable))
+    if not python.exists():
+        raise FileNotFoundError(f"Python executable not found: {python}")
 
     completed = subprocess.run(
-        [sys.executable, "main.py"],
+        [str(python), "main.py"],
         cwd=tool_dir,
         input=f"{device_number}\n",
         text=True,

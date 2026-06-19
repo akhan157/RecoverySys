@@ -55,6 +55,7 @@ def build_parser() -> argparse.ArgumentParser:
     check_parser.add_argument("--collector", default="googlefindmytools")
     check_parser.add_argument("--device-number", default="3")
     check_parser.add_argument("--tool-dir", type=Path, default=googlefindmytools.DEFAULT_TOOL_DIR)
+    check_parser.add_argument("--python", type=Path, default=googlefindmytools.DEFAULT_PYTHON)
     check_parser.add_argument("--timeout-seconds", type=int, default=120)
     check_parser.set_defaults(func=cmd_check)
 
@@ -91,12 +92,23 @@ def cmd_check(conn: Any, args: argparse.Namespace) -> int:
     if collector != "googlefindmytools":
         raise ValueError(f"Unsupported collector: {args.collector}")
 
-    payload = googlefindmytools.collect(
-        device_number=args.device_number,
-        tool_dir=args.tool_dir,
-        timeout_seconds=args.timeout_seconds,
-        previous_observed_at=previous_observed_at,
-    )
+    try:
+        payload = googlefindmytools.collect(
+            device_number=args.device_number,
+            tool_dir=args.tool_dir,
+            python_executable=args.python,
+            timeout_seconds=args.timeout_seconds,
+            previous_observed_at=previous_observed_at,
+        )
+    except Exception as exc:
+        payload = {
+            "status": "failed",
+            "failure_reason": type(exc).__name__,
+            "location_point": None,
+            "collector": "GoogleFindMyTools",
+            "device_number": args.device_number,
+            "raw_error": str(exc),
+        }
     record = record_collector_result(
         conn,
         outside_session_id=int(session["id"]),

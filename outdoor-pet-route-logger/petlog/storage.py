@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import json
 import sqlite3
-from datetime import datetime, timezone
+from datetime import date, datetime, time, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -71,7 +71,11 @@ on location_points(outside_session_id, observed_at);
 
 
 def now_iso() -> str:
-    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    return utc_iso(datetime.now(timezone.utc))
+
+
+def utc_iso(dt: datetime) -> str:
+    return dt.astimezone(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
 def connect(db_path: Path = DEFAULT_DB_PATH) -> sqlite3.Connection:
@@ -269,14 +273,24 @@ def insert_location_point(
 
 
 def summary_for_today(conn: sqlite3.Connection) -> dict[str, Any]:
-    today = datetime.now(timezone.utc).date().isoformat()
+    today = datetime.now().astimezone().date()
+    start_utc, end_utc = local_day_utc_bounds(today)
     return summary_where(
         conn,
-        attempts_predicate="date(checked_at) = date(?)",
-        attempts_params=(today,),
-        points_predicate="date(collected_at) = date(?)",
-        points_params=(today,),
+        attempts_predicate="checked_at >= ? and checked_at < ?",
+        attempts_params=(start_utc, end_utc),
+        points_predicate="collected_at >= ? and collected_at < ?",
+        points_params=(start_utc, end_utc),
     )
+
+
+def local_day_utc_bounds(day: date) -> tuple[str, str]:
+    local_tz = datetime.now().astimezone().tzinfo
+    start = datetime.combine(day, time.min, tzinfo=local_tz)
+    end_exclusive = start + timedelta(days=1)
+    if end_exclusive <= start:
+        raise ValueError(f"Invalid local day bounds for {day}")
+    return utc_iso(start), utc_iso(end_exclusive)
 
 
 def summary_for_session(conn: sqlite3.Connection, session_id: int) -> dict[str, Any]:

@@ -3,12 +3,14 @@ from petlog.storage import (
     connect,
     export_session,
     init_db,
+    local_day_utc_bounds,
     record_collector_result,
     start_session,
     stop_session,
     summary_for_today,
     summary_for_session,
 )
+from datetime import date
 
 
 def test_session_lifecycle_and_check_persistence(tmp_path):
@@ -138,3 +140,35 @@ def test_today_summary_uses_checked_at_and_collected_at_date_columns(tmp_path):
 
     summary = summary_for_today(conn)
     assert set(summary) >= {"check_attempts", "location_points", "recovery_grade_rate"}
+
+
+def test_failed_collector_result_records_check_attempt_without_point(tmp_path):
+    conn = connect(tmp_path / "petlog.sqlite")
+    init_db(conn)
+    session_id = start_session(conn)
+
+    record = record_collector_result(
+        conn,
+        outside_session_id=session_id,
+        collector_name="GoogleFindMyTools",
+        payload={
+            "status": "failed",
+            "failure_reason": "ModuleNotFoundError",
+            "location_point": None,
+            "raw_error": "No module named aiohttp",
+        },
+    )
+
+    summary = summary_for_session(conn, session_id)
+    assert record["location_point_id"] is None
+    assert summary["check_attempts"] == 1
+    assert summary["failed_checks"] == 1
+    assert summary["location_points"] == 0
+
+
+def test_local_day_bounds_are_utc_iso_range():
+    start, end = local_day_utc_bounds(date(2026, 6, 18))
+
+    assert start.endswith("Z")
+    assert end.endswith("Z")
+    assert start < end
