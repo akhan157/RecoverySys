@@ -127,18 +127,14 @@ def active_session(conn: sqlite3.Connection) -> sqlite3.Row | None:
     ).fetchone()
 
 
-def latest_location_observed_at(
-    conn: sqlite3.Connection, outside_session_id: int
-) -> str | None:
+def latest_location_observed_at(conn: sqlite3.Connection) -> str | None:
     row = conn.execute(
         """
         select observed_at
         from location_points
-        where outside_session_id = ?
         order by observed_at desc, id desc
         limit 1
-        """,
-        (outside_session_id,),
+        """
     ).fetchone()
     return str(row["observed_at"]) if row else None
 
@@ -180,7 +176,7 @@ def record_collector_result(
     repeated_location_point_id = None
     if isinstance(location_point, dict) and location_point.get("new_vs_repeated") == "repeated":
         repeated_location_point_id = find_location_point_id(
-            conn, outside_session_id, str(location_point["observed_at"])
+            conn, str(location_point["observed_at"])
         )
 
     check_attempt_id = conn.execute(
@@ -225,17 +221,16 @@ def record_collector_result(
     }
 
 
-def find_location_point_id(
-    conn: sqlite3.Connection, outside_session_id: int, observed_at: str
-) -> int | None:
+def find_location_point_id(conn: sqlite3.Connection, observed_at: str) -> int | None:
     row = conn.execute(
         """
         select id
         from location_points
-        where outside_session_id = ? and observed_at = ?
+        where observed_at = ?
+        order by id desc
         limit 1
         """,
-        (outside_session_id, observed_at),
+        (observed_at,),
     ).fetchone()
     return int(row["id"]) if row else None
 

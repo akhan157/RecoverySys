@@ -138,7 +138,7 @@ def run_single_check(
         raise ValueError("Start an outside session before recording a check")
 
     collector = args.collector.lower().replace("-", "").replace("_", "")
-    previous_observed_at = latest_location_observed_at(conn, int(session["id"]))
+    previous_observed_at = latest_location_observed_at(conn)
     if collector != "googlefindmytools":
         raise ValueError(f"Unsupported collector: {args.collector}")
 

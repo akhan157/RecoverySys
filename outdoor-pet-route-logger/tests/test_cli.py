@@ -90,3 +90,45 @@ def test_public_collector_payload_can_show_coordinates():
     assert redacted["location_point"]["coordinates"] == "redacted"
     assert "lat" not in redacted["location_point"]
     assert visible["location_point"]["lat"] == 40.0
+
+
+def test_repeated_detection_crosses_session_boundary(tmp_path, monkeypatch, capsys):
+    db_path = tmp_path / "petlog.sqlite"
+
+    def fake_collect(**kwargs):
+        repeated = kwargs["previous_observed_at"] == "2026-06-19T12:00:00Z"
+        return {
+            "status": "ok",
+            "failure_reason": None,
+            "collector": "GoogleFindMyTools",
+            "device_number": kwargs["device_number"],
+            "location_point": {
+                "lat": 40.0,
+                "lon": -73.0,
+                "observed_at": "2026-06-19T12:00:00Z",
+                "collected_at": "2026-06-19T12:45:00Z",
+                "freshness_age_seconds": 2700,
+                "freshness_class": "failed",
+                "accuracy_m": 20.0,
+                "confidence": "weak",
+                "new_vs_repeated": "repeated" if repeated else "new",
+                "recovery_grade": False,
+            },
+        }
+
+    monkeypatch.setattr(cli.googlefindmytools, "collect", fake_collect)
+
+    assert cli.main(["--db", str(db_path), "session", "start"]) == 0
+    capsys.readouterr()
+    assert cli.main(["--db", str(db_path), "check"]) == 0
+    capsys.readouterr()
+    assert cli.main(["--db", str(db_path), "session", "stop"]) == 0
+    capsys.readouterr()
+
+    assert cli.main(["--db", str(db_path), "session", "start"]) == 0
+    capsys.readouterr()
+    assert cli.main(["--db", str(db_path), "check"]) == 0
+    second_check = json.loads(capsys.readouterr().out)
+
+    assert second_check["record"]["location_point_id"] is None
+    assert second_check["record"]["repeated_location_point_id"] == 1
