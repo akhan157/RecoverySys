@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" role="img" aria-labelledby="title desc">
+  <title id="title">RecoverySys</title>
+  <desc id="desc">Technical recovery parachute and flight-path mark in the RecoverySys slate palette.</desc>
+
+  <!-- Slate instrument-panel field. The solid field keeps the mark legible in Windows shell views. -->
+  <rect width="1024" height="1024" fill="#1a1d23"/>
+  <rect x="42" y="42" width="940" height="940" fill="none" stroke="#374151" stroke-width="20"/>
+  <rect x="78" y="78" width="868" height="868" fill="none" stroke="#2d3240" stroke-width="4"/>
+
+  <!-- Sparse calibration grid: technical, but quiet at taskbar scale. -->
+  <g stroke="#2d3240" stroke-width="4" opacity="0.9">
+    <path d="M256 80V944M512 80V944M768 80V944M80 256H944M80 512H944M80 768H944"/>
+  </g>
+
+  <!-- Recovery canopy: broad, high-contrast silhouette rather than a consumer logo. -->
+  <path d="M204 420C244 242 366 166 512 166S780 242 820 420" fill="none" stroke="#e8eaf0" stroke-width="44" stroke-linecap="square"/>
+  <path d="M204 420H820" fill="none" stroke="#e8eaf0" stroke-width="44" stroke-linecap="square"/>
+  <path d="M306 420L386 206M420 420L456 174M604 420L568 174M718 420L638 206" fill="none" stroke="#e8eaf0" stroke-width="18" stroke-linecap="square"/>
+
+  <!-- Payload / descent axis. The amber marker is the only signal color. -->
+  <path d="M512 420V708" fill="none" stroke="#c8cdd8" stroke-width="22"/>
+  <path d="M448 706H576L548 842H476Z" fill="#e8eaf0"/>
+  <path d="M476 842H548" fill="none" stroke="#c8cdd8" stroke-width="18"/>
+  <path d="M512 850V902" fill="none" stroke="#d48800" stroke-width="18" stroke-linecap="square"/>
+
+  <!-- Vector / deployment tick: readable as a controlled flight-path cue at 16px. -->
+  <path d="M172 902H352M672 902H852" fill="none" stroke="#636c7e" stroke-width="12" stroke-linecap="square"/>
+  <path d="M172 902L218 856M852 902L806 856" fill="none" stroke="#d48800" stroke-width="12" stroke-linecap="square"/>
+</svg>
