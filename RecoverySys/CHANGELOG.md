@@ -3,7 +3,7 @@
 All notable changes to RecoverySys are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased]
+## [1.2.0.0] - 2026-04-09
 
 ### Added
 - **`lib/schema.js`** — single source of truth for the SPECS object shape. Exports `SPECS_SCHEMA` (per-field type, unit, default, label, min/max), `getDefaultSpecs()`, `SPEC_KEYS`, `coerceSpec()`, and `parseSpec()` (coerce + clamp to schema range). Future field changes are a one-file edit instead of a six-file scavenger hunt.
@@ -38,8 +38,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Security
 - Share-link decoder now rejects payloads from a newer `schemaVersion` rather than silently dropping fields the receiver doesn't understand.
-
-## [1.2.0.0] - 2026-04-09
 
 ### Added
 - **ThrustCurve motor search** — live search field in Rocket Specs queries ThrustCurve.org API; selecting a motor auto-fills total impulse and burn time; AbortController prevents stale results from overwriting fresh ones
