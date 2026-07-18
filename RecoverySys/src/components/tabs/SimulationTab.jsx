@@ -2,9 +2,10 @@ import { WARN_LEVELS } from '../../lib/constants.js'
 import FlightChart from '../FlightChart.jsx'
 import MetricCard from '../MetricCard.jsx'
 
-export default function SimulationTab({ state, runSim, canRun }) {
+export default function SimulationTab({ state, runSim, canRun, resultFresh }) {
   const sim = state.simulation
-  const shock = sim?.shock_load
+  const usableSim = resultFresh ? sim : null
+  const shock = usableSim?.shock_load
 
   return (
     <div className="mc-sim">
@@ -15,15 +16,17 @@ export default function SimulationTab({ state, runSim, canRun }) {
           <h2 className="mc-panel-header">
             FLIGHT_PROFILE // ALT_vs_TIME
             <span className="mc-panel-header__right">
-              {sim
+              {sim && !resultFresh
+                ? 'RESULT_STALE // RERUN_REQUIRED'
+                : sim
                 ? `REF_ID: STR-SIM-${String(Math.abs((sim.apogee_ft || 0) * 7 + (sim.drift_ft || 0)) % 9999).padStart(4, '0')}`
                 : 'AWAITING_DATA'}
             </span>
           </h2>
           <div className="mc-sim__chart-area">
-            <FlightChart simulation={sim} />
+            <FlightChart simulation={usableSim} />
           </div>
-          {!sim && (
+          {(!sim || !resultFresh) && (
             <div style={{ padding: '0 16px 16px', textAlign: 'center' }}>
               <button className="mc-run-btn" onClick={runSim} disabled={!canRun}>
                 {state.simRunning ? 'RUNNING...' : 'RUN_SIMULATION →'}
@@ -38,34 +41,34 @@ export default function SimulationTab({ state, runSim, canRun }) {
           <div className="mc-sim__data-grid">
             <MetricCard
               label="APOGEE_ALTITUDE"
-              value={sim ? sim.apogee_ft.toLocaleString() : '—'}
+              value={usableSim ? usableSim.apogee_ft.toLocaleString() : '—'}
               unit="ft"
             />
             <MetricCard
               label="MAIN_DESCENT"
-              value={sim?.main_fps != null ? sim.main_fps.toFixed(1) : '—'}
+              value={usableSim?.main_fps != null ? usableSim.main_fps.toFixed(1) : '—'}
               unit="ft/s"
-              warn={sim?.main_fps != null && sim.main_fps > 15}
+              warn={usableSim?.main_fps != null && usableSim.main_fps > 15}
             />
             <MetricCard
               label="DESCENT_TIME"
-              value={sim?.total_time_s != null ? Math.round(sim.total_time_s) : '—'}
+              value={usableSim?.total_time_s != null ? Math.round(usableSim.total_time_s) : '—'}
               unit="sec"
             />
             <MetricCard
               label="DRIFT_DISTANCE"
-              value={sim ? sim.drift_ft.toLocaleString() : '—'}
+              value={usableSim ? usableSim.drift_ft.toLocaleString() : '—'}
               unit="ft"
             />
-            {sim?.drogue_fps && (
-              <MetricCard label="DROGUE_DESCENT" value={sim.drogue_fps.toFixed(1)} unit="ft/s" />
+            {usableSim?.drogue_fps && (
+              <MetricCard label="DROGUE_DESCENT" value={usableSim.drogue_fps.toFixed(1)} unit="ft/s" />
             )}
-            {sim?.landing_ke_ftlbf != null && (
+            {usableSim?.landing_ke_ftlbf != null && (
               <MetricCard label="LANDING_KE" value={sim.landing_ke_ftlbf} unit="ft-lbf" />
             )}
 
             {/* Shock Cord Load — peak load + safety factor (strain energy in compat warnings) */}
-            {shock && (
+            {usableSim?.shock_load && (
               <>
                 <MetricCard label="PEAK_LOAD" value={shock.peak_load_lbs.toFixed(0)} unit="lbs" />
                 <MetricCard

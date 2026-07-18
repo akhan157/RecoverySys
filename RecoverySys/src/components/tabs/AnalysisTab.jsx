@@ -27,7 +27,7 @@ function sfStatus(sf, material) {
 }
 
 export default function AnalysisTab({ state }) {
-  const sim = state.simulation
+  const sim = state.resultFresh ? state.simulation : null
   const specs = state.specs
   const config = state.config
 
@@ -136,7 +136,9 @@ export default function AnalysisTab({ state }) {
     return (
       <div className="mc-analysis">
         <div className="mc-analysis__empty">
-          <div className="mc-analysis__empty-code">NO_SIMULATION_DATA</div>
+          <div className="mc-analysis__empty-code">
+            {state.simulation ? 'RESULT_STALE // RERUN_REQUIRED' : 'NO_SIMULATION_DATA'}
+          </div>
           <div className="mc-analysis__empty-sub">
             Run a simulation from the DASHBOARD or SIMULATION tab to populate physics breakdown
           </div>
