@@ -4,9 +4,8 @@
 // part IDs are serialized (not full objects) so URLs stay compact. Receiver
 // re-hydrates parts by looking them up in its own catalog + custom parts list.
 
-import { rehydrateCustomMotor, isValidCustomPart } from './storage.js'
-import { getDefaultSpecs, SPEC_KEYS, SCHEMA_VERSION } from './schema.js'
-import { runMigrations, isPayloadFromFuture } from './migrations.js'
+import { decodeShareEncoded, makeConfigPayload, isValidCustomPart } from './payloadBoundary.js'
+import { SCHEMA_VERSION } from './schema.js'
 
 export const SHARE_PARAM = 'c'
 
@@ -20,8 +19,7 @@ export function encodeSharePayload({ config, specs, customMotor }) {
       return [cat, { id: part.id }]
     })
   )
-  const payload = { schemaVersion: SCHEMA_VERSION, config: configIds, specs, customMotor }
-  return btoa(encodeURIComponent(JSON.stringify(payload)))
+  return btoa(encodeURIComponent(JSON.stringify(makeConfigPayload({ config: configIds, specs, customMotor }))))
 }
 
 export function buildShareUrl(encoded) {
@@ -35,59 +33,6 @@ export function buildShareUrl(encoded) {
 // - catalogMissing: count of catalog parts no longer in the catalog
 // - customMissing: count of custom parts (non-shareable — custom parts live in receiver's localStorage)
 export function decodeSharePayload(encoded, { allParts, slotIds, emptyConfig }) {
-  try {
-    const rawPayload = JSON.parse(decodeURIComponent(atob(decodeURIComponent(encoded))))
-    // Refuse links from a newer schema rather than silently dropping fields
-    // — caller treats null as "invalid link" and toasts the user.
-    if (isPayloadFromFuture(rawPayload)) return null
-    const payload = runMigrations(rawPayload)
-    const validCategories = new Set(slotIds)
-    // Spec key whitelist + default values both come from the central schema
-    // (lib/schema.js) — no need to thread them through callers.
-
-    const newConfig = { ...emptyConfig }
-    let catalogMissing = 0
-    let customMissing = 0
-    const inlinedCustomParts = []
-
-    if (payload.config) {
-      Object.entries(payload.config).forEach(([cat, part]) => {
-        if (!validCategories.has(cat)) return
-        if (part) {
-          if (part.id?.startsWith('custom-') && isValidCustomPart(part)) {
-            // Full custom part inlined in the share link — use directly
-            newConfig[cat] = part
-            if (!inlinedCustomParts.find((p) => p.id === part.id)) {
-              inlinedCustomParts.push(part)
-            }
-          } else {
-            const found = allParts.find((p) => p.id === part.id && p.category === cat)
-            if (found) newConfig[cat] = found
-            else if (part.id?.startsWith('custom-')) customMissing++
-            else catalogMissing++
-          }
-        }
-        // null part → slot stays null (no bleed-through from receiver's localStorage)
-      })
-    }
-
-    const newSpecs = getDefaultSpecs()
-    if (payload.specs) {
-      Object.entries(payload.specs).forEach(([key, value]) => {
-        if (!SPEC_KEYS.has(key)) return
-        newSpecs[key] = value
-      })
-    }
-
-    return {
-      config: newConfig,
-      specs: newSpecs,
-      customMotor: rehydrateCustomMotor(payload.customMotor),
-      catalogMissing,
-      customMissing,
-      inlinedCustomParts,
-    }
-  } catch {
-    return null
-  }
+  const decoded = decodeShareEncoded(encoded, { allParts, slotIds, emptyConfig })
+  return decoded.ok ? decoded : null
 }

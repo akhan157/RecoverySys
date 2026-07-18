@@ -6,7 +6,8 @@
 // must still boot with sane defaults.
 
 import { SCHEMA_VERSION } from './schema.js'
-import { runMigrations } from './migrations.js'
+import { PARTS, SLOT_IDS, EMPTY_CONFIG } from '../data/parts.js'
+import { decodeMigrateValidateNormalize, makeConfigPayload, PAYLOAD_LIMITS, isValidCustomPart as isValidBoundaryCustomPart, validateCustomMotor } from './payloadBoundary.js'
 
 export const STORAGE_KEYS = Object.freeze({
   CONFIG: 'recoverysys-config',
@@ -18,10 +19,10 @@ export function loadSaved() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CONFIG)
     if (!raw) return null
-    return runMigrations(JSON.parse(raw))
-  } catch {
-    return null
-  }
+    const custom = loadCustomParts()
+    const decoded = decodeMigrateValidateNormalize(raw, { allParts: [...custom, ...PARTS], slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG })
+    return decoded.ok ? decoded : null
+  } catch { return null }
 }
 
 // Single validator for custom parts shape. Used by both loadCustomParts
@@ -29,48 +30,25 @@ export function loadSaved() {
 // was duplicated with subtly different limits between the two paths. Now
 // one definition. Cap on name length defends against DoS via crafted
 // payloads from either source.
-const MAX_CUSTOM_NAME_LEN = 200
-
 export function isValidCustomPart(p) {
-  return (
-    p &&
-    typeof p === 'object' &&
-    typeof p.id === 'string' &&
-    p.id.length > 0 &&
-    typeof p.name === 'string' &&
-    p.name.length > 0 &&
-    p.name.length <= MAX_CUSTOM_NAME_LEN &&
-    typeof p.category === 'string' &&
-    p.specs !== null &&
-    typeof p.specs === 'object'
-  )
+  return isValidBoundaryCustomPart(p, p?.category ? [p.category] : [])
 }
 
 export function loadCustomParts() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CUSTOM_PARTS)
     if (!raw) return []
+    if (raw.length > PAYLOAD_LIMITS.customPartsJsonBytes) return []
     const parsed = JSON.parse(raw)
-    if (!Array.isArray(parsed)) return []
+    if (!Array.isArray(parsed) || parsed.length > PAYLOAD_LIMITS.customParts) return []
     return parsed.filter(isValidCustomPart)
-  } catch {
-    return []
-  }
+  } catch { return [] }
 }
 
 // Defensive shape-check for customMotor loaded from localStorage or a share link.
 // Returns null if the payload is missing required fields or malformed.
 export function rehydrateCustomMotor(m) {
-  if (!m || typeof m !== 'object') return null
-  if (typeof m.designation !== 'string' || m.designation.length === 0) return null
-  if (!Array.isArray(m.curve) || m.curve.length < 2) return null
-  for (const p of m.curve) {
-    if (!p || typeof p.t !== 'number' || typeof p.thrust_N !== 'number') return null
-    if (!isFinite(p.t) || !isFinite(p.thrust_N)) return null
-  }
-  if (!isFinite(m.totalImpulse_ns) || m.totalImpulse_ns <= 0) return null
-  if (!isFinite(m.burnTime_s) || m.burnTime_s <= 0) return null
-  return m
+  return validateCustomMotor(m)
 }
 
 // Persist the full config payload. Returns true if written, false if storage failed.
@@ -79,20 +57,24 @@ export function saveConfigToStorage({ config, specs, customMotor }) {
   try {
     localStorage.setItem(
       STORAGE_KEYS.CONFIG,
-      JSON.stringify({ schemaVersion: SCHEMA_VERSION, config, specs, customMotor })
+      JSON.stringify(makeConfigPayload({
+        config: Object.fromEntries(Object.entries(config ?? {}).map(([category, part]) => [category, part ? { id: part.id } : null])),
+        specs,
+        customMotor,
+      })),
     )
     return true
-  } catch {
-    return false
-  }
+  } catch { return false }
 }
 
 export function saveCustomPartsToStorage(customParts) {
   try {
-    localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, JSON.stringify(customParts))
-  } catch {
-    /* storage unavailable */
-  }
+    if (!Array.isArray(customParts) || customParts.length > PAYLOAD_LIMITS.customParts) return false
+    const serialized = JSON.stringify(customParts)
+    if (serialized.length > PAYLOAD_LIMITS.customPartsJsonBytes) return false
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, serialized)
+    return true
+  } catch { return false }
 }
 
 export function loadTheme() {
@@ -102,15 +84,10 @@ export function loadTheme() {
     if (stored === 'light') return false
     // No explicit preference — respect OS setting
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
-  } catch {
-    return false
-  }
+  } catch { return false }
 }
 
 export function saveTheme(darkMode) {
-  try {
-    localStorage.setItem(STORAGE_KEYS.THEME, darkMode ? 'dark' : 'light')
-  } catch {
-    /* storage unavailable */
-  }
+  try { localStorage.setItem(STORAGE_KEYS.THEME, darkMode ? 'dark' : 'light') }
+  catch { /* storage unavailable */ }
 }
