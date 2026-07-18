@@ -17,7 +17,7 @@ const PACKING_ORDER = [
 
 const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map(c => [c.id, c.label]))
 
-export default function PrintChecklist({ specs, config, simulation, warnings = [] }) {
+export default function PrintChecklist({ specs, config, simulation, resultFresh, warnings = [] }) {
   const date = new Date().toLocaleDateString('en-US', {
     year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
   })
@@ -94,7 +94,7 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
       {/* ── Simulation Results ─────────────────────────────────── */}
       <section>
         <h2>Simulation Results</h2>
-        {simulation ? (
+        {simulation && resultFresh ? (
           <table>
             <tbody>
               <tr><th>Apogee</th><td>{simulation.apogee_ft.toLocaleString()} ft ({simulation.apogee_method})</td></tr>
@@ -116,7 +116,7 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
             </tbody>
           </table>
         ) : (
-          <p>No simulation run — click RUN_SIM first</p>
+          <p>{simulation ? 'RESULT_STALE — rerun simulation before printing' : 'No simulation run — click RUN_SIM first'}</p>
         )}
       </section>
 

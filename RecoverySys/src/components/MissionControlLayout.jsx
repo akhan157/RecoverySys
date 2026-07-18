@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
 import { computePackingVolume } from '../lib/compatibility.js'
+import { isResultFresh } from '../lib/resultIntegrity.js'
 import DashboardTab from './tabs/DashboardTab.jsx'
 import SimulationTab from './tabs/SimulationTab.jsx'
 import DispersionTab from './tabs/DispersionTab.jsx'
@@ -54,6 +55,7 @@ export default function MissionControlLayout({
 
   const hasWarnings = state.warnings.length > 0
   const hasErrors = state.warnings.some(w => w.level === WARN_LEVELS.ERROR)
+  const resultFresh = isResultFresh(state.simulation, { specs: state.specs, config: state.config, customMotor: state.customMotor }, state.inputRevision)
 
   // Mirror runSimulation's preconditions exactly — inputs are strings from <input>,
   // so '0' and '-5' are truthy. parseFloat(...) > 0 matches what simulation.js rejects.
@@ -114,8 +116,9 @@ export default function MissionControlLayout({
               packingVolume={packingVolume}
               hasWarnings={hasWarnings}
               hasErrors={hasErrors}
-              canRun={canRun}
-              selectPart={selectPart}
+               canRun={canRun}
+               resultFresh={resultFresh}
+               selectPart={selectPart}
               removePart={removePart}
               setCategory={setCategory}
               runSim={runSim}
@@ -129,10 +132,11 @@ export default function MissionControlLayout({
               state={state}
               runSim={runSim}
               canRun={canRun}
+              resultFresh={resultFresh}
             />
           )}
-          {activeTab === 'ANALYSIS' && <AnalysisTab state={state} />}
-          {activeTab === 'DISPERSION' && <DispersionTab state={state} />}
+          {activeTab === 'ANALYSIS' && <AnalysisTab state={{ ...state, resultFresh }} />}
+           {activeTab === 'DISPERSION' && <DispersionTab state={state} resultFresh={resultFresh} />}
           {activeTab === 'SPECS' && (
             <SpecsTab
               state={state}
@@ -146,8 +150,8 @@ export default function MissionControlLayout({
               addToast={addToast}
             />
           )}
-          {activeTab === 'COMPARE' && <CompareTab state={state} />}
-          {activeTab === 'FLIGHT_LOG' && <FlightLogTab state={state} />}
+          {activeTab === 'COMPARE' && <CompareTab state={state} resultFresh={resultFresh} />}
+          {activeTab === 'FLIGHT_LOG' && <FlightLogTab state={state} resultFresh={resultFresh} />}
           {activeTab === 'EXPORT' && (
             <ExportTab state={state} saveConfig={saveConfig} copyShareLink={copyShareLink} onLoadConfig={loadConfig} />
           )}
@@ -158,8 +162,9 @@ export default function MissionControlLayout({
     <PrintChecklist
       specs={state.specs}
       config={state.config}
-      simulation={state.simulation}
-      warnings={state.warnings}
+       simulation={state.simulation}
+       resultFresh={resultFresh}
+       warnings={state.warnings}
     />
     </>
   )

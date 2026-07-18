@@ -6,7 +6,7 @@ import SuggestPanel from '../SuggestPanel.jsx'
 
 export default function DashboardTab({
   state, allParts, customParts, filledSlots, packingVolume,
-  hasWarnings, hasErrors, canRun,
+  hasWarnings, hasErrors, canRun, resultFresh,
   selectPart, removePart, setCategory, runSim,
   addCustomPart, deleteCustomPart, editCustomPart,
 }) {
@@ -120,7 +120,7 @@ export default function DashboardTab({
           </div>
 
           {/* Sim results in summary */}
-          {state.simulation && (
+           {state.simulation && resultFresh && (
             <>
               <div className="mc-metric">
                 <div className="mc-metric__label">APOGEE_ALTITUDE</div>
@@ -146,7 +146,9 @@ export default function DashboardTab({
             </>
           )}
 
-          {/* Slots count */}
+           {state.simulation && !resultFresh && <div className="mc-validation mc-validation--warn">RESULT_STALE // RERUN_REQUIRED</div>}
+
+           {/* Slots count */}
           <div className="mc-slots-grid">
             <div className="mc-slots-grid__item">
               <div className="mc-slots-grid__value">{String(filledSlots).padStart(2, '0')}/08</div>

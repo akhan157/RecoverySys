@@ -27,7 +27,7 @@ function sfStatus(sf, material) {
 }
 
 export default function AnalysisTab({ state }) {
-  const sim    = state.simulation
+  const sim    = state.resultFresh ? state.simulation : null
   const specs  = state.specs
   const config = state.config
 
