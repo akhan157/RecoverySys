@@ -4,101 +4,111 @@
 
 /* ── Slate palette ───────────────────────────────────────── */
 :root {
-  --bg-app:           #f4f5f7;
-  --bg-panel:         #ffffff;
-  --bg-right:         #edf0f3;
-  --bg-hover:         #edf0f3;
-  --input-bg:         #f4f5f7;
-  --text-primary:     #1a1d23;
-  --text-secondary:   #4a5260;
-  --text-tertiary:    #636c7e;  /* WCAG AA: #636c7e on #fff = 5.28:1 (was #8c94a3 = 3.05:1) */
+  --bg-app: #f4f5f7;
+  --bg-panel: #ffffff;
+  --bg-right: #edf0f3;
+  --bg-hover: #edf0f3;
+  --input-bg: #f4f5f7;
+  --text-primary: #1a1d23;
+  --text-secondary: #4a5260;
+  --text-tertiary: #636c7e; /* WCAG AA: #636c7e on #fff = 5.28:1 (was #8c94a3 = 3.05:1) */
   --text-placeholder: #c8cdd8;
-  --border-default:   #dde1e9;
-  --border-subtle:    #eaecf0;
+  --border-default: #dde1e9;
+  --border-subtle: #eaecf0;
 
-  --accent:           #374151;
-  --accent-text:      #ffffff;
-  --accent-tint:      #f1f2f4;
-  --accent-ring:      rgba(55, 65, 81, 0.12);
+  --accent: #374151;
+  --accent-text: #ffffff;
+  --accent-tint: #f1f2f4;
+  --accent-ring: rgba(55, 65, 81, 0.12);
 
-  --header-bg:        #1a1d23;
-  --header-border:    #2d3240;
+  --header-bg: #1a1d23;
+  --header-border: #2d3240;
 
-  --ok-fg:            #1a7f37;
-  --ok-bg:            #dafbe1;
-  --warn-fg:          #d48800;
-  --warn-bg:          #fff8e1;
-  --warn-border:      #ffe082;
-  --error-fg:         #c0392b;
-  --error-bg:         #fdecea;
+  --ok-fg: #1a7f37;
+  --ok-bg: #dafbe1;
+  --warn-fg: #d48800;
+  --warn-bg: #fff8e1;
+  --warn-border: #ffe082;
+  --error-fg: #c0392b;
+  --error-bg: #fdecea;
 
   /* kept for compat with existing components */
-  --cta-bg:           #1a1d23;
-  --cta-fg:           #ffffff;
-  --neutral-dot:      #c8cdd8;
+  --cta-bg: #1a1d23;
+  --cta-fg: #ffffff;
+  --neutral-dot: #c8cdd8;
 
-  --radius:           6px;
-  --transition:       0.18s ease;
+  --radius: 6px;
+  --transition: 0.18s ease;
 
   /* chart */
-  --chart-bg:         #ffffff;
-  --chart-border:     #dde1e9;
-  --chart-grid:       #edf0f3;
-  --chart-axis:       #c8cdd8;
-  --chart-path:       #1a1d23;
-  --chart-marker:     #636c7e;  /* WCAG AA: 5.28:1 on #ffffff chart bg */
-  --chart-label:      #636c7e;
+  --chart-bg: #ffffff;
+  --chart-border: #dde1e9;
+  --chart-grid: #edf0f3;
+  --chart-axis: #c8cdd8;
+  --chart-path: #1a1d23;
+  --chart-marker: #636c7e; /* WCAG AA: 5.28:1 on #ffffff chart bg */
+  --chart-label: #636c7e;
 }
 
 /* ── Dark mode ───────────────────────────────────────────── */
-[data-theme="dark"] {
-  --bg-app:           #0f1014;
-  --bg-panel:         #171a1f;
-  --bg-right:         #13161b;
-  --bg-hover:         #1e2128;
-  --input-bg:         #13161b;
-  --text-primary:     #e8eaf0;
-  --text-secondary:   #9aa0b0;
-  --text-tertiary:    #7b8496;  /* WCAG AA: #7b8496 on #171a1f = 4.66:1 (was #5a6070 = 2.79:1) */
+[data-theme='dark'] {
+  --bg-app: #0f1014;
+  --bg-panel: #171a1f;
+  --bg-right: #13161b;
+  --bg-hover: #1e2128;
+  --input-bg: #13161b;
+  --text-primary: #e8eaf0;
+  --text-secondary: #9aa0b0;
+  --text-tertiary: #7b8496; /* WCAG AA: #7b8496 on #171a1f = 4.66:1 (was #5a6070 = 2.79:1) */
   --text-placeholder: #353b48;
-  --border-default:   #272c38;
-  --border-subtle:    #1e2230;
+  --border-default: #272c38;
+  --border-subtle: #1e2230;
 
-  --accent:           #c9cdd8;
-  --accent-text:      #1a1d23;
-  --accent-tint:      #1e2128;
-  --accent-ring:      rgba(200, 205, 216, 0.10);
+  --accent: #c9cdd8;
+  --accent-text: #1a1d23;
+  --accent-tint: #1e2128;
+  --accent-ring: rgba(200, 205, 216, 0.1);
 
-  --header-bg:        #0d0f13;
-  --header-border:    #1e2230;
+  --header-bg: #0d0f13;
+  --header-border: #1e2230;
 
-  --ok-fg:            #4caf50;
-  --ok-bg:            #0d2b0d;
-  --warn-fg:          #ffb74d;
-  --warn-bg:          #2b1f00;
-  --warn-border:      #8a5a00;
-  --error-fg:         #ef5350;
-  --error-bg:         #2d0a0a;
+  --ok-fg: #4caf50;
+  --ok-bg: #0d2b0d;
+  --warn-fg: #ffb74d;
+  --warn-bg: #2b1f00;
+  --warn-border: #8a5a00;
+  --error-fg: #ef5350;
+  --error-bg: #2d0a0a;
 
-  --cta-bg:           #e8eaf0;
-  --cta-fg:           #1a1d23;
-  --neutral-dot:      #353b48;
+  --cta-bg: #e8eaf0;
+  --cta-fg: #1a1d23;
+  --neutral-dot: #353b48;
 
-  --chart-bg:         #0f1014;
-  --chart-border:     #272c38;
-  --chart-grid:       #1a1d23;
-  --chart-axis:       #353b48;
-  --chart-path:       #ffffff;
-  --chart-marker:     #7b8496;  /* WCAG AA: 4.66:1 on #0f1014 chart bg */
-  --chart-label:      #7b8496;
+  --chart-bg: #0f1014;
+  --chart-border: #272c38;
+  --chart-grid: #1a1d23;
+  --chart-axis: #353b48;
+  --chart-path: #ffffff;
+  --chart-marker: #7b8496; /* WCAG AA: 4.66:1 on #0f1014 chart bg */
+  --chart-label: #7b8496;
 }
 
 /* ── Base ────────────────────────────────────────────────── */
-* { box-sizing: border-box; margin: 0; padding: 0; }
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
 
-html, body, #root {
+html,
+body,
+#root {
   height: 100%;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family:
+    'Inter',
+    system-ui,
+    -apple-system,
+    sans-serif;
   font-size: 13px;
   color: var(--text-primary);
   background: var(--bg-app);
@@ -120,19 +130,30 @@ html, body, #root {
 
 /* ── Animations ──────────────────────────────────────────── */
 @keyframes dot-pulse {
-  0%   { transform: scale(1); }
-  50%  { transform: scale(1.4); }
-  100% { transform: scale(1); }
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.4);
+  }
+  100% {
+    transform: scale(1);
+  }
 }
-.dot-pulse { animation: dot-pulse 300ms ease-in-out; }
+.dot-pulse {
+  animation: dot-pulse 300ms ease-in-out;
+}
 
 @keyframes spin {
-  to { transform: rotate(360deg); }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .spinner {
   display: inline-block;
-  width: 12px; height: 12px;
-  border: 2px solid rgba(255,255,255,0.3);
+  width: 12px;
+  height: 12px;
+  border: 2px solid rgba(255, 255, 255, 0.3);
   border-top-color: #fff;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
@@ -140,20 +161,44 @@ html, body, #root {
 }
 
 @keyframes toast-in {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.toast-enter { animation: toast-in 200ms ease-out forwards; }
+.toast-enter {
+  animation: toast-in 200ms ease-out forwards;
+}
 
 @keyframes fade-up {
-  from { opacity: 0; transform: translateY(6px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
-.fade-up { animation: fade-up 0.35s ease both; }
-.fade-up-1 { animation-delay: 0.05s; }
-.fade-up-2 { animation-delay: 0.10s; }
-.fade-up-3 { animation-delay: 0.15s; }
-.fade-up-4 { animation-delay: 0.20s; }
+.fade-up {
+  animation: fade-up 0.35s ease both;
+}
+.fade-up-1 {
+  animation-delay: 0.05s;
+}
+.fade-up-2 {
+  animation-delay: 0.1s;
+}
+.fade-up-3 {
+  animation-delay: 0.15s;
+}
+.fade-up-4 {
+  animation-delay: 0.2s;
+}
 
 /* ── Focus rings ─────────────────────────────────────────── */
 button:focus-visible,

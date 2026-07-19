@@ -30,25 +30,34 @@ export default function useCustomParts({ config, dispatch }) {
 
   const allParts = useMemo(() => [...customParts, ...PARTS], [customParts])
 
-  useEffect(() => { saveCustomPartsToStorage(customParts) }, [customParts])
+  useEffect(() => {
+    saveCustomPartsToStorage(customParts)
+  }, [customParts])
 
   const addCustomPart = useCallback((part) => {
-    setCustomParts(prev => [...prev, part])
+    setCustomParts((prev) => [...prev, part])
   }, [])
 
-  const deleteCustomPart = useCallback((id) => {
-    setCustomParts(prev => prev.filter(p => p.id !== id))
-    Object.entries(config).forEach(([category, selected]) => {
-      if (selected?.id === id) dispatch({ type: 'REMOVE_PART', category })
-    })
-  }, [config, dispatch])
+  const deleteCustomPart = useCallback(
+    (id) => {
+      setCustomParts((prev) => prev.filter((p) => p.id !== id))
+      Object.entries(config).forEach(([category, selected]) => {
+        if (selected?.id === id) dispatch({ type: 'REMOVE_PART', category })
+      })
+    },
+    [config, dispatch]
+  )
 
-  const editCustomPart = useCallback((updatedPart) => {
-    setCustomParts(prev => prev.map(p => p.id === updatedPart.id ? updatedPart : p))
-    Object.entries(config).forEach(([category, selected]) => {
-      if (selected?.id === updatedPart.id) dispatch({ type: 'SELECT_PART', category, part: updatedPart })
-    })
-  }, [config, dispatch])
+  const editCustomPart = useCallback(
+    (updatedPart) => {
+      setCustomParts((prev) => prev.map((p) => (p.id === updatedPart.id ? updatedPart : p)))
+      Object.entries(config).forEach(([category, selected]) => {
+        if (selected?.id === updatedPart.id)
+          dispatch({ type: 'SELECT_PART', category, part: updatedPart })
+      })
+    },
+    [config, dispatch]
+  )
 
   return {
     customParts,

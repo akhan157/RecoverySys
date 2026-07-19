@@ -1,10 +1,16 @@
-import React from 'react'
 import { CATEGORIES } from '../../data/parts.js'
 import ConfigBuilder from '../ConfigBuilder.jsx'
 
 export default function SpecsTab({
-  state, setSpec, removePart, setCategory, saveConfig, copyShareLink,
-  setCustomMotor, clearCustomMotor, addToast,
+  state,
+  setSpec,
+  removePart,
+  setCategory,
+  saveConfig,
+  copyShareLink,
+  setCustomMotor,
+  clearCustomMotor,
+  addToast,
 }) {
   return (
     <div className="mc-specs-panel">

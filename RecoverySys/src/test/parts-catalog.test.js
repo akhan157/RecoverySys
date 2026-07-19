@@ -23,7 +23,7 @@ describe('parts catalog integrity', () => {
     for (const part of PARTS) {
       expect(
         validCategories.has(part.category),
-        `part ${part.id} has invalid category "${part.category}" — not in CATEGORIES`,
+        `part ${part.id} has invalid category "${part.category}" — not in CATEGORIES`
       ).toBe(true)
     }
   })
@@ -49,17 +49,17 @@ describe('parts catalog integrity', () => {
     // Drift detector: if someone adds a category without parts, or removes
     // every part from a category, the UI tab is empty and Pass 2's "orphan
     // category" finding (flight_computer / battery cases pre-cleanup) recurs.
-    const populatedCategories = new Set(PARTS.map(p => p.category))
+    const populatedCategories = new Set(PARTS.map((p) => p.category))
     for (const slot of SLOT_IDS) {
       expect(
         populatedCategories.has(slot),
-        `category "${slot}" exists in CATEGORIES but has zero parts in PARTS`,
+        `category "${slot}" exists in CATEGORIES but has zero parts in PARTS`
       ).toBe(true)
     }
   })
 
   it('CATEGORIES.id values are unique', () => {
-    const ids = CATEGORIES.map(c => c.id)
+    const ids = CATEGORIES.map((c) => c.id)
     expect(new Set(ids).size, `duplicate slot ids in CATEGORIES`).toBe(ids.length)
   })
 })

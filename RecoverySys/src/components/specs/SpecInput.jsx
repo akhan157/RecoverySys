@@ -1,11 +1,20 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 
 // Generic numeric input used across all rocket spec rows.
 // `error` + `errorText` drive inline validation UI (e.g. "Below 12G NAR minimum").
 // `help` — optional plain-English tooltip shown on hover/click of a "?" icon.
 export default function SpecInput({
-  label, id, value, unit, placeholder, onChange,
-  min = 0, max, error = false, errorText, help,
+  label,
+  id,
+  value,
+  unit,
+  placeholder,
+  onChange,
+  min = 0,
+  max,
+  error = false,
+  errorText,
+  help,
 }) {
   const restingBorder = error ? 'var(--error-fg)' : 'var(--border-default)'
   const [showHelp, setShowHelp] = useState(false)
@@ -14,29 +23,69 @@ export default function SpecInput({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-      <label htmlFor={id} style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+      <label
+        htmlFor={id}
+        style={{
+          fontSize: '11px',
+          color: 'var(--text-tertiary)',
+          fontWeight: 500,
+          display: 'flex',
+          alignItems: 'center',
+        }}
+      >
         {label}
         {help && (
           <span
             style={{ position: 'relative', display: 'inline-flex', marginLeft: 4 }}
-            onMouseEnter={() => { hoverTimer.current = setTimeout(() => setShowHelp(true), 200) }}
-            onMouseLeave={() => { clearTimeout(hoverTimer.current); setShowHelp(false) }}
-            onClick={() => setShowHelp(v => !v)}
+            onMouseEnter={() => {
+              hoverTimer.current = setTimeout(() => setShowHelp(true), 200)
+            }}
+            onMouseLeave={() => {
+              clearTimeout(hoverTimer.current)
+              setShowHelp(false)
+            }}
+            onClick={() => setShowHelp((v) => !v)}
           >
-            <span style={{
-              display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
-              width: 14, height: 14, borderRadius: '50%',
-              border: '1px solid var(--text-tertiary)', color: 'var(--text-tertiary)',
-              fontSize: 9, fontWeight: 700, cursor: 'help', userSelect: 'none',
-            }}>?</span>
+            <span
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: 14,
+                height: 14,
+                borderRadius: '50%',
+                border: '1px solid var(--text-tertiary)',
+                color: 'var(--text-tertiary)',
+                fontSize: 9,
+                fontWeight: 700,
+                cursor: 'help',
+                userSelect: 'none',
+              }}
+            >
+              ?
+            </span>
             {showHelp && (
-              <span style={{
-                position: 'absolute', left: '-8px', top: '100%', marginTop: 6,
-                background: 'var(--bg-panel)', border: '1px solid var(--border-default)',
-                borderRadius: 4, padding: '7px 10px', fontSize: 11,
-                color: 'var(--text-secondary)', width: 300, whiteSpace: 'normal',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.18)', zIndex: 100, lineHeight: 1.5,
-              }}>{help}</span>
+              <span
+                style={{
+                  position: 'absolute',
+                  left: '-8px',
+                  top: '100%',
+                  marginTop: 6,
+                  background: 'var(--bg-panel)',
+                  border: '1px solid var(--border-default)',
+                  borderRadius: 4,
+                  padding: '7px 10px',
+                  fontSize: 11,
+                  color: 'var(--text-secondary)',
+                  width: 300,
+                  whiteSpace: 'normal',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.18)',
+                  zIndex: 100,
+                  lineHeight: 1.5,
+                }}
+              >
+                {help}
+              </span>
             )}
           </span>
         )}
@@ -49,7 +98,7 @@ export default function SpecInput({
           max={max}
           value={value ?? ''}
           placeholder={placeholder}
-          onChange={e => onChange(e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
           style={{
             fontFamily: "'JetBrains Mono', ui-monospace, monospace",
             fontWeight: 600,
@@ -63,15 +112,25 @@ export default function SpecInput({
             background: 'var(--input-bg)',
             transition: 'border-color 0.18s ease',
           }}
-          onFocus={e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)' }}
-          onBlur={e => { e.target.style.borderColor = restingBorder; e.target.style.boxShadow = '' }}
+          onFocus={(e) => {
+            e.target.style.borderColor = 'var(--accent)'
+            e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)'
+          }}
+          onBlur={(e) => {
+            e.target.style.borderColor = restingBorder
+            e.target.style.boxShadow = ''
+          }}
         />
         {unit && (
-          <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', flexShrink: 0 }}>{unit}</span>
+          <span style={{ fontSize: '11px', color: 'var(--text-tertiary)', flexShrink: 0 }}>
+            {unit}
+          </span>
         )}
       </div>
       {error && errorText && (
-        <span style={{ fontSize: '10px', color: 'var(--error-fg)', lineHeight: 1.3 }}>{errorText}</span>
+        <span style={{ fontSize: '10px', color: 'var(--error-fg)', lineHeight: 1.3 }}>
+          {errorText}
+        </span>
       )}
     </div>
   )

@@ -7,7 +7,8 @@ per-user Windows NSIS installer.
 
 Install Rust (with the MSVC toolchain), Microsoft C++ Build Tools, and WebView2
 using the official Tauri Windows prerequisites. These are system dependencies;
-the project does not install them. Node.js and npm are required locally.
+the project does not install them. Node.js `^20.19.0 || ^22.13.0 || >=24.0.0` and
+npm 10 or newer are required locally; use the current LTS release.
 
 ## Development and packaging
 

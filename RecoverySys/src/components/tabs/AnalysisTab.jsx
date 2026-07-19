@@ -1,11 +1,11 @@
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import { parseSpec } from '../../lib/schema.js'
 import { computePackingVolume } from '../../lib/compatibility.js'
 
-const G          = 9.80665
-const N_PER_LBF  = 4.448
-const FT_PER_M   = 3.28084
-const R_AIR      = 287.058
+const G = 9.80665
+const N_PER_LBF = 4.448
+const FT_PER_M = 3.28084
+const R_AIR = 287.058
 
 function airDensityAtFt(alt_ft) {
   const h = Math.min(Math.max(0, alt_ft / FT_PER_M), 11000)
@@ -27,59 +27,66 @@ function sfStatus(sf, material) {
 }
 
 export default function AnalysisTab({ state }) {
-  const sim    = state.simulation
-  const specs  = state.specs
+  const sim = state.simulation
+  const specs = state.specs
   const config = state.config
 
   const a = useMemo(() => {
     if (!sim) return null
 
-    const mass_g  = parseFloat(specs.rocket_mass_g) || 0
+    const mass_g = parseFloat(specs.rocket_mass_g) || 0
     const mass_kg = mass_g / 1000
 
     const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
-    const g_factor      = g_factor_user != null ? g_factor_user : (mass_kg >= 10 ? 30 : 20)
+    const g_factor = g_factor_user != null ? g_factor_user : mass_kg >= 10 ? 30 : 20
     const g_factor_auto = g_factor_user == null
 
-    const static_N   = mass_kg * g_factor * G
+    const static_N = mass_kg * g_factor * G
     const static_lbs = static_N / N_PER_LBF
 
     // Shock cord derived values
     const cord = config.shock_cord?.specs ?? null
-    let cord_sf = null, cord_sf_status = null
-    let cord_snatch_mult = null, cord_dynamic_lbs = null, cord_dynamic_sf = null
+    let cord_sf = null,
+      cord_sf_status = null
+    let cord_snatch_mult = null,
+      cord_dynamic_lbs = null,
+      cord_dynamic_sf = null
     let strain_energy_J = null
     if (cord) {
-      cord_sf        = cord.strength_lbs / static_lbs
+      cord_sf = cord.strength_lbs / static_lbs
       cord_sf_status = sfStatus(cord_sf, cord.material)
       if (cord.elongation_pct > 0) {
         cord_snatch_mult = Math.sqrt(1 / (cord.elongation_pct / 100))
         cord_dynamic_lbs = static_lbs * cord_snatch_mult
-        cord_dynamic_sf  = cord.strength_lbs / cord_dynamic_lbs
+        cord_dynamic_sf = cord.strength_lbs / cord_dynamic_lbs
       }
       if (cord.elongation_pct > 0 && cord.length_ft > 0) {
-        const k = (cord.strength_lbs * N_PER_LBF) / (cord.length_ft * 0.3048 * (cord.elongation_pct / 100))
+        const k =
+          (cord.strength_lbs * N_PER_LBF) / (cord.length_ft * 0.3048 * (cord.elongation_pct / 100))
         strain_energy_J = (static_N * static_N) / (2 * k)
       }
     }
 
     // Opening shock: main chute opens at deploy_ft while descending at drogue speed
-    const main      = config.main_chute?.specs ?? null
+    const main = config.main_chute?.specs ?? null
     const deploy_ft = sim.deploy_ft || 500
     const drogue_fps = sim.drogue_fps || 0
-    let opening_shock_N = null, opening_shock_lbs = null, main_Cx = null, main_area_m2 = null
+    let opening_shock_N = null,
+      opening_shock_lbs = null,
+      main_Cx = null,
+      main_area_m2 = null
     if (main && drogue_fps > 0) {
       const rho_deploy = airDensityAtFt(deploy_ft)
       const r_m = (main.diameter_in * 0.0254) / 2
-      main_area_m2    = Math.PI * r_m * r_m
-      main_Cx         = Cx_MAP[main.shape] ?? 1.8
-      const v_mps     = drogue_fps / FT_PER_M
-      opening_shock_N   = main_Cx * 0.5 * rho_deploy * v_mps * v_mps * main_area_m2
+      main_area_m2 = Math.PI * r_m * r_m
+      main_Cx = Cx_MAP[main.shape] ?? 1.8
+      const v_mps = drogue_fps / FT_PER_M
+      opening_shock_N = main_Cx * 0.5 * rho_deploy * v_mps * v_mps * main_area_m2
       opening_shock_lbs = opening_shock_N / N_PER_LBF
     }
 
-    const mid_drogue_ft  = (sim.apogee_ft + deploy_ft) / 2
-    const rho_mid        = airDensityAtFt(mid_drogue_ft)
+    const mid_drogue_ft = (sim.apogee_ft + deploy_ft) / 2
+    const rho_mid = airDensityAtFt(mid_drogue_ft)
     const rho_deploy_val = airDensityAtFt(deploy_ft)
 
     const landing_fps = sim.main_fps ?? sim.drogue_fps
@@ -94,13 +101,32 @@ export default function AnalysisTab({ state }) {
     const drogue_phase_dist = sim.apogee_ft - deploy_ft
 
     return {
-      mass_kg, mass_g, g_factor, g_factor_auto,
-      static_N, static_lbs,
-      cord, cord_sf, cord_sf_status, cord_snatch_mult, cord_dynamic_lbs, cord_dynamic_sf, strain_energy_J,
-      opening_shock_N, opening_shock_lbs, main_Cx, main_area_m2, main,
-      deploy_ft, drogue_fps,
-      mid_drogue_ft, rho_mid, rho_deploy_val,
-      landing_ke_J, ke_ftlbf, ke_status,
+      mass_kg,
+      mass_g,
+      g_factor,
+      g_factor_auto,
+      static_N,
+      static_lbs,
+      cord,
+      cord_sf,
+      cord_sf_status,
+      cord_snatch_mult,
+      cord_dynamic_lbs,
+      cord_dynamic_sf,
+      strain_energy_J,
+      opening_shock_N,
+      opening_shock_lbs,
+      main_Cx,
+      main_area_m2,
+      main,
+      deploy_ft,
+      drogue_fps,
+      mid_drogue_ft,
+      rho_mid,
+      rho_deploy_val,
+      landing_ke_J,
+      ke_ftlbf,
+      ke_status,
       packing,
       drogue_phase_dist,
     }
@@ -111,7 +137,9 @@ export default function AnalysisTab({ state }) {
       <div className="mc-analysis">
         <div className="mc-analysis__empty">
           <div className="mc-analysis__empty-code">NO_SIMULATION_DATA</div>
-          <div className="mc-analysis__empty-sub">Run a simulation from the DASHBOARD or SIMULATION tab to populate physics breakdown</div>
+          <div className="mc-analysis__empty-sub">
+            Run a simulation from the DASHBOARD or SIMULATION tab to populate physics breakdown
+          </div>
         </div>
       </div>
     )
@@ -121,7 +149,6 @@ export default function AnalysisTab({ state }) {
 
   return (
     <div className="mc-analysis">
-
       {/* ── EJECTION LOADS ──────────────────────────────────────────────── */}
       <section className="mc-analysis__section">
         <div className="mc-panel-header">EJECTION_LOADS</div>
@@ -129,9 +156,11 @@ export default function AnalysisTab({ state }) {
           <AnalRow
             label="G_FACTOR"
             value={`${ap.g_factor}×`}
-            note={ap.g_factor_auto
-              ? `Auto-selected: ${ap.mass_kg >= 10 ? '≥10 kg rocket → 30G (L3 HPR standard)' : '<10 kg → 20G (L1/L2 standard)'}`
-              : 'User-specified in Rocket Specs'}
+            note={
+              ap.g_factor_auto
+                ? `Auto-selected: ${ap.mass_kg >= 10 ? '≥10 kg rocket → 30G (L3 HPR standard)' : '<10 kg → 20G (L1/L2 standard)'}`
+                : 'User-specified in Rocket Specs'
+            }
           />
           <AnalRow
             label="STATIC_EJECTION_LOAD"
@@ -143,7 +172,13 @@ export default function AnalysisTab({ state }) {
             <AnalRow
               label="CORD_SAFETY_FACTOR"
               value={`${ap.cord_sf.toFixed(1)}×`}
-              badge={ap.cord_sf_status === 'ok' ? 'PASS' : ap.cord_sf_status === 'warn' ? 'MARGINAL' : 'FAIL'}
+              badge={
+                ap.cord_sf_status === 'ok'
+                  ? 'PASS'
+                  : ap.cord_sf_status === 'warn'
+                    ? 'MARGINAL'
+                    : 'FAIL'
+              }
               badgeStatus={ap.cord_sf_status}
               note={`${ap.cord.strength_lbs} lbs rated ÷ ${Math.ceil(ap.static_lbs)} lbs required — ${ap.cord.material} threshold: ${SF_PASS[ap.cord.material] ?? 4}× pass, ${SF_WARN[ap.cord.material] ?? 2}× warn`}
             />
@@ -153,7 +188,13 @@ export default function AnalysisTab({ state }) {
               label="SNATCH_MULTIPLIER"
               value={`${ap.cord_snatch_mult.toFixed(2)}×`}
               badge={`→ ${Math.round(ap.cord_dynamic_lbs)} LBS DYNAMIC`}
-              badgeStatus={ap.cord.strength_lbs < ap.cord_dynamic_lbs ? 'fail' : ap.cord.strength_lbs < ap.cord_dynamic_lbs * 1.5 ? 'warn' : 'ok'}
+              badgeStatus={
+                ap.cord.strength_lbs < ap.cord_dynamic_lbs
+                  ? 'fail'
+                  : ap.cord.strength_lbs < ap.cord_dynamic_lbs * 1.5
+                    ? 'warn'
+                    : 'ok'
+              }
               note={`F_dynamic ≈ F_static × √(1/elongation) — at ${ap.cord.elongation_pct}% elongation the cord amplifies the snatch load (see constraint #12 in simulation.js)`}
             />
           )}
@@ -249,7 +290,9 @@ export default function AnalysisTab({ state }) {
           <AnalRow
             label="LANDING_KE"
             value={`${ap.ke_ftlbf} ft·lbf`}
-            badge={ap.ke_status === 'ok' ? 'SAFE' : ap.ke_status === 'warn' ? 'MARGINAL' : 'CRITICAL'}
+            badge={
+              ap.ke_status === 'ok' ? 'SAFE' : ap.ke_status === 'warn' ? 'MARGINAL' : 'CRITICAL'
+            }
             badgeStatus={ap.ke_status}
             note={`KE = ½mv² = ${ap.landing_ke_J.toFixed(0)} J using main descent rate. NAR/TRA: 75 ft·lbf warn, 100 ft·lbf error. Slightly conservative — actual ground speed is 3–5% lower (denser surface air).`}
           />
@@ -267,7 +310,11 @@ export default function AnalysisTab({ state }) {
       <section className="mc-analysis__section">
         <div className="mc-panel-header">FLIGHT_TIMELINE</div>
         <div className="mc-analysis__body">
-          <TimelineRow marker="T+0" event="LAUNCH" note="Rail exit — no rail friction or launch-guide losses modeled" />
+          <TimelineRow
+            marker="T+0"
+            event="LAUNCH"
+            note="Rail exit — no rail friction or launch-guide losses modeled"
+          />
           {sim.burnout_t_s != null && (
             <TimelineRow
               marker={`T+${sim.burnout_t_s}s`}
@@ -323,7 +370,6 @@ export default function AnalysisTab({ state }) {
           </div>
         </section>
       )}
-
     </div>
   )
 }
@@ -336,7 +382,9 @@ function AnalRow({ label, value, badge, badgeStatus, note, highlight }) {
         <span className="mc-anal-row__right">
           <span className="mc-anal-row__value">{value}</span>
           {badge && (
-            <span className={`mc-anal-row__badge${badgeStatus ? ` mc-anal-row__badge--${badgeStatus}` : ''}`}>
+            <span
+              className={`mc-anal-row__badge${badgeStatus ? ` mc-anal-row__badge--${badgeStatus}` : ''}`}
+            >
               {badge}
             </span>
           )}

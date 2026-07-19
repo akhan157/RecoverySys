@@ -19,7 +19,7 @@ export default function useDarkMode() {
 
   useEffect(() => {
     if (darkMode) document.documentElement.setAttribute('data-theme', 'dark')
-    else          document.documentElement.removeAttribute('data-theme')
+    else document.documentElement.removeAttribute('data-theme')
     saveTheme(darkMode)
   }, [darkMode])
 

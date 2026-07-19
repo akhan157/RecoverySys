@@ -1,4 +1,3 @@
-import React from 'react'
 import StatusChip from './primitives/StatusChip.jsx'
 
 // Shared metric card used by the SIMULATION tab's data grid.
@@ -16,7 +15,9 @@ export default function MetricCard({ label, value, unit, warn, status, statusLab
         )}
       </div>
       {warn && (
-        <div style={{ fontSize: 9, color: 'var(--mc-amber)', marginTop: 2, letterSpacing: '0.04em' }}>
+        <div
+          style={{ fontSize: 9, color: 'var(--mc-amber)', marginTop: 2, letterSpacing: '0.04em' }}
+        >
           ABOVE_NOMINAL_THRESHOLD
         </div>
       )}

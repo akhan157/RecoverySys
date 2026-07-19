@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * Shared button primitive. Pass 2 found 4 distinct button visual styles
  * reimplemented inline across ConfigBuilder, RocketSpecs, SuggestPanel,
@@ -66,8 +64,8 @@ export default function Button({
   ...rest
 }) {
   const variantStyle = VARIANT_BASE[variant] ?? VARIANT_BASE.primary
-  const sizeStyle    = SIZE_BASE[size]       ?? SIZE_BASE.md
-  const isDisabled   = disabled || loading
+  const sizeStyle = SIZE_BASE[size] ?? SIZE_BASE.md
+  const isDisabled = disabled || loading
 
   const handleEnter = (e) => {
     if (isDisabled) return

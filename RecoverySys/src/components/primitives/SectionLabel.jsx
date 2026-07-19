@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * Section divider label — small uppercase tertiary-color text used to title
  * sections within panels, tabs, and forms.

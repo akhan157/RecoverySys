@@ -13,9 +13,10 @@ export function partSpecLine(part, variant = 'compact') {
   switch (part.category) {
     case 'main_chute':
     case 'drogue_chute': {
-      const base = variant === 'detailed'
-        ? `${s.diameter_in}" Ø  Cd ${s.cd}  packed ${s.packed_diam_in}"  ${s.weight_g}g`
-        : `${s.diameter_in}" Ø  Cd ${s.cd}  ${s.weight_g}g`
+      const base =
+        variant === 'detailed'
+          ? `${s.diameter_in}" Ø  Cd ${s.cd}  packed ${s.packed_diam_in}"  ${s.weight_g}g`
+          : `${s.diameter_in}" Ø  Cd ${s.cd}  ${s.weight_g}g`
       const meta = [s.shape, s.material].filter(Boolean).join(' / ')
       return meta ? `${base}  ${meta}` : base
     }
@@ -30,9 +31,8 @@ export function partSpecLine(part, variant = 'compact') {
     case 'swivel':
       return `${s.rated_lbs} lbs WLL  ${s.size_in}" size  ${s.weight_g}g`
     case 'chute_device': {
-      const altRange = s.deploy_alt_min_ft != null
-        ? `  ${s.deploy_alt_min_ft}–${s.deploy_alt_max_ft}ft`
-        : ''
+      const altRange =
+        s.deploy_alt_min_ft != null ? `  ${s.deploy_alt_min_ft}–${s.deploy_alt_max_ft}ft` : ''
       return `${s.weight_g}g${altRange}`
     }
     default:

@@ -2,58 +2,58 @@
 /* Dark oscilloscope / NASA ground station aesthetic                        */
 
 .mc {
-  --mc-bg:        #0a0a0a;
-  --mc-bg-panel:  #111111;
-  --mc-bg-main:   #0d0d0d;
-  --mc-bg-sidebar:#0f0f0f;
-  --mc-border:    #2a2a2a;
-  --mc-border-card:#333333;
-  --mc-border-active:#555555;
-  --mc-white:     #ffffff;
-  --mc-text:      #e0e0e0;
-  --mc-text-dim:  #888888;
-  --mc-text-faint:#555555;
-  --mc-green:     #4caf50;
-  --mc-amber:     #f5a623;
-  --mc-red:       #e74c3c;
-  --mc-accent:    #4caf50;
+  --mc-bg: #0a0a0a;
+  --mc-bg-panel: #111111;
+  --mc-bg-main: #0d0d0d;
+  --mc-bg-sidebar: #0f0f0f;
+  --mc-border: #2a2a2a;
+  --mc-border-card: #333333;
+  --mc-border-active: #555555;
+  --mc-white: #ffffff;
+  --mc-text: #e0e0e0;
+  --mc-text-dim: #888888;
+  --mc-text-faint: #555555;
+  --mc-green: #4caf50;
+  --mc-amber: #f5a623;
+  --mc-red: #e74c3c;
+  --mc-accent: #4caf50;
 
   /* Remap theme vars to MC palette so inputs, panels, and charts inside
      the MC layout stay dark regardless of the app's light/dark toggle. */
-  --bg-app:           var(--mc-bg);
-  --bg-panel:         var(--mc-bg-panel);
-  --bg-right:         var(--mc-bg-main);
-  --bg-hover:         var(--mc-bg-panel);
-  --input-bg:         var(--mc-bg-panel);
-  --text-primary:     var(--mc-text);
-  --text-secondary:   var(--mc-text-dim);
-  --text-tertiary:    var(--mc-text-faint);
+  --bg-app: var(--mc-bg);
+  --bg-panel: var(--mc-bg-panel);
+  --bg-right: var(--mc-bg-main);
+  --bg-hover: var(--mc-bg-panel);
+  --input-bg: var(--mc-bg-panel);
+  --text-primary: var(--mc-text);
+  --text-secondary: var(--mc-text-dim);
+  --text-tertiary: var(--mc-text-faint);
   --text-placeholder: var(--mc-text-faint);
-  --border-default:   var(--mc-border);
-  --border-subtle:    var(--mc-border);
-  --accent:           var(--mc-green);
-  --accent-text:      #000000;
-  --accent-tint:      rgba(76, 175, 80, 0.08);
-  --accent-ring:      rgba(76, 175, 80, 0.15);
-  --header-bg:        var(--mc-bg);
-  --ok-fg:            var(--mc-green);
-  --ok-bg:            rgba(76, 175, 80, 0.08);
-  --warn-fg:          var(--mc-amber);
-  --warn-bg:          rgba(245, 166, 35, 0.08);
-  --warn-border:      rgba(245, 166, 35, 0.3);
-  --error-fg:         var(--mc-red);
-  --error-bg:         rgba(231, 76, 60, 0.08);
-  --neutral-dot:      var(--mc-text-faint);
-  --radius:           4px;
-  --cta-bg:           var(--mc-green);
-  --cta-fg:           #000000;
-  --chart-bg:         var(--mc-bg-panel);
-  --chart-border:     var(--mc-border);
-  --chart-grid:       var(--mc-border);
-  --chart-axis:       var(--mc-text-faint);
-  --chart-path:       var(--mc-text);
-  --chart-marker:     var(--mc-text-dim);
-  --chart-label:      var(--mc-text-dim);
+  --border-default: var(--mc-border);
+  --border-subtle: var(--mc-border);
+  --accent: var(--mc-green);
+  --accent-text: #000000;
+  --accent-tint: rgba(76, 175, 80, 0.08);
+  --accent-ring: rgba(76, 175, 80, 0.15);
+  --header-bg: var(--mc-bg);
+  --ok-fg: var(--mc-green);
+  --ok-bg: rgba(76, 175, 80, 0.08);
+  --warn-fg: var(--mc-amber);
+  --warn-bg: rgba(245, 166, 35, 0.08);
+  --warn-border: rgba(245, 166, 35, 0.3);
+  --error-fg: var(--mc-red);
+  --error-bg: rgba(231, 76, 60, 0.08);
+  --neutral-dot: var(--mc-text-faint);
+  --radius: 4px;
+  --cta-bg: var(--mc-green);
+  --cta-fg: #000000;
+  --chart-bg: var(--mc-bg-panel);
+  --chart-border: var(--mc-border);
+  --chart-grid: var(--mc-border);
+  --chart-axis: var(--mc-text-faint);
+  --chart-path: var(--mc-text);
+  --chart-marker: var(--mc-text-dim);
+  --chart-label: var(--mc-text-dim);
 
   font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', monospace;
   color: var(--mc-text);
@@ -73,7 +73,11 @@
   inset: 0;
   pointer-events: none;
   z-index: 9997;
-  background: radial-gradient(ellipse 130% 130% at 50% 50%, transparent 50%, rgba(0,0,0,0.48) 100%);
+  background: radial-gradient(
+    ellipse 130% 130% at 50% 50%,
+    transparent 50%,
+    rgba(0, 0, 0, 0.48) 100%
+  );
 }
 
 /* Noise grain — breaks digital flatness on dark surfaces */
@@ -89,16 +93,24 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mc::before, .mc::after { display: none; }
+  .mc::before,
+  .mc::after {
+    display: none;
+  }
 }
 @keyframes mc-fade-in {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 @media (prefers-reduced-motion: reduce) {
-  .mc { animation: none; }
+  .mc {
+    animation: none;
+  }
 }
-
 
 /* ── Header ───────────────────────────────────────────────────────────── */
 
@@ -139,7 +151,9 @@
   padding: 14px 18px;
   cursor: pointer;
   border-bottom: 2px solid transparent;
-  transition: color 150ms, border-color 150ms;
+  transition:
+    color 150ms,
+    border-color 150ms;
 }
 
 .mc-header__tab:hover {
@@ -174,7 +188,9 @@
   justify-content: center;
   cursor: pointer;
   font-size: 14px;
-  transition: border-color 150ms, color 150ms;
+  transition:
+    border-color 150ms,
+    color 150ms;
 }
 
 .mc-header__icon-btn:hover {
@@ -298,14 +314,15 @@
 
 .mc-slot--active {
   border-color: var(--mc-white);
-  box-shadow: 0 0 0 1px var(--mc-white), 0 0 14px rgba(255, 255, 255, 0.07);
+  box-shadow:
+    0 0 0 1px var(--mc-white),
+    0 0 14px rgba(255, 255, 255, 0.07);
 }
 
 .mc-slot--empty {
   border-style: dashed;
   border-color: var(--mc-border);
 }
-
 
 .mc-slot__label {
   font-size: 9px;
@@ -449,7 +466,9 @@
   color: var(--mc-green);
   letter-spacing: 0.04em;
   text-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
-  box-shadow: inset 0 0 8px rgba(76, 175, 80, 0.06), 0 0 8px rgba(76, 175, 80, 0.08);
+  box-shadow:
+    inset 0 0 8px rgba(76, 175, 80, 0.06),
+    0 0 8px rgba(76, 175, 80, 0.08);
 }
 
 .mc-validation--warn {
@@ -476,12 +495,12 @@
 }
 
 .mc-run-btn:hover {
-  background: rgba(255,255,255,0.06);
+  background: rgba(255, 255, 255, 0.06);
 }
 
 .mc-run-btn:active:not(:disabled) {
   transform: scale(0.985);
-  background: rgba(255,255,255,0.04);
+  background: rgba(255, 255, 255, 0.04);
   transition: transform 60ms ease;
 }
 
@@ -662,7 +681,6 @@
   color: var(--mc-text-dim);
 }
 
-
 /* ── Parts Browser Wrapper ────────────────────────────────────────────── */
 
 .mc-parts-scroll {
@@ -774,22 +792,48 @@
     border-left: none;
     border-top: 1px solid var(--mc-border);
   }
-  .mc-schematic { min-height: 300px; }
+  .mc-schematic {
+    min-height: 300px;
+  }
 
-  .mc-sim__top { flex-direction: column; }
-  .mc-sim__chart { border-right: none; border-bottom: 1px solid var(--mc-border); min-height: 300px; }
-  .mc-sim__data { width: 100%; }
-  .mc-sim__data-grid { flex-direction: row; flex-wrap: wrap; }
-  .mc-sim__data-card { flex: 1 1 140px; }
+  .mc-sim__top {
+    flex-direction: column;
+  }
+  .mc-sim__chart {
+    border-right: none;
+    border-bottom: 1px solid var(--mc-border);
+    min-height: 300px;
+  }
+  .mc-sim__data {
+    width: 100%;
+  }
+  .mc-sim__data-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .mc-sim__data-card {
+    flex: 1 1 140px;
+  }
 
-  .mc-sim__bottom { flex-direction: column; min-height: auto; max-height: none; }
-  .mc-sim__compat { border-right: none; border-bottom: 1px solid var(--mc-border); }
+  .mc-sim__bottom {
+    flex-direction: column;
+    min-height: auto;
+    max-height: none;
+  }
+  .mc-sim__compat {
+    border-right: none;
+    border-bottom: 1px solid var(--mc-border);
+  }
 }
 
 /* ── Responsive: Mobile ──────────────────────────────────────────────── */
 
 @media (max-width: 640px) {
-  .mc-header { padding: 0 12px; gap: 8px; position: relative; }
+  .mc-header {
+    padding: 0 12px;
+    gap: 8px;
+    position: relative;
+  }
   /* Fade-out gradient on the right edge of the nav tabs hints that more tabs
      are available by scrolling horizontally. Pointer-events none so it doesn't
      block clicks. */
@@ -802,7 +846,9 @@
     mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
     -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
   }
-  .mc-header__tabs::-webkit-scrollbar { display: none; }
+  .mc-header__tabs::-webkit-scrollbar {
+    display: none;
+  }
   .mc-header__tab {
     padding: 14px 10px;
     font-size: 10px;
@@ -811,21 +857,51 @@
     display: inline-flex;
     align-items: center;
   }
-  .mc-header__brand { font-size: 10px; letter-spacing: 0.06em; }
+  .mc-header__brand {
+    font-size: 10px;
+    letter-spacing: 0.06em;
+  }
 
-  .mc-bay-grid { grid-template-columns: 1fr; gap: 8px; padding: 12px; }
+  .mc-bay-grid {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
 
-  .mc-inv-grid { grid-template-columns: 1fr; }
+  .mc-inv-grid {
+    grid-template-columns: 1fr;
+  }
 
-  .mc-sim { height: auto; }
-  .mc-sim__top { flex-direction: column; }
-  .mc-sim__chart { border-right: none; border-bottom: 1px solid var(--mc-border); min-height: 280px; }
-  .mc-sim__data { width: 100%; }
-  .mc-sim__data-grid { flex-direction: row; flex-wrap: wrap; }
-  .mc-sim__data-card { flex: 1 1 120px; }
-  .mc-sim__bottom { flex-direction: column; min-height: auto; max-height: none; }
-  .mc-sim__compat { border-right: none; border-bottom: 1px solid var(--mc-border); }
-
+  .mc-sim {
+    height: auto;
+  }
+  .mc-sim__top {
+    flex-direction: column;
+  }
+  .mc-sim__chart {
+    border-right: none;
+    border-bottom: 1px solid var(--mc-border);
+    min-height: 280px;
+  }
+  .mc-sim__data {
+    width: 100%;
+  }
+  .mc-sim__data-grid {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .mc-sim__data-card {
+    flex: 1 1 120px;
+  }
+  .mc-sim__bottom {
+    flex-direction: column;
+    min-height: auto;
+    max-height: none;
+  }
+  .mc-sim__compat {
+    border-right: none;
+    border-bottom: 1px solid var(--mc-border);
+  }
 }
 
 /* ── Analysis Tab ────────────────────────────────────────────────────────── */
@@ -894,7 +970,7 @@
 }
 
 .mc-anal-row:hover {
-  background: rgba(255,255,255,0.02);
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .mc-anal-row--highlight {
@@ -906,7 +982,7 @@
 }
 
 .mc-anal-row--highlight:hover {
-  background: rgba(76, 175, 80, 0.10);
+  background: rgba(76, 175, 80, 0.1);
 }
 
 .mc-anal-row__top {
@@ -950,9 +1026,15 @@
   white-space: nowrap;
 }
 
-.mc-anal-row__badge--ok   { color: var(--mc-green); }
-.mc-anal-row__badge--warn { color: var(--mc-amber); }
-.mc-anal-row__badge--fail { color: var(--mc-red); }
+.mc-anal-row__badge--ok {
+  color: var(--mc-green);
+}
+.mc-anal-row__badge--warn {
+  color: var(--mc-amber);
+}
+.mc-anal-row__badge--fail {
+  color: var(--mc-red);
+}
 
 .mc-anal-row__note {
   font-size: 11px;
@@ -1019,9 +1101,15 @@
   transition: width 0.4s ease;
 }
 
-.mc-packing-gauge__fill--ok   { background: var(--mc-green); }
-.mc-packing-gauge__fill--warn { background: var(--mc-amber); }
-.mc-packing-gauge__fill--fail { background: var(--mc-red); }
+.mc-packing-gauge__fill--ok {
+  background: var(--mc-green);
+}
+.mc-packing-gauge__fill--warn {
+  background: var(--mc-amber);
+}
+.mc-packing-gauge__fill--fail {
+  background: var(--mc-red);
+}
 
 .mc-packing-gauge__labels {
   margin: 3px 14px 6px;
@@ -1049,22 +1137,38 @@
 
 /* ── Safety factor status classes ────────────────────────────────────────── */
 
-.mc-sf--pass { color: var(--mc-green); font-weight: 600; text-shadow: 0 0 6px rgba(76, 175, 80, 0.6); }
-.mc-sf--warn { color: var(--mc-amber); font-weight: 600; }
-.mc-sf--fail { color: var(--mc-red);   font-weight: 600; }
+.mc-sf--pass {
+  color: var(--mc-green);
+  font-weight: 600;
+  text-shadow: 0 0 6px rgba(76, 175, 80, 0.6);
+}
+.mc-sf--warn {
+  color: var(--mc-amber);
+  font-weight: 600;
+}
+.mc-sf--fail {
+  color: var(--mc-red);
+  font-weight: 600;
+}
 
 /* ── MetricCard value sizes ───────────────────────────────────────────────── */
 
-.mc-metric__value--compact { font-size: 22px; }
+.mc-metric__value--compact {
+  font-size: 22px;
+}
 
 /* ── Print Styles ────────────────────────────────────────────────────────── */
 
 /* Screen: hide the print checklist */
-.print-checklist { display: none; }
+.print-checklist {
+  display: none;
+}
 
 @media print {
   /* Hide the app UI, show only the checklist */
-  .mc { display: none !important; }
+  .mc {
+    display: none !important;
+  }
 
   .print-checklist {
     display: block !important;

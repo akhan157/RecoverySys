@@ -1,4 +1,3 @@
-import React from 'react'
 import './DemoBanner.css'
 
 // Shown at the top of the app when ?demo=1 is in the URL. Tells the user the
@@ -10,7 +9,8 @@ export default function DemoBanner({ onExit }) {
       <div className="demo-banner__inner">
         <span className="demo-banner__tag">DEMO</span>
         <span className="demo-banner__msg">
-          You're viewing a sample L3 recovery configuration at FAR Mojave. Explore the tabs to see how it works.
+          You're viewing a sample L3 recovery configuration at FAR Mojave. Explore the tabs to see
+          how it works.
         </span>
         <button type="button" className="demo-banner__btn" onClick={onExit}>
           ✕ START_FRESH

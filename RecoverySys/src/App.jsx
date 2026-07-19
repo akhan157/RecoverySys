@@ -1,8 +1,10 @@
-import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } from 'react'
-import { PARTS, CATEGORIES, SLOT_IDS, EMPTY_CONFIG } from './data/parts.js'
+import { useReducer, useEffect, useCallback, useRef } from 'react'
+import { PARTS, SLOT_IDS, EMPTY_CONFIG } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import {
-  loadSaved, loadCustomParts, rehydrateCustomMotor,
+  loadSaved,
+  loadCustomParts,
+  rehydrateCustomMotor,
   saveConfigToStorage,
 } from './lib/storage.js'
 import useDarkMode from './hooks/useDarkMode.js'
@@ -13,8 +15,12 @@ import useDemoMode from './hooks/useDemoMode.js'
 import usePersistence from './hooks/usePersistence.js'
 import { encodeSharePayload, buildShareUrl, SHARE_PARAM } from './lib/shareLink.js'
 import {
-  SAVE_STATES, SHARE_STATES, TOAST_LEVELS,
-  SAVE_FLASH_MS, SAVE_RESET_MS, SHARE_RESET_MS,
+  SAVE_STATES,
+  SHARE_STATES,
+  TOAST_LEVELS,
+  SAVE_FLASH_MS,
+  SAVE_RESET_MS,
+  SHARE_RESET_MS,
 } from './lib/constants.js'
 import { getDefaultSpecs } from './lib/schema.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
@@ -25,7 +31,11 @@ import DemoBanner from './components/DemoBanner.jsx'
 // clicking the DISPERSION tab feels instant instead of waiting for the bundle.
 function prefetchLeaflet() {
   if (typeof window === 'undefined') return
-  const run = () => { import('leaflet').catch(() => { /* offline — retry on-demand */ }) }
+  const run = () => {
+    import('leaflet').catch(() => {
+      /* offline — retry on-demand */
+    })
+  }
   if (window.requestIdleCallback) window.requestIdleCallback(run, { timeout: 3000 })
   else setTimeout(run, 1500)
 }
@@ -52,47 +62,51 @@ const DEFAULT_SPECS = getDefaultSpecs()
 //
 // Expected validation: 3 yellow notices, 0 red errors.
 const DEMO_PART_IDS = {
-  main_chute:      'ifc-096-n',       // Fruity Chutes 96" Iris Ultra Standard (Nylon), CD 2.2
-  drogue_chute:    'cfc-030-n',       // Fruity Chutes 30" Classic Elliptical (Nylon)
-  shock_cord:      'sc-tub-1-20',     // 1" Tubular Nylon 20ft, 2000 lbs
-  chute_protector: null,              // No protector rated for 96" main in catalog
-  deployment_bag:  null,              // Absent intentionally — triggers d-bag notice
-  quick_links:     'ql-38-zinc',      // 3/8" Zinc Quick Links, 2640 lbs
-  swivel:          'sw-ss-3qtr',      // 3/4" Stainless Ball Bearing Swivel, 3500 lbs
-  chute_device:    'jl-chute-release',// Jolly Logic Chute Release
+  main_chute: 'ifc-096-n', // Fruity Chutes 96" Iris Ultra Standard (Nylon), CD 2.2
+  drogue_chute: 'cfc-030-n', // Fruity Chutes 30" Classic Elliptical (Nylon)
+  shock_cord: 'sc-tub-1-20', // 1" Tubular Nylon 20ft, 2000 lbs
+  chute_protector: null, // No protector rated for 96" main in catalog
+  deployment_bag: null, // Absent intentionally — triggers d-bag notice
+  quick_links: 'ql-38-zinc', // 3/8" Zinc Quick Links, 2640 lbs
+  swivel: 'sw-ss-3qtr', // 3/4" Stainless Ball Bearing Swivel, 3500 lbs
+  chute_device: 'jl-chute-release', // Jolly Logic Chute Release
 }
 
 const DEMO_SPECS = {
-  rocket_mass_g:          '11000',    // 11 kg — typical L3 cert rocket
-  motor_total_impulse_ns: '7450',     // M class (M795 / M1450 range)
-  burn_time_s:            '5.0',
-  airframe_id_in:         '6',        // 6" ID — most common L3 airframe
-  bay_length_in:          '24',       // 24" recovery bay → 87% packing utilization
-  drag_cd:                '0.5',
-  wind_speed_mph:         '10',       // FAR surface — sheltered by Rand/El Paso mountains
-  wind_direction_deg:     '270',      // prevailing westerly
-  main_deploy_alt_ft:     '700',
-  ejection_g_factor:      '',
+  rocket_mass_g: '11000', // 11 kg — typical L3 cert rocket
+  motor_total_impulse_ns: '7450', // M class (M795 / M1450 range)
+  burn_time_s: '5.0',
+  airframe_id_in: '6', // 6" ID — most common L3 airframe
+  bay_length_in: '24', // 24" recovery bay → 87% packing utilization
+  drag_cd: '0.5',
+  wind_speed_mph: '10', // FAR surface — sheltered by Rand/El Paso mountains
+  wind_direction_deg: '270', // prevailing westerly
+  main_deploy_alt_ft: '700',
+  ejection_g_factor: '',
   bay_obstruction_vol_in3: '',
-  launch_lat:             '35.3456',  // FAR (Friends of Amateur Rocketry), Mojave CA
-  launch_lon:             '-117.8083',
-  wind_surface_alt_ft:    '0',
-  wind_mid_speed_mph:     '18',       // mid-level — above terrain shielding
+  launch_lat: '35.3456', // FAR (Friends of Amateur Rocketry), Mojave CA
+  launch_lon: '-117.8083',
+  wind_surface_alt_ft: '0',
+  wind_mid_speed_mph: '18', // mid-level — above terrain shielding
   wind_mid_direction_deg: '270',
-  wind_mid_alt_ft:        '3000',
-  wind_aloft_speed_mph:   '28',       // aloft — slight directional shift to WSW
+  wind_mid_alt_ft: '3000',
+  wind_aloft_speed_mph: '28', // aloft — slight directional shift to WSW
   wind_aloft_direction_deg: '260',
-  wind_aloft_alt_ft:      '8000',
+  wind_aloft_alt_ft: '8000',
 }
 
 function buildInitialState() {
   const saved = loadSaved()
   const custom = loadCustomParts()
   const allParts = [...custom, ...PARTS]
-  const rehydrate = (part) => part ? allParts.find(p => p.id === part.id && p.category === part.category) ?? null : null
+  const rehydrate = (part) =>
+    part ? (allParts.find((p) => p.id === part.id && p.category === part.category) ?? null) : null
   return {
-    config: Object.fromEntries(SLOT_IDS.map(id => [id, rehydrate(saved?.config?.[id])])),
-    specs: { ...DEFAULT_SPECS, ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)) },
+    config: Object.fromEntries(SLOT_IDS.map((id) => [id, rehydrate(saved?.config?.[id])])),
+    specs: {
+      ...DEFAULT_SPECS,
+      ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)),
+    },
     // Imported .eng motor file data: null when using the ThrustCurve search or manual entry.
     // Shape: { designation, curve: [{t, thrust_N}], totalImpulse_ns, burnTime_s,
     //         peakThrust_N, propellant_kg, total_kg, diameter_mm, length_mm, delays, manufacturer }
@@ -110,7 +124,11 @@ function buildInitialState() {
 function reducer(state, action) {
   switch (action.type) {
     case 'SELECT_PART':
-      return { ...state, config: { ...state.config, [action.category]: action.part }, simulation: null }
+      return {
+        ...state,
+        config: { ...state.config, [action.category]: action.part },
+        simulation: null,
+      }
     case 'REMOVE_PART':
       return { ...state, config: { ...state.config, [action.category]: null }, simulation: null }
     case 'SET_SPEC':
@@ -147,7 +165,7 @@ function reducer(state, action) {
     case 'ADD_TOAST':
       return { ...state, toasts: [...state.toasts, { ...action.toast, id: action.id }] }
     case 'REMOVE_TOAST':
-      return { ...state, toasts: state.toasts.filter(t => t.id !== action.id) }
+      return { ...state, toasts: state.toasts.filter((t) => t.id !== action.id) }
     case 'SET_SAVE_STATE':
       return { ...state, saveState: action.state }
     case 'SET_SHARE_STATE':
@@ -183,10 +201,10 @@ function reducer(state, action) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, null, buildInitialState)
-  const toastCounter      = useRef(0)
-  const timeoutIds        = useRef([])
-  const restoredToastFired = useRef(false)   // guard against React 18 StrictMode double-invoke
-  const leafletPrefetched  = useRef(false)
+  const toastCounter = useRef(0)
+  const timeoutIds = useRef([])
+  const restoredToastFired = useRef(false) // guard against React 18 StrictMode double-invoke
+  const leafletPrefetched = useRef(false)
 
   const safeTimeout = useCallback((fn, ms) => {
     const id = setTimeout(fn, ms)
@@ -197,7 +215,7 @@ export default function App() {
   useEffect(() => () => timeoutIds.current.forEach(clearTimeout), [])
 
   useEffect(() => {
-    if (leafletPrefetched.current) return   // StrictMode double-invoke idempotent
+    if (leafletPrefetched.current) return // StrictMode double-invoke idempotent
     leafletPrefetched.current = true
     prefetchLeaflet()
   }, [])
@@ -207,10 +225,8 @@ export default function App() {
 
   // Custom parts (persisted; merged with PARTS into allParts; CRUD cleans
   // up matching config slots when parts are deleted or edited).
-  const {
-    customParts, setCustomParts, allParts,
-    addCustomPart, deleteCustomPart, editCustomPart,
-  } = useCustomParts({ config: state.config, dispatch })
+  const { customParts, setCustomParts, allParts, addCustomPart, deleteCustomPart, editCustomPart } =
+    useCustomParts({ config: state.config, dispatch })
 
   // Debounced compatibility re-evaluation on config/specs change.
   useCompatibilityWatcher({ config: state.config, specs: state.specs, dispatch })
@@ -220,7 +236,10 @@ export default function App() {
   // Share link wins if both are present. Hoisted above usePersistence so demoMode
   // is available to disable auto-save during the demo session.
   const { demoMode, exitDemo } = useDemoMode({
-    allParts, demoPartIds: DEMO_PART_IDS, demoSpecs: DEMO_SPECS, dispatch,
+    allParts,
+    demoPartIds: DEMO_PART_IDS,
+    demoSpecs: DEMO_SPECS,
+    dispatch,
   })
 
   // Auto-persist config + specs + customMotor to localStorage (Pass 2 fix).
@@ -239,10 +258,10 @@ export default function App() {
     dispatch({ type: 'SET_CATEGORY', category: part.category })
   }, [])
 
-  const removePart       = useCallback((category) => dispatch({ type: 'REMOVE_PART', category }), [])
-  const setSpec          = useCallback((key, value) => dispatch({ type: 'SET_SPEC', key, value }), [])
-  const setCategory      = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
-  const setCustomMotor   = useCallback((motor) => dispatch({ type: 'SET_CUSTOM_MOTOR', motor }), [])
+  const removePart = useCallback((category) => dispatch({ type: 'REMOVE_PART', category }), [])
+  const setSpec = useCallback((key, value) => dispatch({ type: 'SET_SPEC', key, value }), [])
+  const setCategory = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
+  const setCustomMotor = useCallback((motor) => dispatch({ type: 'SET_CUSTOM_MOTOR', motor }), [])
   const clearCustomMotor = useCallback(() => dispatch({ type: 'CLEAR_CUSTOM_MOTOR' }), [])
   const loadConfig = useCallback(({ config, specs, customMotor }) => {
     dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
@@ -254,19 +273,36 @@ export default function App() {
 
   const runSim = useCallback(() => {
     dispatch({ type: 'START_SIM' })
-    const result = runSimulation({ specs: state.specs, config: state.config, customMotor: state.customMotor })
+    const result = runSimulation({
+      specs: state.specs,
+      config: state.config,
+      customMotor: state.customMotor,
+    })
     dispatch({ type: 'SET_SIM', simulation: result })
     if (result === null) {
-      addToast(TOAST_LEVELS.ERROR, 'Simulation failed — main deploy altitude may exceed apogee, or chute specs are invalid. Lower deploy altitude or increase motor impulse.')
+      addToast(
+        TOAST_LEVELS.ERROR,
+        'Simulation failed — main deploy altitude may exceed apogee, or chute specs are invalid. Lower deploy altitude or increase motor impulse.'
+      )
     }
   }, [state.specs, state.config, state.customMotor, addToast])
 
   const saveConfig = useCallback(() => {
     dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVING })
-    const ok = saveConfigToStorage({ config: state.config, specs: state.specs, customMotor: state.customMotor })
+    const ok = saveConfigToStorage({
+      config: state.config,
+      specs: state.specs,
+      customMotor: state.customMotor,
+    })
     if (ok) {
-      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVED }), SAVE_FLASH_MS)
-      safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE  }), SAVE_RESET_MS)
+      safeTimeout(
+        () => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVED }),
+        SAVE_FLASH_MS
+      )
+      safeTimeout(
+        () => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE }),
+        SAVE_RESET_MS
+      )
     } else {
       dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE })
       addToast(TOAST_LEVELS.ERROR, 'Save failed — storage full')
@@ -275,15 +311,25 @@ export default function App() {
 
   const copyShareLink = useCallback(() => {
     try {
-      const encoded = encodeSharePayload({ config: state.config, specs: state.specs, customMotor: state.customMotor })
+      const encoded = encodeSharePayload({
+        config: state.config,
+        specs: state.specs,
+        customMotor: state.customMotor,
+      })
       const url = buildShareUrl(encoded)
       // Only show "Copied!" after the write actually succeeds.
-      navigator.clipboard.writeText(url).then(() => {
-        dispatch({ type: 'SET_SHARE_STATE', state: SHARE_STATES.COPIED })
-        safeTimeout(() => dispatch({ type: 'SET_SHARE_STATE', state: SHARE_STATES.IDLE }), SHARE_RESET_MS)
-      }).catch(() => {
-        addToast(TOAST_LEVELS.ERROR, 'Copy failed — try again')
-      })
+      navigator.clipboard
+        .writeText(url)
+        .then(() => {
+          dispatch({ type: 'SET_SHARE_STATE', state: SHARE_STATES.COPIED })
+          safeTimeout(
+            () => dispatch({ type: 'SET_SHARE_STATE', state: SHARE_STATES.IDLE }),
+            SHARE_RESET_MS
+          )
+        })
+        .catch(() => {
+          addToast(TOAST_LEVELS.ERROR, 'Copy failed — try again')
+        })
     } catch {
       // Synchronous failure — clipboard API unavailable
       addToast(TOAST_LEVELS.ERROR, 'Copy failed — try again')
@@ -294,18 +340,20 @@ export default function App() {
 
   // ── Session restore toast ─────────────────────────────────────────────────
   useEffect(() => {
-    if (restoredToastFired.current) return   // idempotent under React 18 StrictMode double-invoke
+    if (restoredToastFired.current) return // idempotent under React 18 StrictMode double-invoke
     restoredToastFired.current = true
     try {
       const params = new URLSearchParams(location.search)
-      if (params.get(SHARE_PARAM)) return   // share link active — URL state takes precedence
-      if (demoMode) return                  // demo (explicit or first-visit) — no "restored" toast
+      if (params.get(SHARE_PARAM)) return // share link active — URL state takes precedence
+      if (demoMode) return // demo (explicit or first-visit) — no "restored" toast
       const raw = localStorage.getItem('recoverysys-config')
       if (raw && JSON.parse(raw)) {
         addToast(TOAST_LEVELS.OK, 'Restored your last session.')
       }
-    } catch { /* silent */ }
-  }, [addToast])
+    } catch {
+      /* silent */
+    }
+  }, [addToast, demoMode])
 
   // Share link loader (mount-once: decode ?c=, dispatch LOAD_SHARE, toast).
   useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch })

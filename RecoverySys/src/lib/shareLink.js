@@ -57,11 +57,11 @@ export function decodeSharePayload(encoded, { allParts, slotIds, emptyConfig }) 
           if (part.id?.startsWith('custom-') && isValidCustomPart(part)) {
             // Full custom part inlined in the share link — use directly
             newConfig[cat] = part
-            if (!inlinedCustomParts.find(p => p.id === part.id)) {
+            if (!inlinedCustomParts.find((p) => p.id === part.id)) {
               inlinedCustomParts.push(part)
             }
           } else {
-            const found = allParts.find(p => p.id === part.id && p.category === cat)
+            const found = allParts.find((p) => p.id === part.id && p.category === cat)
             if (found) newConfig[cat] = found
             else if (part.id?.startsWith('custom-')) customMissing++
             else catalogMissing++
@@ -87,5 +87,7 @@ export function decodeSharePayload(encoded, { allParts, slotIds, emptyConfig }) 
       customMissing,
       inlinedCustomParts,
     }
-  } catch { return null }
+  } catch {
+    return null
+  }
 }

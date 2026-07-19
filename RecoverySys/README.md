@@ -18,6 +18,9 @@ RecoverySys is a local-first recovery-bay configuration and flight-estimation to
 
 ## Local development
 
+RecoverySys supports Node.js `^20.19.0 || ^22.13.0 || >=24.0.0` and npm `>=10`.
+CI runs on Node 22.
+
 From this directory:
 
 ```bash
@@ -34,6 +37,7 @@ npm test             # run the test suite once
 npm run test:watch   # run tests in watch mode
 npm run lint         # lint src/
 npm run format:check # check formatting
+npm run check        # run formatting, lint, tests, and build checks
 ```
 
 ## GitHub Pages

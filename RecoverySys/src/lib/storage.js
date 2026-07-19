@@ -19,7 +19,9 @@ export function loadSaved() {
     const raw = localStorage.getItem(STORAGE_KEYS.CONFIG)
     if (!raw) return null
     return runMigrations(JSON.parse(raw))
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 // Single validator for custom parts shape. Used by both loadCustomParts
@@ -30,12 +32,18 @@ export function loadSaved() {
 const MAX_CUSTOM_NAME_LEN = 200
 
 export function isValidCustomPart(p) {
-  return p &&
+  return (
+    p &&
     typeof p === 'object' &&
-    typeof p.id === 'string' && p.id.length > 0 &&
-    typeof p.name === 'string' && p.name.length > 0 && p.name.length <= MAX_CUSTOM_NAME_LEN &&
+    typeof p.id === 'string' &&
+    p.id.length > 0 &&
+    typeof p.name === 'string' &&
+    p.name.length > 0 &&
+    p.name.length <= MAX_CUSTOM_NAME_LEN &&
     typeof p.category === 'string' &&
-    p.specs !== null && typeof p.specs === 'object'
+    p.specs !== null &&
+    typeof p.specs === 'object'
+  )
 }
 
 export function loadCustomParts() {
@@ -45,7 +53,9 @@ export function loadCustomParts() {
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed)) return []
     return parsed.filter(isValidCustomPart)
-  } catch { return [] }
+  } catch {
+    return []
+  }
 }
 
 // Defensive shape-check for customMotor loaded from localStorage or a share link.
@@ -69,15 +79,20 @@ export function saveConfigToStorage({ config, specs, customMotor }) {
   try {
     localStorage.setItem(
       STORAGE_KEYS.CONFIG,
-      JSON.stringify({ schemaVersion: SCHEMA_VERSION, config, specs, customMotor }),
+      JSON.stringify({ schemaVersion: SCHEMA_VERSION, config, specs, customMotor })
     )
     return true
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 export function saveCustomPartsToStorage(customParts) {
-  try { localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, JSON.stringify(customParts)) }
-  catch { /* storage unavailable */ }
+  try {
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, JSON.stringify(customParts))
+  } catch {
+    /* storage unavailable */
+  }
 }
 
 export function loadTheme() {
@@ -87,10 +102,15 @@ export function loadTheme() {
     if (stored === 'light') return false
     // No explicit preference — respect OS setting
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 export function saveTheme(darkMode) {
-  try { localStorage.setItem(STORAGE_KEYS.THEME, darkMode ? 'dark' : 'light') }
-  catch { /* storage unavailable */ }
+  try {
+    localStorage.setItem(STORAGE_KEYS.THEME, darkMode ? 'dark' : 'light')
+  } catch {
+    /* storage unavailable */
+  }
 }

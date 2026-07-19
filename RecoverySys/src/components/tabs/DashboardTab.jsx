@@ -1,14 +1,24 @@
-import React from 'react'
 import { CATEGORIES } from '../../data/parts.js'
 import { partSpecLine } from '../../lib/format.js'
 import PartsBrowser from '../PartsBrowser.jsx'
 import SuggestPanel from '../SuggestPanel.jsx'
 
 export default function DashboardTab({
-  state, allParts, customParts, filledSlots, packingVolume,
-  hasWarnings, hasErrors, canRun,
-  selectPart, removePart, setCategory, runSim,
-  addCustomPart, deleteCustomPart, editCustomPart,
+  state,
+  allParts,
+  customParts,
+  filledSlots,
+  packingVolume,
+  hasWarnings,
+  hasErrors,
+  canRun,
+  selectPart,
+  removePart,
+  setCategory,
+  runSim,
+  addCustomPart,
+  deleteCustomPart,
+  editCustomPart,
 }) {
   return (
     <div className="mc-dashboard">
@@ -39,7 +49,7 @@ export default function DashboardTab({
           <span className="mc-panel-header__right">LAYER: 01_INTERNAL &nbsp; SCALE: 1:10</span>
         </h2>
         <div className="mc-bay-grid">
-          {CATEGORIES.map((cat, i) => {
+          {CATEGORIES.map((cat) => {
             const part = state.config[cat.id]
             const isEmpty = !part
             const isActive = state.activeCategory === cat.id
@@ -62,18 +72,19 @@ export default function DashboardTab({
                 {part && (
                   <button
                     className="mc-slot__remove"
-                    onClick={(e) => { e.stopPropagation(); removePart(cat.id) }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removePart(cat.id)
+                    }}
                     title="Remove"
                     aria-label={`Remove ${part.name}`}
-                  >×</button>
+                  >
+                    ×
+                  </button>
                 )}
                 <div className="mc-slot__label">{cat.code}</div>
-                <div className="mc-slot__name">
-                  {part ? part.name : 'NO_COMPONENT_LOADED'}
-                </div>
-                {part && (
-                  <div className="mc-slot__specs">{partSpecLine(part)}</div>
-                )}
+                <div className="mc-slot__name">{part ? part.name : 'NO_COMPONENT_LOADED'}</div>
+                {part && <div className="mc-slot__specs">{partSpecLine(part)}</div>}
               </div>
             )
           })}
@@ -125,22 +136,25 @@ export default function DashboardTab({
               <div className="mc-metric">
                 <div className="mc-metric__label">APOGEE_ALTITUDE</div>
                 <div className="mc-metric__value">
-                  {state.simulation.apogee_ft.toLocaleString()}<span className="mc-metric__unit">FT</span>
+                  {state.simulation.apogee_ft.toLocaleString()}
+                  <span className="mc-metric__unit">FT</span>
                 </div>
-                <div className="mc-metric__sub">{state.simulation.apogee_method?.toUpperCase() || 'CALCULATED'}</div>
+                <div className="mc-metric__sub">
+                  {state.simulation.apogee_method?.toUpperCase() || 'CALCULATED'}
+                </div>
               </div>
               <div className="mc-metric">
                 <div className="mc-metric__label">DESCENT_RATE</div>
                 <div className="mc-metric__value">
-                  {state.simulation.main_fps != null
-                    ? state.simulation.main_fps.toFixed(1)
-                    : '—'}
+                  {state.simulation.main_fps != null ? state.simulation.main_fps.toFixed(1) : '—'}
                   <span className="mc-metric__unit">FT/S</span>
                 </div>
                 <div className="mc-metric__sub">
                   {state.simulation.main_fps == null
                     ? 'DROGUE_ONLY'
-                    : state.simulation.main_fps > 15 ? 'ABOVE_NOMINAL' : 'WITHIN_LIMITS'}
+                    : state.simulation.main_fps > 15
+                      ? 'ABOVE_NOMINAL'
+                      : 'WITHIN_LIMITS'}
                 </div>
               </div>
             </>

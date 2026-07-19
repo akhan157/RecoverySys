@@ -25,27 +25,32 @@ import { SHARE_PARAM } from '../lib/shareLink.js'
  * Returns: { demoMode, exitDemo }
  */
 export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch }) {
-  const [demoMode, setDemoMode] = useState(() => {
+  const [demoMode] = useState(() => {
     if (typeof window === 'undefined') return false
     const params = new URLSearchParams(location.search)
     if (params.get('demo') === '1') return true
     if (params.get(SHARE_PARAM)) return false
     try {
-      const hasConfig  = !!localStorage.getItem('recoverysys-config')
+      const hasConfig = !!localStorage.getItem('recoverysys-config')
       const hasVisited = !!localStorage.getItem('recoverysys-visited')
       return !hasConfig && !hasVisited
-    } catch { return false }
+    } catch {
+      return false
+    }
   })
   const demoLoaded = useRef(false)
 
   useEffect(() => {
-    if (demoLoaded.current) return        // StrictMode-safe single load
+    if (demoLoaded.current) return // StrictMode-safe single load
     if (!demoMode) return
-    if (new URLSearchParams(location.search).get(SHARE_PARAM)) return  // share link wins
+    if (new URLSearchParams(location.search).get(SHARE_PARAM)) return // share link wins
     demoLoaded.current = true
 
     const config = Object.fromEntries(
-      SLOT_IDS.map(slot => [slot, allParts.find(p => p.id === demoPartIds[slot] && p.category === slot) ?? null])
+      SLOT_IDS.map((slot) => [
+        slot,
+        allParts.find((p) => p.id === demoPartIds[slot] && p.category === slot) ?? null,
+      ])
     )
     // Run sim synchronously before dispatching so config + results land in
     // the same render batch. safeTimeout would be cleared by StrictMode's
@@ -69,7 +74,9 @@ export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch
     try {
       localStorage.removeItem('recoverysys-config')
       localStorage.setItem('recoverysys-visited', '1')
-    } catch { /* silent */ }
+    } catch {
+      /* silent */
+    }
     // Hard-navigate to the clean URL (removes ?demo=1, triggers visible reload).
     // replaceState would silently mutate the URL bar with no perceived navigation.
     window.location.replace(window.location.pathname)

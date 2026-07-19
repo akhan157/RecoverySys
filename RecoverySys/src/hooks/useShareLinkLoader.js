@@ -20,9 +20,11 @@ export default function useShareLinkLoader({ allParts, addToast, setCustomParts,
     const c = new URLSearchParams(location.search).get(SHARE_PARAM)
     if (!c) return
     const decoded = decodeSharePayload(c, {
-      allParts, slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG,
+      allParts,
+      slotIds: SLOT_IDS,
+      emptyConfig: EMPTY_CONFIG,
     })
-    if (!decoded) return   // malformed or future-version — silently ignore
+    if (!decoded) return // malformed or future-version — silently ignore
 
     dispatch({
       type: 'LOAD_SHARE',
@@ -34,22 +36,22 @@ export default function useShareLinkLoader({ allParts, addToast, setCustomParts,
     if (decoded.catalogMissing > 0) {
       addToast(
         TOAST_LEVELS.WARN,
-        `${decoded.catalogMissing} part${decoded.catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`,
+        `${decoded.catalogMissing} part${decoded.catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`
       )
     }
 
     if (decoded.inlinedCustomParts?.length > 0) {
       let importedCount = 0
-      setCustomParts(prev => {
-        const existingIds = new Set(prev.map(p => p.id))
-        const newParts = decoded.inlinedCustomParts.filter(p => !existingIds.has(p.id))
+      setCustomParts((prev) => {
+        const existingIds = new Set(prev.map((p) => p.id))
+        const newParts = decoded.inlinedCustomParts.filter((p) => !existingIds.has(p.id))
         importedCount = newParts.length
         return importedCount > 0 ? [...prev, ...newParts] : prev
       })
       if (importedCount > 0) {
         addToast(
           TOAST_LEVELS.OK,
-          `Imported ${importedCount} custom part${importedCount > 1 ? 's' : ''} from share link.`,
+          `Imported ${importedCount} custom part${importedCount > 1 ? 's' : ''} from share link.`
         )
       }
     }
@@ -57,7 +59,7 @@ export default function useShareLinkLoader({ allParts, addToast, setCustomParts,
     if (decoded.customMissing > 0) {
       addToast(
         TOAST_LEVELS.WARN,
-        `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be loaded.`,
+        `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be loaded.`
       )
     }
     // Mount-once: link is parsed exactly once at first render.

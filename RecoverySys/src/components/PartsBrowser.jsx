@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { slotStatus } from '../lib/compatibility.js'
 import { partSpecLine } from '../lib/format.js'
 import CompatDot from './CompatDot.jsx'
@@ -9,7 +9,7 @@ import './PartsBrowser.css'
 function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen, hasSelected }) {
   return (
     <CollapsibleGroup label={mfr} defaultOpen={defaultOpen || hasSelected}>
-      {parts.map(part => {
+      {parts.map((part) => {
         const isSelected = config[part.category]?.id === part.id
         return (
           <button
@@ -32,7 +32,7 @@ function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen, hasSelected }
 function CustomGroup({ parts, config, onSelectPart, onDelete, onEdit }) {
   return (
     <CollapsibleGroup label="CUSTOM" labelStyle={{ color: 'var(--accent)' }} defaultOpen>
-      {parts.map(part => {
+      {parts.map((part) => {
         const isSelected = config[part.category]?.id === part.id
         return (
           <div key={part.id} style={{ position: 'relative' }}>
@@ -46,11 +46,22 @@ function CustomGroup({ parts, config, onSelectPart, onDelete, onEdit }) {
               <div className="parts-card__spec mono">{partSpecLine(part)}</div>
             </button>
             {/* Edit + Delete buttons — positioned over card */}
-            <div style={{ position: 'absolute', top: '4px', right: '4px', display: 'flex', gap: '2px' }}>
+            <div
+              style={{
+                position: 'absolute',
+                top: '4px',
+                right: '4px',
+                display: 'flex',
+                gap: '2px',
+              }}
+            >
               <button
                 type="button"
                 className="parts-card__delete"
-                onClick={e => { e.stopPropagation(); onEdit(part) }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onEdit(part)
+                }}
                 title="Edit custom part"
                 aria-label={`Edit ${part.name}`}
                 style={{ fontSize: '11px' }}
@@ -60,7 +71,10 @@ function CustomGroup({ parts, config, onSelectPart, onDelete, onEdit }) {
               <button
                 type="button"
                 className="parts-card__delete"
-                onClick={e => { e.stopPropagation(); onDelete(part.id) }}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onDelete(part.id)
+                }}
                 title="Delete custom part"
                 aria-label={`Delete ${part.name}`}
               >
@@ -76,52 +90,213 @@ function CustomGroup({ parts, config, onSelectPart, onDelete, onEdit }) {
 
 // ── Per-category field schemas for custom part creation ──────────────────────
 const CHUTE_FIELDS = [
-  { key: 'diameter_in', label: 'Diameter (in)', type: 'number', required: true, min: 6, max: 200, step: 1 },
-  { key: 'cd', label: 'Drag Coeff (Cd)', type: 'number', required: true, min: 0.3, max: 2.5, step: 0.01 },
-  { key: 'packed_diam_in', label: 'Packed Diam (in)', type: 'number', required: true, min: 0.5, max: 20, step: 0.1 },
-  { key: 'packed_length_in', label: 'Packed Length (in)', type: 'number', required: true, min: 0.5, max: 30, step: 0.1 },
-  { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, max: 5000, step: 1 },
-  { key: 'shape', label: 'Shape', type: 'select', options: ['', 'elliptical', 'flat', 'toroidal', 'cruciform'], required: false },
-  { key: 'material', label: 'Material', type: 'select', options: ['', 'nylon', 'ripstop nylon', 'silicone-coated nylon'], required: false },
+  {
+    key: 'diameter_in',
+    label: 'Diameter (in)',
+    type: 'number',
+    required: true,
+    min: 6,
+    max: 200,
+    step: 1,
+  },
+  {
+    key: 'cd',
+    label: 'Drag Coeff (Cd)',
+    type: 'number',
+    required: true,
+    min: 0.3,
+    max: 2.5,
+    step: 0.01,
+  },
+  {
+    key: 'packed_diam_in',
+    label: 'Packed Diam (in)',
+    type: 'number',
+    required: true,
+    min: 0.5,
+    max: 20,
+    step: 0.1,
+  },
+  {
+    key: 'packed_length_in',
+    label: 'Packed Length (in)',
+    type: 'number',
+    required: true,
+    min: 0.5,
+    max: 30,
+    step: 0.1,
+  },
+  {
+    key: 'weight_g',
+    label: 'Weight (g)',
+    type: 'number',
+    required: true,
+    min: 1,
+    max: 5000,
+    step: 1,
+  },
+  {
+    key: 'shape',
+    label: 'Shape',
+    type: 'select',
+    options: ['', 'elliptical', 'flat', 'toroidal', 'cruciform'],
+    required: false,
+  },
+  {
+    key: 'material',
+    label: 'Material',
+    type: 'select',
+    options: ['', 'nylon', 'ripstop nylon', 'silicone-coated nylon'],
+    required: false,
+  },
 ]
 
 const CATEGORY_FIELD_SCHEMAS = {
   main_chute: CHUTE_FIELDS,
   drogue_chute: CHUTE_FIELDS,
   shock_cord: [
-    { key: 'material', label: 'Material', type: 'select', options: ['nylon', 'kevlar'], required: true },
-    { key: 'elongation_pct', label: 'Elongation (%)', type: 'number', required: true, min: 1, max: 50, step: 1 },
-    { key: 'strength_lbs', label: 'Strength (lbs)', type: 'number', required: true, min: 50, max: 20000, step: 1 },
-    { key: 'length_ft', label: 'Length (ft)', type: 'number', required: true, min: 1, max: 100, step: 1 },
-    { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, max: 5000, step: 1 },
-    { key: 'packed_height_in', label: 'Packed Height (in)', type: 'number', required: true, min: 0.1, max: 20, step: 0.1 },
+    {
+      key: 'material',
+      label: 'Material',
+      type: 'select',
+      options: ['nylon', 'kevlar'],
+      required: true,
+    },
+    {
+      key: 'elongation_pct',
+      label: 'Elongation (%)',
+      type: 'number',
+      required: true,
+      min: 1,
+      max: 50,
+      step: 1,
+    },
+    {
+      key: 'strength_lbs',
+      label: 'Strength (lbs)',
+      type: 'number',
+      required: true,
+      min: 50,
+      max: 20000,
+      step: 1,
+    },
+    {
+      key: 'length_ft',
+      label: 'Length (ft)',
+      type: 'number',
+      required: true,
+      min: 1,
+      max: 100,
+      step: 1,
+    },
+    {
+      key: 'weight_g',
+      label: 'Weight (g)',
+      type: 'number',
+      required: true,
+      min: 1,
+      max: 5000,
+      step: 1,
+    },
+    {
+      key: 'packed_height_in',
+      label: 'Packed Height (in)',
+      type: 'number',
+      required: true,
+      min: 0.1,
+      max: 20,
+      step: 0.1,
+    },
   ],
   chute_protector: [
     { key: 'size_in', label: 'Size (in)', type: 'number', required: true, min: 1, step: 1 },
-    { key: 'max_chute_diam_in', label: 'Max Chute Diam (in)', type: 'number', required: true, min: 1, step: 1 },
+    {
+      key: 'max_chute_diam_in',
+      label: 'Max Chute Diam (in)',
+      type: 'number',
+      required: true,
+      min: 1,
+      step: 1,
+    },
     { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, step: 1 },
-    { key: 'packed_height_in', label: 'Packed Height (in)', type: 'number', required: true, min: 0.1, step: 0.1 },
+    {
+      key: 'packed_height_in',
+      label: 'Packed Height (in)',
+      type: 'number',
+      required: true,
+      min: 0.1,
+      step: 0.1,
+    },
   ],
   deployment_bag: [
-    { key: 'max_chute_diam_in', label: 'Max Chute Diam (in)', type: 'number', required: true, min: 1, step: 1 },
-    { key: 'packed_height_in', label: 'Packed Height (in)', type: 'number', required: true, min: 0.1, step: 0.1 },
+    {
+      key: 'max_chute_diam_in',
+      label: 'Max Chute Diam (in)',
+      type: 'number',
+      required: true,
+      min: 1,
+      step: 1,
+    },
+    {
+      key: 'packed_height_in',
+      label: 'Packed Height (in)',
+      type: 'number',
+      required: true,
+      min: 0.1,
+      step: 0.1,
+    },
     { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, step: 1 },
   ],
   quick_links: [
-    { key: 'strength_lbs', label: 'Strength (lbs)', type: 'number', required: true, min: 1, step: 1 },
+    {
+      key: 'strength_lbs',
+      label: 'Strength (lbs)',
+      type: 'number',
+      required: true,
+      min: 1,
+      step: 1,
+    },
     { key: 'size_in', label: 'Size (in)', type: 'number', required: true, min: 0.01, step: 0.01 },
     { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, step: 1 },
   ],
   swivel: [
-    { key: 'rated_lbs', label: 'Rated Load (lbs)', type: 'number', required: true, min: 1, step: 1 },
+    {
+      key: 'rated_lbs',
+      label: 'Rated Load (lbs)',
+      type: 'number',
+      required: true,
+      min: 1,
+      step: 1,
+    },
     { key: 'size_in', label: 'Size (in)', type: 'number', required: true, min: 0.01, step: 0.01 },
     { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, step: 1 },
-    { key: 'packed_height_in', label: 'Packed Height (in)', type: 'number', required: true, min: 0.1, step: 0.1 },
+    {
+      key: 'packed_height_in',
+      label: 'Packed Height (in)',
+      type: 'number',
+      required: true,
+      min: 0.1,
+      step: 0.1,
+    },
   ],
   chute_device: [
     { key: 'weight_g', label: 'Weight (g)', type: 'number', required: true, min: 1, step: 1 },
-    { key: 'deploy_alt_min_ft', label: 'Min Deploy Alt (ft)', type: 'number', required: false, min: 0, step: 1 },
-    { key: 'deploy_alt_max_ft', label: 'Max Deploy Alt (ft)', type: 'number', required: false, min: 0, step: 1 },
+    {
+      key: 'deploy_alt_min_ft',
+      label: 'Min Deploy Alt (ft)',
+      type: 'number',
+      required: false,
+      min: 0,
+      step: 1,
+    },
+    {
+      key: 'deploy_alt_max_ft',
+      label: 'Max Deploy Alt (ft)',
+      type: 'number',
+      required: false,
+      min: 0,
+      step: 1,
+    },
   ],
 }
 
@@ -143,27 +318,45 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
     return obj
   }
 
-  const [form, setForm] = useState(() => isEdit ? buildFromPart(editingPart) : buildEmpty())
+  const [form, setForm] = useState(() => (isEdit ? buildFromPart(editingPart) : buildEmpty()))
   const [error, setError] = useState('')
 
-  const set = (key, val) => setForm(f => ({ ...f, [key]: val }))
+  const set = (key, val) => setForm((f) => ({ ...f, [key]: val }))
 
   const handleSubmit = () => {
-    if (!form.name.trim()) { setError('Name is required'); return }
+    if (!form.name.trim()) {
+      setError('Name is required')
+      return
+    }
     const specs = {}
     for (const f of schema) {
       if (f.type === 'select') {
-        if (f.required && !form[f.key]) { setError(`${f.label} is required`); return }
+        if (f.required && !form[f.key]) {
+          setError(`${f.label} is required`)
+          return
+        }
         if (form[f.key]) specs[f.key] = form[f.key]
       } else {
         const v = parseFloat(form[f.key])
         if (f.required) {
-          if (!isFinite(v) || v < (f.min ?? 0)) { setError(`${f.label} must be ≥ ${f.min ?? 0}`); return }
-          if (f.max != null && v > f.max) { setError(`${f.label} must be ≤ ${f.max}`); return }
+          if (!isFinite(v) || v < (f.min ?? 0)) {
+            setError(`${f.label} must be ≥ ${f.min ?? 0}`)
+            return
+          }
+          if (f.max != null && v > f.max) {
+            setError(`${f.label} must be ≤ ${f.max}`)
+            return
+          }
           specs[f.key] = v
         } else if (form[f.key] !== '') {
-          if (!isFinite(v) || (f.min != null && v < f.min)) { setError(`${f.label} must be ≥ ${f.min}`); return }
-          if (f.max != null && v > f.max) { setError(`${f.label} must be ≤ ${f.max}`); return }
+          if (!isFinite(v) || (f.min != null && v < f.min)) {
+            setError(`${f.label} must be ≥ ${f.min}`)
+            return
+          }
+          if (f.max != null && v > f.max) {
+            setError(`${f.label} must be ≤ ${f.max}`)
+            return
+          }
           specs[f.key] = v
         }
       }
@@ -184,15 +377,35 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
   }
 
   const inputStyle = {
-    width: '100%', height: '28px', padding: '0 6px',
-    border: '1px solid var(--border-default)', borderRadius: 'var(--radius)',
-    background: 'var(--input-bg)', color: 'var(--text-primary)',
-    fontSize: '12px', outline: 'none', boxSizing: 'border-box',
+    width: '100%',
+    height: '28px',
+    padding: '0 6px',
+    border: '1px solid var(--border-default)',
+    borderRadius: 'var(--radius)',
+    background: 'var(--input-bg)',
+    color: 'var(--text-primary)',
+    fontSize: '12px',
+    outline: 'none',
+    boxSizing: 'border-box',
   }
-  const labelStyle = { fontSize: '10px', fontWeight: 600, color: 'var(--text-tertiary)', marginBottom: '3px', display: 'block', textTransform: 'uppercase', letterSpacing: '0.04em' }
+  const labelStyle = {
+    fontSize: '10px',
+    fontWeight: 600,
+    color: 'var(--text-tertiary)',
+    marginBottom: '3px',
+    display: 'block',
+    textTransform: 'uppercase',
+    letterSpacing: '0.04em',
+  }
   const focusHandlers = {
-    onFocus: e => { e.target.style.borderColor = 'var(--accent)'; e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)' },
-    onBlur: e => { e.target.style.borderColor = 'var(--border-default)'; e.target.style.boxShadow = 'none' },
+    onFocus: (e) => {
+      e.target.style.borderColor = 'var(--accent)'
+      e.target.style.boxShadow = '0 0 0 3px var(--accent-ring)'
+    },
+    onBlur: (e) => {
+      e.target.style.borderColor = 'var(--border-default)'
+      e.target.style.boxShadow = 'none'
+    },
   }
 
   // Pair fields into rows of 2 for compact layout
@@ -202,8 +415,25 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
   }
 
   return (
-    <div style={{ margin: '8px 12px 12px', padding: '12px', background: 'var(--bg-panel)', border: '1px solid var(--accent)', borderRadius: 'var(--radius)' }}>
-      <div style={{ fontSize: '11px', fontWeight: 600, color: 'var(--accent)', marginBottom: '10px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+    <div
+      style={{
+        margin: '8px 12px 12px',
+        padding: '12px',
+        background: 'var(--bg-panel)',
+        border: '1px solid var(--accent)',
+        borderRadius: 'var(--radius)',
+      }}
+    >
+      <div
+        style={{
+          fontSize: '11px',
+          fontWeight: 600,
+          color: 'var(--accent)',
+          marginBottom: '10px',
+          textTransform: 'uppercase',
+          letterSpacing: '0.05em',
+        }}
+      >
         {isEdit ? `Edit ${categoryLabel}` : `New Custom ${categoryLabel}`}
       </div>
 
@@ -215,27 +445,40 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
           placeholder="e.g. My Custom Part"
           aria-label="Custom part name"
           value={form.name}
-          onChange={e => set('name', e.target.value)}
+          onChange={(e) => set('name', e.target.value)}
           {...focusHandlers}
         />
       </div>
 
       {/* Dynamic fields in 2-column grid */}
       {rows.map((row, ri) => (
-        <div key={ri} style={{ display: 'grid', gridTemplateColumns: row.length === 1 ? '1fr' : '1fr 1fr', gap: '6px', marginBottom: '8px' }}>
-          {row.map(field => (
+        <div
+          key={ri}
+          style={{
+            display: 'grid',
+            gridTemplateColumns: row.length === 1 ? '1fr' : '1fr 1fr',
+            gap: '6px',
+            marginBottom: '8px',
+          }}
+        >
+          {row.map((field) => (
             <div key={field.key}>
-              <label style={labelStyle}>{field.label}{!field.required && ' (opt)'}</label>
+              <label style={labelStyle}>
+                {field.label}
+                {!field.required && ' (opt)'}
+              </label>
               {field.type === 'select' ? (
                 <select
                   style={inputStyle}
                   value={form[field.key]}
-                  onChange={e => set(field.key, e.target.value)}
+                  onChange={(e) => set(field.key, e.target.value)}
                   aria-label={field.label}
                   {...focusHandlers}
                 >
-                  {field.options.map(opt => (
-                    <option key={opt} value={opt}>{opt || '—'}</option>
+                  {field.options.map((opt) => (
+                    <option key={opt} value={opt}>
+                      {opt || '—'}
+                    </option>
                   ))}
                 </select>
               ) : (
@@ -245,7 +488,7 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
                   step={field.step}
                   style={inputStyle}
                   value={form[field.key]}
-                  onChange={e => set(field.key, e.target.value)}
+                  onChange={(e) => set(field.key, e.target.value)}
                   aria-label={field.label}
                   {...focusHandlers}
                 />
@@ -256,17 +499,24 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
       ))}
 
       {error && (
-        <div style={{ fontSize: '11px', color: 'var(--error-fg)', marginBottom: '8px' }}>{error}</div>
+        <div style={{ fontSize: '11px', color: 'var(--error-fg)', marginBottom: '8px' }}>
+          {error}
+        </div>
       )}
 
       <div style={{ display: 'flex', gap: '6px' }}>
         <button
           onClick={handleSubmit}
           style={{
-            height: '28px', padding: '0 14px',
-            background: 'var(--cta-bg)', color: 'var(--cta-fg)',
-            border: 'none', borderRadius: 'var(--radius)', cursor: 'pointer',
-            fontSize: '12px', fontWeight: 500,
+            height: '28px',
+            padding: '0 14px',
+            background: 'var(--cta-bg)',
+            color: 'var(--cta-fg)',
+            border: 'none',
+            borderRadius: 'var(--radius)',
+            cursor: 'pointer',
+            fontSize: '12px',
+            fontWeight: 500,
           }}
         >
           {isEdit ? 'Save Changes' : 'Add Part'}
@@ -274,10 +524,14 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
         <button
           onClick={onCancel}
           style={{
-            height: '28px', padding: '0 12px',
-            background: 'transparent', color: 'var(--text-secondary)',
-            border: '1px solid var(--border-default)', borderRadius: 'var(--radius)',
-            cursor: 'pointer', fontSize: '12px',
+            height: '28px',
+            padding: '0 12px',
+            background: 'transparent',
+            color: 'var(--text-secondary)',
+            border: '1px solid var(--border-default)',
+            borderRadius: 'var(--radius)',
+            cursor: 'pointer',
+            fontSize: '12px',
           }}
         >
           Cancel
@@ -287,15 +541,31 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
   )
 }
 
-export default function PartsBrowser({ parts, categories, activeCategory, config, warnings, customParts = [], onSelectCategory, onSelectPart, onAddCustomPart, onDeleteCustomPart, onEditCustomPart }) {
+export default function PartsBrowser({
+  parts,
+  categories,
+  activeCategory,
+  config,
+  warnings,
+  customParts = [],
+  onSelectCategory,
+  onSelectPart,
+  onAddCustomPart,
+  onDeleteCustomPart,
+  onEditCustomPart,
+}) {
   const [showForm, setShowForm] = useState(false)
   const [editingPart, setEditingPart] = useState(null)
   const [searchQuery, setSearchQuery] = useState('')
 
   // Close the form, clear edit state, and clear search when switching categories
-  useEffect(() => { setShowForm(false); setEditingPart(null); setSearchQuery('') }, [activeCategory])
+  useEffect(() => {
+    setShowForm(false)
+    setEditingPart(null)
+    setSearchQuery('')
+  }, [activeCategory])
 
-  const activeCategoryLabel = categories.find(c => c.id === activeCategory)?.label || 'Part'
+  const activeCategoryLabel = categories.find((c) => c.id === activeCategory)?.label || 'Part'
 
   // Pre-group warnings by slot once so we avoid an O(categories × warnings) scan on every render.
   const warningsBySlot = useMemo(() => {
@@ -308,19 +578,20 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
   }, [warnings])
 
   // Custom-part ID set for O(1) exclusion from the catalog list.
-  const customIds = useMemo(() => new Set(customParts.map(p => p.id)), [customParts])
+  const customIds = useMemo(() => new Set(customParts.map((p) => p.id)), [customParts])
 
   const query = searchQuery.trim().toLowerCase()
 
   const { categoryCustomParts, byMfr, flatFiltered } = useMemo(() => {
-    const categoryCustomParts = customParts.filter(p => p.category === activeCategory)
+    const categoryCustomParts = customParts.filter((p) => p.category === activeCategory)
     const byMfr = {}
     const flatFiltered = []
     for (const p of parts) {
       if (p.category !== activeCategory) continue
       if (customIds.has(p.id)) continue
       if (query) {
-        const match = p.name.toLowerCase().includes(query) || p.manufacturer.toLowerCase().includes(query)
+        const match =
+          p.name.toLowerCase().includes(query) || p.manufacturer.toLowerCase().includes(query)
         if (match) flatFiltered.push(p)
       } else {
         if (!byMfr[p.manufacturer]) byMfr[p.manufacturer] = []
@@ -329,7 +600,11 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
     }
     // Also filter custom parts when searching
     const filteredCustom = query
-      ? categoryCustomParts.filter(p => p.name.toLowerCase().includes(query) || (p.manufacturer || '').toLowerCase().includes(query))
+      ? categoryCustomParts.filter(
+          (p) =>
+            p.name.toLowerCase().includes(query) ||
+            (p.manufacturer || '').toLowerCase().includes(query)
+        )
       : categoryCustomParts
     return { categoryCustomParts: filteredCustom, byMfr, flatFiltered }
   }, [parts, activeCategory, customParts, customIds, query])
@@ -337,26 +612,33 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
   return (
     <div style={{ display: 'flex', flexDirection: 'column' }}>
       {/* Category tabs — pill style */}
-      <div style={{
-        borderBottom: '1px solid var(--border-default)',
-        padding: '10px 12px 0',
-        background: 'var(--bg-right)',
-      }}>
-        <div className="section-label" style={{ marginBottom: '8px' }}>Parts</div>
-        <div style={{
-          display: 'flex',
-          flexWrap: 'wrap',
-          gap: '4px',
-          paddingBottom: '10px',
-        }}>
-          {categories.map(cat => {
+      <div
+        style={{
+          borderBottom: '1px solid var(--border-default)',
+          padding: '10px 12px 0',
+          background: 'var(--bg-right)',
+        }}
+      >
+        <div className="section-label" style={{ marginBottom: '8px' }}>
+          Parts
+        </div>
+        <div
+          style={{
+            display: 'flex',
+            flexWrap: 'wrap',
+            gap: '4px',
+            paddingBottom: '10px',
+          }}
+        >
+          {categories.map((cat) => {
             const isActive = cat.id === activeCategory
             const selected = config[cat.id]
-            const status   = selected ? slotStatus(cat.id, warnings) : 'neutral'
+            const status = selected ? slotStatus(cat.id, warnings) : 'neutral'
             const slotWarnings = warningsBySlot[cat.id] ?? []
-            const tooltip  = (status === 'warn' || status === 'error') && slotWarnings.length > 0
-              ? slotWarnings.map(w => w.message).join('\n')
-              : undefined
+            const tooltip =
+              (status === 'warn' || status === 'error') && slotWarnings.length > 0
+                ? slotWarnings.map((w) => w.message).join('\n')
+                : undefined
             return (
               <button
                 key={cat.id}
@@ -379,11 +661,19 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
       </div>
 
       {/* Search input */}
-      <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-subtle)', display: 'flex', alignItems: 'center', gap: 4 }}>
+      <div
+        style={{
+          padding: '8px 12px',
+          borderBottom: '1px solid var(--border-subtle)',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 4,
+        }}
+      >
         <input
           type="text"
           value={searchQuery}
-          onChange={e => setSearchQuery(e.target.value)}
+          onChange={(e) => setSearchQuery(e.target.value)}
           placeholder="Search parts..."
           aria-label="Search parts"
           className="parts-search-input"
@@ -393,7 +683,9 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
             onClick={() => setSearchQuery('')}
             className="parts-search-clear"
             aria-label="Clear search"
-          >&times;</button>
+          >
+            &times;
+          </button>
         )}
       </div>
 
@@ -405,7 +697,10 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
             config={config}
             onSelectPart={onSelectPart}
             onDelete={onDeleteCustomPart}
-            onEdit={(part) => { setEditingPart(part); setShowForm(true) }}
+            onEdit={(part) => {
+              setEditingPart(part)
+              setShowForm(true)
+            }}
           />
         )}
 
@@ -413,7 +708,10 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
           <div style={{ padding: '8px 12px', borderBottom: '1px solid var(--border-subtle)' }}>
             <button
               className="parts-add-custom"
-              onClick={() => { setEditingPart(null); setShowForm(true) }}
+              onClick={() => {
+                setEditingPart(null)
+                setShowForm(true)
+              }}
             >
               + Add Custom Part
             </button>
@@ -424,9 +722,20 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
             category={activeCategory}
             categoryLabel={activeCategoryLabel}
             editingPart={editingPart}
-            onAdd={(part) => { onAddCustomPart(part); setShowForm(false); setEditingPart(null) }}
-            onEdit={(part) => { onEditCustomPart(part); setShowForm(false); setEditingPart(null) }}
-            onCancel={() => { setShowForm(false); setEditingPart(null) }}
+            onAdd={(part) => {
+              onAddCustomPart(part)
+              setShowForm(false)
+              setEditingPart(null)
+            }}
+            onEdit={(part) => {
+              onEditCustomPart(part)
+              setShowForm(false)
+              setEditingPart(null)
+            }}
+            onCancel={() => {
+              setShowForm(false)
+              setEditingPart(null)
+            }}
           />
         )}
       </>
@@ -436,8 +745,15 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
         {query ? (
           /* Search active: flat 2-column grid, no manufacturer grouping */
           flatFiltered.length > 0 ? (
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '6px', padding: '8px 12px' }}>
-              {flatFiltered.map(part => {
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: '1fr 1fr',
+                gap: '6px',
+                padding: '8px 12px',
+              }}
+            >
+              {flatFiltered.map((part) => {
                 const isSelected = config[part.category]?.id === part.id
                 return (
                   <button
@@ -445,13 +761,24 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
                     className="parts-card"
                     aria-pressed={isSelected}
                     onClick={() => onSelectPart(part)}
-                    style={isSelected ? { background: 'var(--ok-bg)', borderColor: 'var(--ok-fg)' } : undefined}
+                    style={
+                      isSelected
+                        ? { background: 'var(--ok-bg)', borderColor: 'var(--ok-fg)' }
+                        : undefined
+                    }
                   >
                     <div className="parts-card__name">{part.name}</div>
                     <div className="parts-card__spec mono" style={{ marginTop: '2px' }}>
                       {partSpecLine(part)}
                     </div>
-                    <div style={{ fontSize: '9px', color: 'var(--text-tertiary)', marginTop: '2px', fontStyle: 'italic' }}>
+                    <div
+                      style={{
+                        fontSize: '9px',
+                        color: 'var(--text-tertiary)',
+                        marginTop: '2px',
+                        fontStyle: 'italic',
+                      }}
+                    >
                       {part.manufacturer}
                     </div>
                   </button>
@@ -459,21 +786,28 @@ export default function PartsBrowser({ parts, categories, activeCategory, config
               })}
             </div>
           ) : (
-            <div style={{ padding: '16px 12px', fontSize: '11px', color: 'var(--text-tertiary)', textAlign: 'center' }}>
+            <div
+              style={{
+                padding: '16px 12px',
+                fontSize: '11px',
+                color: 'var(--text-tertiary)',
+                textAlign: 'center',
+              }}
+            >
               No parts match "{searchQuery}"
             </div>
           )
         ) : (
           /* Normal: collapsible manufacturer groups */
-          Object.entries(byMfr).map(([mfr, mfrParts], i) => (
+          Object.entries(byMfr).map(([mfr, mfrParts], index) => (
             <MfrGroup
               key={activeCategory + '-' + mfr}
               mfr={mfr}
               parts={mfrParts}
               config={config}
               onSelectPart={onSelectPart}
-              defaultOpen={i === 0}
-              hasSelected={mfrParts.some(p => config[p.category]?.id === p.id)}
+              defaultOpen={index === 0}
+              hasSelected={mfrParts.some((p) => config[p.category]?.id === p.id)}
             />
           ))
         )}

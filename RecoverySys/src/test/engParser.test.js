@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url'
 import { parseEng } from '../lib/engParser.js'
 
 const __filename = fileURLToPath(import.meta.url)
-const __dirname  = path.dirname(__filename)
+const __dirname = path.dirname(__filename)
 
 const fixture = (name) => fs.readFileSync(path.join(__dirname, 'fixtures', name), 'utf8')
 
@@ -62,11 +62,7 @@ F32 24 124 P .038 .07 RV
     })
 
     it('handles Windows CRLF line endings', () => {
-      const input = [
-        'F32 24 124 P .038 .07 RV',
-        '  0.05 50',
-        '  1.00  0',
-      ].join('\r\n')
+      const input = ['F32 24 124 P .038 .07 RV', '  0.05 50', '  1.00  0'].join('\r\n')
       const result = parseEng(input)
       expect(result.success).toBe(true)
       expect(result.data.curve.length).toBe(3) // implicit (0,0) + 2 data points
@@ -81,7 +77,7 @@ F32 24 124 P .038 .07 RV
 
     it('preserves curve monotonicity in time', () => {
       const result = parseEng(fixture('aerotech-k550.eng'))
-      const times = result.data.curve.map(p => p.t)
+      const times = result.data.curve.map((p) => p.t)
       for (let i = 1; i < times.length; i++) {
         expect(times[i]).toBeGreaterThan(times[i - 1])
       }

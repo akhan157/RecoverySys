@@ -11,14 +11,17 @@
   cursor: pointer;
   text-align: left;
   gap: 3px;
-  transition: transform 150ms ease, border-color 150ms ease, box-shadow 150ms ease;
+  transition:
+    transform 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease;
 }
-.parts-card:hover:not([aria-pressed="true"]) {
+.parts-card:hover:not([aria-pressed='true']) {
   transform: translateY(-1px);
   border-color: var(--accent);
   box-shadow: 0 2px 8px var(--accent-ring);
 }
-.parts-card[aria-pressed="true"] {
+.parts-card[aria-pressed='true'] {
   background: var(--ok-bg);
   border-color: var(--ok-fg);
 }
@@ -45,9 +48,11 @@
   width: 100%;
   padding: 8px 24px 8px 10px;
   border-color: var(--accent);
-  transition: transform 150ms ease, box-shadow 150ms ease;
+  transition:
+    transform 150ms ease,
+    box-shadow 150ms ease;
 }
-.parts-card--custom:hover:not([aria-pressed="true"]) {
+.parts-card--custom:hover:not([aria-pressed='true']) {
   transform: translateY(-1px);
   box-shadow: 0 2px 8px var(--accent-ring);
 }
@@ -71,7 +76,9 @@
   color: var(--text-tertiary);
   line-height: 1;
   padding: 0;
-  transition: border-color 150ms ease, color 150ms ease;
+  transition:
+    border-color 150ms ease,
+    color 150ms ease;
 }
 .parts-card__delete:hover {
   border-color: var(--error-fg);

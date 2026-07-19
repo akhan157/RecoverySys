@@ -1,4 +1,3 @@
-import React from 'react'
 import { render, screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
@@ -11,8 +10,8 @@ Object.assign(navigator, {
 
 // ── localStorage helpers ───────────────────────────────────────────────────────
 
-const STORAGE_KEY   = 'recoverysys-config'
-const VISITED_KEY   = 'recoverysys-visited'
+const STORAGE_KEY = 'recoverysys-config'
+const VISITED_KEY = 'recoverysys-visited'
 
 function setLocalStorage(value) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
@@ -33,22 +32,22 @@ function setReturningUser() {
 
 const SAVED_SESSION = {
   config: {
-    main_chute:      { id: 'cl-24-n' },  // b2 Rocketry 24" Compact Light
-    drogue_chute:    null,
-    shock_cord:      null,
+    main_chute: { id: 'cl-24-n' }, // b2 Rocketry 24" Compact Light
+    drogue_chute: null,
+    shock_cord: null,
     chute_protector: null,
-    quick_links:     null,
-    chute_device:    null,
+    quick_links: null,
+    chute_device: null,
   },
   specs: {
-    rocket_mass_g:          '2500',
+    rocket_mass_g: '2500',
     motor_total_impulse_ns: '640',
-    burn_time_s:            '1.8',
-    airframe_id_in:         '3.9',
-    bay_length_in:          '18',
-    drag_cd:                '0.5',
-    wind_speed_mph:         '10',
-    main_deploy_alt_ft:     '500',
+    burn_time_s: '1.8',
+    airframe_id_in: '3.9',
+    bay_length_in: '18',
+    drag_cd: '0.5',
+    wind_speed_mph: '10',
+    main_deploy_alt_ft: '500',
   },
 }
 
@@ -62,7 +61,6 @@ describe('App — restored-session toast', () => {
   })
 
   afterEach(() => {
-    vi.runAllTimers()
     vi.useRealTimers()
     clearLocalStorage()
   })
@@ -122,7 +120,6 @@ describe('App — status bar warning badge', () => {
   })
 
   afterEach(() => {
-    vi.runAllTimers()
     vi.useRealTimers()
     clearLocalStorage()
   })
@@ -131,12 +128,12 @@ describe('App — status bar warning badge', () => {
     // A drogue chute with no main chute triggers a 'main_chute' error
     setLocalStorage({
       config: {
-        main_chute:      null,
-        drogue_chute:    { id: 'fr3-12-12', category: 'drogue_chute' },  // Front Range 12" Elliptical
-        shock_cord:      null,
+        main_chute: null,
+        drogue_chute: { id: 'fr3-12-12', category: 'drogue_chute' }, // Front Range 12" Elliptical
+        shock_cord: null,
         chute_protector: null,
-        quick_links:     null,
-        chute_device:    null,
+        quick_links: null,
+        chute_device: null,
       },
       specs: { ...SAVED_SESSION.specs },
     })

@@ -41,7 +41,10 @@
   letter-spacing: 0.05em;
   cursor: pointer;
   border-radius: 3px;
-  transition: border-color 120ms ease, background 120ms ease, color 120ms ease;
+  transition:
+    border-color 120ms ease,
+    background 120ms ease,
+    color 120ms ease;
 }
 
 .demo-banner__btn:hover {

@@ -18,8 +18,14 @@ import { saveConfigToStorage } from '../lib/storage.js'
  * Skips the very first render to avoid writing the initial buildInitialState
  * value back to storage as a no-op (the value just came FROM storage).
  */
-export default function usePersistence({ config, specs, customMotor, delayMs = 300, disabled = false }) {
-  const debounceRef  = useRef(null)
+export default function usePersistence({
+  config,
+  specs,
+  customMotor,
+  delayMs = 300,
+  disabled = false,
+}) {
+  const debounceRef = useRef(null)
   const isFirstRender = useRef(true)
 
   useEffect(() => {

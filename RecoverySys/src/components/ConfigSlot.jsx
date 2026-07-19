@@ -1,15 +1,21 @@
-import React from 'react'
 import { slotStatus } from '../lib/compatibility.js'
 import { partSpecLine } from '../lib/format.js'
 
 const ACCENT = {
-  ok:      'var(--ok-fg)',
-  warn:    'var(--warn-fg)',
-  error:   'var(--error-fg)',
+  ok: 'var(--ok-fg)',
+  warn: 'var(--warn-fg)',
+  error: 'var(--error-fg)',
   neutral: 'var(--border-default)',
 }
 
-export default function ConfigSlot({ category, placeholder, part, warnings, onRemove, onClickEmpty }) {
+export default function ConfigSlot({
+  category,
+  placeholder,
+  part,
+  warnings,
+  onRemove,
+  onClickEmpty,
+}) {
   const status = part ? slotStatus(category, warnings) : 'neutral'
   const accent = ACCENT[status]
 
@@ -30,8 +36,8 @@ export default function ConfigSlot({ category, placeholder, part, warnings, onRe
           cursor: 'pointer',
           textAlign: 'left',
         }}
-        onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-hover)'}
-        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+        onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-hover)')}
+        onMouseLeave={(e) => (e.currentTarget.style.background = 'transparent')}
       >
         <span style={{ color: 'var(--text-placeholder)', fontStyle: 'italic', fontSize: '13px' }}>
           {placeholder}
@@ -41,20 +47,40 @@ export default function ConfigSlot({ category, placeholder, part, warnings, onRe
   }
 
   return (
-    <div style={{
-      display: 'flex',
-      alignItems: 'center',
-      height: '56px',
-      border: `1px solid ${accent}`,
-      padding: '0 12px',
-      gap: '8px',
-      background: 'var(--bg-panel)',
-    }}>
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'center',
+        height: '56px',
+        border: `1px solid ${accent}`,
+        padding: '0 12px',
+        gap: '8px',
+        background: 'var(--bg-panel)',
+      }}
+    >
       <div style={{ flex: 1, minWidth: 0 }}>
-        <div style={{ fontSize: '13px', fontWeight: 500, color: 'var(--text-primary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div
+          style={{
+            fontSize: '13px',
+            fontWeight: 500,
+            color: 'var(--text-primary)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {part.manufacturer} {part.name}
         </div>
-        <div className="mono" style={{ fontSize: '11px', color: 'var(--text-secondary)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+        <div
+          className="mono"
+          style={{
+            fontSize: '11px',
+            color: 'var(--text-secondary)',
+            overflow: 'hidden',
+            textOverflow: 'ellipsis',
+            whiteSpace: 'nowrap',
+          }}
+        >
           {partSpecLine(part, 'detailed')}
         </div>
       </div>
@@ -78,8 +104,8 @@ export default function ConfigSlot({ category, placeholder, part, warnings, onRe
           justifyContent: 'center',
           margin: '0 -12px 0 0',
         }}
-        onMouseEnter={e => e.currentTarget.style.color = 'var(--error-fg)'}
-        onMouseLeave={e => e.currentTarget.style.color = 'var(--text-tertiary)'}
+        onMouseEnter={(e) => (e.currentTarget.style.color = 'var(--error-fg)')}
+        onMouseLeave={(e) => (e.currentTarget.style.color = 'var(--text-tertiary)')}
       >
         ×
       </button>
