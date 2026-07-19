@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { runSimulation } from '../lib/simulation.js'
 import { SLOT_IDS } from '../data/parts.js'
 import { SHARE_PARAM } from '../lib/shareLink.js'
+import { buildResultEnvelope } from '../lib/resultIntegrity.js'
 
 /**
  * Demo mode bootstrap. Triggered by `?demo=1` (e.g. landing-page LAUNCH
@@ -62,7 +63,11 @@ export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch
       specs: { ...demoSpecs },
       customMotor: null,
     })
-    if (result) dispatch({ type: 'SET_SIM', simulation: result })
+    if (result)
+      dispatch({
+        type: 'SET_SIM',
+        simulation: buildResultEnvelope(result, { specs: demoSpecs, config, customMotor: null }, 0),
+      })
     // Mount-once + demoMode-edge: allParts read once is intentional.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demoMode])

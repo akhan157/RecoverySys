@@ -1,15 +1,16 @@
 import { useRef } from 'react'
 import { SAVE_STATES, SHARE_STATES } from '../../lib/constants.js'
+import {
+  encodeJsonPayload,
+  decodeMigrateValidateNormalize,
+  PAYLOAD_LIMITS,
+  isPayloadSizeAllowed,
+} from '../../lib/payloadBoundary.js'
+import { PARTS, SLOT_IDS, EMPTY_CONFIG } from '../../data/parts.js'
+import { loadCustomParts } from '../../lib/storage.js'
 
 function downloadJson(state) {
-  const payload = {
-    _format: 'recoverysys-config-v1',
-    exportedAt: new Date().toISOString(),
-    config: state.config,
-    specs: state.specs,
-    customMotor: state.customMotor ?? null,
-  }
-  const blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' })
+  const blob = new Blob([encodeJsonPayload(state)], { type: 'application/json' })
   const url = URL.createObjectURL(blob)
   const a = document.createElement('a')
   a.href = url
@@ -24,25 +25,39 @@ export default function ExportTab({ state, saveConfig, copyShareLink, onLoadConf
   const handleImport = (e) => {
     const file = e.target.files?.[0]
     if (!file) return
+    if (!isPayloadSizeAllowed(file.size)) {
+      alert(
+        `Invalid config file — Payload exceeds the supported size limit of ${PAYLOAD_LIMITS.jsonBytes.toLocaleString()} bytes.`
+      )
+      e.target.value = ''
+      return
+    }
     const reader = new FileReader()
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result)
-        if (
-          data._format !== 'recoverysys-config-v1' ||
-          !data.config ||
-          typeof data.config !== 'object' ||
-          !data.specs ||
-          typeof data.specs !== 'object'
-        ) {
+        if (data._format !== 'recoverysys-config-v1') {
           alert('Invalid config file — must be a RecoverySys JSON export.')
           return
         }
-        onLoadConfig({
-          config: data.config,
-          specs: data.specs,
-          customMotor: data.customMotor ?? null,
+        const decoded = decodeMigrateValidateNormalize(data, {
+          allParts: [...loadCustomParts(), ...PARTS],
+          slotIds: SLOT_IDS,
+          emptyConfig: EMPTY_CONFIG,
         })
+        if (!decoded.ok) {
+          alert(`Invalid config file — ${decoded.error.message}.`)
+          return
+        }
+        const loadResult = onLoadConfig({
+          config: decoded.config,
+          specs: decoded.specs,
+          customMotor: decoded.customMotor,
+          inlinedCustomParts: decoded.inlinedCustomParts,
+        })
+        if (loadResult?.ok === false) {
+          alert(`Invalid config file — ${loadResult.error}.`)
+        }
       } catch {
         alert('Failed to parse config file — not valid JSON.')
       }

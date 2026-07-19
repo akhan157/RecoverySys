@@ -23,6 +23,7 @@ import {
   SHARE_RESET_MS,
 } from './lib/constants.js'
 import { getDefaultSpecs } from './lib/schema.js'
+import { buildResultEnvelope } from './lib/resultIntegrity.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 import DemoBanner from './components/DemoBanner.jsx'
@@ -113,6 +114,7 @@ function buildInitialState() {
     customMotor: rehydrateCustomMotor(saved?.customMotor),
     activeCategory: SLOT_IDS[0],
     simulation: null,
+    inputRevision: 0,
     simRunning: false,
     warnings: [],
     toasts: [],
@@ -127,17 +129,20 @@ function reducer(state, action) {
       return {
         ...state,
         config: { ...state.config, [action.category]: action.part },
-        simulation: null,
+        inputRevision: state.inputRevision + 1,
       }
     case 'REMOVE_PART':
-      return { ...state, config: { ...state.config, [action.category]: null }, simulation: null }
+      return {
+        ...state,
+        config: { ...state.config, [action.category]: null },
+        inputRevision: state.inputRevision + 1,
+      }
     case 'SET_SPEC':
-      // Spec edits do NOT wipe the simulation. Pass 2's perf review found
-      // that flagging the sim stale on every keystroke triggered a full
-      // re-render of MissionControlLayout (Dashboard + 189-card PartsBrowser
-      // + FlightChart + DispersionMap). The user has to click RUN_SIM to
-      // refresh anyway; the displayed numbers are "last run", not "live."
-      return { ...state, specs: { ...state.specs, [action.key]: action.value } }
+      return {
+        ...state,
+        specs: { ...state.specs, [action.key]: action.value },
+        inputRevision: state.inputRevision + 1,
+      }
     // Loading a custom motor also mirrors its totalImpulse/burnTime into specs so
     // canRun + the status-bar MOTOR display keep working unchanged.
     case 'SET_CUSTOM_MOTOR':
@@ -149,11 +154,11 @@ function reducer(state, action) {
           motor_total_impulse_ns: String(Math.round(action.motor.totalImpulse_ns)),
           burn_time_s: String(action.motor.burnTime_s.toFixed(2)),
         },
-        simulation: null,
+        inputRevision: state.inputRevision + 1,
       }
     // Clearing keeps the scalar specs — user may have typed them manually or wants to continue with ThrustCurve search.
     case 'CLEAR_CUSTOM_MOTOR':
-      return { ...state, customMotor: null, simulation: null }
+      return { ...state, customMotor: null, inputRevision: state.inputRevision + 1 }
     case 'SET_CATEGORY':
       return { ...state, activeCategory: action.category }
     case 'SET_WARNINGS':
@@ -225,8 +230,14 @@ export default function App() {
 
   // Custom parts (persisted; merged with PARTS into allParts; CRUD cleans
   // up matching config slots when parts are deleted or edited).
-  const { customParts, setCustomParts, allParts, addCustomPart, deleteCustomPart, editCustomPart } =
-    useCustomParts({ config: state.config, dispatch })
+  const {
+    customParts,
+    mergeCustomParts,
+    allParts,
+    addCustomPart,
+    deleteCustomPart,
+    editCustomPart,
+  } = useCustomParts({ config: state.config, dispatch })
 
   // Debounced compatibility re-evaluation on config/specs change.
   useCompatibilityWatcher({ config: state.config, specs: state.specs, dispatch })
@@ -263,9 +274,15 @@ export default function App() {
   const setCategory = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
   const setCustomMotor = useCallback((motor) => dispatch({ type: 'SET_CUSTOM_MOTOR', motor }), [])
   const clearCustomMotor = useCallback(() => dispatch({ type: 'CLEAR_CUSTOM_MOTOR' }), [])
-  const loadConfig = useCallback(({ config, specs, customMotor }) => {
-    dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
-  }, [])
+  const loadConfig = useCallback(
+    ({ config, specs, customMotor, inlinedCustomParts }) => {
+      const mergeResult = mergeCustomParts(inlinedCustomParts)
+      if (!mergeResult.ok) return mergeResult
+      dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
+      return mergeResult
+    },
+    [mergeCustomParts]
+  )
 
   const addToast = useCallback((level, message) => {
     dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
@@ -273,19 +290,19 @@ export default function App() {
 
   const runSim = useCallback(() => {
     dispatch({ type: 'START_SIM' })
-    const result = runSimulation({
-      specs: state.specs,
-      config: state.config,
-      customMotor: state.customMotor,
+    const inputs = { specs: state.specs, config: state.config, customMotor: state.customMotor }
+    const result = runSimulation(inputs)
+    dispatch({
+      type: 'SET_SIM',
+      simulation: buildResultEnvelope(result, inputs, state.inputRevision),
     })
-    dispatch({ type: 'SET_SIM', simulation: result })
     if (result === null) {
       addToast(
         TOAST_LEVELS.ERROR,
         'Simulation failed — main deploy altitude may exceed apogee, or chute specs are invalid. Lower deploy altitude or increase motor impulse.'
       )
     }
-  }, [state.specs, state.config, state.customMotor, addToast])
+  }, [state.specs, state.config, state.customMotor, state.inputRevision, addToast])
 
   const saveConfig = useCallback(() => {
     dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVING })
@@ -356,7 +373,7 @@ export default function App() {
   }, [addToast, demoMode])
 
   // Share link loader (mount-once: decode ?c=, dispatch LOAD_SHARE, toast).
-  useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch })
+  useShareLinkLoader({ allParts, addToast, mergeCustomParts, dispatch })
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (

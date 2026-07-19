@@ -1,4 +1,4 @@
-import { parseSpec } from './schema.js'
+import { normalizeCalculationInputs, parseSpec } from './schema.js'
 
 /**
  * ── Known constraints & simplifications ─────────────────────────────────────
@@ -99,6 +99,10 @@ const APCP_ISP = 195 // s — typical APCP specific impulse (see constraint #4)
 const CD_DEFAULT = 0.5 // typical subsonic HPR drag coefficient
 const GAMMA = 1.4 // ratio of specific heats for air
 const R_AIR = 287.058 // J/(kg·K) — specific gas constant for dry air
+const MAX_INTEGRATION_STEPS = 100_000
+const MAX_SIM_ALTITUDE_FT = 1_000_000
+const MAX_DESCENT_STEPS = 20_000
+const MAX_TIMELINE_POINTS = 10_000
 
 // ── ISA Atmosphere ──────────────────────────────────────────────────────────
 
@@ -270,7 +274,8 @@ function integrateAscent(
 
   // RK4 integration loop
   const maxTime = burn_s + 300
-  while (t < maxTime) {
+  let steps = 0
+  while (t < maxTime && steps < MAX_INTEGRATION_STEPS) {
     // Apogee: velocity crosses zero after burnout
     if (t > burn_s && v <= 0) break
 
@@ -285,6 +290,7 @@ function integrateAscent(
     h += (step / 6) * (k1.dh + 2 * k2.dh + 2 * k3.dh + k4.dh)
     v += (step / 6) * (k1.dv + 2 * k2.dv + 2 * k3.dv + k4.dv)
     t += step
+    steps++
 
     if (!isFinite(v) || !isFinite(h) || Math.abs(v) > V_MAX) {
       return { apogee_m: NaN, burnout_t_s: t, ascentTimeline }
@@ -438,7 +444,13 @@ export function computeDrift({ simulation, specs }) {
   const hasCoords = isFinite(launch_lat) && isFinite(launch_lon)
 
   const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation
-  if (!drogue_fps || !apogee_ft) return null
+  if (
+    !Number.isFinite(drogue_fps) ||
+    drogue_fps <= 0 ||
+    !Number.isFinite(apogee_ft) ||
+    apogee_ft <= 0
+  )
+    return null
 
   const ALT_STEP = 100
   let dx_ft = 0,
@@ -449,10 +461,12 @@ export function computeDrift({ simulation, specs }) {
     main_dy = 0
   let drogue_time_s = 0,
     main_time_s = 0
+  let descent_steps = 0
 
-  const deploy = deploy_ft || 500
+  const deploy = Math.min(MAX_SIM_ALTITUDE_FT, deploy_ft || 500)
   let alt = apogee_ft
   while (alt > deploy) {
+    if (++descent_steps > MAX_DESCENT_STEPS) return null
     const step_ft = Math.min(ALT_STEP, alt - deploy)
     const mid_alt = alt - step_ft / 2
     const wind = interpolateWind(mid_alt, layers)
@@ -469,6 +483,7 @@ export function computeDrift({ simulation, specs }) {
   alt = deploy
   const effective_main_fps = main_fps && main_fps > 0 ? main_fps : drogue_fps
   while (alt > 0) {
+    if (++descent_steps > MAX_DESCENT_STEPS) return null
     const step_ft = Math.min(ALT_STEP, alt)
     const mid_alt = alt - step_ft / 2
     const wind = interpolateWind(Math.max(0, mid_alt), layers)
@@ -536,10 +551,16 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
   if (!isFinite(launch_lat) || !isFinite(launch_lon)) return null
 
   const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation
-  if (!drogue_fps || !apogee_ft) return null
+  if (
+    !Number.isFinite(drogue_fps) ||
+    drogue_fps <= 0 ||
+    !Number.isFinite(apogee_ft) ||
+    apogee_ft <= 0
+  )
+    return null
 
   const ALT_STEP = 200
-  const deploy = deploy_ft || 500
+  const deploy = Math.min(MAX_SIM_ALTITUDE_FT, deploy_ft || 500)
   const effective_main_fps = main_fps && main_fps > 0 ? main_fps : drogue_fps
 
   function gaussRand() {
@@ -557,10 +578,13 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
     const mass_factor = 1 + 0.02 * gaussRand() // ±2% mass uncertainty
     const impulse_factor = 1 + 0.03 * gaussRand() // ±3% motor lot variation
     const cd_factor = 1 + 0.1 * gaussRand() // ±10% Cd uncertainty
-    const deploy_pert = Math.max(100, deploy + 50 * gaussRand()) // ±50 ft altimeter error
+    const deploy_pert = Math.min(MAX_SIM_ALTITUDE_FT, Math.max(100, deploy + 50 * gaussRand())) // ±50 ft altimeter error
 
     // Apogee scales with impulse, inversely with mass and Cd (approximate)
-    const apogee_pert = (apogee_ft * impulse_factor) / (mass_factor * cd_factor)
+    const apogee_pert = Math.min(
+      MAX_SIM_ALTITUDE_FT,
+      (apogee_ft * impulse_factor) / (mass_factor * cd_factor)
+    )
 
     // Descent rates scale with sqrt(mass_factor) (heavier = faster descent)
     const drogue_pert = drogue_fps * Math.sqrt(mass_factor)
@@ -574,10 +598,12 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
 
     let dx_ft = 0,
       dy_ft = 0
+    let descent_steps = 0
 
     // Drogue phase
     let alt = apogee_pert
     while (alt > deploy_pert) {
+      if (++descent_steps > MAX_DESCENT_STEPS) return null
       const step_ft = Math.min(ALT_STEP, alt - deploy_pert)
       const mid_alt = alt - step_ft / 2
       const wind = interpolateWind(mid_alt, perturbedLayers)
@@ -593,6 +619,7 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
     // Main phase
     alt = deploy_pert
     while (alt > 0) {
+      if (++descent_steps > MAX_DESCENT_STEPS) return null
       const step_ft = Math.min(ALT_STEP, alt)
       const mid_alt = alt - step_ft / 2
       const wind = interpolateWind(Math.max(0, mid_alt), perturbedLayers)
@@ -676,20 +703,15 @@ export function fitConfidenceEllipse(points) {
  *   Without                  → impulse/mass heuristic (±30%)
  */
 export function runSimulation({ specs, config, customMotor = null }) {
-  const mass_g = parseFloat(specs.rocket_mass_g)
-  const impulse = parseFloat(specs.motor_total_impulse_ns)
-  const burn_s = parseFloat(specs.burn_time_s)
+  const { mass_g, mass_kg, deploy_alt_ft, g_factor } = normalizeCalculationInputs(specs)
+  const impulse = parseSpec('motor_total_impulse_ns', specs.motor_total_impulse_ns)
+  const burn_s = parseSpec('burn_time_s', specs.burn_time_s)
   const od_in = parseFloat(specs.airframe_id_in)
   const cd = parseFloat(specs.drag_cd) || CD_DEFAULT
   const wind_mph = parseFloat(specs.wind_speed_mph) || 0
-  const deploy_ft = parseFloat(specs.main_deploy_alt_ft) || 500
-  // Stays in lockstep with compatibility.js + SuggestPanel.jsx via parseSpec.
-  const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
-  const g_factor = g_factor_user ?? (mass_g / 1000 >= 10 ? 30 : 20)
+  const deploy_ft = deploy_alt_ft
 
-  if (!mass_g || !impulse || mass_g <= 0 || impulse <= 0) return null
-
-  const mass_kg = mass_g / 1000
+  if (mass_g == null || !impulse || impulse <= 0) return null
   const thrustCurve = customMotor?.curve ?? null
   const propMass_kg = customMotor?.propellant_kg ?? null
 
@@ -724,7 +746,7 @@ export function runSimulation({ specs, config, customMotor = null }) {
   }
 
   const apogee_ft = apogee_m * FT_PER_M
-  if (!isFinite(apogee_ft) || apogee_ft <= deploy_ft) return null
+  if (!isFinite(apogee_ft) || apogee_ft <= deploy_ft || apogee_ft > MAX_SIM_ALTITUDE_FT) return null
 
   // ── Descent rates (constraints #6, #7, #8) ────────────────────────────────
   // Single terminal velocity per phase; no transient acceleration modeled.
@@ -815,7 +837,7 @@ function buildTimeline({
 }) {
   const points = []
 
-  const steps1 = Math.max(30, Math.ceil(phase1_time_s / 2))
+  const steps1 = Math.min(MAX_TIMELINE_POINTS, Math.max(30, Math.ceil(phase1_time_s / 2)))
   for (let i = 0; i <= steps1; i++) {
     const t = offset + (i / steps1) * phase1_time_s
     const alt = apogee_ft - drogue_fps * (i / steps1) * phase1_time_s
@@ -823,7 +845,7 @@ function buildTimeline({
   }
 
   if (main_fps != null && phase2_time_s != null) {
-    const steps2 = Math.max(15, Math.ceil(phase2_time_s / 2))
+    const steps2 = Math.min(MAX_TIMELINE_POINTS, Math.max(15, Math.ceil(phase2_time_s / 2)))
     for (let i = 1; i <= steps2; i++) {
       const frac = i / steps2
       const t = offset + phase1_time_s + frac * phase2_time_s

@@ -1,6 +1,6 @@
 import { computeDescentRate } from './simulation.js'
 import { WARN_LEVELS, PHYSICS } from './constants.js'
-import { parseSpec } from './schema.js'
+import { normalizeCalculationInputs } from './schema.js'
 
 /**
  * Compatibility rules engine.
@@ -41,7 +41,6 @@ const N_PER_LBF = 1 / PHYSICS.LBS_PER_N
 
 // Default values used when a spec is blank / out-of-range. These drove the
 // repeated `|| 500` and `|| 0` fallbacks in the imperative version.
-const DEFAULT_DEPLOY_ALT_FT = 500
 const MID_DROGUE_ALT_FT = 5000 // air ~15% thinner here vs sea level
 
 // Rule thresholds — moving these out of rule bodies so a future tuning
@@ -75,23 +74,14 @@ const HARNESS_MIN_LENGTH_FT = (mass_kg) => (mass_kg >= 10 ? 15 : mass_kg >= 2.5 
 // ── Context ─────────────────────────────────────────────────────────────────
 
 function buildContext({ config, specs }) {
-  const mass_g = parseFloat(specs.rocket_mass_g)
+  const { mass_g, mass_kg, deploy_alt_ft, deploy_alt_raw, g_factor } =
+    normalizeCalculationInputs(specs)
   const airframe_id = parseFloat(specs.airframe_id_in) || 0
   const bay_length = parseFloat(specs.bay_length_in) || 0
   const bay_cross_area = airframe_id > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) : 0
   const bay_volume = bay_cross_area > 0 && bay_length > 0 ? bay_cross_area * bay_length : 0
   const obstruction_vol = Math.max(0, parseFloat(specs.bay_obstruction_vol_in3) || 0)
   const usable_volume = bay_volume > 0 ? Math.max(0, bay_volume - obstruction_vol) : 0
-  const mass_kg = mass_g > 0 ? mass_g / 1000 : null
-  const deploy_alt_ft = parseFloat(specs.main_deploy_alt_ft) || DEFAULT_DEPLOY_ALT_FT
-  const deploy_alt_raw = parseFloat(specs.main_deploy_alt_ft) // unguarded for sanity rule
-
-  // parseSpec returns null for ≤0 (treated as "auto") — keeps simulation,
-  // compatibility, and SuggestPanel in lockstep.
-  const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
-  const g_factor =
-    g_factor_user != null ? Math.max(5, g_factor_user) : mass_kg != null && mass_kg >= 10 ? 30 : 20
-
   // Required ejection-pull load in pound-force; used by shock-cord, quick-link,
   // swivel strength rules. Null when mass is missing (rules guard on this).
   const required_lbs = mass_kg != null ? (mass_kg * G_ACCEL * g_factor) / N_PER_LBF : null

@@ -16,7 +16,7 @@ const PACKING_ORDER = [
 
 const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label]))
 
-export default function PrintChecklist({ specs, config, simulation, warnings = [] }) {
+export default function PrintChecklist({ specs, config, simulation, resultFresh, warnings = [] }) {
   const date = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -139,7 +139,7 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
       {/* ── Simulation Results ─────────────────────────────────── */}
       <section>
         <h2>Simulation Results</h2>
-        {simulation ? (
+        {simulation && resultFresh ? (
           <table>
             <tbody>
               <tr>
@@ -212,7 +212,11 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
             </tbody>
           </table>
         ) : (
-          <p>No simulation run — click RUN_SIM first</p>
+          <p>
+            {simulation
+              ? 'RESULT_STALE — rerun simulation before printing'
+              : 'No simulation run — click RUN_SIM first'}
+          </p>
         )}
       </section>
 

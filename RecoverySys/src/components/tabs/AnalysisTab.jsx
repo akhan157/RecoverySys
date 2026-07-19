@@ -1,5 +1,5 @@
 import { useMemo } from 'react'
-import { parseSpec } from '../../lib/schema.js'
+import { normalizeCalculationInputs } from '../../lib/schema.js'
 import { computePackingVolume } from '../../lib/compatibility.js'
 
 const G = 9.80665
@@ -27,19 +27,14 @@ function sfStatus(sf, material) {
 }
 
 export default function AnalysisTab({ state }) {
-  const sim = state.simulation
+  const sim = state.resultFresh ? state.simulation : null
   const specs = state.specs
   const config = state.config
 
   const a = useMemo(() => {
     if (!sim) return null
 
-    const mass_g = parseFloat(specs.rocket_mass_g) || 0
-    const mass_kg = mass_g / 1000
-
-    const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
-    const g_factor = g_factor_user != null ? g_factor_user : mass_kg >= 10 ? 30 : 20
-    const g_factor_auto = g_factor_user == null
+    const { mass_g, mass_kg, g_factor, g_factor_auto } = normalizeCalculationInputs(specs)
 
     const static_N = mass_kg * g_factor * G
     const static_lbs = static_N / N_PER_LBF
@@ -136,7 +131,9 @@ export default function AnalysisTab({ state }) {
     return (
       <div className="mc-analysis">
         <div className="mc-analysis__empty">
-          <div className="mc-analysis__empty-code">NO_SIMULATION_DATA</div>
+          <div className="mc-analysis__empty-code">
+            {state.simulation ? 'RESULT_STALE // RERUN_REQUIRED' : 'NO_SIMULATION_DATA'}
+          </div>
           <div className="mc-analysis__empty-sub">
             Run a simulation from the DASHBOARD or SIMULATION tab to populate physics breakdown
           </div>

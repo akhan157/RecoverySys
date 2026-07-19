@@ -1,7 +1,10 @@
-import { render, screen, act, waitFor } from '@testing-library/react'
+import { render, renderHook, screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import App from '../App.jsx'
+import { encodeSharePayload } from '../lib/shareLink.js'
+import useShareLinkLoader from '../hooks/useShareLinkLoader.js'
+import { EMPTY_CONFIG, SLOT_IDS } from '../data/parts.js'
 
 // Stub clipboard API not supported in jsdom
 Object.assign(navigator, {
@@ -164,5 +167,73 @@ describe('App — status bar warning badge', () => {
 
     const badge = document.querySelector('.mc-validation--warn, .mc-validation--error')
     expect(badge).not.toBeInTheDocument()
+  })
+})
+
+// ── Share-link import transaction ────────────────────────────────────────────
+
+describe('App — rejected share-link import', () => {
+  beforeEach(() => {
+    clearLocalStorage()
+    setReturningUser()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.runAllTimers()
+    vi.useRealTimers()
+    clearLocalStorage()
+  })
+
+  it('does not apply configuration when inline custom parts exceed storage limits', async () => {
+    const incoming = {
+      id: 'custom-imported',
+      category: 'main_chute',
+      name: 'Should Not Load',
+      specs: {},
+    }
+    const originalSearch = window.location.search
+    Object.defineProperty(window, 'location', {
+      value: {
+        ...window.location,
+        search: `?c=${encodeURIComponent(
+          encodeSharePayload({
+            config: { ...SAVED_SESSION.config, main_chute: incoming },
+            specs: SAVED_SESSION.specs,
+          })
+        )}`,
+      },
+      writable: true,
+      configurable: true,
+    })
+
+    const dispatch = vi.fn()
+    const addToast = vi.fn()
+    const mergeCustomParts = vi.fn(() => ({
+      ok: false,
+      importedCount: 0,
+      error: 'Imported custom parts exceed local storage limits.',
+    }))
+    renderHook(() =>
+      useShareLinkLoader({
+        allParts: [],
+        addToast,
+        mergeCustomParts,
+        dispatch,
+      })
+    )
+
+    expect(mergeCustomParts).toHaveBeenCalledWith([incoming])
+    expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'LOAD_SHARE' }))
+    expect(addToast).toHaveBeenCalledWith(
+      expect.anything(),
+      'Imported custom parts exceed local storage limits.'
+    )
+
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, search: originalSearch },
+      writable: true,
+      configurable: true,
+    })
   })
 })

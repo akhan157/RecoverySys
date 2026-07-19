@@ -1,7 +1,7 @@
 import { useState, useMemo } from 'react'
 import { computeDescentRate } from '../lib/simulation.js'
 import { PHYSICS } from '../lib/constants.js'
-import { parseSpec } from '../lib/schema.js'
+import { normalizeCalculationInputs } from '../lib/schema.js'
 
 const G_ACCEL = PHYSICS.G
 const LBS_PER_N = PHYSICS.LBS_PER_N
@@ -112,13 +112,7 @@ export default function SuggestPanel({ parts, specs, config, onSelectPart }) {
   const [mainFps, setMainFps] = useState('15')
   const [drogueFps, setDrogueFps] = useState('80')
 
-  const mass_kg = (parseFloat(specs.rocket_mass_g) || 0) / 1000
-  const deploy_ft = parseFloat(specs.main_deploy_alt_ft) || 500
-  // Use parseSpec so this matches compatibility.js + simulation.js exactly —
-  // negative or zero inputs fall through to the auto default (20G/30G), no
-  // silent disagreement between consumers (Pass 2 red-team finding).
-  const g_factor =
-    parseSpec('ejection_g_factor', specs.ejection_g_factor) ?? (mass_kg >= 10 ? 30 : 20)
+  const { mass_kg, deploy_alt_ft, g_factor } = normalizeCalculationInputs(specs)
   const targetMain = parseFloat(mainFps) || 15
   const targetDrogue = parseFloat(drogueFps) || 80
 
@@ -127,10 +121,10 @@ export default function SuggestPanel({ parts, specs, config, onSelectPart }) {
 
     // Main chute: sort by |actual_fps - target|
     const mainChutes = scored(parts, 'main_chute', (p) => {
-      const fps = computeDescentRate(p.specs, mass_kg, deploy_ft)
+      const fps = computeDescentRate(p.specs, mass_kg, deploy_alt_ft)
       return fps > 0 ? Math.abs(fps - targetMain) : null
     }).map(({ part }) => {
-      const fps = computeDescentRate(part.specs, mass_kg, deploy_ft)
+      const fps = computeDescentRate(part.specs, mass_kg, deploy_alt_ft)
       return {
         part,
         detail: `${fpsLabel(fps)} main descent · ${part.specs.diameter_in}" Ø Cd ${part.specs.cd}`,
@@ -163,7 +157,7 @@ export default function SuggestPanel({ parts, specs, config, onSelectPart }) {
     })
 
     return { mainChutes, drogueChutes, shockCords }
-  }, [parts, mass_kg, deploy_ft, g_factor, targetMain, targetDrogue])
+  }, [parts, mass_kg, deploy_alt_ft, g_factor, targetMain, targetDrogue])
 
   const inputStyle = {
     fontFamily: "'JetBrains Mono', ui-monospace, monospace",

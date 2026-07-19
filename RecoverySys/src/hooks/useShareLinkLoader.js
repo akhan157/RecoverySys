@@ -15,7 +15,7 @@ import { TOAST_LEVELS } from '../lib/constants.js'
  * re-running on `allParts` change would re-import after the user adds
  * a new local custom part).
  */
-export default function useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch }) {
+export default function useShareLinkLoader({ allParts, addToast, mergeCustomParts, dispatch }) {
   useEffect(() => {
     const c = new URLSearchParams(location.search).get(SHARE_PARAM)
     if (!c) return
@@ -25,6 +25,15 @@ export default function useShareLinkLoader({ allParts, addToast, setCustomParts,
       emptyConfig: EMPTY_CONFIG,
     })
     if (!decoded) return // malformed or future-version — silently ignore
+
+    let mergeResult = null
+    if (decoded.inlinedCustomParts?.length > 0) {
+      mergeResult = mergeCustomParts(decoded.inlinedCustomParts)
+      if (!mergeResult.ok) {
+        addToast(TOAST_LEVELS.WARN, mergeResult.error)
+        return
+      }
+    }
 
     dispatch({
       type: 'LOAD_SHARE',
@@ -40,14 +49,8 @@ export default function useShareLinkLoader({ allParts, addToast, setCustomParts,
       )
     }
 
-    if (decoded.inlinedCustomParts?.length > 0) {
-      let importedCount = 0
-      setCustomParts((prev) => {
-        const existingIds = new Set(prev.map((p) => p.id))
-        const newParts = decoded.inlinedCustomParts.filter((p) => !existingIds.has(p.id))
-        importedCount = newParts.length
-        return importedCount > 0 ? [...prev, ...newParts] : prev
-      })
+    if (mergeResult?.importedCount > 0) {
+      const importedCount = mergeResult.importedCount
       if (importedCount > 0) {
         addToast(
           TOAST_LEVELS.OK,

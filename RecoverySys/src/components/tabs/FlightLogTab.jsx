@@ -280,7 +280,8 @@ function LogEntry({ entry, onDelete }) {
   )
 }
 
-export default function FlightLogTab({ state }) {
+export default function FlightLogTab({ state, resultFresh }) {
+  const usableSimulation = resultFresh ? state.simulation : null
   const [entries, setEntries] = useState(loadLog)
 
   useEffect(() => {
@@ -306,7 +307,12 @@ export default function FlightLogTab({ state }) {
         >
           New Entry
         </div>
-        <NewEntryForm simulation={state.simulation} specs={state.specs} onSave={addEntry} />
+        {state.simulation && !resultFresh && (
+          <div className="mc-validation mc-validation--warn" style={{ marginBottom: 10 }}>
+            RESULT_STALE — rerun simulation before logging predicted values
+          </div>
+        )}
+        <NewEntryForm simulation={usableSimulation} specs={state.specs} onSave={addEntry} />
 
         {entries.length > 0 && (
           <>

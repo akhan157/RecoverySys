@@ -6,7 +6,7 @@ import { runSimulation } from '../../lib/simulation.js'
  * Config comparison tab. Save a snapshot of the current config ("A"),
  * then modify parts/specs — the tab shows A vs current ("B") side-by-side.
  */
-export default function CompareTab({ state }) {
+export default function CompareTab({ state, resultFresh }) {
   const [snapshot, setSnapshot] = useState(null)
 
   const saveSnapshot = () => {
@@ -30,7 +30,12 @@ export default function CompareTab({ state }) {
     })
   }, [snapshot])
 
-  const currentSim = state.simulation
+  const currentSim = resultFresh ? state.simulation : null
+  const currentBStatus = !state.simulation
+    ? 'No current-B simulation available — run a simulation before using B results.'
+    : !resultFresh
+      ? 'Current-B simulation is stale — rerun before using it.'
+      : null
 
   if (!snapshot) {
     return (
@@ -163,7 +168,13 @@ export default function CompareTab({ state }) {
       <div style={{ padding: '12px', overflowY: 'auto', flex: 1 }}>
         <div style={{ fontSize: 10, color: 'var(--mc-text-dim)', marginBottom: 8 }}>
           Config A saved at {snapshot.savedAt}. Current config is B. Changed values shown in amber.
+          {currentBStatus && <span role="status"> {currentBStatus}</span>}
         </div>
+        {currentBStatus && (
+          <div className="mc-validation mc-validation--warn" role="alert">
+            {currentBStatus}
+          </div>
+        )}
 
         {/* Parts comparison */}
         <div
