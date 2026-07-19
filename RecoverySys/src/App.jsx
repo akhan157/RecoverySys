@@ -232,7 +232,6 @@ export default function App() {
   // up matching config slots when parts are deleted or edited).
   const {
     customParts,
-    setCustomParts,
     mergeCustomParts,
     allParts,
     addCustomPart,

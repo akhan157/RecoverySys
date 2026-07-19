@@ -5,7 +5,6 @@
 // unavailable (Safari private mode, storage full, corrupt JSON) and the app
 // must still boot with sane defaults.
 
-import { SCHEMA_VERSION } from './schema.js'
 import { PARTS, SLOT_IDS, EMPTY_CONFIG } from '../data/parts.js'
 import {
   decodeMigrateValidateNormalize,

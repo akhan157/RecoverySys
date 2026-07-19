@@ -1,4 +1,4 @@
-import React, { useRef } from 'react'
+import { useRef } from 'react'
 import { SAVE_STATES, SHARE_STATES } from '../../lib/constants.js'
 import {
   encodeJsonPayload,

@@ -4,8 +4,7 @@
 // part IDs are serialized (not full objects) so URLs stay compact. Receiver
 // re-hydrates parts by looking them up in its own catalog + custom parts list.
 
-import { decodeShareEncoded, makeConfigPayload, isValidCustomPart } from './payloadBoundary.js'
-import { SCHEMA_VERSION } from './schema.js'
+import { decodeShareEncoded, makeConfigPayload } from './payloadBoundary.js'
 
 export const SHARE_PARAM = 'c'
 
