@@ -18,6 +18,10 @@ function byteLength(value) {
   return textEncoder ? textEncoder.encode(value).length : value.length * 2
 }
 
+export function isPayloadSizeAllowed(bytes) {
+  return Number.isFinite(bytes) && bytes >= 0 && bytes <= PAYLOAD_LIMITS.jsonBytes
+}
+
 function failure(code, message = code) {
   return { ok: false, error: { code, message } }
 }
@@ -117,12 +121,18 @@ export function decodeShareEncoded(encoded, options = {}) {
 }
 
 export function makeConfigPayload({ config, specs, customMotor }) {
-  return { schemaVersion: SCHEMA_VERSION, config, specs, customMotor: customMotor ?? null }
+  const compactConfig = Object.fromEntries(
+    Object.entries(config ?? {}).map(([category, part]) => {
+      if (!part) return [category, null]
+      if (part.id?.startsWith('custom-')) {
+        return [category, { ...part, category: part.category ?? category }]
+      }
+      return [category, { id: part.id }]
+    }),
+  )
+  return { schemaVersion: SCHEMA_VERSION, config: compactConfig, specs, customMotor: customMotor ?? null }
 }
 
 export function encodeJsonPayload(state) {
-  const config = Object.fromEntries(
-    Object.entries(state.config ?? {}).map(([category, part]) => [category, part ? { id: part.id } : null]),
-  )
-  return JSON.stringify({ _format: 'recoverysys-config-v1', ...makeConfigPayload({ ...state, config }) }, null, 2)
+  return JSON.stringify({ _format: 'recoverysys-config-v1', ...makeConfigPayload(state) }, null, 2)
 }

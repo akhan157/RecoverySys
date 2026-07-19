@@ -36,6 +36,7 @@ export const SPECS_SCHEMA = Object.freeze({
     default: '',
     label: 'Motor total impulse',
     min: 0,
+    max: 1_000_000,
     exclusiveMin: true,
   },
   burn_time_s: {
@@ -44,6 +45,7 @@ export const SPECS_SCHEMA = Object.freeze({
     default: '',
     label: 'Burn time',
     min: 0,
+    max: 120,
     exclusiveMin: true,
   },
   airframe_id_in: {
@@ -256,4 +258,22 @@ export function parseSpec(key, raw) {
   if (def.min != null && clamped < def.min) clamped = def.min
   if (def.max != null && clamped > def.max) clamped = def.max
   return clamped
+}
+
+/**
+ * Normalize the schema-backed values shared by the calculation consumers.
+ * Keeping deployment and ejection defaults here prevents simulation and
+ * compatibility from making different assumptions about the same rocket.
+ */
+export function normalizeCalculationInputs(specs = {}) {
+  const mass_g = parseSpec('rocket_mass_g', specs.rocket_mass_g)
+  const mass_kg = mass_g != null ? mass_g / 1000 : null
+  const deploy_alt_raw = coerceSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft)
+  const deploy_alt_ft = parseSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft) ?? 500
+  const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
+  const g_factor = g_factor_user != null
+    ? Math.max(5, g_factor_user)
+    : (mass_kg != null && mass_kg >= 10 ? 30 : 20)
+
+  return { mass_g, mass_kg, deploy_alt_raw, deploy_alt_ft, g_factor, g_factor_auto: g_factor_user == null }
 }

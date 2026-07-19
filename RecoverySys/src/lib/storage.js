@@ -38,11 +38,24 @@ export function loadCustomParts() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CUSTOM_PARTS)
     if (!raw) return []
-    if (raw.length > PAYLOAD_LIMITS.customPartsJsonBytes) return []
+    if (serializedByteLength(raw) > PAYLOAD_LIMITS.customPartsJsonBytes) return []
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed) || parsed.length > PAYLOAD_LIMITS.customParts) return []
     return parsed.filter(isValidCustomPart)
   } catch { return [] }
+}
+
+function serializedByteLength(value) {
+  return typeof TextEncoder !== 'undefined'
+    ? new TextEncoder().encode(value).length
+    : value.length * 2
+}
+
+export function canPersistCustomParts(customParts) {
+  try {
+    if (!Array.isArray(customParts) || customParts.length > PAYLOAD_LIMITS.customParts) return false
+    return serializedByteLength(JSON.stringify(customParts)) <= PAYLOAD_LIMITS.customPartsJsonBytes
+  } catch { return false }
 }
 
 // Defensive shape-check for customMotor loaded from localStorage or a share link.
@@ -57,11 +70,7 @@ export function saveConfigToStorage({ config, specs, customMotor }) {
   try {
     localStorage.setItem(
       STORAGE_KEYS.CONFIG,
-      JSON.stringify(makeConfigPayload({
-        config: Object.fromEntries(Object.entries(config ?? {}).map(([category, part]) => [category, part ? { id: part.id } : null])),
-        specs,
-        customMotor,
-      })),
+      JSON.stringify(makeConfigPayload({ config, specs, customMotor })),
     )
     return true
   } catch { return false }
@@ -69,9 +78,8 @@ export function saveConfigToStorage({ config, specs, customMotor }) {
 
 export function saveCustomPartsToStorage(customParts) {
   try {
-    if (!Array.isArray(customParts) || customParts.length > PAYLOAD_LIMITS.customParts) return false
+    if (!canPersistCustomParts(customParts)) return false
     const serialized = JSON.stringify(customParts)
-    if (serialized.length > PAYLOAD_LIMITS.customPartsJsonBytes) return false
     localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, serialized)
     return true
   } catch { return false }

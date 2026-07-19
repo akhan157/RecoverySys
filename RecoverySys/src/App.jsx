@@ -222,8 +222,13 @@ export default function App() {
 
   // Custom parts (persisted; merged with PARTS into allParts; CRUD cleans
   // up matching config slots when parts are deleted or edited).
-  const { customParts, setCustomParts, allParts, addCustomPart, deleteCustomPart, editCustomPart } =
-    useCustomParts({ config: state.config, dispatch })
+  const {
+    customParts,
+    setCustomParts,
+    mergeCustomParts,
+    allParts,
+    addCustomPart, deleteCustomPart, editCustomPart,
+  } = useCustomParts({ config: state.config, dispatch })
 
   // Debounced compatibility re-evaluation on config/specs change.
   useCompatibilityWatcher({ config: state.config, specs: state.specs, dispatch })
@@ -260,9 +265,12 @@ export default function App() {
   const setCategory = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
   const setCustomMotor = useCallback((motor) => dispatch({ type: 'SET_CUSTOM_MOTOR', motor }), [])
   const clearCustomMotor = useCallback(() => dispatch({ type: 'CLEAR_CUSTOM_MOTOR' }), [])
-  const loadConfig = useCallback(({ config, specs, customMotor }) => {
+  const loadConfig = useCallback(({ config, specs, customMotor, inlinedCustomParts }) => {
+    const mergeResult = mergeCustomParts(inlinedCustomParts)
+    if (!mergeResult.ok) return mergeResult
     dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
-  }, [])
+    return mergeResult
+  }, [mergeCustomParts])
 
   const addToast = useCallback((level, message) => {
     dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
@@ -350,7 +358,7 @@ export default function App() {
   }, [addToast, demoMode])
 
   // Share link loader (mount-once: decode ?c=, dispatch LOAD_SHARE, toast).
-  useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch })
+  useShareLinkLoader({ allParts, addToast, mergeCustomParts, dispatch })
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (

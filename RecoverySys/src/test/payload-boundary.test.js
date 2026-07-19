@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { decodeMigrateValidateNormalize, encodeJsonPayload, PAYLOAD_LIMITS } from '../lib/payloadBoundary.js'
-import { loadSaved, loadCustomParts, saveCustomPartsToStorage, STORAGE_KEYS } from '../lib/storage.js'
+import { decodeMigrateValidateNormalize, encodeJsonPayload, PAYLOAD_LIMITS, isPayloadSizeAllowed } from '../lib/payloadBoundary.js'
+import { loadSaved, loadCustomParts, saveConfigToStorage, saveCustomPartsToStorage, STORAGE_KEYS } from '../lib/storage.js'
 import { PARTS } from '../data/parts.js'
 import { SCHEMA_VERSION } from '../lib/schema.js'
 
@@ -35,8 +35,24 @@ describe('payload boundary', () => {
   it('handles share catalog references and valid inline custom parts', () => {
     const custom = { id: 'custom-one', category: 'main_chute', name: 'Custom', specs: {} }
     const result = decodeMigrateValidateNormalize({ ...valid, config: { main_chute: custom } }, options)
-    expect(result.config.main_chute).toBe(custom)
+    expect(result.config.main_chute).toEqual(custom)
     expect(result.inlinedCustomParts).toEqual([custom])
+  })
+
+  it('preserves selected custom parts through saved config and JSON export/import', () => {
+    const custom = { id: 'custom-one', category: 'main_chute', name: 'Custom', specs: { diameter_in: 36, cd: 1.5 } }
+    saveConfigToStorage({ config: { main_chute: custom }, specs: {}, customMotor: null })
+    expect(loadSaved()?.config.main_chute).toEqual(custom)
+
+    const exported = JSON.parse(encodeJsonPayload({ config: { main_chute: custom }, specs: {}, customMotor: null }))
+    expect(exported.config.main_chute).toEqual(custom)
+    expect(decodeMigrateValidateNormalize(exported, options).config.main_chute).toEqual(custom)
+  })
+
+  it('uses the shared byte limit for raw JSON and file-size guards', () => {
+    expect(isPayloadSizeAllowed(PAYLOAD_LIMITS.jsonBytes)).toBe(true)
+    expect(isPayloadSizeAllowed(PAYLOAD_LIMITS.jsonBytes + 1)).toBe(false)
+    expect(decodeMigrateValidateNormalize(' '.repeat(PAYLOAD_LIMITS.jsonBytes + 1), options).ok).toBe(false)
   })
 
   it('rejects oversized and over-limit custom-part storage', () => {
