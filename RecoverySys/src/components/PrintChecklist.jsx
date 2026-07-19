@@ -212,7 +212,11 @@ export default function PrintChecklist({ specs, config, simulation, resultFresh,
             </tbody>
           </table>
         ) : (
-          <p>{simulation ? 'RESULT_STALE — rerun simulation before printing' : 'No simulation run — click RUN_SIM first'}</p>
+          <p>
+            {simulation
+              ? 'RESULT_STALE — rerun simulation before printing'
+              : 'No simulation run — click RUN_SIM first'}
+          </p>
         )}
       </section>
 

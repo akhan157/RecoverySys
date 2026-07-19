@@ -14,7 +14,9 @@ describe('useCustomParts import transactions', () => {
     const imported = Array.from({ length: 201 }, (_, i) => customPart(i))
 
     let mergeResult
-    act(() => { mergeResult = result.current.mergeCustomParts(imported) })
+    act(() => {
+      mergeResult = result.current.mergeCustomParts(imported)
+    })
 
     expect(mergeResult.ok).toBe(false)
     expect(result.current.customParts).toEqual([])

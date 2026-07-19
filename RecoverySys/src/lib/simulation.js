@@ -444,7 +444,13 @@ export function computeDrift({ simulation, specs }) {
   const hasCoords = isFinite(launch_lat) && isFinite(launch_lon)
 
   const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation
-  if (!Number.isFinite(drogue_fps) || drogue_fps <= 0 || !Number.isFinite(apogee_ft) || apogee_ft <= 0) return null
+  if (
+    !Number.isFinite(drogue_fps) ||
+    drogue_fps <= 0 ||
+    !Number.isFinite(apogee_ft) ||
+    apogee_ft <= 0
+  )
+    return null
 
   const ALT_STEP = 100
   let dx_ft = 0,
@@ -545,11 +551,17 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
   if (!isFinite(launch_lat) || !isFinite(launch_lon)) return null
 
   const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation
-  if (!Number.isFinite(drogue_fps) || drogue_fps <= 0 || !Number.isFinite(apogee_ft) || apogee_ft <= 0) return null
+  if (
+    !Number.isFinite(drogue_fps) ||
+    drogue_fps <= 0 ||
+    !Number.isFinite(apogee_ft) ||
+    apogee_ft <= 0
+  )
+    return null
 
   const ALT_STEP = 200
   const deploy = Math.min(MAX_SIM_ALTITUDE_FT, deploy_ft || 500)
-  const effective_main_fps = (main_fps && main_fps > 0) ? main_fps : drogue_fps
+  const effective_main_fps = main_fps && main_fps > 0 ? main_fps : drogue_fps
 
   function gaussRand() {
     let u = 0,
@@ -569,7 +581,10 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
     const deploy_pert = Math.min(MAX_SIM_ALTITUDE_FT, Math.max(100, deploy + 50 * gaussRand())) // ±50 ft altimeter error
 
     // Apogee scales with impulse, inversely with mass and Cd (approximate)
-    const apogee_pert = Math.min(MAX_SIM_ALTITUDE_FT, (apogee_ft * impulse_factor) / (mass_factor * cd_factor))
+    const apogee_pert = Math.min(
+      MAX_SIM_ALTITUDE_FT,
+      (apogee_ft * impulse_factor) / (mass_factor * cd_factor)
+    )
 
     // Descent rates scale with sqrt(mass_factor) (heavier = faster descent)
     const drogue_pert = drogue_fps * Math.sqrt(mass_factor)

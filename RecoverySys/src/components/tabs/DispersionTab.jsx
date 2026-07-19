@@ -7,7 +7,11 @@ export default function DispersionTab({ state, resultFresh }) {
       <h2 className="mc-panel-header">
         DISPERSION_MAP // LANDING_PREDICTION
         <span className="mc-panel-header__right">
-          {state.simulation && !resultFresh ? 'RESULT_STALE // RERUN_REQUIRED' : state.simulation ? 'DATA_LOADED' : 'AWAITING_SIMULATION'}
+          {state.simulation && !resultFresh
+            ? 'RESULT_STALE // RERUN_REQUIRED'
+            : state.simulation
+              ? 'DATA_LOADED'
+              : 'AWAITING_SIMULATION'}
         </span>
       </h2>
       <div className="mc-dispersion__content">

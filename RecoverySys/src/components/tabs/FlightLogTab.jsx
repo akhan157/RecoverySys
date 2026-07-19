@@ -307,7 +307,11 @@ export default function FlightLogTab({ state, resultFresh }) {
         >
           New Entry
         </div>
-        {state.simulation && !resultFresh && <div className="mc-validation mc-validation--warn" style={{ marginBottom: 10 }}>RESULT_STALE — rerun simulation before logging predicted values</div>}
+        {state.simulation && !resultFresh && (
+          <div className="mc-validation mc-validation--warn" style={{ marginBottom: 10 }}>
+            RESULT_STALE — rerun simulation before logging predicted values
+          </div>
+        )}
         <NewEntryForm simulation={usableSimulation} specs={state.specs} onSave={addEntry} />
 
         {entries.length > 0 && (

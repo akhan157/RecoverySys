@@ -7,7 +7,13 @@
 
 import { SCHEMA_VERSION } from './schema.js'
 import { PARTS, SLOT_IDS, EMPTY_CONFIG } from '../data/parts.js'
-import { decodeMigrateValidateNormalize, makeConfigPayload, PAYLOAD_LIMITS, isValidCustomPart as isValidBoundaryCustomPart, validateCustomMotor } from './payloadBoundary.js'
+import {
+  decodeMigrateValidateNormalize,
+  makeConfigPayload,
+  PAYLOAD_LIMITS,
+  isValidCustomPart as isValidBoundaryCustomPart,
+  validateCustomMotor,
+} from './payloadBoundary.js'
 
 export const STORAGE_KEYS = Object.freeze({
   CONFIG: 'recoverysys-config',
@@ -20,9 +26,15 @@ export function loadSaved() {
     const raw = localStorage.getItem(STORAGE_KEYS.CONFIG)
     if (!raw) return null
     const custom = loadCustomParts()
-    const decoded = decodeMigrateValidateNormalize(raw, { allParts: [...custom, ...PARTS], slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG })
+    const decoded = decodeMigrateValidateNormalize(raw, {
+      allParts: [...custom, ...PARTS],
+      slotIds: SLOT_IDS,
+      emptyConfig: EMPTY_CONFIG,
+    })
     return decoded.ok ? decoded : null
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 // Single validator for custom parts shape. Used by both loadCustomParts
@@ -42,7 +54,9 @@ export function loadCustomParts() {
     const parsed = JSON.parse(raw)
     if (!Array.isArray(parsed) || parsed.length > PAYLOAD_LIMITS.customParts) return []
     return parsed.filter(isValidCustomPart)
-  } catch { return [] }
+  } catch {
+    return []
+  }
 }
 
 function serializedByteLength(value) {
@@ -55,7 +69,9 @@ export function canPersistCustomParts(customParts) {
   try {
     if (!Array.isArray(customParts) || customParts.length > PAYLOAD_LIMITS.customParts) return false
     return serializedByteLength(JSON.stringify(customParts)) <= PAYLOAD_LIMITS.customPartsJsonBytes
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 // Defensive shape-check for customMotor loaded from localStorage or a share link.
@@ -70,10 +86,12 @@ export function saveConfigToStorage({ config, specs, customMotor }) {
   try {
     localStorage.setItem(
       STORAGE_KEYS.CONFIG,
-      JSON.stringify(makeConfigPayload({ config, specs, customMotor })),
+      JSON.stringify(makeConfigPayload({ config, specs, customMotor }))
     )
     return true
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 export function saveCustomPartsToStorage(customParts) {
@@ -82,7 +100,9 @@ export function saveCustomPartsToStorage(customParts) {
     const serialized = JSON.stringify(customParts)
     localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, serialized)
     return true
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 export function loadTheme() {
@@ -92,10 +112,15 @@ export function loadTheme() {
     if (stored === 'light') return false
     // No explicit preference — respect OS setting
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 export function saveTheme(darkMode) {
-  try { localStorage.setItem(STORAGE_KEYS.THEME, darkMode ? 'dark' : 'light') }
-  catch { /* storage unavailable */ }
+  try {
+    localStorage.setItem(STORAGE_KEYS.THEME, darkMode ? 'dark' : 'light')
+  } catch {
+    /* storage unavailable */
+  }
 }

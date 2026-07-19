@@ -19,8 +19,8 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh }) {
               {sim && !resultFresh
                 ? 'RESULT_STALE // RERUN_REQUIRED'
                 : sim
-                ? `REF_ID: STR-SIM-${String(Math.abs((sim.apogee_ft || 0) * 7 + (sim.drift_ft || 0)) % 9999).padStart(4, '0')}`
-                : 'AWAITING_DATA'}
+                  ? `REF_ID: STR-SIM-${String(Math.abs((sim.apogee_ft || 0) * 7 + (sim.drift_ft || 0)) % 9999).padStart(4, '0')}`
+                  : 'AWAITING_DATA'}
             </span>
           </h2>
           <div className="mc-sim__chart-area">
@@ -61,7 +61,11 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh }) {
               unit="ft"
             />
             {usableSim?.drogue_fps && (
-              <MetricCard label="DROGUE_DESCENT" value={usableSim.drogue_fps.toFixed(1)} unit="ft/s" />
+              <MetricCard
+                label="DROGUE_DESCENT"
+                value={usableSim.drogue_fps.toFixed(1)}
+                unit="ft/s"
+              />
             )}
             {usableSim?.landing_ke_ftlbf != null && (
               <MetricCard label="LANDING_KE" value={sim.landing_ke_ftlbf} unit="ft-lbf" />

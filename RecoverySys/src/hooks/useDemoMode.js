@@ -63,7 +63,11 @@ export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch
       specs: { ...demoSpecs },
       customMotor: null,
     })
-    if (result) dispatch({ type: 'SET_SIM', simulation: buildResultEnvelope(result, { specs: demoSpecs, config, customMotor: null }, 0) })
+    if (result)
+      dispatch({
+        type: 'SET_SIM',
+        simulation: buildResultEnvelope(result, { specs: demoSpecs, config, customMotor: null }, 0),
+      })
     // Mount-once + demoMode-edge: allParts read once is intentional.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demoMode])

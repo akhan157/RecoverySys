@@ -132,9 +132,17 @@ function reducer(state, action) {
         inputRevision: state.inputRevision + 1,
       }
     case 'REMOVE_PART':
-      return { ...state, config: { ...state.config, [action.category]: null }, inputRevision: state.inputRevision + 1 }
+      return {
+        ...state,
+        config: { ...state.config, [action.category]: null },
+        inputRevision: state.inputRevision + 1,
+      }
     case 'SET_SPEC':
-      return { ...state, specs: { ...state.specs, [action.key]: action.value }, inputRevision: state.inputRevision + 1 }
+      return {
+        ...state,
+        specs: { ...state.specs, [action.key]: action.value },
+        inputRevision: state.inputRevision + 1,
+      }
     // Loading a custom motor also mirrors its totalImpulse/burnTime into specs so
     // canRun + the status-bar MOTOR display keep working unchanged.
     case 'SET_CUSTOM_MOTOR':
@@ -227,7 +235,9 @@ export default function App() {
     setCustomParts,
     mergeCustomParts,
     allParts,
-    addCustomPart, deleteCustomPart, editCustomPart,
+    addCustomPart,
+    deleteCustomPart,
+    editCustomPart,
   } = useCustomParts({ config: state.config, dispatch })
 
   // Debounced compatibility re-evaluation on config/specs change.
@@ -265,12 +275,15 @@ export default function App() {
   const setCategory = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
   const setCustomMotor = useCallback((motor) => dispatch({ type: 'SET_CUSTOM_MOTOR', motor }), [])
   const clearCustomMotor = useCallback(() => dispatch({ type: 'CLEAR_CUSTOM_MOTOR' }), [])
-  const loadConfig = useCallback(({ config, specs, customMotor, inlinedCustomParts }) => {
-    const mergeResult = mergeCustomParts(inlinedCustomParts)
-    if (!mergeResult.ok) return mergeResult
-    dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
-    return mergeResult
-  }, [mergeCustomParts])
+  const loadConfig = useCallback(
+    ({ config, specs, customMotor, inlinedCustomParts }) => {
+      const mergeResult = mergeCustomParts(inlinedCustomParts)
+      if (!mergeResult.ok) return mergeResult
+      dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
+      return mergeResult
+    },
+    [mergeCustomParts]
+  )
 
   const addToast = useCallback((level, message) => {
     dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
@@ -280,7 +293,10 @@ export default function App() {
     dispatch({ type: 'START_SIM' })
     const inputs = { specs: state.specs, config: state.config, customMotor: state.customMotor }
     const result = runSimulation(inputs)
-    dispatch({ type: 'SET_SIM', simulation: buildResultEnvelope(result, inputs, state.inputRevision) })
+    dispatch({
+      type: 'SET_SIM',
+      simulation: buildResultEnvelope(result, inputs, state.inputRevision),
+    })
     if (result === null) {
       addToast(
         TOAST_LEVELS.ERROR,

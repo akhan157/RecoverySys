@@ -193,23 +193,41 @@ describe('computeShockLoad', () => {
   })
 
   it('uses normalized defaults/clamps for mass, deployment, and ejection G', () => {
-    expect(normalizeCalculationInputs({
-      rocket_mass_g: '-1', main_deploy_alt_ft: '-100', ejection_g_factor: '2',
-    })).toMatchObject({ mass_g: null, mass_kg: null, deploy_alt_ft: 500, g_factor: 5 })
+    expect(
+      normalizeCalculationInputs({
+        rocket_mass_g: '-1',
+        main_deploy_alt_ft: '-100',
+        ejection_g_factor: '2',
+      })
+    ).toMatchObject({ mass_g: null, mass_kg: null, deploy_alt_ft: 500, g_factor: 5 })
 
     const result = runSimulation({
-      specs: { rocket_mass_g: '2000', motor_total_impulse_ns: '2000', burn_time_s: '5',
-               airframe_id_in: '6', main_deploy_alt_ft: '', ejection_g_factor: '2' },
-      config: { main_chute: { specs: { diameter_in: 36, cd: 1.5 } }, shock_cord: { specs: NYLON_CORD } },
+      specs: {
+        rocket_mass_g: '2000',
+        motor_total_impulse_ns: '2000',
+        burn_time_s: '5',
+        airframe_id_in: '6',
+        main_deploy_alt_ft: '',
+        ejection_g_factor: '2',
+      },
+      config: {
+        main_chute: { specs: { diameter_in: 36, cd: 1.5 } },
+        shock_cord: { specs: NYLON_CORD },
+      },
     })
     expect(result.deploy_ft).toBe(500)
-    expect(result.shock_load.peak_load_lbs).toBe(Math.round(2 * 5 * 9.80665 / 4.448))
+    expect(result.shock_load.peak_load_lbs).toBe(Math.round((2 * 5 * 9.80665) / 4.448))
   })
 
   it('uses the normalized deployment altitude for descent density', () => {
     const chute = { diameter_in: 36, cd: 1.5 }
-    const specs = { rocket_mass_g: '2000', motor_total_impulse_ns: '2000', burn_time_s: '5',
-                    airframe_id_in: '6', main_deploy_alt_ft: '' }
+    const specs = {
+      rocket_mass_g: '2000',
+      motor_total_impulse_ns: '2000',
+      burn_time_s: '5',
+      airframe_id_in: '6',
+      main_deploy_alt_ft: '',
+    }
     const result = runSimulation({ specs, config: { main_chute: { specs: chute } } })
     const expected = computeDescentRate(chute, 2, normalizeCalculationInputs(specs).deploy_alt_ft)
     expect(result.deploy_ft).toBe(500)
@@ -222,10 +240,17 @@ describe('computeShockLoad', () => {
   })
 
   it('rejects heuristic apogees above the bounded simulation altitude', () => {
-    expect(runSimulation({
-      specs: { rocket_mass_g: '1', motor_total_impulse_ns: '999999999', burn_time_s: '', main_deploy_alt_ft: '500' },
-      config: {},
-    })).toBeNull()
+    expect(
+      runSimulation({
+        specs: {
+          rocket_mass_g: '1',
+          motor_total_impulse_ns: '999999999',
+          burn_time_s: '',
+          main_deploy_alt_ft: '500',
+        },
+        config: {},
+      })
+    ).toBeNull()
   })
 })
 
@@ -247,17 +272,22 @@ describe('computeDrift', () => {
   })
 
   it('returns null instead of iterating an extreme altitude range forever', () => {
-    expect(computeDrift({
-      simulation: { apogee_ft: 3_000_000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
-      specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
-    })).toBeNull()
+    expect(
+      computeDrift({
+        simulation: { apogee_ft: 3_000_000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
+        specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
+      })
+    ).toBeNull()
   })
 
   it('bounds extreme Monte Carlo altitude inputs before descent sampling', () => {
     const result = runDispersionMonteCarlo({
       simulation: { apogee_ft: 3_000_000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
       specs: {
-        launch_lat: '35', launch_lon: '-117', wind_speed_mph: '10', wind_direction_deg: '0',
+        launch_lat: '35',
+        launch_lon: '-117',
+        wind_speed_mph: '10',
+        wind_direction_deg: '0',
       },
       iterations: 10,
     })

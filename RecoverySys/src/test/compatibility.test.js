@@ -138,16 +138,25 @@ describe('checkCompatibility', () => {
   })
 
   it('shares normalized blank/default and clamped G semantics with simulation', () => {
-    expect(normalizeCalculationInputs({
-      rocket_mass_g: '', main_deploy_alt_ft: '', ejection_g_factor: '2',
-    })).toMatchObject({ mass_g: null, mass_kg: null, deploy_alt_ft: 500, g_factor: 5 })
+    expect(
+      normalizeCalculationInputs({
+        rocket_mass_g: '',
+        main_deploy_alt_ft: '',
+        ejection_g_factor: '2',
+      })
+    ).toMatchObject({ mass_g: null, mass_kg: null, deploy_alt_ft: 500, g_factor: 5 })
 
     const cord = { name: 'Cord', specs: { strength_lbs: 30, packed_height_in: 2 } }
     const warnings = checkCompatibility({
       config: { main_chute: validMain, shock_cord: cord },
-      specs: { ...baseSpecs, rocket_mass_g: '2500', main_deploy_alt_ft: '', ejection_g_factor: '2' },
+      specs: {
+        ...baseSpecs,
+        rocket_mass_g: '2500',
+        main_deploy_alt_ft: '',
+        ejection_g_factor: '2',
+      },
     })
-    expect(warnings.some(w => w.slot === 'shock_cord' && w.message.includes('at 5G'))).toBe(true)
+    expect(warnings.some((w) => w.slot === 'shock_cord' && w.message.includes('at 5G'))).toBe(true)
   })
 
   it('user-supplied ejection_g_factor applies to quick links too', () => {

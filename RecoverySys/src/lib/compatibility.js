@@ -74,7 +74,8 @@ const HARNESS_MIN_LENGTH_FT = (mass_kg) => (mass_kg >= 10 ? 15 : mass_kg >= 2.5 
 // ── Context ─────────────────────────────────────────────────────────────────
 
 function buildContext({ config, specs }) {
-  const { mass_g, mass_kg, deploy_alt_ft, deploy_alt_raw, g_factor } = normalizeCalculationInputs(specs)
+  const { mass_g, mass_kg, deploy_alt_ft, deploy_alt_raw, g_factor } =
+    normalizeCalculationInputs(specs)
   const airframe_id = parseFloat(specs.airframe_id_in) || 0
   const bay_length = parseFloat(specs.bay_length_in) || 0
   const bay_cross_area = airframe_id > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) : 0

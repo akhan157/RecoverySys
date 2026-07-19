@@ -59,7 +59,11 @@ export default function MissionControlLayout({
 
   const hasWarnings = state.warnings.length > 0
   const hasErrors = state.warnings.some((w) => w.level === WARN_LEVELS.ERROR)
-  const resultFresh = isResultFresh(state.simulation, { specs: state.specs, config: state.config, customMotor: state.customMotor }, state.inputRevision)
+  const resultFresh = isResultFresh(
+    state.simulation,
+    { specs: state.specs, config: state.config, customMotor: state.customMotor },
+    state.inputRevision
+  )
 
   // Mirror runSimulation's preconditions exactly — inputs are strings from <input>,
   // so '0' and '-5' are truthy. parseFloat(...) > 0 matches what simulation.js rejects.
@@ -131,10 +135,17 @@ export default function MissionControlLayout({
               />
             )}
             {activeTab === 'SIMULATION' && (
-              <SimulationTab state={state} runSim={runSim} canRun={canRun} resultFresh={resultFresh} />
+              <SimulationTab
+                state={state}
+                runSim={runSim}
+                canRun={canRun}
+                resultFresh={resultFresh}
+              />
             )}
             {activeTab === 'ANALYSIS' && <AnalysisTab state={{ ...state, resultFresh }} />}
-            {activeTab === 'DISPERSION' && <DispersionTab state={state} resultFresh={resultFresh} />}
+            {activeTab === 'DISPERSION' && (
+              <DispersionTab state={state} resultFresh={resultFresh} />
+            )}
             {activeTab === 'SPECS' && (
               <SpecsTab
                 state={state}

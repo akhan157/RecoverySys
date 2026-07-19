@@ -16,7 +16,9 @@ describe('CompareTab current-B result integrity', () => {
     fireEvent.click(screen.getByRole('button', { name: /SAVE_AS_CONFIG_A/i }))
     expect(screen.getByRole('alert')).toHaveTextContent(/no current-b simulation available/i)
 
-    rerender(<CompareTab state={{ ...state, simulation: { apogee_ft: 1000 } }} resultFresh={false} />)
+    rerender(
+      <CompareTab state={{ ...state, simulation: { apogee_ft: 1000 } }} resultFresh={false} />
+    )
     expect(screen.getByRole('alert')).toHaveTextContent(/current-b simulation is stale/i)
   })
 })

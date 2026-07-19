@@ -194,9 +194,15 @@ describe('App — rejected share-link import', () => {
     }
     const originalSearch = window.location.search
     Object.defineProperty(window, 'location', {
-      value: { ...window.location, search: `?c=${encodeURIComponent(encodeSharePayload({
-        config: { ...SAVED_SESSION.config, main_chute: incoming }, specs: SAVED_SESSION.specs,
-      }))}` },
+      value: {
+        ...window.location,
+        search: `?c=${encodeURIComponent(
+          encodeSharePayload({
+            config: { ...SAVED_SESSION.config, main_chute: incoming },
+            specs: SAVED_SESSION.specs,
+          })
+        )}`,
+      },
       writable: true,
       configurable: true,
     })
@@ -208,18 +214,20 @@ describe('App — rejected share-link import', () => {
       importedCount: 0,
       error: 'Imported custom parts exceed local storage limits.',
     }))
-    renderHook(() => useShareLinkLoader({
-      allParts: [],
-      addToast,
-      mergeCustomParts,
-      dispatch,
-    }))
+    renderHook(() =>
+      useShareLinkLoader({
+        allParts: [],
+        addToast,
+        mergeCustomParts,
+        dispatch,
+      })
+    )
 
     expect(mergeCustomParts).toHaveBeenCalledWith([incoming])
     expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'LOAD_SHARE' }))
     expect(addToast).toHaveBeenCalledWith(
       expect.anything(),
-      'Imported custom parts exceed local storage limits.',
+      'Imported custom parts exceed local storage limits.'
     )
 
     Object.defineProperty(window, 'location', {

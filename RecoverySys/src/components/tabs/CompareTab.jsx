@@ -166,12 +166,15 @@ export default function CompareTab({ state, resultFresh }) {
         </button>
       </h2>
       <div style={{ padding: '12px', overflowY: 'auto', flex: 1 }}>
-         <div style={{ fontSize: 10, color: 'var(--mc-text-dim)', marginBottom: 8 }}>
-           Config A saved at {snapshot.savedAt}. Current config is B. Changed values shown in amber.
-           {currentBStatus && <span role="status"> {currentBStatus}</span>}
-         </div>
-         {currentBStatus && <div className="mc-validation mc-validation--warn" role="alert">{currentBStatus}</div>}
-
+        <div style={{ fontSize: 10, color: 'var(--mc-text-dim)', marginBottom: 8 }}>
+          Config A saved at {snapshot.savedAt}. Current config is B. Changed values shown in amber.
+          {currentBStatus && <span role="status"> {currentBStatus}</span>}
+        </div>
+        {currentBStatus && (
+          <div className="mc-validation mc-validation--warn" role="alert">
+            {currentBStatus}
+          </div>
+        )}
 
         {/* Parts comparison */}
         <div

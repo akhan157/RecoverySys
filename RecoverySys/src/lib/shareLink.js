@@ -19,7 +19,9 @@ export function encodeSharePayload({ config, specs, customMotor }) {
       return [cat, { id: part.id }]
     })
   )
-  return btoa(encodeURIComponent(JSON.stringify(makeConfigPayload({ config: configIds, specs, customMotor }))))
+  return btoa(
+    encodeURIComponent(JSON.stringify(makeConfigPayload({ config: configIds, specs, customMotor })))
+  )
 }
 
 export function buildShareUrl(encoded) {

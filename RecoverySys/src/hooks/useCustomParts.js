@@ -39,21 +39,28 @@ export default function useCustomParts({ config, dispatch }) {
     setCustomParts((prev) => [...prev, part])
   }, [])
 
-  const mergeCustomParts = useCallback((parts = []) => {
-    const valid = parts.filter((part) => isValidCustomPart(part, SLOT_IDS))
-    const existingIds = new Set(customParts.map((part) => part.id))
-    const additions = valid.filter((part) => !existingIds.has(part.id))
-    const prospective = [...customParts, ...additions]
-    if (!canPersistCustomParts(prospective)) {
-      return { ok: false, importedCount: 0, error: 'Imported custom parts exceed local storage limits.' }
-    }
-    setCustomParts((prev) => {
-      const prevIds = new Set(prev.map((part) => part.id))
-      const safeAdditions = additions.filter((part) => !prevIds.has(part.id))
-      return safeAdditions.length > 0 ? [...prev, ...safeAdditions] : prev
-    })
-    return { ok: true, importedCount: additions.length }
-  }, [customParts])
+  const mergeCustomParts = useCallback(
+    (parts = []) => {
+      const valid = parts.filter((part) => isValidCustomPart(part, SLOT_IDS))
+      const existingIds = new Set(customParts.map((part) => part.id))
+      const additions = valid.filter((part) => !existingIds.has(part.id))
+      const prospective = [...customParts, ...additions]
+      if (!canPersistCustomParts(prospective)) {
+        return {
+          ok: false,
+          importedCount: 0,
+          error: 'Imported custom parts exceed local storage limits.',
+        }
+      }
+      setCustomParts((prev) => {
+        const prevIds = new Set(prev.map((part) => part.id))
+        const safeAdditions = additions.filter((part) => !prevIds.has(part.id))
+        return safeAdditions.length > 0 ? [...prev, ...safeAdditions] : prev
+      })
+      return { ok: true, importedCount: additions.length }
+    },
+    [customParts]
+  )
 
   const deleteCustomPart = useCallback(
     (id) => {

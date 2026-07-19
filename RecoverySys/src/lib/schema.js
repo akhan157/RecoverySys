@@ -271,9 +271,15 @@ export function normalizeCalculationInputs(specs = {}) {
   const deploy_alt_raw = coerceSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft)
   const deploy_alt_ft = parseSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft) ?? 500
   const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
-  const g_factor = g_factor_user != null
-    ? Math.max(5, g_factor_user)
-    : (mass_kg != null && mass_kg >= 10 ? 30 : 20)
+  const g_factor =
+    g_factor_user != null ? Math.max(5, g_factor_user) : mass_kg != null && mass_kg >= 10 ? 30 : 20
 
-  return { mass_g, mass_kg, deploy_alt_raw, deploy_alt_ft, g_factor, g_factor_auto: g_factor_user == null }
+  return {
+    mass_g,
+    mass_kg,
+    deploy_alt_raw,
+    deploy_alt_ft,
+    g_factor,
+    g_factor_auto: g_factor_user == null,
+  }
 }
