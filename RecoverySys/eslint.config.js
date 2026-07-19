@@ -70,6 +70,7 @@ export default [
       'react/jsx-uses-react': 'off',         // not needed in React 17+ with the new JSX transform
       'react/react-in-jsx-scope': 'off',     // same — no need to import React just for JSX
       'react/jsx-uses-vars': 'error',
+      'react/jsx-no-undef': 'error',
       'react/prop-types': 'off',             // project doesn't use PropTypes
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
