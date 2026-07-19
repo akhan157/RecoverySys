@@ -2,6 +2,8 @@
 
 RecoverySys is a recovery-first, local-first planning tool for high-power rocketry (HPR). Assemble a recovery-bay configuration, review compatibility warnings, and explore estimated flight and landing behavior before launch—without an account or application backend.
 
+![RecoverySys recovery planning flow](assets/recoverysys-overview.svg)
+
 ## Start here
 
 - **[Try the live demo](https://akhan157.github.io/RecoverySys/)**
@@ -26,7 +28,7 @@ Configurations and preferences are stored in browser `localStorage`; share links
 
 ## Quality status
 
-CI runs on Node 22. The project check covers formatting, linting, the 113-test suite, and the production build (`npm run check`).
+CI runs on Node 22. The project check covers formatting, linting, the 135-test suite, and the production build (`npm run check`).
 
 ## Documentation
 
@@ -34,6 +36,8 @@ CI runs on Node 22. The project check covers formatting, linting, the 113-test s
 - [Windows desktop build](RecoverySys/DESKTOP.md)
 - [Roadmap and explicit deferrals](RecoverySys/ROADMAP.md)
 - [Changelog](RecoverySys/CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md)
+- [MIT License](LICENSE)
 
 ## Local development
 
