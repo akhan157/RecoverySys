@@ -1,44 +1,56 @@
 # RecoverySys
 
-Browser-based dual-deploy recovery bay configurator for high-power rocketry.
+RecoverySys is a recovery-first, local-first planning tool for high-power rocketry (HPR). Assemble a recovery-bay configuration, review compatibility warnings, and explore estimated flight and landing behavior before launch—without an account or application backend.
 
-**[Live demo →](https://akhan157.github.io/RecoverySys/)**
+![RecoverySys recovery planning flow](assets/recoverysys-overview.svg)
 
----
+## Start here
 
-RecoverySys helps rocketeers design and validate dual-deploy recovery systems before going to the field. Pick components from a catalog of real hardware, check bay compatibility, and run a physics simulation to predict flight performance and landing scatter.
+- **[Try the live demo](https://akhan157.github.io/RecoverySys/)**
+- **[Latest release: v1.2.0.1](https://github.com/akhan157/RecoverySys/releases/tag/v1.2.0.1)**
+- **[Windows installer available in the v1.2.0.0 release](https://github.com/akhan157/RecoverySys/releases/tag/v1.2.0.0)**
 
-## Features
+## What it does
 
-- **189-part catalog** — parachutes, deployment charges, harnesses, and hardware with real specs
-- **Compatibility checks** — bay volume fit, parachute diameter clearance, shock-cord load limits
-- **Flight simulation** — RK45 ODE integrator with ISA atmosphere and altitude-dependent air density
-- **Monte Carlo wind analysis** — 500-run scatter, p95 drift radius, 1-sigma landing ellipse
-- **Map overlay** — predicted landing coordinates rendered on a Leaflet map
-- **75 automated tests** — simulation logic, compatibility rules, and UI state
+- Configure main and drogue parachutes, shock cord, chute protection, quick links, and related hardware from the built-in catalog.
+- Enter rocket, motor, airframe, deployment, and wind specifications; search ThrustCurve.org or import a RASP `.eng` thrust curve.
+- Estimate ascent, apogee, descent, drift, shock load, and landing energy, with a dispersion map for predicted landing behavior.
+- Check packing, bay volume, parachute, harness, and other recovery-system compatibility warnings.
+- Compare configurations, save and restore locally, export or import JSON, copy share links, and print a recovery checklist.
 
-## Stack
+## Scope and safety
 
-| Layer | Tech |
-|-------|------|
-| Frontend | React, Vite, JavaScript, Leaflet |
-| Simulation | Python, SciPy, NumPy, FastAPI ([recoverysys-engine](https://github.com/akhan157/recoverysys-engine)) |
-| Deployment | GitHub Pages via GitHub Actions |
+RecoverySys is a transparent recovery-planning aid, not flight-certification software or a substitute for engineering review, field procedures, manufacturer guidance, or range rules. Results are estimates based on simplifying assumptions and may differ from actual flight performance.
 
-## Run locally
+It is deliberately narrower than a full flight simulator: it does not provide 6-DOF aerodynamics, stability or rail-exit analysis, detailed motor/airframe performance modeling, accounts, backend persistence, or collaboration. Verify catalog and entered specifications, recovery hardware, deployment settings, weather, and launch decisions independently before flight. RecoverySys does not guarantee safe, legal, or successful operation.
+
+Configurations and preferences are stored in browser `localStorage`; share links encode configuration data in the URL. Motor search, map tiles, and web fonts are optional network-dependent features.
+
+## Quality status
+
+CI runs on Node 22. The project check covers formatting, linting, the 135-test suite, and the production build (`npm run check`).
+
+## Documentation
+
+- [User guide and local-first details](RecoverySys/README.md)
+- [Windows desktop build](RecoverySys/DESKTOP.md)
+- [Roadmap and explicit deferrals](RecoverySys/ROADMAP.md)
+- [Changelog](RecoverySys/CHANGELOG.md)
+- [Contributing](CONTRIBUTING.md)
+- [MIT License](LICENSE)
+
+## Local development
+
+From the `RecoverySys` directory (Node.js `^20.19.0 || ^22.13.0 || >=24.0.0`, npm `>=10`):
 
 ```bash
-cd RecoverySys
 npm install
 npm run dev
 ```
 
-The app runs fully client-side with a built-in simulation fallback. To connect the full Python backend, see [recoverysys-engine](https://github.com/akhan157/recoverysys-engine).
+Useful checks:
 
-## Related
-
-- **[recoverysys-engine](https://github.com/akhan157/recoverysys-engine)** — the Python simulation core: RK45 ascent, dual-deploy descent, drift, Monte Carlo scatter, FastAPI service
-
----
-
-Built for the Aerobing Rocketry Team at Binghamton University.
+```bash
+npm run check
+npm run preview
+```

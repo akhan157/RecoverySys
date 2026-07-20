@@ -1,0 +1,110 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">RecoverySys recovery planning flow</title>
+  <desc id="desc">An engineering-instrument style overview of RecoverySys for high-power rocketry. The recovery planning flow moves from Configure, to Check, to Estimate, to Review.</desc>
+
+  <defs>
+    <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
+      <path d="M32 0H0V32" fill="none" stroke="#eaecf0" stroke-width="1"/>
+    </pattern>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M1 1L8 5L1 9" fill="none" stroke="#636c7e" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </marker>
+    <style>
+      .ui { font-family: Inter, system-ui, -apple-system, sans-serif; }
+      .mono { font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Consolas, monospace; }
+      .eyebrow { font-size: 13px; font-weight: 600; letter-spacing: .12em; }
+      .title { font-size: 42px; font-weight: 600; letter-spacing: -.03em; }
+      .subtitle { font-size: 17px; }
+      .step { font-size: 11px; font-weight: 600; letter-spacing: .12em; }
+      .card-title { font-size: 23px; font-weight: 600; }
+      .body { font-size: 14px; }
+      .micro { font-size: 11px; font-weight: 600; letter-spacing: .08em; }
+      .value { font-size: 13px; font-weight: 600; }
+    </style>
+  </defs>
+
+  <!-- Slate instrument palette: #f4f5f7 / #ffffff / #1a1d23 / #374151 -->
+  <rect width="1200" height="630" fill="#f4f5f7"/>
+  <rect x="34" y="34" width="1132" height="562" fill="#ffffff" stroke="#dde1e9"/>
+  <rect x="34" y="34" width="1132" height="562" fill="url(#grid)" opacity=".46"/>
+
+  <!-- Header -->
+  <rect x="34" y="34" width="1132" height="104" fill="#1a1d23"/>
+  <text x="78" y="72" class="ui eyebrow" fill="#c8cdd8">RECOVERYSYS / RECOVERY PLANNING</text>
+  <text x="78" y="116" class="ui title" fill="#ffffff">Build a recovery plan you can inspect.</text>
+  <text x="1120" y="74" text-anchor="end" class="mono micro" fill="#c8cdd8">HPR / LOCAL TOOL</text>
+  <path d="M1080 100h40" stroke="#ffffff" stroke-width="2"/>
+
+  <!-- Flow label -->
+  <text x="78" y="182" class="ui step" fill="#636c7e">THE RECOVERY-FIRST FLOW</text>
+  <text x="1120" y="182" text-anchor="end" class="ui subtitle" fill="#4a5260">From parts and specs to a reviewable flight estimate.</text>
+
+  <!-- Connectors behind cards -->
+  <path d="M294 337H326" fill="none" stroke="#636c7e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M566 337H598" fill="none" stroke="#636c7e" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <path d="M838 337H870" fill="none" stroke="#636c7e" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- Configure -->
+  <g>
+    <rect x="78" y="218" width="216" height="238" fill="#ffffff" stroke="#dde1e9"/>
+    <rect x="78" y="218" width="4" height="238" fill="#374151"/>
+    <text x="102" y="249" class="mono step" fill="#636c7e">01 / CONFIGURE</text>
+    <text x="102" y="292" class="ui card-title" fill="#1a1d23">Choose recovery</text>
+    <text x="102" y="320" class="ui body" fill="#4a5260">Set the recovery-bay</text>
+    <text x="102" y="341" class="ui body" fill="#4a5260">parts and rocket specs.</text>
+    <line x1="102" y1="371" x2="270" y2="371" stroke="#eaecf0"/>
+    <circle cx="110" cy="399" r="4" fill="#1a7f37"/>
+    <text x="123" y="403" class="ui value" fill="#4a5260">Main / drogue chutes</text>
+    <circle cx="110" cy="425" r="4" fill="#c8cdd8"/>
+    <text x="123" y="429" class="ui value" fill="#4a5260">Cord + hardware</text>
+  </g>
+
+  <!-- Check -->
+  <g>
+    <rect x="350" y="218" width="216" height="238" fill="#ffffff" stroke="#dde1e9"/>
+    <rect x="350" y="218" width="4" height="238" fill="#d48800"/>
+    <text x="374" y="249" class="mono step" fill="#636c7e">02 / CHECK</text>
+    <text x="374" y="292" class="ui card-title" fill="#1a1d23">Check fit</text>
+    <text x="374" y="320" class="ui body" fill="#4a5260">See compatibility status</text>
+    <text x="374" y="341" class="ui body" fill="#4a5260">before running an estimate.</text>
+    <line x1="374" y1="371" x2="542" y2="371" stroke="#eaecf0"/>
+    <circle cx="382" cy="399" r="4" fill="#1a7f37"/>
+    <text x="395" y="403" class="ui value" fill="#4a5260">Compatible</text>
+    <circle cx="382" cy="425" r="4" fill="#d48800"/>
+    <text x="395" y="429" class="ui value" fill="#4a5260">Warnings are visible</text>
+  </g>
+
+  <!-- Estimate -->
+  <g>
+    <rect x="622" y="218" width="216" height="238" fill="#ffffff" stroke="#dde1e9"/>
+    <rect x="622" y="218" width="4" height="238" fill="#374151"/>
+    <text x="646" y="249" class="mono step" fill="#636c7e">03 / ESTIMATE</text>
+    <text x="646" y="292" class="ui card-title" fill="#1a1d23">Estimate flight</text>
+    <text x="646" y="320" class="ui body" fill="#4a5260">Model the flight profile,</text>
+    <text x="646" y="341" class="ui body" fill="#4a5260">descent, and landing drift.</text>
+    <line x1="646" y1="371" x2="814" y2="371" stroke="#eaecf0"/>
+    <path d="M647 425C674 421 676 390 700 393C723 396 724 411 744 403C762 396 770 385 794 389C802 390 808 387 814 383" fill="none" stroke="#1a1d23" stroke-width="2"/>
+    <line x1="647" y1="425" x2="814" y2="425" stroke="#c8cdd8"/>
+    <text x="646" y="443" class="mono micro" fill="#636c7e">PROFILE / DESCENT / DRIFT</text>
+  </g>
+
+  <!-- Review -->
+  <g>
+    <rect x="894" y="218" width="216" height="238" fill="#ffffff" stroke="#dde1e9"/>
+    <rect x="894" y="218" width="4" height="238" fill="#1a7f37"/>
+    <text x="918" y="249" class="mono step" fill="#636c7e">04 / REVIEW</text>
+    <text x="918" y="292" class="ui card-title" fill="#1a1d23">Review results</text>
+    <text x="918" y="320" class="ui body" fill="#4a5260">Read the profile and</text>
+    <text x="918" y="341" class="ui body" fill="#4a5260">dispersion before launch.</text>
+    <line x1="918" y1="371" x2="1086" y2="371" stroke="#eaecf0"/>
+    <rect x="918" y="391" width="168" height="37" fill="#f1f2f4" stroke="#dde1e9"/>
+    <text x="931" y="414" class="mono value" fill="#1a1d23">RESULTS / INSPECT</text>
+    <text x="918" y="447" class="ui body" fill="#4a5260">No hidden assumptions.</text>
+  </g>
+
+  <!-- Footer -->
+  <line x1="78" y1="514" x2="1120" y2="514" stroke="#dde1e9"/>
+  <text x="78" y="550" class="ui micro" fill="#636c7e">RECOVERY CONFIGURATION</text>
+  <text x="306" y="550" class="ui body" fill="#4a5260">Parts · compatibility · simulation · review</text>
+  <text x="1120" y="550" text-anchor="end" class="mono micro" fill="#636c7e">CONFIGURE  →  CHECK  →  ESTIMATE  →  REVIEW</text>
+</svg>

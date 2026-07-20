@@ -197,15 +197,71 @@ export default function PrintChecklist({ specs, config, simulation, resultFresh,
               {simulation.shock_load && (
                 <>
                   <tr>
-                    <th>Shock Load</th>
+                    <th>Legacy Static Ejection</th>
                     <td>
                       {simulation.shock_load.peak_load_lbs} lbs (SF{' '}
                       {simulation.shock_load.safety_factor})
                     </td>
                   </tr>
+                </>
+              )}
+              <tr>
+                <th>Estimated main-deployment snatch</th>
+                <td>
+                  {simulation.main_snatch &&
+                  !['not_evaluated', 'unavailable'].includes(
+                    String(simulation.main_snatch.status || '')
+                      .toLowerCase()
+                      .replace(/[- ]/g, '_')
+                  )
+                    ? `${simulation.main_snatch.peak_force_proxy_lbs ?? '—'} lbs — linear-elastic screening proxy`
+                    : 'NOT EVALUATED'}
+                </td>
+              </tr>
+              {simulation.main_snatch && (
+                <>
                   <tr>
-                    <th>Strain Energy</th>
-                    <td>{simulation.shock_load.strain_energy_J} J</td>
+                    <th>Snatch screening status</th>
+                    <td>{screeningStatusLabel(simulation.main_snatch.status)}</td>
+                  </tr>
+                  <tr>
+                    <th>Rating margin</th>
+                    <td>{simulation.main_snatch.rating_margin ?? '—'}</td>
+                  </tr>
+                  <tr>
+                    <th>Approach velocity</th>
+                    <td>{simulation.main_snatch.approach_velocity_fps ?? '—'} ft/s</td>
+                  </tr>
+                  <tr>
+                    <th>Predicted extension</th>
+                    <td>{simulation.main_snatch.predicted_extension_m ?? '—'} m</td>
+                  </tr>
+                  <tr>
+                    <th>Snatch source / data quality</th>
+                    <td>
+                      {simulation.main_snatch.approach_velocity_source || 'Core screening model'} /{' '}
+                      {simulation.main_snatch.data_quality || 'Not specified'}
+                    </td>
+                  </tr>
+                  {['not_evaluated', 'unavailable'].includes(
+                    String(simulation.main_snatch.status || '')
+                      .toLowerCase()
+                      .replace(/[- ]/g, '_')
+                  ) && (
+                    <tr>
+                      <th>Snatch unavailable reason</th>
+                      <td>{simulation.main_snatch.reason || 'No reason supplied.'}</td>
+                    </tr>
+                  )}
+                  <tr>
+                    <th>Snatch limitations</th>
+                    <td>
+                      {Array.isArray(simulation.main_snatch.limitations)
+                        ? simulation.main_snatch.limitations.join(' ')
+                        : simulation.main_snatch.limitations ||
+                          simulation.main_snatch.reason ||
+                          'See core screening model documentation.'}
+                    </td>
                   </tr>
                 </>
               )}
@@ -253,4 +309,15 @@ export default function PrintChecklist({ specs, config, simulation, resultFresh,
       </footer>
     </div>
   )
+}
+
+function screeningStatusLabel(status) {
+  const normalized = String(status || 'not evaluated')
+    .toLowerCase()
+    .replace(/[-_]/g, ' ')
+  if (normalized === 'screened' || normalized === 'evaluated') return 'SCREENED'
+  if (normalized === 'marginal') return 'MARGINAL'
+  if (normalized === 'exceeds rating') return 'EXCEEDS RATING'
+  if (normalized === 'not evaluated' || normalized === 'unavailable') return 'NOT EVALUATED'
+  return normalized.toUpperCase()
 }
