@@ -6,6 +6,7 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh }) {
   const sim = state.simulation
   const usableSim = resultFresh ? sim : null
   const shock = usableSim?.shock_load
+  const snatch = usableSim?.main_snatch
 
   return (
     <div className="mc-sim">
@@ -71,12 +72,16 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh }) {
               <MetricCard label="LANDING_KE" value={sim.landing_ke_ftlbf} unit="ft-lbf" />
             )}
 
-            {/* Shock Cord Load — peak load + safety factor (strain energy in compat warnings) */}
+            {/* Legacy static ejection result — retained for continuity. */}
             {usableSim?.shock_load && (
               <>
-                <MetricCard label="PEAK_LOAD" value={shock.peak_load_lbs.toFixed(0)} unit="lbs" />
                 <MetricCard
-                  label="SAFETY_FACTOR"
+                  label="LEGACY_STATIC_EJECTION"
+                  value={shock.peak_load_lbs.toFixed(0)}
+                  unit="lbs"
+                />
+                <MetricCard
+                  label="LEGACY_STATIC_EJECTION_SF"
                   value={shock.safety_factor.toFixed(1) + '×'}
                   unit=""
                   status={
@@ -99,6 +104,8 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh }) {
           </div>
         </div>
       </div>
+
+      <MainSnatchSummary snatch={snatch} />
 
       {/* ── Bottom: Compatibility Analysis ───────────────────────────── */}
       <div className="mc-sim__bottom">
@@ -126,4 +133,81 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh }) {
       </div>
     </div>
   )
+}
+
+function MainSnatchSummary({ snatch }) {
+  const status = String(snatch?.status || '')
+    .toLowerCase()
+    .replace(/[- ]/g, '_')
+  const evaluated = snatch && status !== 'not_evaluated' && status !== 'unavailable'
+  const limitations = Array.isArray(snatch?.limitations)
+    ? snatch.limitations.join(' ')
+    : snatch?.limitations
+  return (
+    <section className="mc-sim__snatch" aria-label="Main deployment snatch screening">
+      <h2 className="mc-panel-header">
+        MAIN_DEPLOYMENT_SNATCH <span className="mc-panel-header__right">SCREENING_ONLY</span>
+      </h2>
+      {!evaluated ? (
+        <div className="mc-sim__snatch-empty">
+          <strong>{screeningStatusLabel(snatch?.status)}</strong>
+          <span>
+            {snatch?.reason || 'No screening result is available for this configuration.'}
+          </span>
+        </div>
+      ) : (
+        <div className="mc-sim__snatch-grid">
+          <div className="mc-sim__snatch-primary">
+            <span>ESTIMATED_MAIN_DEPLOYMENT_SNATCH</span>
+            <strong>{formatValue(snatch.peak_force_proxy_lbs, ' lbs')}</strong>
+            <small>Linear-elastic screening proxy; not peak load, safe, or certified.</small>
+          </div>
+          <div>
+            <span>APPROACH VELOCITY</span>
+            <strong>{formatValue(snatch.approach_velocity_fps, ' ft/s')}</strong>
+          </div>
+          <div>
+            <span>PREDICTED EXTENSION</span>
+            <strong>{formatValue(snatch.predicted_extension_m, ' m')}</strong>
+          </div>
+          <div>
+            <span>SCREENING STATUS</span>
+            <strong>{screeningStatusLabel(snatch.status)}</strong>
+          </div>
+          <div>
+            <span>RATING MARGIN</span>
+            <strong>{formatValue(snatch.rating_margin)}</strong>
+          </div>
+          <div>
+            <span>APPROACH VELOCITY SOURCE</span>
+            <strong>{snatch.approach_velocity_source || 'Core screening model'}</strong>
+          </div>
+          <div>
+            <span>DATA QUALITY</span>
+            <strong>{snatch.data_quality || 'Not specified'}</strong>
+          </div>
+          <details className="mc-sim__snatch-limitations">
+            <summary>LIMITATIONS // ASSUMPTIONS</summary>
+            <p>{limitations || 'See the core screening model documentation for assumptions.'}</p>
+          </details>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function formatValue(value, suffix = '') {
+  if (value == null || value === '') return '—'
+  return `${typeof value === 'number' ? value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : value}${suffix}`
+}
+
+function screeningStatusLabel(status) {
+  const normalized = String(status || 'not evaluated')
+    .toLowerCase()
+    .replace(/[-_]/g, ' ')
+  if (normalized === 'screened' || normalized === 'evaluated') return 'SCREENED'
+  if (normalized === 'marginal') return 'MARGINAL'
+  if (normalized === 'exceeds rating') return 'EXCEEDS RATING'
+  if (normalized === 'not evaluated' || normalized === 'unavailable') return 'NOT EVALUATED'
+  return normalized.toUpperCase()
 }

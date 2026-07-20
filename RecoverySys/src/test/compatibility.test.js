@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest'
 import { checkCompatibility, slotStatus } from '../lib/compatibility.js'
 import { normalizeCalculationInputs } from '../lib/schema.js'
+import { computeMainSnatchLoad, computeDrogueDeploymentVelocity } from '../lib/recoveryLoad.js'
 
 const baseSpecs = {
   rocket_mass_g: '2500',
@@ -22,6 +23,86 @@ const validDrogue = {
 }
 
 describe('checkCompatibility', () => {
+  it('uses the canonical main snatch result for dual-deploy cord warnings', () => {
+    const cord = { name: 'Weak', specs: { strength_lbs: 1, length_ft: 10, elongation_pct: 10 } }
+    const config = { main_chute: validMain, drogue_chute: validDrogue, shock_cord: cord }
+    const canonical = computeMainSnatchLoad({
+      config,
+      mass_kg: 2.5,
+      deploy_alt_ft: 500,
+      approach_velocity_fps: computeDrogueDeploymentVelocity(validDrogue.specs, 2.5, 500),
+    })
+    const warnings = checkCompatibility({ config, specs: baseSpecs })
+    expect(canonical.status).toBe('exceeds_rating')
+    expect(
+      warnings.some(
+        (warning) => warning.slot === 'shock_cord' && warning.message.includes('snatch-load model')
+      )
+    ).toBe(true)
+  })
+
+  it('emits a non-nominal caution for canonical marginal snatch screening', () => {
+    const referenceConfig = {
+      main_chute: validMain,
+      drogue_chute: validDrogue,
+      shock_cord: { specs: { strength_lbs: 1000, length_ft: 10, elongation_pct: 10 } },
+    }
+    const approach_velocity_fps = computeDrogueDeploymentVelocity(validDrogue.specs, 2.5, 500)
+    const reference = computeMainSnatchLoad({
+      config: referenceConfig,
+      mass_kg: 2.5,
+      deploy_alt_ft: 500,
+      approach_velocity_fps,
+    })
+    const strength_lbs = 1000 * (1.5 / reference.rating_margin) ** 2
+    const config = {
+      ...referenceConfig,
+      shock_cord: { specs: { strength_lbs, length_ft: 10, elongation_pct: 10 } },
+    }
+    const canonical = computeMainSnatchLoad({
+      config,
+      mass_kg: 2.5,
+      deploy_alt_ft: 500,
+      approach_velocity_fps,
+    })
+    const warnings = checkCompatibility({ config, specs: baseSpecs })
+    expect(canonical.status).toBe('marginal')
+    expect(
+      warnings.some(
+        (warning) => warning.level === 'warn' && warning.message.includes('is marginal')
+      )
+    ).toBe(true)
+  })
+
+  it('emits no canonical snatch warning for a screened result', () => {
+    const referenceConfig = {
+      main_chute: validMain,
+      drogue_chute: validDrogue,
+      shock_cord: { specs: { strength_lbs: 1000, length_ft: 10, elongation_pct: 10 } },
+    }
+    const approach_velocity_fps = computeDrogueDeploymentVelocity(validDrogue.specs, 2.5, 500)
+    const reference = computeMainSnatchLoad({
+      config: referenceConfig,
+      mass_kg: 2.5,
+      deploy_alt_ft: 500,
+      approach_velocity_fps,
+    })
+    const strength_lbs = 1000 * (2.5 / reference.rating_margin) ** 2
+    const config = {
+      ...referenceConfig,
+      shock_cord: { specs: { strength_lbs, length_ft: 10, elongation_pct: 10 } },
+    }
+    const canonical = computeMainSnatchLoad({
+      config,
+      mass_kg: 2.5,
+      deploy_alt_ft: 500,
+      approach_velocity_fps,
+    })
+    const warnings = checkCompatibility({ config, specs: baseSpecs })
+    expect(canonical.status).toBe('screened')
+    expect(warnings.some((warning) => warning.message.includes('snatch-load'))).toBe(false)
+  })
+
   it('returns no warnings for a well-configured setup', () => {
     const warnings = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: validDrogue },
@@ -45,6 +126,19 @@ describe('checkCompatibility', () => {
       specs: baseSpecs,
     })
     expect(warnings.some((w) => w.slot === 'drogue_chute' && w.level === 'warn')).toBe(true)
+    expect(warnings.some((w) => w.message.includes('safety analysis was not evaluated'))).toBe(true)
+  })
+
+  it('cautions when dual-deploy snatch screening is unavailable for a missing cord', () => {
+    const warnings = checkCompatibility({
+      config: { main_chute: validMain, drogue_chute: validDrogue },
+      specs: baseSpecs,
+    })
+    expect(
+      warnings.some(
+        (w) => w.slot === 'shock_cord' && w.level === 'warn' && w.message.includes('not evaluated')
+      )
+    ).toBe(true)
   })
 
   it('errors when packed chute diameter exceeds inner bore', () => {
