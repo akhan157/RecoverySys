@@ -15,7 +15,7 @@ import { TOAST_LEVELS } from '../lib/constants.js'
  * re-running on `allParts` change would re-import after the user adds
  * a new local custom part).
  */
-export default function useShareLinkLoader({ allParts, addToast, dispatch, onLoadConfig }) {
+export default function useShareLinkLoader({ allParts, addToast, dispatch, onLoadConfig, mergeCustomParts }) {
   useEffect(() => {
     const c = new URLSearchParams(location.search).get(SHARE_PARAM)
     if (!c) return
@@ -27,7 +27,16 @@ export default function useShareLinkLoader({ allParts, addToast, dispatch, onLoa
       return
     }
 
-    onLoadConfig(decoded)
+    if (typeof onLoadConfig === 'function') {
+      onLoadConfig(decoded)
+    } else if (typeof mergeCustomParts === 'function') {
+      const mergeResult = mergeCustomParts(decoded.inlinedCustomParts ?? [])
+      if (!mergeResult?.ok) {
+        addToast(TOAST_LEVELS.ERROR, mergeResult?.error ?? 'Imported custom parts could not be loaded.')
+        return
+      }
+      dispatch({ type: 'LOAD_SHARE', config: decoded.config, specs: decoded.specs, customMotor: decoded.customMotor })
+    }
 
     if (decoded.catalogMissing > 0) {
       addToast(

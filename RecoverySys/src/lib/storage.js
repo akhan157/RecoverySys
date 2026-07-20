@@ -1,7 +1,8 @@
 // ── LocalStorage persistence ────────────────────────────────────────────────
 import { SCHEMA_VERSION } from './schema.js'
 import { normalizeStoredPayload, normalizeCustomParts, normalizeCustomMotor, isValidCustomPart as isValidBoundaryPart } from './payloadBoundary.js'
-import { SLOT_IDS, EMPTY_CONFIG } from '../data/parts.js'
+import { PARTS, SLOT_IDS, EMPTY_CONFIG } from '../data/parts.js'
+import { PAYLOAD_LIMITS } from './payloadBoundary.js'
 
 export const STORAGE_KEYS = Object.freeze({ CONFIG: 'recoverysys-config', CUSTOM_PARTS: 'recoverysys-custom-parts', THEME: 'recoverysys-theme' })
 
@@ -9,7 +10,7 @@ export function loadSaved() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CONFIG)
     if (!raw) return null
-    return normalizeStoredPayload(JSON.parse(raw), { allParts: [], slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG })
+    return normalizeStoredPayload(JSON.parse(raw), { allParts: PARTS, slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG })
   } catch { return null }
 }
 
@@ -22,6 +23,13 @@ export function loadCustomParts() {
   } catch { return [] }
 }
 
+export function canPersistCustomParts(customParts) {
+  if (!Array.isArray(customParts) || customParts.length > PAYLOAD_LIMITS.customParts) return false
+  try {
+    return JSON.stringify(customParts).length <= PAYLOAD_LIMITS.customPartsJsonBytes
+  } catch { return false }
+}
+
 export const rehydrateCustomMotor = normalizeCustomMotor
 
 export function saveConfigToStorage({ config, specs, customMotor }) {
@@ -32,8 +40,14 @@ export function saveConfigToStorage({ config, specs, customMotor }) {
 }
 
 export function saveCustomPartsToStorage(customParts) {
-  try { localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, JSON.stringify(normalizeCustomParts(customParts, SLOT_IDS))) }
-  catch { /* storage unavailable */ }
+  if (!canPersistCustomParts(customParts)) return false
+  try {
+    const normalized = normalizeCustomParts(customParts, SLOT_IDS)
+    const serialized = JSON.stringify(normalized)
+    if (serialized.length > PAYLOAD_LIMITS.customPartsJsonBytes) return false
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, serialized)
+    return true
+  } catch { return false }
 }
 
 export function loadTheme() {
