@@ -59,6 +59,21 @@
     gsap.ticker.lagSmoothing(0);
   })();
 </script>
+<script>
+  // Keep the public launch action available if optional landing runtime assets are unavailable.
+  // The normal React landing renders its own CTA; this only fills the offline/runtime gap.
+  function ensureLaunchCta() {
+    if (document.querySelector('a[href="../?demo=1"]')) return;
+    var launch = document.createElement('a');
+    launch.href = '../?demo=1';
+    launch.className = 'lps-btn lps-btn--green';
+    launch.setAttribute('aria-label', 'LAUNCH');
+    launch.textContent = 'LAUNCH ▶';
+    document.getElementById('root').appendChild(launch);
+  }
+  if (document.readyState === 'complete') ensureLaunchCta();
+  else window.addEventListener('load', ensureLaunchCta, { once: true });
+</script>
 <script type="text/babel">
 ReactDOM.createRoot(document.getElementById('root')).render(<LPScroll />);
 </script>

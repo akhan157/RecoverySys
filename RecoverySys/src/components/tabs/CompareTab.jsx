@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { CATEGORIES } from '../../data/parts.js'
 import { runSimulation } from '../../lib/simulation.js'
 
@@ -6,20 +6,13 @@ import { runSimulation } from '../../lib/simulation.js'
  * Config comparison tab. Save a snapshot of the current config ("A"),
  * then modify parts/specs — the tab shows A vs current ("B") side-by-side.
  */
-export default function CompareTab({ state, resultFresh }) {
-  const [snapshot, setSnapshot] = useState(null)
-
-  const saveSnapshot = () => {
-    setSnapshot({
-      config: JSON.parse(JSON.stringify(state.config)),
-      specs: { ...state.specs },
-      customMotor: state.customMotor ? JSON.parse(JSON.stringify(state.customMotor)) : null,
-      savedAt: new Date().toLocaleTimeString(),
-    })
-  }
-
-  const clearSnapshot = () => setSnapshot(null)
-
+export default function CompareTab({
+  state,
+  resultFresh,
+  snapshot,
+  onSaveSnapshot,
+  onClearSnapshot,
+}) {
   // Run sim for the snapshot config
   const snapshotSim = useMemo(() => {
     if (!snapshot) return null
@@ -58,7 +51,7 @@ export default function CompareTab({ state, resultFresh }) {
               will show A vs B side-by-side so you can compare descent rates, drift, warnings, and
               part choices.
             </div>
-            <button className="mc-run-btn" onClick={saveSnapshot}>
+            <button className="mc-run-btn" onClick={onSaveSnapshot}>
               SAVE_AS_CONFIG_A &rarr;
             </button>
           </div>
@@ -160,7 +153,7 @@ export default function CompareTab({ state, resultFresh }) {
         <button
           className="mc-run-btn"
           style={{ fontSize: 9, padding: '2px 8px' }}
-          onClick={clearSnapshot}
+          onClick={onClearSnapshot}
         >
           CLEAR
         </button>
@@ -292,7 +285,7 @@ export default function CompareTab({ state, resultFresh }) {
         </table>
 
         <div style={{ marginTop: 16 }}>
-          <button className="mc-run-btn" onClick={saveSnapshot}>
+          <button className="mc-run-btn" onClick={onSaveSnapshot}>
             RE-SAVE_CONFIG_A &rarr;
           </button>
         </div>

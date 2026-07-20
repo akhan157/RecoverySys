@@ -63,16 +63,30 @@ function NewEntryForm({ simulation, specs, onSave }) {
     <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
         <div>
-          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>
+          <label
+            htmlFor="flight-date"
+            className="section-label"
+            style={{ marginBottom: 3, display: 'block' }}
+          >
             Date
           </label>
-          <Input type="date" value={form.date} onChange={(e) => set('date', e.target.value)} />
+          <Input
+            id="flight-date"
+            type="date"
+            value={form.date}
+            onChange={(e) => set('date', e.target.value)}
+          />
         </div>
         <div>
-          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>
+          <label
+            htmlFor="flight-location"
+            className="section-label"
+            style={{ marginBottom: 3, display: 'block' }}
+          >
             Location
           </label>
           <Input
+            id="flight-location"
             placeholder="e.g. FAR Mojave"
             value={form.location}
             onChange={(e) => set('location', e.target.value)}
@@ -80,10 +94,15 @@ function NewEntryForm({ simulation, specs, onSave }) {
           />
         </div>
         <div>
-          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>
+          <label
+            htmlFor="flight-apogee"
+            className="section-label"
+            style={{ marginBottom: 3, display: 'block' }}
+          >
             Actual Apogee (ft)
           </label>
           <Input
+            id="flight-apogee"
             type="number"
             placeholder={simulation ? `predicted: ${simulation.apogee_ft}` : ''}
             value={form.actual_apogee_ft}
@@ -91,10 +110,15 @@ function NewEntryForm({ simulation, specs, onSave }) {
           />
         </div>
         <div>
-          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>
+          <label
+            htmlFor="flight-main-rate"
+            className="section-label"
+            style={{ marginBottom: 3, display: 'block' }}
+          >
             Actual Main Rate (fps)
           </label>
           <Input
+            id="flight-main-rate"
             type="number"
             placeholder={simulation?.main_fps ? `predicted: ${simulation.main_fps}` : ''}
             value={form.actual_main_fps}
@@ -102,10 +126,15 @@ function NewEntryForm({ simulation, specs, onSave }) {
           />
         </div>
         <div>
-          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>
+          <label
+            htmlFor="flight-lat"
+            className="section-label"
+            style={{ marginBottom: 3, display: 'block' }}
+          >
             Landing Lat
           </label>
           <Input
+            id="flight-lat"
             type="number"
             placeholder="decimal degrees"
             value={form.actual_landing_lat}
@@ -113,10 +142,15 @@ function NewEntryForm({ simulation, specs, onSave }) {
           />
         </div>
         <div>
-          <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>
+          <label
+            htmlFor="flight-lon"
+            className="section-label"
+            style={{ marginBottom: 3, display: 'block' }}
+          >
             Landing Lon
           </label>
           <Input
+            id="flight-lon"
             type="number"
             placeholder="decimal degrees"
             value={form.actual_landing_lon}
@@ -125,10 +159,15 @@ function NewEntryForm({ simulation, specs, onSave }) {
         </div>
       </div>
       <div>
-        <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>
+        <label
+          htmlFor="flight-outcome"
+          className="section-label"
+          style={{ marginBottom: 3, display: 'block' }}
+        >
           Outcome
         </label>
         <select
+          id="flight-outcome"
           className="parts-search-input"
           style={{ width: '100%' }}
           value={form.outcome}
@@ -141,10 +180,15 @@ function NewEntryForm({ simulation, specs, onSave }) {
         </select>
       </div>
       <div>
-        <label className="section-label" style={{ marginBottom: 3, display: 'block' }}>
+        <label
+          htmlFor="flight-notes"
+          className="section-label"
+          style={{ marginBottom: 3, display: 'block' }}
+        >
           Notes
         </label>
         <textarea
+          id="flight-notes"
           className="parts-search-input"
           style={{ width: '100%', height: 60, resize: 'vertical' }}
           placeholder="Post-flight observations, issues, cord condition, chute state..."

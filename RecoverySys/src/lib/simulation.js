@@ -1,4 +1,5 @@
 import { parseSpec } from './schema.js'
+import { computeDrogueDeploymentVelocity, computeMainSnatchLoad } from './recoveryLoad.js'
 
 /**
  * ── Known constraints & simplifications ─────────────────────────────────────
@@ -755,6 +756,16 @@ export function runSimulation({ specs, config, customMotor = null }) {
     mass_kg,
     g_factor,
   )
+  const main_snatch = computeMainSnatchLoad({
+    config,
+    mass_kg,
+    deploy_alt_ft: deploy_ft,
+    approach_velocity_fps: computeDrogueDeploymentVelocity(
+      config.drogue_chute?.specs,
+      mass_kg,
+      deploy_ft
+    ),
+  })
 
   // ── Landing kinetic energy (constraint #14: uses terminal v, not ground-impact v)
   // KE = 0.5 * m * v². Landing speed is main descent rate (or drogue if no main).
@@ -779,6 +790,7 @@ export function runSimulation({ specs, config, customMotor = null }) {
     deploy_ft,
     timeline,
     shock_load,
+    main_snatch,
     landing_ke_ftlbf: Math.round(landing_ke_ftlbf),
   }
   // Keep the exact phase rates available to the shared drift route without

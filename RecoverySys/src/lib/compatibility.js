@@ -1,6 +1,7 @@
 import { airDensity, computeDescentRate } from './simulation.js'
 import { WARN_LEVELS, PHYSICS } from './constants.js'
 import { parseSpec, coerceSpec } from './schema.js'
+import { computeDrogueDeploymentVelocity, computeMainSnatchLoad } from './recoveryLoad.js'
 
 /**
  * Compatibility rules engine.
@@ -99,6 +100,16 @@ function buildContext({ config, specs }) {
     obstruction_vol, usable_volume,
     g_factor, required_lbs,
     deploy_alt_ft, deploy_alt_raw,
+    main_snatch: computeMainSnatchLoad({
+      config,
+      mass_kg,
+      deploy_alt_ft,
+      approach_velocity_fps: computeDrogueDeploymentVelocity(
+        config.drogue_chute?.specs,
+        mass_kg,
+        deploy_alt_ft
+      ),
+    }),
   }
 }
 
@@ -211,7 +222,7 @@ function rule_openingShock(ctx) {
 function rule_shockCordStrength(ctx) {
   const { config, mass_kg, g_factor, required_lbs } = ctx
   if (!config.shock_cord || !mass_kg) return []
-  const { strength_lbs, material, length_ft, elongation_pct } = config.shock_cord.specs
+  const { strength_lbs, length_ft, elongation_pct, material } = config.shock_cord.specs
 
   // Strain energy display string (computed once, reused in static-load warning text).
   let strainNote = ''
@@ -244,6 +255,21 @@ function rule_shockCordStrength(ctx) {
       out.push(warn('shock_cord', `Snatch force at ${elongation_pct}% elongation is ~${snatch_multiplier.toFixed(1)}× static load (~${Math.round(dynamic_load_lbs)} lbs) — marginal safety factor for ${strength_lbs} lbs cord`))
     }
   }
+  if (ctx.main_snatch?.status === 'exceeds_rating') {
+    out.push(
+      err(
+        'shock_cord',
+        `Main snatch-load model predicts cord capacity exceedance (margin ${ctx.main_snatch.rating_margin.toFixed(2)}×).`
+      )
+    )
+  } else if (ctx.main_snatch?.status === 'marginal') {
+    out.push(
+      warn(
+        'shock_cord',
+        `Main snatch-load screening is marginal (margin ${ctx.main_snatch.rating_margin.toFixed(2)}×); review cord capacity and configuration.`
+      )
+    )
+  }
 
   // Cord/harness length tier check
   if (length_ft != null) {
@@ -253,6 +279,22 @@ function rule_shockCordStrength(ctx) {
     }
   }
   return out
+}
+
+function rule_mainSnatchAvailability(ctx) {
+  if (!ctx.config.main_chute || ctx.main_snatch?.status !== 'unavailable') return []
+  const reason = ctx.main_snatch.reason ?? 'unknown'
+  const slot = reason.includes('drogue')
+    ? 'drogue_chute'
+    : reason.includes('cord')
+      ? 'shock_cord'
+      : 'main_chute'
+  return [
+    warn(
+      slot,
+      `Main snatch-load screening unavailable (${reason}); safety analysis was not evaluated.`
+    ),
+  ]
 }
 
 function rule_chuteCordMaterialMismatch(ctx) {
@@ -433,6 +475,7 @@ const RULES = [
   rule_drogueDescentRate,
   rule_openingShock,
   rule_shockCordStrength,
+  rule_mainSnatchAvailability,
   rule_chuteCordMaterialMismatch,
   rule_chuteProtector,
   rule_quickLinksEjectionLoad,

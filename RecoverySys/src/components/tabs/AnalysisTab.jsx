@@ -43,23 +43,9 @@ export default function AnalysisTab({ state }) {
     const cord = config.shock_cord?.specs ?? null
     let cord_sf = null,
       cord_sf_status = null
-    let cord_snatch_mult = null,
-      cord_dynamic_lbs = null,
-      cord_dynamic_sf = null
-    let strain_energy_J = null
     if (cord) {
       cord_sf = cord.strength_lbs / static_lbs
       cord_sf_status = sfStatus(cord_sf, cord.material)
-      if (cord.elongation_pct > 0) {
-        cord_snatch_mult = Math.sqrt(1 / (cord.elongation_pct / 100))
-        cord_dynamic_lbs = static_lbs * cord_snatch_mult
-        cord_dynamic_sf = cord.strength_lbs / cord_dynamic_lbs
-      }
-      if (cord.elongation_pct > 0 && cord.length_ft > 0) {
-        const k =
-          (cord.strength_lbs * N_PER_LBF) / (cord.length_ft * 0.3048 * (cord.elongation_pct / 100))
-        strain_energy_J = (static_N * static_N) / (2 * k)
-      }
     }
 
     // Opening shock: main chute opens at deploy_ft while descending at drogue speed
@@ -105,10 +91,6 @@ export default function AnalysisTab({ state }) {
       cord,
       cord_sf,
       cord_sf_status,
-      cord_snatch_mult,
-      cord_dynamic_lbs,
-      cord_dynamic_sf,
-      strain_energy_J,
       opening_shock_N,
       opening_shock_lbs,
       main_Cx,
@@ -180,30 +162,10 @@ export default function AnalysisTab({ state }) {
               note={`${ap.cord.strength_lbs} lbs rated ÷ ${Math.ceil(ap.static_lbs)} lbs required — ${ap.cord.material} threshold: ${SF_PASS[ap.cord.material] ?? 4}× pass, ${SF_WARN[ap.cord.material] ?? 2}× warn`}
             />
           )}
-          {ap.cord_snatch_mult != null && (
-            <AnalRow
-              label="SNATCH_MULTIPLIER"
-              value={`${ap.cord_snatch_mult.toFixed(2)}×`}
-              badge={`→ ${Math.round(ap.cord_dynamic_lbs)} LBS DYNAMIC`}
-              badgeStatus={
-                ap.cord.strength_lbs < ap.cord_dynamic_lbs
-                  ? 'fail'
-                  : ap.cord.strength_lbs < ap.cord_dynamic_lbs * 1.5
-                    ? 'warn'
-                    : 'ok'
-              }
-              note={`F_dynamic ≈ F_static × √(1/elongation) — at ${ap.cord.elongation_pct}% elongation the cord amplifies the snatch load (see constraint #12 in simulation.js)`}
-            />
-          )}
-          {ap.strain_energy_J != null && (
-            <AnalRow
-              label="STRAIN_ENERGY"
-              value={`${ap.strain_energy_J.toFixed(1)} J`}
-              note={`½F²/k — linear elastic model using k = rated_strength / (cord_length × elongation). Nylon is nonlinear above ~10% strain — this underestimates peak energy near failure.`}
-            />
-          )}
         </div>
       </section>
+
+      <MainSnatchSection snatch={sim.main_snatch} />
 
       {/* ── OPENING SHOCK ───────────────────────────────────────────────── */}
       {ap.opening_shock_lbs != null && (
@@ -369,6 +331,82 @@ export default function AnalysisTab({ state }) {
       )}
     </div>
   )
+}
+
+function MainSnatchSection({ snatch }) {
+  const status = String(snatch?.status || '')
+    .toLowerCase()
+    .replace(/[- ]/g, '_')
+  const evaluated = snatch && status !== 'not_evaluated' && status !== 'unavailable'
+  const limitations = snatch?.limitations
+  const limitationText = Array.isArray(limitations) ? limitations.join(' ') : limitations
+
+  return (
+    <section className="mc-analysis__section mc-analysis__section--wide mc-analysis__section--screening">
+      <div className="mc-panel-header">MAIN_DEPLOYMENT_SNATCH // SCREENING</div>
+      {!evaluated ? (
+        <div className="mc-screening-empty">
+          <div className="mc-screening-empty__status">{screeningStatusLabel(snatch?.status)}</div>
+          <div className="mc-anal-row__note">
+            {snatch?.reason ||
+              'No linear-elastic screening result is available for this configuration.'}
+          </div>
+        </div>
+      ) : (
+        <div className="mc-analysis__body">
+          <AnalRow
+            label="ESTIMATED_MAIN_DEPLOYMENT_SNATCH"
+            value={formatValue(snatch.peak_force_proxy_lbs, ' lbs')}
+            badge="LINEAR-ELASTIC SCREENING PROXY"
+            highlight
+            note="A screening estimate of the main-deployment snatch force; not a peak-load, safe, or certified result."
+          />
+          <AnalRow
+            label="APPROACH_VELOCITY"
+            value={formatValue(snatch.approach_velocity_fps, ' ft/s')}
+          />
+          <AnalRow
+            label="PREDICTED_EXTENSION"
+            value={formatValue(snatch.predicted_extension_m, ' m')}
+          />
+          <AnalRow label="SCREENING_STATUS" value={screeningStatusLabel(snatch.status)} />
+          <AnalRow label="RATING_MARGIN" value={formatValue(snatch.rating_margin)} />
+          <AnalRow
+            label="APPROACH_VELOCITY_SOURCE"
+            value={snatch.approach_velocity_source || 'Core screening model'}
+          />
+          <AnalRow
+            label="ASSUMPTION / DATA QUALITY"
+            value={snatch.data_quality || 'Not specified'}
+          />
+          <div className="mc-screening-limitations">
+            <details>
+              <summary>LIMITATIONS // ASSUMPTIONS</summary>
+              <p>
+                {limitationText || 'See the core screening model documentation for assumptions.'}
+              </p>
+            </details>
+          </div>
+        </div>
+      )}
+    </section>
+  )
+}
+
+function formatValue(value, suffix = '') {
+  if (value == null || value === '') return '—'
+  return `${typeof value === 'number' ? value.toLocaleString(undefined, { maximumFractionDigits: 2 }) : value}${suffix}`
+}
+
+function screeningStatusLabel(status) {
+  const normalized = String(status || 'not evaluated')
+    .toLowerCase()
+    .replace(/[-_]/g, ' ')
+  if (normalized === 'screened' || normalized === 'evaluated') return 'SCREENED'
+  if (normalized === 'marginal') return 'MARGINAL'
+  if (normalized === 'exceeds rating') return 'EXCEEDS RATING'
+  if (normalized === 'not evaluated' || normalized === 'unavailable') return 'NOT EVALUATED'
+  return normalized.toUpperCase()
 }
 
 function AnalRow({ label, value, badge, badgeStatus, note, highlight }) {

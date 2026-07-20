@@ -12,12 +12,39 @@ const state = {
 
 describe('CompareTab current-B result integrity', () => {
   it('distinguishes no current-B result from a stale current-B result', () => {
-    const { rerender } = render(<CompareTab state={state} resultFresh={false} />)
+    let snapshot = null
+    const onSaveSnapshot = () => {
+      snapshot = { config: {}, specs: {}, customMotor: null, savedAt: 'now' }
+    }
+    const { rerender } = render(
+      <CompareTab
+        state={state}
+        resultFresh={false}
+        snapshot={snapshot}
+        onSaveSnapshot={onSaveSnapshot}
+        onClearSnapshot={() => {}}
+      />
+    )
     fireEvent.click(screen.getByRole('button', { name: /SAVE_AS_CONFIG_A/i }))
+    rerender(
+      <CompareTab
+        state={state}
+        resultFresh={false}
+        snapshot={snapshot}
+        onSaveSnapshot={onSaveSnapshot}
+        onClearSnapshot={() => {}}
+      />
+    )
     expect(screen.getByRole('alert')).toHaveTextContent(/no current-b simulation available/i)
 
     rerender(
-      <CompareTab state={{ ...state, simulation: { apogee_ft: 1000 } }} resultFresh={false} />
+      <CompareTab
+        state={{ ...state, simulation: { apogee_ft: 1000 } }}
+        resultFresh={false}
+        snapshot={snapshot}
+        onSaveSnapshot={onSaveSnapshot}
+        onClearSnapshot={() => {}}
+      />
     )
     expect(screen.getByRole('alert')).toHaveTextContent(/current-b simulation is stale/i)
   })

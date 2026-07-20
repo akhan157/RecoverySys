@@ -121,6 +121,7 @@ function buildInitialState() {
     toasts: [],
     saveState: SAVE_STATES.IDLE,
     shareState: SHARE_STATES.IDLE,
+    compareSnapshot: null,
   }
 }
 
@@ -176,6 +177,18 @@ function reducer(state, action) {
       return { ...state, saveState: action.state }
     case 'SET_SHARE_STATE':
       return { ...state, shareState: action.state }
+    case 'SAVE_COMPARE_SNAPSHOT':
+      return {
+        ...state,
+        compareSnapshot: {
+          config: JSON.parse(JSON.stringify(state.config)),
+          specs: { ...state.specs },
+          customMotor: state.customMotor ? JSON.parse(JSON.stringify(state.customMotor)) : null,
+          savedAt: new Date().toLocaleTimeString(),
+        },
+      }
+    case 'CLEAR_COMPARE_SNAPSHOT':
+      return { ...state, compareSnapshot: null }
     // Atomically replace config + specs from a share link.
     // Doing this in one action prevents the receiver's localStorage-restored values
     // from bleeding through for slots/keys that are null or absent in the payload.
@@ -276,6 +289,8 @@ export default function App() {
   const setCategory = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
   const setCustomMotor = useCallback((motor) => dispatch({ type: 'SET_CUSTOM_MOTOR', motor }), [])
   const clearCustomMotor = useCallback(() => dispatch({ type: 'CLEAR_CUSTOM_MOTOR' }), [])
+  const saveCompareSnapshot = useCallback(() => dispatch({ type: 'SAVE_COMPARE_SNAPSHOT' }), [])
+  const clearCompareSnapshot = useCallback(() => dispatch({ type: 'CLEAR_COMPARE_SNAPSHOT' }), [])
   const loadConfig = useCallback(
     ({ config, specs, customMotor, inlinedCustomParts }) => {
       const mergeResult = mergeCustomParts(inlinedCustomParts)
@@ -403,6 +418,8 @@ export default function App() {
         clearCustomMotor={clearCustomMotor}
         loadConfig={loadConfig}
         addToast={addToast}
+        saveCompareSnapshot={saveCompareSnapshot}
+        clearCompareSnapshot={clearCompareSnapshot}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
       />
