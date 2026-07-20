@@ -1,5 +1,7 @@
 import React, { useRef } from 'react'
 import { SAVE_STATES, SHARE_STATES } from '../../lib/constants.js'
+import { normalizePayload } from '../../lib/payloadBoundary.js'
+import { SLOT_IDS, EMPTY_CONFIG } from '../../data/parts.js'
 
 function downloadJson(state) {
   const payload = {
@@ -18,7 +20,7 @@ function downloadJson(state) {
   URL.revokeObjectURL(url)
 }
 
-export default function ExportTab({ state, saveConfig, copyShareLink, onLoadConfig }) {
+export default function ExportTab({ state, allParts, saveConfig, copyShareLink, onLoadConfig }) {
   const fileRef = useRef(null)
 
   const handleImport = (e) => {
@@ -28,11 +30,18 @@ export default function ExportTab({ state, saveConfig, copyShareLink, onLoadConf
     reader.onload = () => {
       try {
         const data = JSON.parse(reader.result)
-        if (data._format !== 'recoverysys-config-v1' || !data.config || typeof data.config !== 'object' || !data.specs || typeof data.specs !== 'object') {
+        if (data._format !== 'recoverysys-config-v1') {
           alert('Invalid config file — must be a RecoverySys JSON export.')
           return
         }
-        onLoadConfig({ config: data.config, specs: data.specs, customMotor: data.customMotor ?? null })
+        // Rehydrate catalog identities before handing the payload to App. State
+        // must never receive a preserveCatalogRefs escape-hatch object.
+        const normalized = normalizePayload(data, {
+          allParts,
+          slotIds: SLOT_IDS,
+          emptyConfig: EMPTY_CONFIG,
+        })
+        onLoadConfig(normalized)
       } catch {
         alert('Failed to parse config file — not valid JSON.')
       }

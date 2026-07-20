@@ -2,6 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { runSimulation } from '../lib/simulation.js'
 import { SLOT_IDS } from '../data/parts.js'
 import { SHARE_PARAM } from '../lib/shareLink.js'
+import { normalizeSpecs } from '../lib/payloadBoundary.js'
+import { captureSimulationProvenance } from '../lib/simulationIdentity.js'
 
 /**
  * Demo mode bootstrap. Triggered by `?demo=1` (e.g. landing-page LAUNCH
@@ -50,11 +52,14 @@ export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch
     // Run sim synchronously before dispatching so config + results land in
     // the same render batch. safeTimeout would be cleared by StrictMode's
     // unmount/remount cycle.
-    const result = runSimulation({ specs: demoSpecs, config, customMotor: null })
+    const safeSpecs = normalizeSpecs(demoSpecs)
+    const input = { specs: safeSpecs, config, customMotor: null }
+    const result = runSimulation(input)
+    if (result) result.provenance = captureSimulationProvenance(input)
     dispatch({
       type: 'LOAD_SHARE',
       config,
-      specs: { ...demoSpecs },
+       specs: safeSpecs,
       customMotor: null,
     })
     if (result) dispatch({ type: 'SET_SIM', simulation: result })
@@ -63,16 +68,13 @@ export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch
   }, [demoMode])
 
   const exitDemo = useCallback(() => {
-    // Clear the saved config so the page reload starts with a blank slate.
-    // We do this before navigating because dispatch(CLEAR_ALL) + usePersistence
-    // would race against the reload and the demo config might win.
     try {
-      localStorage.removeItem('recoverysys-config')
       localStorage.setItem('recoverysys-visited', '1')
+      const url = new URL(location.href)
+      url.searchParams.delete('demo')
+      window.history.replaceState(null, '', url.pathname + url.search + url.hash)
     } catch { /* silent */ }
-    // Hard-navigate to the clean URL (removes ?demo=1, triggers visible reload).
-    // replaceState would silently mutate the URL bar with no perceived navigation.
-    window.location.replace(window.location.pathname)
+    setDemoMode(false)
   }, [])
 
   return { demoMode, exitDemo }

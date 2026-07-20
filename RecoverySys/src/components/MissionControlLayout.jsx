@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
 import { computePackingVolume } from '../lib/compatibility.js'
+import { isSimulationStale } from '../lib/simulationIdentity.js'
 import DashboardTab from './tabs/DashboardTab.jsx'
 import SimulationTab from './tabs/SimulationTab.jsx'
 import DispersionTab from './tabs/DispersionTab.jsx'
@@ -54,6 +55,8 @@ export default function MissionControlLayout({
 
   const hasWarnings = state.warnings.length > 0
   const hasErrors = state.warnings.some(w => w.level === WARN_LEVELS.ERROR)
+  const simulationStale = isSimulationStale(state.simulation, { specs: state.specs, config: state.config, customMotor: state.customMotor })
+  const usableSimulation = simulationStale ? null : state.simulation
 
   // Mirror runSimulation's preconditions exactly — inputs are strings from <input>,
   // so '0' and '-5' are truthy. parseFloat(...) > 0 matches what simulation.js rejects.
@@ -107,8 +110,9 @@ export default function MissionControlLayout({
         >
           {activeTab === 'DASHBOARD' && (
             <DashboardTab
-              state={state}
-              allParts={allParts}
+               state={{ ...state, simulation: usableSimulation, simulationStale }}
+               allParts={allParts}
+
               customParts={customParts}
               filledSlots={filledSlots}
               packingVolume={packingVolume}
@@ -126,13 +130,15 @@ export default function MissionControlLayout({
           )}
           {activeTab === 'SIMULATION' && (
             <SimulationTab
-              state={state}
-              runSim={runSim}
-              canRun={canRun}
+               state={{ ...state, simulation: usableSimulation, simulationStale }}
+               runSim={runSim}
+               canRun={canRun}
+
             />
           )}
-          {activeTab === 'ANALYSIS' && <AnalysisTab state={state} />}
-          {activeTab === 'DISPERSION' && <DispersionTab state={state} />}
+          {activeTab === 'ANALYSIS' && <AnalysisTab state={{ ...state, simulation: usableSimulation }} />}
+           {activeTab === 'DISPERSION' && <DispersionTab state={{ ...state, simulation: usableSimulation, simulationStale }} />}
+
           {activeTab === 'SPECS' && (
             <SpecsTab
               state={state}
@@ -146,10 +152,11 @@ export default function MissionControlLayout({
               addToast={addToast}
             />
           )}
-          {activeTab === 'COMPARE' && <CompareTab state={state} />}
-          {activeTab === 'FLIGHT_LOG' && <FlightLogTab state={state} />}
+           {activeTab === 'COMPARE' && <CompareTab state={{ ...state, simulation: usableSimulation, simulationStale }} />}
+           {activeTab === 'FLIGHT_LOG' && <FlightLogTab state={{ ...state, simulation: usableSimulation, simulationStale: false }} />}
+
           {activeTab === 'EXPORT' && (
-            <ExportTab state={state} saveConfig={saveConfig} copyShareLink={copyShareLink} onLoadConfig={loadConfig} />
+            <ExportTab state={state} allParts={allParts} saveConfig={saveConfig} copyShareLink={copyShareLink} onLoadConfig={loadConfig} />
           )}
         </main>
       </div>
@@ -158,8 +165,10 @@ export default function MissionControlLayout({
     <PrintChecklist
       specs={state.specs}
       config={state.config}
-      simulation={state.simulation}
-      warnings={state.warnings}
+       simulation={usableSimulation}
+       simulationStale={false}
+       warnings={state.warnings}
+
     />
     </>
   )

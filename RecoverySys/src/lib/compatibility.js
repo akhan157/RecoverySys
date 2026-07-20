@@ -1,6 +1,6 @@
-import { computeDescentRate } from './simulation.js'
+import { airDensity, computeDescentRate } from './simulation.js'
 import { WARN_LEVELS, PHYSICS } from './constants.js'
-import { parseSpec } from './schema.js'
+import { parseSpec, coerceSpec } from './schema.js'
 
 /**
  * Compatibility rules engine.
@@ -70,16 +70,16 @@ const HARNESS_MIN_LENGTH_FT = (mass_kg) =>
 // ── Context ─────────────────────────────────────────────────────────────────
 
 function buildContext({ config, specs }) {
-  const mass_g          = parseFloat(specs.rocket_mass_g)
-  const airframe_id     = parseFloat(specs.airframe_id_in)  || 0
-  const bay_length      = parseFloat(specs.bay_length_in)   || 0
+  const mass_g          = parseSpec('rocket_mass_g', specs.rocket_mass_g)
+  const airframe_id     = parseSpec('airframe_id_in', specs.airframe_id_in) ?? 0
+  const bay_length      = parseSpec('bay_length_in', specs.bay_length_in) ?? 0
   const bay_cross_area  = airframe_id > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) : 0
   const bay_volume      = bay_cross_area > 0 && bay_length > 0 ? bay_cross_area * bay_length : 0
-  const obstruction_vol = Math.max(0, parseFloat(specs.bay_obstruction_vol_in3) || 0)
+  const obstruction_vol = Math.max(0, parseSpec('bay_obstruction_vol_in3', specs.bay_obstruction_vol_in3) ?? 0)
   const usable_volume   = bay_volume > 0 ? Math.max(0, bay_volume - obstruction_vol) : 0
   const mass_kg         = mass_g > 0 ? mass_g / 1000 : null
-  const deploy_alt_ft   = parseFloat(specs.main_deploy_alt_ft) || DEFAULT_DEPLOY_ALT_FT
-  const deploy_alt_raw  = parseFloat(specs.main_deploy_alt_ft)  // unguarded for sanity rule
+  const deploy_alt_ft   = parseSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft) ?? DEFAULT_DEPLOY_ALT_FT
+  const deploy_alt_raw  = coerceSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft)
 
   // parseSpec returns null for ≤0 (treated as "auto") — keeps simulation,
   // compatibility, and SuggestPanel in lockstep.
@@ -189,9 +189,7 @@ function rule_openingShock(ctx) {
   if (!config.drogue_chute || !config.main_chute || !mass_kg) return []
   const drogue_at_deploy = computeDescentRate(config.drogue_chute.specs, mass_kg, deploy_alt_ft)
   const drogue_mps = drogue_at_deploy / FT_PER_M
-  // ISA density at deploy altitude
-  const _T  = 288.15 - 0.0065 * Math.min(deploy_alt_ft / FT_PER_M, 11000)
-  const rho_deploy = (101325 * Math.pow(_T / 288.15, 5.2559)) / (287.058 * _T)
+  const rho_deploy = airDensity(deploy_alt_ft / FT_PER_M)
   const main_r_m   = (config.main_chute.specs.diameter_in * PHYSICS.IN_TO_M) / 2
   const main_area  = Math.PI * main_r_m * main_r_m
   const Cx         = SHAPE_OPENING_FACTOR_Cx[config.main_chute.specs.shape] || Cx_DEFAULT
@@ -456,11 +454,11 @@ const RULES = [
  * Used by Config Summary gauge.
  */
 export function computePackingVolume({ config, specs }) {
-  const airframe_id    = parseFloat(specs.airframe_id_in)  || 0
-  const bay_length     = parseFloat(specs.bay_length_in)   || 0
+  const airframe_id    = parseSpec('airframe_id_in', specs.airframe_id_in) ?? 0
+  const bay_length     = parseSpec('bay_length_in', specs.bay_length_in) ?? 0
   const bay_cross_area = airframe_id > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) : 0
   const bay_volume     = bay_cross_area > 0 && bay_length > 0 ? bay_cross_area * bay_length : 0
-  const obstruction    = Math.max(0, parseFloat(specs.bay_obstruction_vol_in3) || 0)
+  const obstruction    = Math.max(0, parseSpec('bay_obstruction_vol_in3', specs.bay_obstruction_vol_in3) ?? 0)
   const usable         = bay_volume > 0 ? Math.max(0, bay_volume - obstruction) : 0
   const effective      = usable * PACKING_EFFICIENCY
 

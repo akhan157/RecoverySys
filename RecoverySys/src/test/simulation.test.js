@@ -1,5 +1,27 @@
 import { describe, it, expect } from 'vitest'
-import { computeDescentRate, computeShockLoad, computeDrift, runSimulation, interpolateThrust } from '../lib/simulation.js'
+import { airDensity, computeDescentRate, computeShockLoad, computeDrift, runDispersionMonteCarlo, runSimulation, interpolateThrust } from '../lib/simulation.js'
+import { coerceSpec, parseSpec } from '../lib/schema.js'
+
+describe('spec numeric parsing', () => {
+  it('rejects malformed numeric prefixes instead of partially parsing them', () => {
+    expect(coerceSpec('rocket_mass_g', '12kg')).toBeNull()
+    expect(parseSpec('rocket_mass_g', '12kg')).toBeNull()
+  })
+
+  it('clamps valid specs and rejects exclusive-min boundaries', () => {
+    expect(parseSpec('wind_direction_deg', '999')).toBe(360)
+    expect(parseSpec('drag_cd', '-1')).toBeNull()
+    expect(parseSpec('main_deploy_alt_ft', '0')).toBeNull()
+  })
+})
+
+describe('ISA density', () => {
+  it('is finite and decreases with altitude', () => {
+    expect(airDensity(0)).toBeCloseTo(1.225, 2)
+    expect(airDensity(5000)).toBeLessThan(airDensity(0))
+    expect(Number.isFinite(airDensity(5000))).toBe(true)
+  })
+})
 
 // ── computeDescentRate ────────────────────────────────────────────────────────
 
@@ -205,6 +227,18 @@ describe('computeDrift', () => {
     expect(Math.abs(r10.drift_ft - r5.drift_ft * 2)).toBeLessThan(5)
   })
 
+  it('uses layered wind integration rather than scalar surface wind', () => {
+    const layered = computeDrift({
+      simulation: baseSim,
+      specs: {
+        wind_speed_mph: '10', wind_direction_deg: '0',
+        wind_mid_speed_mph: '40', wind_mid_direction_deg: '180', wind_mid_alt_ft: '2500',
+      },
+    })
+    const surfaceOnly = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })
+    expect(layered.drift_ft).not.toBe(surfaceOnly.drift_ft)
+  })
+
   it('bearing is downwind: wind FROM north (0°) → drift TOWARD south (180°)', () => {
     const result = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })
     expect(result.bearing_deg).toBe(180)
@@ -266,6 +300,7 @@ describe('runSimulation', () => {
     bay_length_in:          '18',
     drag_cd:                '0.50',
     wind_speed_mph:         '10',
+    wind_direction_deg:     '270',
     main_deploy_alt_ft:     '500',
   }
 
@@ -334,6 +369,45 @@ describe('runSimulation', () => {
     expect(Number.isNaN(result.drogue_fps)).toBe(false)
     expect(Number.isNaN(result.main_fps)).toBe(false)
     expect(Number.isNaN(result.drift_ft)).toBe(false)
+  })
+
+  it('rejects malformed prefixes at the simulation boundary', () => {
+    expect(runSimulation({ specs: { ...baseSpecs, rocket_mass_g: '2500g' }, config: baseConfig })).toBeNull()
+  })
+
+  it('uses layered wind for scalar drift when a profile is supplied', () => {
+    const scalar = runSimulation({ specs: { ...baseSpecs, wind_direction_deg: '0' }, config: baseConfig })
+    const layered = runSimulation({
+      specs: {
+        ...baseSpecs, wind_direction_deg: '0',
+        wind_mid_speed_mph: '40', wind_mid_direction_deg: '180', wind_mid_alt_ft: '2500',
+      },
+      config: baseConfig,
+    })
+    expect(layered.drift_ft).not.toBe(scalar.drift_ft)
+  })
+
+  it('uses the shared exact drift route, and rejects missing direction everywhere', () => {
+    const result = runSimulation({ specs: baseSpecs, config: baseConfig })
+    const shared = computeDrift({ simulation: result, specs: baseSpecs })
+    expect(result.drift_ft).toBe(shared.drift_ft)
+
+    const noDirection = runSimulation({
+      specs: { ...baseSpecs, wind_direction_deg: '' },
+      config: baseConfig,
+    })
+    expect(noDirection.drift_ft).toBe(0)
+    expect(computeDrift({ simulation: noDirection, specs: { ...baseSpecs, wind_direction_deg: '' } })).toBeNull()
+  })
+
+  it('keeps extreme Monte Carlo perturbations finite', () => {
+    const result = runDispersionMonteCarlo({
+      simulation: { apogee_ft: 4000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
+      specs: { wind_speed_mph: '10', wind_direction_deg: '0', launch_lat: '39', launch_lon: '-98' },
+      iterations: 100,
+    })
+    expect(result).not.toBeNull()
+    expect(result.scatter.every(p => Number.isFinite(p.lat) && Number.isFinite(p.lon))).toBe(true)
   })
 })
 

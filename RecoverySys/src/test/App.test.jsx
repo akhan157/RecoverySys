@@ -61,32 +61,26 @@ describe('App — restored-session toast', () => {
     vi.useFakeTimers()
   })
 
-  afterEach(() => {
-    vi.runAllTimers()
+  afterEach(async () => {
+    await act(async () => { vi.runAllTimers() })
     vi.useRealTimers()
     clearLocalStorage()
   })
 
   it('shows "Restored your last session." toast when localStorage has saved config', async () => {
     setLocalStorage(SAVED_SESSION)
-    await act(async () => {
-      render(<App />)
-    })
+    render(<App />)
     expect(screen.getByText('Restored your last session.')).toBeInTheDocument()
   })
 
   it('does NOT show the restore toast when localStorage is empty', async () => {
-    await act(async () => {
-      render(<App />)
-    })
+    render(<App />)
     expect(screen.queryByText('Restored your last session.')).not.toBeInTheDocument()
   })
 
   it('does NOT show the restore toast when localStorage contains invalid JSON', async () => {
     localStorage.setItem(STORAGE_KEY, 'not-json{{{')
-    await act(async () => {
-      render(<App />)
-    })
+    render(<App />)
     expect(screen.queryByText('Restored your last session.')).not.toBeInTheDocument()
   })
 
@@ -99,9 +93,7 @@ describe('App — restored-session toast', () => {
       writable: true,
       configurable: true,
     })
-    await act(async () => {
-      render(<App />)
-    })
+    render(<App />)
     expect(screen.queryByText('Restored your last session.')).not.toBeInTheDocument()
     // Restore location
     Object.defineProperty(window, 'location', {
@@ -121,8 +113,8 @@ describe('App — status bar warning badge', () => {
     vi.useFakeTimers()
   })
 
-  afterEach(() => {
-    vi.runAllTimers()
+  afterEach(async () => {
+    await act(async () => { vi.runAllTimers() })
     vi.useRealTimers()
     clearLocalStorage()
   })
@@ -141,9 +133,7 @@ describe('App — status bar warning badge', () => {
       specs: { ...SAVED_SESSION.specs },
     })
 
-    await act(async () => {
-      render(<App />)
-    })
+    render(<App />)
 
     // Advance past the 300ms compatibility debounce and flush React updates
     await act(async () => {
@@ -157,9 +147,7 @@ describe('App — status bar warning badge', () => {
 
   it('shows NOMINAL badge when there are no errors', async () => {
     // Default state — no components, no errors
-    await act(async () => {
-      render(<App />)
-    })
+    render(<App />)
 
     await act(async () => {
       vi.advanceTimersByTime(400)

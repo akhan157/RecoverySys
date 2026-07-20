@@ -2,7 +2,7 @@ import React, { useReducer, useEffect, useCallback, useRef, useState, useMemo } 
 import { PARTS, CATEGORIES, SLOT_IDS, EMPTY_CONFIG } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import {
-  loadSaved, loadCustomParts, rehydrateCustomMotor,
+  loadCustomParts,
   saveConfigToStorage,
 } from './lib/storage.js'
 import useDarkMode from './hooks/useDarkMode.js'
@@ -17,6 +17,8 @@ import {
   SAVE_FLASH_MS, SAVE_RESET_MS, SHARE_RESET_MS,
 } from './lib/constants.js'
 import { getDefaultSpecs } from './lib/schema.js'
+import { normalizeStoredPayload, normalizeCustomParts } from './lib/payloadBoundary.js'
+import { captureSimulationProvenance, simulationInputKey } from './lib/simulationIdentity.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 import DemoBanner from './components/DemoBanner.jsx'
@@ -86,17 +88,22 @@ const DEMO_SPECS = {
 }
 
 function buildInitialState() {
-  const saved = loadSaved()
-  const custom = loadCustomParts()
+  const custom = normalizeCustomParts(loadCustomParts(), SLOT_IDS)
   const allParts = [...custom, ...PARTS]
-  const rehydrate = (part) => part ? allParts.find(p => p.id === part.id && p.category === part.category) ?? null : null
+  let saved = null
+  try {
+    const raw = localStorage.getItem('recoverysys-config')
+    saved = raw ? normalizeStoredPayload(JSON.parse(raw), {
+      allParts, slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG,
+    }) : null
+  } catch { /* invalid/future saved payloads fall back without rewriting storage */ }
   return {
-    config: Object.fromEntries(SLOT_IDS.map(id => [id, rehydrate(saved?.config?.[id])])),
-    specs: { ...DEFAULT_SPECS, ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)) },
+    config: saved?.config ?? { ...EMPTY_CONFIG },
+    specs: saved?.specs ?? { ...DEFAULT_SPECS },
     // Imported .eng motor file data: null when using the ThrustCurve search or manual entry.
     // Shape: { designation, curve: [{t, thrust_N}], totalImpulse_ns, burnTime_s,
     //         peakThrust_N, propellant_kg, total_kg, diameter_mm, length_mm, delays, manufacturer }
-    customMotor: rehydrateCustomMotor(saved?.customMotor),
+    customMotor: saved?.customMotor ?? null,
     activeCategory: SLOT_IDS[0],
     simulation: null,
     simRunning: false,
@@ -110,9 +117,9 @@ function buildInitialState() {
 function reducer(state, action) {
   switch (action.type) {
     case 'SELECT_PART':
-      return { ...state, config: { ...state.config, [action.category]: action.part }, simulation: null }
+      return { ...state, config: { ...state.config, [action.category]: action.part } }
     case 'REMOVE_PART':
-      return { ...state, config: { ...state.config, [action.category]: null }, simulation: null }
+      return { ...state, config: { ...state.config, [action.category]: null } }
     case 'SET_SPEC':
       // Spec edits do NOT wipe the simulation. Pass 2's perf review found
       // that flagging the sim stale on every keystroke triggered a full
@@ -183,6 +190,7 @@ function reducer(state, action) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, null, buildInitialState)
+  const [importSession, setImportSession] = useState(false)
   const toastCounter      = useRef(0)
   const timeoutIds        = useRef([])
   const restoredToastFired = useRef(false)   // guard against React 18 StrictMode double-invoke
@@ -230,7 +238,7 @@ export default function App() {
     config: state.config,
     specs: state.specs,
     customMotor: state.customMotor,
-    disabled: demoMode,
+    disabled: demoMode || importSession,
   })
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -244,18 +252,34 @@ export default function App() {
   const setCategory      = useCallback((cat) => dispatch({ type: 'SET_CATEGORY', category: cat }), [])
   const setCustomMotor   = useCallback((motor) => dispatch({ type: 'SET_CUSTOM_MOTOR', motor }), [])
   const clearCustomMotor = useCallback(() => dispatch({ type: 'CLEAR_CUSTOM_MOTOR' }), [])
-  const loadConfig = useCallback(({ config, specs, customMotor }) => {
-    dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
-  }, [])
-
   const addToast = useCallback((level, message) => {
     dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
   }, [])
+  const loadConfig = useCallback(({ config, specs, customMotor, inlinedCustomParts = [] }) => {
+    const normalized = normalizeStoredPayload({ config, specs, customMotor }, {
+      allParts, slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG,
+    })
+    if (!normalized) {
+      addToast(TOAST_LEVELS.ERROR, 'Config import rejected — invalid or future payload.')
+      return
+    }
+    if (inlinedCustomParts.length) {
+      setCustomParts(prev => {
+        const ids = new Set(prev.map(p => p.id))
+        return [...prev, ...inlinedCustomParts.filter(p => !ids.has(p.id))]
+      })
+    }
+    setImportSession(true)
+    dispatch({ type: 'LOAD_SHARE', config: normalized.config, specs: normalized.specs, customMotor: normalized.customMotor })
+  }, [allParts, setCustomParts, addToast])
 
   const runSim = useCallback(() => {
     dispatch({ type: 'START_SIM' })
-    const result = runSimulation({ specs: state.specs, config: state.config, customMotor: state.customMotor })
-    dispatch({ type: 'SET_SIM', simulation: result })
+     const input = { specs: state.specs, config: state.config, customMotor: state.customMotor }
+     const result = runSimulation(input)
+     if (result) result.provenance = captureSimulationProvenance(input)
+     dispatch({ type: 'SET_SIM', simulation: result })
+
     if (result === null) {
       addToast(TOAST_LEVELS.ERROR, 'Simulation failed — main deploy altitude may exceed apogee, or chute specs are invalid. Lower deploy altitude or increase motor impulse.')
     }
@@ -265,6 +289,7 @@ export default function App() {
     dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVING })
     const ok = saveConfigToStorage({ config: state.config, specs: state.specs, customMotor: state.customMotor })
     if (ok) {
+      setImportSession(false)
       safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVED }), SAVE_FLASH_MS)
       safeTimeout(() => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE  }), SAVE_RESET_MS)
     } else {
@@ -308,7 +333,7 @@ export default function App() {
   }, [addToast])
 
   // Share link loader (mount-once: decode ?c=, dispatch LOAD_SHARE, toast).
-  useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch })
+  useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch, onLoadConfig: loadConfig })
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (

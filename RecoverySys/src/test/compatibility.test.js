@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { checkCompatibility, slotStatus } from '../lib/compatibility.js'
+import { checkCompatibility, computePackingVolume, slotStatus } from '../lib/compatibility.js'
 
 const baseSpecs = {
   rocket_mass_g:      '2500',
@@ -21,6 +21,15 @@ const validDrogue = {
 }
 
 describe('checkCompatibility', () => {
+  it('does not partially parse malformed numeric spec prefixes', () => {
+    const warnings = checkCompatibility({
+      config: { main_chute: validMain },
+      specs: { ...baseSpecs, rocket_mass_g: '2500g' },
+    })
+    expect(warnings.some(w => w.slot === 'drogue_chute' && w.message.includes('single deploy'))).toBe(true)
+    expect(warnings.some(w => w.slot === 'shock_cord')).toBe(false)
+  })
+
   it('returns no warnings for a well-configured setup', () => {
     const warnings = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: validDrogue },
@@ -216,6 +225,17 @@ describe('checkCompatibility', () => {
       specs: { ...baseSpecs, bay_length_in: '4' },
     })
     expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
+  })
+})
+
+describe('compatibility spec clamping', () => {
+  it('uses clamped dimensions consistently for packing', () => {
+    const result = computePackingVolume({
+      config: { main_chute: { specs: { packed_length_in: 4 } } },
+      specs: { airframe_id_in: '-3', bay_length_in: '18', bay_obstruction_vol_in3: '-2' },
+    })
+    expect(result.bay_known).toBe(false)
+    expect(result.stacked_in3).toBe(0)
   })
 })
 

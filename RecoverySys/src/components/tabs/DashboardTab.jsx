@@ -120,7 +120,8 @@ export default function DashboardTab({
           </div>
 
           {/* Sim results in summary */}
-          {state.simulation && (
+           {state.simulation && !state.simulationStale && (
+
             <>
               <div className="mc-metric">
                 <div className="mc-metric__label">APOGEE_ALTITUDE</div>

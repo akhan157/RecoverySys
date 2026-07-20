@@ -6,9 +6,12 @@ import MetricCard from '../MetricCard.jsx'
 export default function SimulationTab({ state, runSim, canRun }) {
   const sim = state.simulation
   const shock = sim?.shock_load
+  const stale = state.simulationStale
 
   return (
-    <div className="mc-sim">
+      <div className="mc-sim">
+       {stale && <div className="mc-alert mc-alert--warn" role="status"><div className="mc-alert__title">⚠ RESULTS_STALE</div><div className="mc-alert__body">Configuration changed since this simulation. Run again before using these results.</div></div>}
+
       {/* ── Top: Chart + Data ────────────────────────────────────────── */}
       <div className="mc-sim__top">
         {/* Flight Chart */}

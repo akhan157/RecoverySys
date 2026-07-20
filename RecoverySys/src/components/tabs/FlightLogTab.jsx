@@ -13,7 +13,7 @@ function saveLog(entries) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
 }
 
-function NewEntryForm({ simulation, specs, onSave }) {
+function NewEntryForm({ simulation, simulationStale, specs, onSave }) {
   const [form, setForm] = useState({
     date: new Date().toISOString().slice(0, 10),
     location: '',
@@ -37,7 +37,10 @@ function NewEntryForm({ simulation, specs, onSave }) {
         drogue_fps: simulation.drogue_fps,
         drift_ft: simulation.drift_ft,
         landing_ke_ftlbf: simulation.landing_ke_ftlbf,
-      } : null,
+         provenance: simulation.provenance ?? null,
+         stale: !!simulationStale,
+       } : null,
+
       specs_snapshot: {
         rocket_mass_g: specs.rocket_mass_g,
         motor_total_impulse_ns: specs.motor_total_impulse_ns,
@@ -140,8 +143,12 @@ function LogEntry({ entry, onDelete }) {
         >&times;</button>
       </div>
 
-      {pred && (
-        <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 6 }}>
+       {pred && (
+         <>
+         {pred.stale && <div style={{ color: 'var(--mc-amber)', fontSize: 10, marginBottom: 4 }}>STALE PREDICTION — configuration changed after simulation</div>}
+         {pred.provenance && <div style={{ color: 'var(--mc-text-dim)', fontSize: 9, marginBottom: 4 }}>Model {pred.provenance.modelVersion} · {pred.provenance.method} · {pred.provenance.generatedAt}</div>}
+         <table style={{ width: '100%', borderCollapse: 'collapse', marginBottom: 6 }}>
+
           <thead>
             <tr>
               <th style={{ ...cellStyle, fontWeight: 600 }}>Metric</th>
@@ -167,9 +174,11 @@ function LogEntry({ entry, onDelete }) {
                 <td style={{ ...cellStyle, color: 'var(--mc-amber)' }}>{delta(entry.actual_main_fps, pred.main_fps)}</td>
               </tr>
             )}
-          </tbody>
-        </table>
-      )}
+           </tbody>
+         </table>
+         </>
+       )}
+
 
       {entry.notes && (
         <div style={{ fontSize: 11, color: 'var(--mc-text-dim)', lineHeight: 1.4, whiteSpace: 'pre-wrap' }}>
@@ -195,7 +204,7 @@ export default function FlightLogTab({ state }) {
         <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', textTransform: 'uppercase', letterSpacing: '0.06em', marginBottom: 8 }}>
           New Entry
         </div>
-        <NewEntryForm simulation={state.simulation} specs={state.specs} onSave={addEntry} />
+        <NewEntryForm simulation={state.simulation} simulationStale={state.simulationStale} specs={state.specs} onSave={addEntry} />
 
         {entries.length > 0 && (
           <>

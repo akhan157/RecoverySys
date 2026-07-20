@@ -119,7 +119,7 @@ function isa(alt_m) {
   return { rho, T, P, a }
 }
 
-function airDensity(alt_m) { return isa(alt_m).rho }
+export function airDensity(alt_m) { return isa(alt_m).rho }
 
 // ── Mach-dependent drag ─────────────────────────────────────────────────────
 
@@ -355,28 +355,34 @@ function interpolateWind(alt_ft, layers) {
 export function parseWindLayers(specs) {
   const layers = []
 
-  const s0_speed = parseFloat(specs.wind_speed_mph)
-  const s0_dir   = parseFloat(specs.wind_direction_deg)
-  if (s0_speed > 0 && isFinite(s0_dir)) {
+  const s0_speed = parseSpec('wind_speed_mph', specs.wind_speed_mph) ?? 0
+  const s0_dir   = parseSpec('wind_direction_deg', specs.wind_direction_deg)
+  // A positive wind without a valid direction is invalid for drift. Reject the
+  // complete profile rather than silently defaulting one layer to north; this
+  // keeps scalar simulation and dispersion on the same no-drift contract.
+  if (s0_speed > 0 && s0_dir == null) return []
+  if (s0_speed > 0) {
     layers.push({
-      alt_ft: parseFloat(specs.wind_surface_alt_ft) || 0,
+      alt_ft: parseSpec('wind_surface_alt_ft', specs.wind_surface_alt_ft) ?? 0,
       speed_mph: s0_speed,
       direction_deg: s0_dir,
     })
   }
 
-  const s1_speed = parseFloat(specs.wind_mid_speed_mph)
-  const s1_dir   = parseFloat(specs.wind_mid_direction_deg)
-  const s1_alt   = parseFloat(specs.wind_mid_alt_ft)
+  const s1_speed = parseSpec('wind_mid_speed_mph', specs.wind_mid_speed_mph) ?? 0
+  const s1_dir   = parseSpec('wind_mid_direction_deg', specs.wind_mid_direction_deg)
+  const s1_alt   = parseSpec('wind_mid_alt_ft', specs.wind_mid_alt_ft) ?? 0
+  if (s1_speed > 0 && s1_alt > 0 && s1_dir == null) return []
   if (s1_speed > 0 && s1_alt > 0) {
-    layers.push({ alt_ft: s1_alt, speed_mph: s1_speed, direction_deg: isFinite(s1_dir) ? s1_dir : 0 })
+    layers.push({ alt_ft: s1_alt, speed_mph: s1_speed, direction_deg: s1_dir })
   }
 
-  const s2_speed = parseFloat(specs.wind_aloft_speed_mph)
-  const s2_dir   = parseFloat(specs.wind_aloft_direction_deg)
-  const s2_alt   = parseFloat(specs.wind_aloft_alt_ft)
+  const s2_speed = parseSpec('wind_aloft_speed_mph', specs.wind_aloft_speed_mph) ?? 0
+  const s2_dir   = parseSpec('wind_aloft_direction_deg', specs.wind_aloft_direction_deg)
+  const s2_alt   = parseSpec('wind_aloft_alt_ft', specs.wind_aloft_alt_ft) ?? 0
+  if (s2_speed > 0 && s2_alt > 0 && s2_dir == null) return []
   if (s2_speed > 0 && s2_alt > 0) {
-    layers.push({ alt_ft: s2_alt, speed_mph: s2_speed, direction_deg: isFinite(s2_dir) ? s2_dir : 0 })
+    layers.push({ alt_ft: s2_alt, speed_mph: s2_speed, direction_deg: s2_dir })
   }
 
   return layers.sort((a, b) => a.alt_ft - b.alt_ft)
@@ -408,11 +414,11 @@ export function computeDrift({ simulation, specs }) {
   const layers = parseWindLayers(specs)
   if (layers.length === 0) return null
 
-  const launch_lat = parseFloat(specs.launch_lat)
-  const launch_lon = parseFloat(specs.launch_lon)
-  const hasCoords  = isFinite(launch_lat) && isFinite(launch_lon)
+  const launch_lat = parseSpec('launch_lat', specs.launch_lat)
+  const launch_lon = parseSpec('launch_lon', specs.launch_lon)
+  const hasCoords  = launch_lat != null && launch_lon != null
 
-  const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation
+  const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation._driftSimulation ?? simulation
   if (!drogue_fps || !apogee_ft) return null
 
   const ALT_STEP = 100
@@ -472,7 +478,7 @@ export function computeDrift({ simulation, specs }) {
     land_lon = pt.lon
   }
 
-  return {
+  const result = {
     drift_ft:        Math.round(drift_ft),
     drift_m:         Math.round(drift_m),
     drogue_drift_ft: Math.round(drogue_drift_ft),
@@ -485,6 +491,7 @@ export function computeDrift({ simulation, specs }) {
     drogue_vector: { dx_ft: drogue_dx, dy_ft: drogue_dy },
     main_vector:   { dx_ft: main_dx,   dy_ft: main_dy },
   }
+  return result
 }
 
 // ── Monte Carlo Dispersion ──────────────────────────────────────────────────
@@ -503,9 +510,9 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
   const baseLayers = parseWindLayers(specs)
   if (baseLayers.length === 0) return null
 
-  const launch_lat = parseFloat(specs.launch_lat)
-  const launch_lon = parseFloat(specs.launch_lon)
-  if (!isFinite(launch_lat) || !isFinite(launch_lon)) return null
+  const launch_lat = parseSpec('launch_lat', specs.launch_lat)
+  const launch_lon = parseSpec('launch_lon', specs.launch_lon)
+  if (launch_lat == null || launch_lon == null) return null
 
   const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation
   if (!drogue_fps || !apogee_ft) return null
@@ -525,17 +532,19 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
 
   for (let i = 0; i < iterations; i++) {
     // Multi-parameter perturbation
-    const mass_factor    = 1 + 0.02 * gaussRand()   // ±2% mass uncertainty
+    const mass_factor    = Math.max(Number.MIN_VALUE, 1 + 0.02 * gaussRand()) // ±2% mass uncertainty
     const impulse_factor = 1 + 0.03 * gaussRand()   // ±3% motor lot variation
-    const cd_factor      = 1 + 0.10 * gaussRand()   // ±10% Cd uncertainty
+    const cd_factor      = Math.max(Number.MIN_VALUE, 1 + 0.10 * gaussRand()) // ±10% Cd uncertainty
     const deploy_pert    = Math.max(100, deploy + 50 * gaussRand())  // ±50 ft altimeter error
 
     // Apogee scales with impulse, inversely with mass and Cd (approximate)
     const apogee_pert = apogee_ft * impulse_factor / (mass_factor * cd_factor)
 
     // Descent rates scale with sqrt(mass_factor) (heavier = faster descent)
-    const drogue_pert = drogue_fps * Math.sqrt(mass_factor)
-    const main_pert   = effective_main_fps * Math.sqrt(mass_factor)
+    const descent_factor = Math.sqrt(mass_factor)
+    const drogue_pert = drogue_fps * descent_factor
+    const main_pert   = effective_main_fps * descent_factor
+    if (!Number.isFinite(apogee_pert) || !Number.isFinite(drogue_pert) || !Number.isFinite(main_pert) || drogue_pert <= 0 || main_pert <= 0) continue
 
     const perturbedLayers = baseLayers.map(layer => ({
       alt_ft: layer.alt_ft,
@@ -577,6 +586,7 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
 
     const drift_ft_i = Math.sqrt(dx_ft * dx_ft + dy_ft * dy_ft)
     const drift_m    = drift_ft_i / FT_PER_M
+    if (!Number.isFinite(drift_ft_i) || !Number.isFinite(drift_m)) continue
     const bearing    = ((Math.atan2(dx_ft, dy_ft) * 180 / Math.PI) + 360) % 360
     if (drift_m > 0) {
       const pt = projectPoint(launch_lat, launch_lon, bearing, drift_m)
@@ -644,13 +654,13 @@ export function fitConfidenceEllipse(points) {
  *   Without                  → impulse/mass heuristic (±30%)
  */
 export function runSimulation({ specs, config, customMotor = null }) {
-  const mass_g    = parseFloat(specs.rocket_mass_g)
-  const impulse   = parseFloat(specs.motor_total_impulse_ns)
-  const burn_s    = parseFloat(specs.burn_time_s)
-  const od_in     = parseFloat(specs.airframe_id_in)
-  const cd        = parseFloat(specs.drag_cd) || CD_DEFAULT
-  const wind_mph  = parseFloat(specs.wind_speed_mph) || 0
-  const deploy_ft = parseFloat(specs.main_deploy_alt_ft) || 500
+  const mass_g    = parseSpec('rocket_mass_g', specs.rocket_mass_g)
+  const impulse   = parseSpec('motor_total_impulse_ns', specs.motor_total_impulse_ns)
+  const burn_s    = parseSpec('burn_time_s', specs.burn_time_s)
+  const od_in     = parseSpec('airframe_id_in', specs.airframe_id_in)
+  const cd        = parseSpec('drag_cd', specs.drag_cd) ?? CD_DEFAULT
+  const wind_mph  = parseSpec('wind_speed_mph', specs.wind_speed_mph) ?? 0
+  const deploy_ft = parseSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft) ?? 500
   // Stays in lockstep with compatibility.js + SuggestPanel.jsx via parseSpec.
   const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
   const g_factor      = g_factor_user ?? (mass_g / 1000 >= 10 ? 30 : 20)
@@ -712,15 +722,22 @@ export function runSimulation({ specs, config, customMotor = null }) {
   const phase2_time_s  = main_fps ? deploy_ft / main_fps : null
   const total_time_s   = phase2_time_s != null ? phase1_time_s + phase2_time_s : null
 
+  const main_fps_rounded   = main_fps != null ? Math.round(main_fps * 10) / 10 : null
+  const drogue_fps_rounded = Math.round(drogue_fps)
+
   // ── Drift (constraints #9, #10: instant wind coupling, linear interpolation)
   const wind_fps       = wind_mph * MPH_TO_FPS
   const effective_time = main_fps
     ? (total_time_s ?? phase1_time_s)
     : phase1_time_s + (deploy_ft / drogue_fps)
-  const drift_ft = wind_fps * effective_time
-
-  const main_fps_rounded   = main_fps != null ? Math.round(main_fps * 10) / 10 : null
-  const drogue_fps_rounded = Math.round(drogue_fps)
+  const layeredDrift = computeDrift({
+    // Shared drift computation uses unrounded descent rates; presentation is
+    // rounded only in the returned result.
+    simulation: { apogee_ft, deploy_ft, drogue_fps, main_fps },
+    specs,
+  })
+  // No valid direction means no drift everywhere; never use a scalar fallback.
+  const drift_ft = layeredDrift?.drift_ft ?? 0
 
   // ── Timeline ──────────────────────────────────────────────────────────────
   const descentTimeline = buildTimeline({
@@ -753,7 +770,7 @@ export function runSimulation({ specs, config, customMotor = null }) {
   const landing_ke_J = 0.5 * mass_kg * landing_mps * landing_mps
   const landing_ke_ftlbf = landing_ke_J * 0.7376
 
-  return {
+  const result = {
     apogee_ft:      Math.round(apogee_ft),
     apogee_method,
     apogee_t_s:     Math.round(apogee_t_s),
@@ -769,6 +786,13 @@ export function runSimulation({ specs, config, customMotor = null }) {
     shock_load,
     landing_ke_ftlbf: Math.round(landing_ke_ftlbf),
   }
+  // Keep the exact phase rates available to the shared drift route without
+  // changing the rounded public result fields.
+  Object.defineProperty(result, '_driftSimulation', {
+    value: { apogee_ft, deploy_ft, drogue_fps, main_fps },
+    enumerable: false,
+  })
+  return result
 }
 
 function buildTimeline({ apogee_ft, drogue_fps, main_fps, deploy_ft, phase1_time_s, phase2_time_s, offset = 0 }) {

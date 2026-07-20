@@ -27,7 +27,7 @@ export default function CompareTab({ state }) {
     return runSimulation({ specs: snapshot.specs, config: snapshot.config, customMotor: snapshot.customMotor })
   }, [snapshot])
 
-  const currentSim = state.simulation
+  const currentSim = state.simulationStale ? null : state.simulation
 
   if (!snapshot) {
     return (
@@ -94,9 +94,11 @@ export default function CompareTab({ state }) {
         <button className="mc-run-btn" style={{ fontSize: 9, padding: '2px 8px' }} onClick={clearSnapshot}>CLEAR</button>
       </h2>
       <div style={{ padding: '12px', overflowY: 'auto', flex: 1 }}>
-        <div style={{ fontSize: 10, color: 'var(--mc-text-dim)', marginBottom: 8 }}>
-          Config A saved at {snapshot.savedAt}. Current config is B. Changed values shown in amber.
-        </div>
+         <div style={{ fontSize: 10, color: 'var(--mc-text-dim)', marginBottom: 8 }}>
+           Config A saved at {snapshot.savedAt}. Current config is B. Changed values shown in amber.
+         </div>
+         {state.simulationStale && <div className="mc-alert mc-alert--warn" role="status"><div className="mc-alert__title">⚠ CONFIG_B_RESULTS_STALE</div><div className="mc-alert__body">Config B changed after its last simulation; B values are withheld until you run again.</div></div>}
+
 
         {/* Parts comparison */}
         <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', margin: '12px 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Components</div>
