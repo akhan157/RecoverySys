@@ -29,7 +29,21 @@ jobs:
           cache-dependency-path: RecoverySys/package-lock.json
       - run: npm ci
       - run: npm run build
-      - run: cp -r landing dist/landing
+      - run: node scripts/prepare-e2e.mjs
+      - run: npx playwright install --with-deps chromium
+      - name: Run production-artifact E2E
+        run: npm run e2e
+        env:
+          E2E_ARTIFACT_ONLY: '1'
+      - name: Upload E2E evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-pages-${{ github.run_id }}
+          if-no-files-found: warn
+          path: |
+            RecoverySys/playwright-report/
+            RecoverySys/test-results/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: RecoverySys/dist
