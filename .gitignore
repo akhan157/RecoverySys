@@ -1,9 +1,6 @@
 # Local gstack config
 .gstack/
 
-# Claude worktrees (managed by git, not files to commit)
-.claude/worktrees/
-
 # Python bytecode
 __pycache__/
 *.pyc
@@ -27,5 +24,7 @@ build/
 .DS_Store
 Thumbs.db
 *.exe
-.claude/settings.local.json
-.claude/skills/gstack/
+# BEGIN oh-my-opencode-slim worktrees
+.slim/worktrees/
+.slim/worktrees.json
+# END oh-my-opencode-slim worktrees
