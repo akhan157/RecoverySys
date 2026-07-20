@@ -9,8 +9,10 @@ import { saveConfigToStorage } from '../lib/storage.js'
  * "persisted on every change" but in practice only the SAVE button wrote
  * — close-the-tab lost any unsaved edits. This hook closes that gap.
  *
- * The existing manual-save flow (saveConfig callback dispatched on the
- * SAVE button click) keeps working alongside this. Auto-save is invisible;
+ * App disables this hook for imported sessions until the explicit Save button
+ * is clicked, so later edits cannot overwrite the user's saved local session.
+ * The existing manual-save flow resumes persistence after that explicit save;
+ * auto-save remains invisible;
  * the explicit button still toasts "Saved ✓" so the existing UX contract
  * holds. A future commit can replace the SAVE button with an "Export
  * config (.json)" download and let auto-save be the only persistence path.

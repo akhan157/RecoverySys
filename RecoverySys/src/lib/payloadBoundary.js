@@ -210,3 +210,22 @@ export function makeConfigPayload({ config, specs, customMotor }) {
 export function encodeJsonPayload(state) {
   return JSON.stringify({ _format: 'recoverysys-config-v1', ...makeConfigPayload(state) }, null, 2)
 }
+
+// Compatibility API used by storage/share-link callers. The structured result
+// is intentionally retained so callers can distinguish rejected payloads.
+export function normalizePayload(raw, options = {}) {
+  const result = decodeMigrateValidateNormalize(raw, options)
+  if (!result.ok) throw new Error(result.error.message)
+  return result
+}
+
+export function normalizeCustomParts(raw, slotIds = []) {
+  if (!Array.isArray(raw) || raw.length > PAYLOAD_LIMITS.customParts) return []
+  return raw.filter((part) => isValidCustomPart(part, slotIds))
+}
+
+export const normalizeCustomMotor = validateCustomMotor
+
+export function normalizeStoredPayload(raw, options = {}) {
+  try { return normalizePayload(raw, options) } catch { return null }
+}

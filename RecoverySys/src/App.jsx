@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback, useRef } from 'react'
+import { useReducer, useEffect, useCallback, useRef, useState } from 'react'
 import { PARTS, SLOT_IDS, EMPTY_CONFIG } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import {
@@ -24,6 +24,7 @@ import {
 } from './lib/constants.js'
 import { getDefaultSpecs } from './lib/schema.js'
 import { buildResultEnvelope } from './lib/resultIntegrity.js'
+import { captureSimulationProvenance } from './lib/simulationIdentity.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 import DemoBanner from './components/DemoBanner.jsx'
@@ -206,6 +207,7 @@ function reducer(state, action) {
 
 export default function App() {
   const [state, dispatch] = useReducer(reducer, null, buildInitialState)
+  const [importSession, setImportSession] = useState(false)
   const toastCounter = useRef(0)
   const timeoutIds = useRef([])
   const restoredToastFired = useRef(false) // guard against React 18 StrictMode double-invoke
@@ -260,7 +262,7 @@ export default function App() {
     config: state.config,
     specs: state.specs,
     customMotor: state.customMotor,
-    disabled: demoMode,
+    disabled: demoMode || importSession,
   })
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -279,6 +281,7 @@ export default function App() {
       const mergeResult = mergeCustomParts(inlinedCustomParts)
       if (!mergeResult.ok) return mergeResult
       dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
+      setImportSession(true)
       return mergeResult
     },
     [mergeCustomParts]
@@ -292,9 +295,11 @@ export default function App() {
     dispatch({ type: 'START_SIM' })
     const inputs = { specs: state.specs, config: state.config, customMotor: state.customMotor }
     const result = runSimulation(inputs)
+    const envelope = buildResultEnvelope(result, inputs, state.inputRevision)
+    if (envelope) envelope.provenance = captureSimulationProvenance(inputs)
     dispatch({
       type: 'SET_SIM',
-      simulation: buildResultEnvelope(result, inputs, state.inputRevision),
+      simulation: envelope,
     })
     if (result === null) {
       addToast(
@@ -312,6 +317,7 @@ export default function App() {
       customMotor: state.customMotor,
     })
     if (ok) {
+      setImportSession(false)
       safeTimeout(
         () => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVED }),
         SAVE_FLASH_MS
@@ -373,7 +379,7 @@ export default function App() {
   }, [addToast, demoMode])
 
   // Share link loader (mount-once: decode ?c=, dispatch LOAD_SHARE, toast).
-  useShareLinkLoader({ allParts, addToast, mergeCustomParts, dispatch })
+  useShareLinkLoader({ allParts, addToast, dispatch, onLoadConfig: loadConfig })
 
   // ── Render ────────────────────────────────────────────────────────────────
   return (

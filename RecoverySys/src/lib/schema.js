@@ -224,7 +224,7 @@ export function coerceSpec(key, raw) {
   if (!def) return null
   if (raw == null || raw === '') return null
   if (def.type === 'number') {
-    const n = parseFloat(raw)
+    const n = Number(raw)
     return Number.isFinite(n) ? n : null
   }
   return raw

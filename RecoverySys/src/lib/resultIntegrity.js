@@ -1,4 +1,5 @@
 import { VERSION } from './constants.js'
+import { isSimulationStale } from './simulationIdentity.js'
 
 function stable(value) {
   if (value === null || typeof value !== 'object') return JSON.stringify(value)
@@ -26,6 +27,7 @@ export function buildResultEnvelope(result, inputs, inputRevision) {
 }
 
 export function isResultFresh(result, inputs, inputRevision) {
+  if (result?.provenance?.inputKey) return !isSimulationStale(result, inputs)
   return Boolean(
     result?.provenance &&
     result.provenance.inputRevision === inputRevision &&

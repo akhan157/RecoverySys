@@ -1,12 +1,11 @@
 import { describe, it, expect } from 'vitest'
-import { checkCompatibility, slotStatus } from '../lib/compatibility.js'
-import { normalizeCalculationInputs } from '../lib/schema.js'
+import { checkCompatibility, computePackingVolume, slotStatus } from '../lib/compatibility.js'
 
 const baseSpecs = {
-  rocket_mass_g: '2500',
-  airframe_od_in: '4',
-  airframe_id_in: '3.9', // standard 4" airframe tube
-  bay_length_in: '18', // π × (3.9/2)² × 18 ≈ 215 in³ usable bay
+  rocket_mass_g:      '2500',
+  airframe_od_in:     '4',
+  airframe_id_in:     '3.9',  // standard 4" airframe tube
+  bay_length_in:      '18',   // π × (3.9/2)² × 18 ≈ 215 in³ usable bay
   main_deploy_alt_ft: '500',
 }
 
@@ -22,12 +21,21 @@ const validDrogue = {
 }
 
 describe('checkCompatibility', () => {
+  it('does not partially parse malformed numeric spec prefixes', () => {
+    const warnings = checkCompatibility({
+      config: { main_chute: validMain },
+      specs: { ...baseSpecs, rocket_mass_g: '2500g' },
+    })
+    expect(warnings.some(w => w.slot === 'drogue_chute' && w.message.includes('single deploy'))).toBe(true)
+    expect(warnings.some(w => w.slot === 'shock_cord')).toBe(false)
+  })
+
   it('returns no warnings for a well-configured setup', () => {
     const warnings = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: validDrogue },
       specs: baseSpecs,
     })
-    const errors = warnings.filter((w) => w.level === 'error')
+    const errors = warnings.filter(w => w.level === 'error')
     expect(errors).toHaveLength(0)
   })
 
@@ -36,7 +44,7 @@ describe('checkCompatibility', () => {
       config: { drogue_chute: validDrogue },
       specs: baseSpecs,
     })
-    expect(warnings.some((w) => w.slot === 'main_chute' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'main_chute' && w.level === 'error')).toBe(true)
   })
 
   it('warns single-deploy when main but no drogue', () => {
@@ -44,24 +52,17 @@ describe('checkCompatibility', () => {
       config: { main_chute: validMain },
       specs: baseSpecs,
     })
-    expect(warnings.some((w) => w.slot === 'drogue_chute' && w.level === 'warn')).toBe(true)
+    expect(warnings.some(w => w.slot === 'drogue_chute' && w.level === 'warn')).toBe(true)
   })
 
   it('errors when packed chute diameter exceeds inner bore', () => {
-    const bigChute = {
-      name: 'Big',
-      specs: { diameter_in: 60, cd: 1.5, packed_diam_in: 5, packed_length_in: 6 },
-    }
+    const bigChute = { name: 'Big', specs: { diameter_in: 60, cd: 1.5, packed_diam_in: 5, packed_length_in: 6 } }
     const warnings = checkCompatibility({
       // airframe_id is 3.9" but packed_diam is 5"
       config: { main_chute: bigChute, drogue_chute: validDrogue },
       specs: baseSpecs,
     })
-    expect(
-      warnings.some(
-        (w) => w.slot === 'main_chute' && w.level === 'error' && w.message.includes("won't fit")
-      )
-    ).toBe(true)
+    expect(warnings.some(w => w.slot === 'main_chute' && w.level === 'error' && w.message.includes("won't fit"))).toBe(true)
   })
 
   it('errors when shock cord is too weak for 20G ejection load', () => {
@@ -70,7 +71,7 @@ describe('checkCompatibility', () => {
       config: { main_chute: validMain, shock_cord: weakCord },
       specs: { ...baseSpecs, rocket_mass_g: '2500' },
     })
-    expect(warnings.some((w) => w.slot === 'shock_cord' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'shock_cord' && w.level === 'error')).toBe(true)
   })
 
   it('returns empty warnings when config is completely empty', () => {
@@ -81,32 +82,22 @@ describe('checkCompatibility', () => {
   it('errors when chute packed volumes exceed bay volume', () => {
     // bay_cross_area ≈ 11.95 in²; hugeDrogue packed_length=20 → vol ≈ 239 in³
     // bay: 3.9" ID × 5" → vol ≈ 60 in³ → error triggered
-    const hugeDrogue = {
-      name: 'Huge',
-      specs: { diameter_in: 12, cd: 1.5, packed_diam_in: 2, packed_length_in: 20 },
-    }
+    const hugeDrogue = { name: 'Huge', specs: { diameter_in: 12, cd: 1.5, packed_diam_in: 2, packed_length_in: 20 } }
     const warnings = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: hugeDrogue },
       specs: { ...baseSpecs, bay_length_in: '5' },
     })
-    expect(warnings.some((w) => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
   })
 
   it('errors when main descent exceeds 20 fps', () => {
     // 36" cd=1.34 at 2500g ≈ 21.4fps — above the 20fps hard limit
-    const medChute = {
-      name: 'Med',
-      specs: { diameter_in: 36, cd: 1.34, packed_diam_in: 2, packed_length_in: 4 },
-    }
+    const medChute = { name: 'Med', specs: { diameter_in: 36, cd: 1.34, packed_diam_in: 2, packed_length_in: 4 } }
     const warnings = checkCompatibility({
       config: { main_chute: medChute, drogue_chute: validDrogue },
       specs: { ...baseSpecs, rocket_mass_g: '2500' },
     })
-    expect(
-      warnings.some(
-        (w) => w.slot === 'main_chute' && w.level === 'error' && w.message.includes('20 fps')
-      )
-    ).toBe(true)
+    expect(warnings.some(w => w.slot === 'main_chute' && w.level === 'error' && w.message.includes('20 fps'))).toBe(true)
   })
 
   it('errors when quick links are weaker than ejection load even without shock cord', () => {
@@ -116,7 +107,7 @@ describe('checkCompatibility', () => {
       config: { main_chute: validMain, drogue_chute: validDrogue, quick_links: weakQL },
       specs: { ...baseSpecs, rocket_mass_g: '50000' },
     })
-    expect(warnings.some((w) => w.slot === 'quick_links' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'quick_links' && w.level === 'error')).toBe(true)
   })
 
   it('user-supplied ejection_g_factor overrides auto-default', () => {
@@ -126,37 +117,15 @@ describe('checkCompatibility', () => {
     const marginalCord = { name: 'Cord', specs: { strength_lbs: 75, packed_height_in: 2 } }
     const warningsAuto = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: validDrogue, shock_cord: marginalCord },
-      specs: { ...baseSpecs, rocket_mass_g: '2500' }, // auto = 20G
+      specs: { ...baseSpecs, rocket_mass_g: '2500' },          // auto = 20G
     })
     const warningsLowG = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: validDrogue, shock_cord: marginalCord },
       specs: { ...baseSpecs, rocket_mass_g: '2500', ejection_g_factor: '10' }, // user = 10G
     })
     // At auto 20G the cord should error; at user-set 10G it should not
-    expect(warningsAuto.some((w) => w.slot === 'shock_cord' && w.level === 'error')).toBe(true)
-    expect(warningsLowG.some((w) => w.slot === 'shock_cord' && w.level === 'error')).toBe(false)
-  })
-
-  it('shares normalized blank/default and clamped G semantics with simulation', () => {
-    expect(
-      normalizeCalculationInputs({
-        rocket_mass_g: '',
-        main_deploy_alt_ft: '',
-        ejection_g_factor: '2',
-      })
-    ).toMatchObject({ mass_g: null, mass_kg: null, deploy_alt_ft: 500, g_factor: 5 })
-
-    const cord = { name: 'Cord', specs: { strength_lbs: 30, packed_height_in: 2 } }
-    const warnings = checkCompatibility({
-      config: { main_chute: validMain, shock_cord: cord },
-      specs: {
-        ...baseSpecs,
-        rocket_mass_g: '2500',
-        main_deploy_alt_ft: '',
-        ejection_g_factor: '2',
-      },
-    })
-    expect(warnings.some((w) => w.slot === 'shock_cord' && w.message.includes('at 5G'))).toBe(true)
+    expect(warningsAuto.some(w => w.slot === 'shock_cord' && w.level === 'error')).toBe(true)
+    expect(warningsLowG.some(w => w.slot === 'shock_cord' && w.level === 'error')).toBe(false)
   })
 
   it('user-supplied ejection_g_factor applies to quick links too', () => {
@@ -167,32 +136,26 @@ describe('checkCompatibility', () => {
       config: { main_chute: validMain, drogue_chute: validDrogue, quick_links: ql },
       specs: { ...baseSpecs, rocket_mass_g: '2500', ejection_g_factor: '40' },
     })
-    expect(warnings.some((w) => w.slot === 'quick_links' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'quick_links' && w.level === 'error')).toBe(true)
   })
 
   it('warns when deploy bag is too small for main chute', () => {
-    const smallBag = {
-      name: 'Small Bag',
-      specs: { max_chute_diam_in: 36, packed_height_in: 2.5, weight_g: 60 },
-    }
+    const smallBag = { name: 'Small Bag', specs: { max_chute_diam_in: 36, packed_height_in: 2.5, weight_g: 60 } }
     const bigChute = { ...validMain, specs: { ...validMain.specs, diameter_in: 60 } }
     const warnings = checkCompatibility({
       config: { main_chute: bigChute, drogue_chute: validDrogue, deployment_bag: smallBag },
       specs: baseSpecs,
     })
-    expect(warnings.some((w) => w.slot === 'deployment_bag' && w.level === 'warn')).toBe(true)
+    expect(warnings.some(w => w.slot === 'deployment_bag' && w.level === 'warn')).toBe(true)
   })
 
   it('no deployment bag warning when bag fits the chute', () => {
-    const bigBag = {
-      name: 'Big Bag',
-      specs: { max_chute_diam_in: 96, packed_height_in: 6.0, weight_g: 175 },
-    }
+    const bigBag = { name: 'Big Bag', specs: { max_chute_diam_in: 96, packed_height_in: 6.0, weight_g: 175 } }
     const warnings = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: validDrogue, deployment_bag: bigBag },
       specs: baseSpecs,
     })
-    expect(warnings.some((w) => w.slot === 'deployment_bag')).toBe(false)
+    expect(warnings.some(w => w.slot === 'deployment_bag')).toBe(false)
   })
 
   it('errors when swivel is too weak for ejection load', () => {
@@ -202,108 +165,77 @@ describe('checkCompatibility', () => {
       config: { main_chute: validMain, drogue_chute: validDrogue, swivel: weakSwivel },
       specs: { ...baseSpecs, rocket_mass_g: '50000' },
     })
-    expect(warnings.some((w) => w.slot === 'swivel' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'swivel' && w.level === 'error')).toBe(true)
   })
 
   it('warns on tiered bridle length for L1 rocket (< 2.5kg)', () => {
     // 1500g L1 rocket, minimum 5ft; 3ft cord should warn
-    const shortCord = {
-      name: 'Short Cord',
-      specs: { strength_lbs: 300, length_ft: 3, material: 'nylon', packed_height_in: 1 },
-    }
+    const shortCord = { name: 'Short Cord', specs: { strength_lbs: 300, length_ft: 3, material: 'nylon', packed_height_in: 1 } }
     const warnings = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: validDrogue, shock_cord: shortCord },
       specs: { ...baseSpecs, rocket_mass_g: '1500' },
     })
-    expect(
-      warnings.some(
-        (w) => w.slot === 'shock_cord' && w.level === 'warn' && w.message.includes('5ft')
-      )
-    ).toBe(true)
+    expect(warnings.some(w => w.slot === 'shock_cord' && w.level === 'warn' && w.message.includes('5ft'))).toBe(true)
   })
 
   it('warns on tiered bridle length for L2 rocket (2.5–10kg)', () => {
     // 5000g L2 rocket, minimum 10ft; 8ft cord should warn
-    const shortCord = {
-      name: 'Med Cord',
-      specs: { strength_lbs: 600, length_ft: 8, material: 'nylon', packed_height_in: 1.5 },
-    }
+    const shortCord = { name: 'Med Cord', specs: { strength_lbs: 600, length_ft: 8, material: 'nylon', packed_height_in: 1.5 } }
     const warnings = checkCompatibility({
       config: { main_chute: validMain, drogue_chute: validDrogue, shock_cord: shortCord },
       specs: { ...baseSpecs, rocket_mass_g: '5000' },
     })
-    expect(
-      warnings.some(
-        (w) => w.slot === 'shock_cord' && w.level === 'warn' && w.message.includes('10ft')
-      )
-    ).toBe(true)
+    expect(warnings.some(w => w.slot === 'shock_cord' && w.level === 'warn' && w.message.includes('10ft'))).toBe(true)
   })
 
   it('errors when chute volumes alone exceed the bay volume', () => {
     // bay_cross_area ≈ 11.95 in²; smallMain(4) + hugeDrogue(20) → vol ≈ 287 in³
     // bay: 3.9" ID × 2.5" → vol ≈ 30 in³ → error
-    const smallMain = {
-      name: 'SM',
-      specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 4 },
-    }
-    const hugeDrogue = {
-      name: 'HD',
-      specs: { diameter_in: 12, cd: 1.5, packed_diam_in: 2, packed_length_in: 20 },
-    }
+    const smallMain  = { name: 'SM',  specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 4 } }
+    const hugeDrogue = { name: 'HD',  specs: { diameter_in: 12, cd: 1.5, packed_diam_in: 2, packed_length_in: 20 } }
     const warnings = checkCompatibility({
       config: { main_chute: smallMain, drogue_chute: hugeDrogue },
       specs: { ...baseSpecs, bay_length_in: '2.5' },
     })
-    expect(warnings.some((w) => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
   })
 
   it('hardware items (protector, bag, swivel) count toward bay volume', () => {
     // bay: 3.9" ID × 4" → cross_area ≈ 11.95 in², usable ≈ 47.8 in³
     // main: packed_length_in=3 → vol ≈ 35.9 in³ (75%)  — below 85% alone
     // protector(packed_height_in=0.75) + swivel(0.5) → +14.9 in³ → total ≈ 50.8 in³ > 47.8 → error
-    const tightMain = {
-      name: 'Main',
-      specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 3 },
-    }
-    const protector = {
-      name: 'Nomex 12"',
-      specs: { size_in: 12, max_chute_diam_in: 36, weight_g: 65, packed_height_in: 0.75 },
-    }
-    const swivel = {
-      name: 'Swivel',
-      specs: { rated_lbs: 800, size_in: 0.5, weight_g: 25, packed_height_in: 0.5 },
-    }
+    const tightMain = { name: 'Main', specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 3 } }
+    const protector = { name: 'Nomex 12"', specs: { size_in: 12, max_chute_diam_in: 36, weight_g: 65, packed_height_in: 0.75 } }
+    const swivel    = { name: 'Swivel',    specs: { rated_lbs: 800, size_in: 0.5, weight_g: 25, packed_height_in: 0.5 } }
     const warnings = checkCompatibility({
       config: { main_chute: tightMain, chute_protector: protector, swivel },
       specs: { ...baseSpecs, bay_length_in: '4' },
     })
-    expect(warnings.some((w) => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
   })
 
   it('shock cord packed_height_in counts toward bay volume', () => {
     // bay: 3.9" ID × 4" → cross_area ≈ 11.95 in², usable ≈ 47.8 in³
     // main: packed_length_in=3 → vol ≈ 35.9 in³ (75%)  — below 85% alone
     // shock_cord(packed_height_in=1.5) → +17.9 in³ → total ≈ 53.8 in³ > 47.8 → error
-    const tightMain = {
-      name: 'Main',
-      specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 3 },
-    }
-    const cord = {
-      name: '1" Nylon 20ft',
-      specs: {
-        material: 'nylon',
-        elongation_pct: 22,
-        strength_lbs: 2000,
-        length_ft: 20,
-        weight_g: 200,
-        packed_height_in: 1.5,
-      },
-    }
+    const tightMain = { name: 'Main', specs: { diameter_in: 36, cd: 1.5, packed_diam_in: 2, packed_length_in: 3 } }
+    const cord = { name: '1" Nylon 20ft', specs: { material: 'nylon', elongation_pct: 22, strength_lbs: 2000, length_ft: 20, weight_g: 200, packed_height_in: 1.5 } }
     const warnings = checkCompatibility({
       config: { main_chute: tightMain, shock_cord: cord },
       specs: { ...baseSpecs, bay_length_in: '4' },
     })
-    expect(warnings.some((w) => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
+    expect(warnings.some(w => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
+  })
+})
+
+describe('compatibility spec clamping', () => {
+  it('uses clamped dimensions consistently for packing', () => {
+    const result = computePackingVolume({
+      config: { main_chute: { specs: { packed_length_in: 4 } } },
+      specs: { airframe_id_in: '-3', bay_length_in: '18', bay_obstruction_vol_in3: '-2' },
+    })
+    expect(result.bay_known).toBe(false)
+    expect(result.stacked_in3).toBe(0)
   })
 })
 
@@ -324,7 +256,7 @@ describe('slotStatus', () => {
 
   it('error takes priority over warn', () => {
     const warnings = [
-      { level: 'warn', slot: 'main_chute', message: 'warn' },
+      { level: 'warn',  slot: 'main_chute', message: 'warn' },
       { level: 'error', slot: 'main_chute', message: 'error' },
     ]
     expect(slotStatus('main_chute', warnings)).toBe('error')

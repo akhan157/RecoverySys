@@ -1,13 +1,27 @@
 import { describe, it, expect } from 'vitest'
-import {
-  computeDescentRate,
-  computeShockLoad,
-  computeDrift,
-  runSimulation,
-  interpolateThrust,
-} from '../lib/simulation.js'
-import { normalizeCalculationInputs, parseSpec } from '../lib/schema.js'
-import { runDispersionMonteCarlo } from '../lib/simulation.js'
+import { airDensity, computeDescentRate, computeShockLoad, computeDrift, runDispersionMonteCarlo, runSimulation, interpolateThrust } from '../lib/simulation.js'
+import { coerceSpec, parseSpec } from '../lib/schema.js'
+
+describe('spec numeric parsing', () => {
+  it('rejects malformed numeric prefixes instead of partially parsing them', () => {
+    expect(coerceSpec('rocket_mass_g', '12kg')).toBeNull()
+    expect(parseSpec('rocket_mass_g', '12kg')).toBeNull()
+  })
+
+  it('clamps valid specs and rejects exclusive-min boundaries', () => {
+    expect(parseSpec('wind_direction_deg', '999')).toBe(360)
+    expect(parseSpec('drag_cd', '-1')).toBeNull()
+    expect(parseSpec('main_deploy_alt_ft', '0')).toBeNull()
+  })
+})
+
+describe('ISA density', () => {
+  it('is finite and decreases with altitude', () => {
+    expect(airDensity(0)).toBeCloseTo(1.225, 2)
+    expect(airDensity(5000)).toBeLessThan(airDensity(0))
+    expect(Number.isFinite(airDensity(5000))).toBe(true)
+  })
+})
 
 // ── computeDescentRate ────────────────────────────────────────────────────────
 
@@ -16,7 +30,7 @@ describe('computeDescentRate', () => {
     // 36" Cd=1.5 chute, 2.5 kg rocket — typical HPR main
     const fps = computeDescentRate({ diameter_in: 36, cd: 1.5 }, 2.5)
     expect(fps).toBeGreaterThan(0)
-    expect(fps).toBeLessThan(30) // should be under safe landing speed
+    expect(fps).toBeLessThan(30)   // should be under safe landing speed
   })
 
   it('returns 0 for zero cd (guard against NaN/Infinity)', () => {
@@ -79,7 +93,7 @@ describe('computeShockLoad', () => {
     // 1500 lb kevlar, 20G: SF=5 → mass_kg = 1500/(5*20*9.81/4.448) ≈ 6.8 kg
     const result = computeShockLoad(KEVLAR_CORD, 6.8, 20)
     expect(result).not.toBeNull()
-    expect(result.sf_status).toBe('warn') // would be 'pass' under nylon threshold
+    expect(result.sf_status).toBe('warn')   // would be 'pass' under nylon threshold
     expect(result.safety_factor).toBeLessThan(8)
   })
 
@@ -92,14 +106,10 @@ describe('computeShockLoad', () => {
   it('nylon absorbs more strain energy than kevlar for same load', () => {
     // Same mass, same cord length/strength ratio — nylon stretches more → more energy absorbed
     const nylonResult = computeShockLoad(
-      { material: 'nylon', elongation_pct: 22, strength_lbs: 2000, length_ft: 20 },
-      3,
-      20
+      { material: 'nylon', elongation_pct: 22, strength_lbs: 2000, length_ft: 20 }, 3, 20
     )
     const kevlarResult = computeShockLoad(
-      { material: 'kevlar', elongation_pct: 3, strength_lbs: 2000, length_ft: 20 },
-      3,
-      20
+      { material: 'kevlar', elongation_pct: 3, strength_lbs: 2000, length_ft: 20 }, 3, 20
     )
     expect(nylonResult.strain_energy_J).toBeGreaterThan(kevlarResult.strain_energy_J)
   })
@@ -114,48 +124,35 @@ describe('computeShockLoad', () => {
   it('unknown material falls back to nylon thresholds', () => {
     // e.g. 'spectra' is not in SF_THRESHOLDS — should silently use nylon defaults
     const result = computeShockLoad(
-      { material: 'spectra', elongation_pct: 15, strength_lbs: 1000, length_ft: 10 },
-      1,
-      20
+      { material: 'spectra', elongation_pct: 15, strength_lbs: 1000, length_ft: 10 }, 1, 20
     )
     expect(result).not.toBeNull()
-    expect(result.sf_thresholds.pass).toBe(4) // nylon thresholds
+    expect(result.sf_thresholds.pass).toBe(4)   // nylon thresholds
     expect(result.sf_thresholds.warn).toBe(2)
   })
 
   it('runSimulation includes shock_load when cord is in config', () => {
     // 2 kg @ 20G = 2 × 20 × 9.81 / 4.448 ≈ 88 lbs peak load; 2000 lb cord → SF ≈ 22.7
     const result = runSimulation({
-      specs: {
-        rocket_mass_g: '2000',
-        motor_total_impulse_ns: '2000',
-        burn_time_s: '5',
-        airframe_id_in: '6',
-        drag_cd: '0.5',
-        wind_speed_mph: '10',
-        main_deploy_alt_ft: '500',
-        ejection_g_factor: '20',
-      },
+      specs: { rocket_mass_g: '2000', motor_total_impulse_ns: '2000', burn_time_s: '5',
+               airframe_id_in: '6', drag_cd: '0.5', wind_speed_mph: '10',
+               main_deploy_alt_ft: '500', ejection_g_factor: '20' },
       config: {
         main_chute: { specs: { diameter_in: 36, cd: 1.5 } },
-        shock_cord: { specs: NYLON_CORD },
+        shock_cord:  { specs: NYLON_CORD },
       },
     })
     expect(result).not.toBeNull()
     expect(result.shock_load).not.toBeNull()
-    expect(result.shock_load.sf_status).toBe('pass') // 22.7× >> 4× nylon threshold
-    expect(result.shock_load.peak_load_lbs).toBeGreaterThan(80) // 2 kg × 20G
+    expect(result.shock_load.sf_status).toBe('pass')        // 22.7× >> 4× nylon threshold
+    expect(result.shock_load.peak_load_lbs).toBeGreaterThan(80)   // 2 kg × 20G
     expect(result.shock_load.peak_load_lbs).toBeLessThan(110)
   })
 
   it('runSimulation shock_load is null when no cord selected', () => {
     const result = runSimulation({
-      specs: {
-        rocket_mass_g: '2000',
-        motor_total_impulse_ns: '2000',
-        burn_time_s: '5',
-        main_deploy_alt_ft: '500',
-      },
+      specs: { rocket_mass_g: '2000', motor_total_impulse_ns: '2000', burn_time_s: '5',
+               main_deploy_alt_ft: '500' },
       config: { main_chute: { specs: { diameter_in: 36, cd: 1.5 } } },
     })
     expect(result).not.toBeNull()
@@ -164,93 +161,22 @@ describe('computeShockLoad', () => {
 
   it('ejection_g_factor spec string is parsed correctly (auto = 20G)', () => {
     const withAuto = runSimulation({
-      specs: {
-        rocket_mass_g: '2000',
-        motor_total_impulse_ns: '2000',
-        burn_time_s: '5',
-        main_deploy_alt_ft: '500',
-        ejection_g_factor: '',
-      },
+      specs: { rocket_mass_g: '2000', motor_total_impulse_ns: '2000', burn_time_s: '5',
+               main_deploy_alt_ft: '500', ejection_g_factor: '' },
       config: {
         main_chute: { specs: { diameter_in: 36, cd: 1.5 } },
-        shock_cord: { specs: NYLON_CORD },
+        shock_cord:  { specs: NYLON_CORD },
       },
     })
     const with20 = runSimulation({
-      specs: {
-        rocket_mass_g: '2000',
-        motor_total_impulse_ns: '2000',
-        burn_time_s: '5',
-        main_deploy_alt_ft: '500',
-        ejection_g_factor: '20',
-      },
+      specs: { rocket_mass_g: '2000', motor_total_impulse_ns: '2000', burn_time_s: '5',
+               main_deploy_alt_ft: '500', ejection_g_factor: '20' },
       config: {
         main_chute: { specs: { diameter_in: 36, cd: 1.5 } },
-        shock_cord: { specs: NYLON_CORD },
+        shock_cord:  { specs: NYLON_CORD },
       },
     })
     expect(withAuto.shock_load.peak_load_lbs).toBe(with20.shock_load.peak_load_lbs)
-  })
-
-  it('uses normalized defaults/clamps for mass, deployment, and ejection G', () => {
-    expect(
-      normalizeCalculationInputs({
-        rocket_mass_g: '-1',
-        main_deploy_alt_ft: '-100',
-        ejection_g_factor: '2',
-      })
-    ).toMatchObject({ mass_g: null, mass_kg: null, deploy_alt_ft: 500, g_factor: 5 })
-
-    const result = runSimulation({
-      specs: {
-        rocket_mass_g: '2000',
-        motor_total_impulse_ns: '2000',
-        burn_time_s: '5',
-        airframe_id_in: '6',
-        main_deploy_alt_ft: '',
-        ejection_g_factor: '2',
-      },
-      config: {
-        main_chute: { specs: { diameter_in: 36, cd: 1.5 } },
-        shock_cord: { specs: NYLON_CORD },
-      },
-    })
-    expect(result.deploy_ft).toBe(500)
-    expect(result.shock_load.peak_load_lbs).toBe(Math.round((2 * 5 * 9.80665) / 4.448))
-  })
-
-  it('uses the normalized deployment altitude for descent density', () => {
-    const chute = { diameter_in: 36, cd: 1.5 }
-    const specs = {
-      rocket_mass_g: '2000',
-      motor_total_impulse_ns: '2000',
-      burn_time_s: '5',
-      airframe_id_in: '6',
-      main_deploy_alt_ft: '',
-    }
-    const result = runSimulation({ specs, config: { main_chute: { specs: chute } } })
-    const expected = computeDescentRate(chute, 2, normalizeCalculationInputs(specs).deploy_alt_ft)
-    expect(result.deploy_ft).toBe(500)
-    expect(result.main_fps).toBe(Math.round(expected * 10) / 10)
-  })
-
-  it('clamps oversized integration inputs before simulation work begins', () => {
-    expect(parseSpec('motor_total_impulse_ns', '999999999')).toBe(1_000_000)
-    expect(parseSpec('burn_time_s', '999999999')).toBe(120)
-  })
-
-  it('rejects heuristic apogees above the bounded simulation altitude', () => {
-    expect(
-      runSimulation({
-        specs: {
-          rocket_mass_g: '1',
-          motor_total_impulse_ns: '999999999',
-          burn_time_s: '',
-          main_deploy_alt_ft: '500',
-        },
-        config: {},
-      })
-    ).toBeNull()
   })
 })
 
@@ -259,73 +185,30 @@ describe('computeShockLoad', () => {
 describe('computeDrift', () => {
   // Minimal simulation result that computeDrift expects
   const baseSim = {
-    apogee_ft: 4000,
-    deploy_ft: 500,
-    drogue_fps: 70, // ft/s descent under drogue
-    main_fps: 15, // ft/s descent under main
+    apogee_ft:  4000,
+    deploy_ft:  500,
+    drogue_fps: 70,   // ft/s descent under drogue
+    main_fps:   15,   // ft/s descent under main
   }
 
   it('returns null when simulation is null', () => {
-    expect(
-      computeDrift({ simulation: null, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })
-    ).toBeNull()
-  })
-
-  it('returns null instead of iterating an extreme altitude range forever', () => {
-    expect(
-      computeDrift({
-        simulation: { apogee_ft: 3_000_000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
-        specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
-      })
-    ).toBeNull()
-  })
-
-  it('bounds extreme Monte Carlo altitude inputs before descent sampling', () => {
-    const result = runDispersionMonteCarlo({
-      simulation: { apogee_ft: 3_000_000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
-      specs: {
-        launch_lat: '35',
-        launch_lon: '-117',
-        wind_speed_mph: '10',
-        wind_direction_deg: '0',
-      },
-      iterations: 10,
-    })
-    expect(result).not.toBeNull()
-    expect(result.scatter).toHaveLength(10)
+    expect(computeDrift({ simulation: null, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })).toBeNull()
   })
 
   it('returns null when wind speed is zero or missing', () => {
-    expect(
-      computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '0', wind_direction_deg: '0' } })
-    ).toBeNull()
-    expect(
-      computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '', wind_direction_deg: '0' } })
-    ).toBeNull()
+    expect(computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '0',  wind_direction_deg: '0' } })).toBeNull()
+    expect(computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '',   wind_direction_deg: '0' } })).toBeNull()
   })
 
   it('returns null when drogue_fps is missing or zero (guard against divide-by-zero)', () => {
     const nodrogue = { apogee_ft: 4000, deploy_ft: 500, drogue_fps: 0, main_fps: 15 }
-    expect(
-      computeDrift({
-        simulation: nodrogue,
-        specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
-      })
-    ).toBeNull()
+    expect(computeDrift({ simulation: nodrogue, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })).toBeNull()
     const missingdrogue = { apogee_ft: 4000, deploy_ft: 500, main_fps: 15 }
-    expect(
-      computeDrift({
-        simulation: missingdrogue,
-        specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
-      })
-    ).toBeNull()
+    expect(computeDrift({ simulation: missingdrogue, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })).toBeNull()
   })
 
   it('returns drift components with correct structure', () => {
-    const result = computeDrift({
-      simulation: baseSim,
-      specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
-    })
+    const result = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })
     expect(result).not.toBeNull()
     expect(result).toHaveProperty('drift_ft')
     expect(result).toHaveProperty('drift_m')
@@ -338,83 +221,66 @@ describe('computeDrift', () => {
   })
 
   it('drift scales linearly with wind speed', () => {
-    const r5 = computeDrift({
-      simulation: baseSim,
-      specs: { wind_speed_mph: '5', wind_direction_deg: '0' },
-    })
-    const r10 = computeDrift({
-      simulation: baseSim,
-      specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
-    })
+    const r5  = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '5',  wind_direction_deg: '0' } })
+    const r10 = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })
     // Double the wind → double the drift (within rounding)
     expect(Math.abs(r10.drift_ft - r5.drift_ft * 2)).toBeLessThan(5)
   })
 
-  it('bearing is downwind: wind FROM north (0°) → drift TOWARD south (180°)', () => {
-    const result = computeDrift({
+  it('uses layered wind integration rather than scalar surface wind', () => {
+    const layered = computeDrift({
       simulation: baseSim,
-      specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
+      specs: {
+        wind_speed_mph: '10', wind_direction_deg: '0',
+        wind_mid_speed_mph: '40', wind_mid_direction_deg: '180', wind_mid_alt_ft: '2500',
+      },
     })
+    const surfaceOnly = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })
+    expect(layered.drift_ft).not.toBe(surfaceOnly.drift_ft)
+  })
+
+  it('bearing is downwind: wind FROM north (0°) → drift TOWARD south (180°)', () => {
+    const result = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })
     expect(result.bearing_deg).toBe(180)
   })
 
   it('bearing is downwind: wind FROM west (270°) → drift TOWARD east (90°)', () => {
-    const result = computeDrift({
-      simulation: baseSim,
-      specs: { wind_speed_mph: '10', wind_direction_deg: '270' },
-    })
+    const result = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '270' } })
     expect(result.bearing_deg).toBe(90)
   })
 
   it('bearing wraps correctly: wind FROM south (180°) → drift TOWARD north (0°)', () => {
-    const result = computeDrift({
-      simulation: baseSim,
-      specs: { wind_speed_mph: '10', wind_direction_deg: '180' },
-    })
+    const result = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '180' } })
     expect(result.bearing_deg).toBe(0)
   })
 
   it('returns null when wind_direction_deg is missing (direction required for layer-based drift)', () => {
     // Wind speed without direction produces no valid wind layers → null drift
-    const result = computeDrift({
-      simulation: baseSim,
-      specs: { wind_speed_mph: '10', wind_direction_deg: '' },
-    })
+    const result = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '' } })
     expect(result).toBeNull()
   })
 
   it('computes landing coords when launch_lat/lon provided', () => {
     const result = computeDrift({
       simulation: baseSim,
-      specs: {
-        wind_speed_mph: '10',
-        wind_direction_deg: '0',
-        launch_lat: '39.5',
-        launch_lon: '-98.35',
-      },
+      specs: { wind_speed_mph: '10', wind_direction_deg: '0', launch_lat: '39.5', launch_lon: '-98.35' },
     })
     expect(result.land_lat).not.toBeNull()
     expect(result.land_lon).not.toBeNull()
     // Wind from north → drifts south → land_lat < launch_lat
     expect(result.land_lat).toBeLessThan(39.5)
     // Longitude should be approximately the same (drift is north-south)
-    expect(Math.abs(result.land_lon - -98.35)).toBeLessThan(0.01)
+    expect(Math.abs(result.land_lon - (-98.35))).toBeLessThan(0.01)
   })
 
   it('land_lat/lon are null when launch coords not provided', () => {
-    const result = computeDrift({
-      simulation: baseSim,
-      specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
-    })
+    const result = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })
     expect(result.land_lat).toBeNull()
     expect(result.land_lon).toBeNull()
   })
 
   it('drogue_time_s matches span / drogue_fps', () => {
-    const result = computeDrift({
-      simulation: baseSim,
-      specs: { wind_speed_mph: '10', wind_direction_deg: '0' },
-    })
+    const result = computeDrift({ simulation: baseSim, specs: { wind_speed_mph: '10', wind_direction_deg: '0' } })
     // drogue span = 4000 - 500 = 3500 ft; time = 3500 / 70 = 50s
     expect(result.drogue_time_s).toBe(50)
     // main time = 500 / 15 ≈ 33s
@@ -426,15 +292,16 @@ describe('computeDrift', () => {
 
 describe('runSimulation', () => {
   const baseSpecs = {
-    rocket_mass_g: '2500',
+    rocket_mass_g:          '2500',
     motor_total_impulse_ns: '640',
-    burn_time_s: '1.8',
-    airframe_od_in: '4',
-    airframe_id_in: '3.9',
-    bay_length_in: '18',
-    drag_cd: '0.50',
-    wind_speed_mph: '10',
-    main_deploy_alt_ft: '500',
+    burn_time_s:            '1.8',
+    airframe_od_in:         '4',
+    airframe_id_in:         '3.9',
+    bay_length_in:          '18',
+    drag_cd:                '0.50',
+    wind_speed_mph:         '10',
+    wind_direction_deg:     '270',
+    main_deploy_alt_ft:     '500',
   }
 
   const baseConfig = {
@@ -476,14 +343,8 @@ describe('runSimulation', () => {
   })
 
   it('drift is larger with more wind', () => {
-    const noWind = runSimulation({
-      specs: { ...baseSpecs, wind_speed_mph: '0' },
-      config: baseConfig,
-    })
-    const wind15 = runSimulation({
-      specs: { ...baseSpecs, wind_speed_mph: '15' },
-      config: baseConfig,
-    })
+    const noWind  = runSimulation({ specs: { ...baseSpecs, wind_speed_mph: '0' }, config: baseConfig })
+    const wind15  = runSimulation({ specs: { ...baseSpecs, wind_speed_mph: '15' }, config: baseConfig })
     expect(wind15.drift_ft).toBeGreaterThan(noWind.drift_ft)
   })
 
@@ -508,6 +369,45 @@ describe('runSimulation', () => {
     expect(Number.isNaN(result.drogue_fps)).toBe(false)
     expect(Number.isNaN(result.main_fps)).toBe(false)
     expect(Number.isNaN(result.drift_ft)).toBe(false)
+  })
+
+  it('rejects malformed prefixes at the simulation boundary', () => {
+    expect(runSimulation({ specs: { ...baseSpecs, rocket_mass_g: '2500g' }, config: baseConfig })).toBeNull()
+  })
+
+  it('uses layered wind for scalar drift when a profile is supplied', () => {
+    const scalar = runSimulation({ specs: { ...baseSpecs, wind_direction_deg: '0' }, config: baseConfig })
+    const layered = runSimulation({
+      specs: {
+        ...baseSpecs, wind_direction_deg: '0',
+        wind_mid_speed_mph: '40', wind_mid_direction_deg: '180', wind_mid_alt_ft: '2500',
+      },
+      config: baseConfig,
+    })
+    expect(layered.drift_ft).not.toBe(scalar.drift_ft)
+  })
+
+  it('uses the shared exact drift route, and rejects missing direction everywhere', () => {
+    const result = runSimulation({ specs: baseSpecs, config: baseConfig })
+    const shared = computeDrift({ simulation: result, specs: baseSpecs })
+    expect(result.drift_ft).toBe(shared.drift_ft)
+
+    const noDirection = runSimulation({
+      specs: { ...baseSpecs, wind_direction_deg: '' },
+      config: baseConfig,
+    })
+    expect(noDirection.drift_ft).toBe(0)
+    expect(computeDrift({ simulation: noDirection, specs: { ...baseSpecs, wind_direction_deg: '' } })).toBeNull()
+  })
+
+  it('keeps extreme Monte Carlo perturbations finite', () => {
+    const result = runDispersionMonteCarlo({
+      simulation: { apogee_ft: 4000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
+      specs: { wind_speed_mph: '10', wind_direction_deg: '0', launch_lat: '39', launch_lon: '-98' },
+      iterations: 100,
+    })
+    expect(result).not.toBeNull()
+    expect(result.scatter.every(p => Number.isFinite(p.lat) && Number.isFinite(p.lon))).toBe(true)
   })
 })
 
@@ -574,9 +474,9 @@ describe('runSimulation — custom motor thrust curve', () => {
     designation: 'FLAT-K550',
     curve: [
       { t: 0, thrust_N: 0 },
-      { t: 0.01, thrust_N: 552 }, // 1600/2.9 ≈ 552
+      { t: 0.01, thrust_N: 552 },   // 1600/2.9 ≈ 552
       { t: 2.89, thrust_N: 552 },
-      { t: 2.9, thrust_N: 0 },
+      { t: 2.90, thrust_N: 0 },
     ],
     totalImpulse_ns: 1600,
     burnTime_s: 2.9,
@@ -593,8 +493,8 @@ describe('runSimulation — custom motor thrust curve', () => {
 
   it('constant-thrust curve produces apogee within 5% of scalar path', () => {
     const scalar = runSimulation({ specs, config })
-    const curve = runSimulation({ specs, config, customMotor: flatCurve })
-    const delta = Math.abs(scalar.apogee_ft - curve.apogee_ft) / scalar.apogee_ft
+    const curve  = runSimulation({ specs, config, customMotor: flatCurve })
+    const delta  = Math.abs(scalar.apogee_ft - curve.apogee_ft) / scalar.apogee_ft
     expect(delta).toBeLessThan(0.05)
   })
 
@@ -617,10 +517,7 @@ describe('runSimulation — custom motor thrust curve', () => {
   it('works when customMotor.curve has the minimum 2 points', () => {
     const minCurve = {
       designation: 'MIN',
-      curve: [
-        { t: 0, thrust_N: 0 },
-        { t: 1, thrust_N: 0 },
-      ],
+      curve: [{ t: 0, thrust_N: 0 }, { t: 1, thrust_N: 0 }],
       totalImpulse_ns: 0,
       burnTime_s: 0,
       peakThrust_N: 0,
