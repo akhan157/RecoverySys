@@ -43,6 +43,8 @@ export default function MissionControlLayout({
   clearCustomMotor,
   loadConfig,
   addToast,
+  saveCompareSnapshot,
+  clearCompareSnapshot,
   /* darkMode/setDarkMode removed: MC layout is dark-only */
 }) {
   const [activeTab, setActiveTab] = useState('DASHBOARD')
@@ -159,7 +161,15 @@ export default function MissionControlLayout({
                 addToast={addToast}
               />
             )}
-            {activeTab === 'COMPARE' && <CompareTab state={state} resultFresh={resultFresh} />}
+            {activeTab === 'COMPARE' && (
+              <CompareTab
+                state={state}
+                resultFresh={resultFresh}
+                snapshot={state.compareSnapshot}
+                onSaveSnapshot={saveCompareSnapshot}
+                onClearSnapshot={clearCompareSnapshot}
+              />
+            )}
             {activeTab === 'FLIGHT_LOG' && <FlightLogTab state={state} resultFresh={resultFresh} />}
             {activeTab === 'EXPORT' && (
               <ExportTab
