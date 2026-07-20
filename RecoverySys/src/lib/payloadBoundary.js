@@ -14,8 +14,14 @@ export const PAYLOAD_LIMITS = Object.freeze({
 
 const textEncoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null
 
-function byteLength(value) {
-  return textEncoder ? textEncoder.encode(value).length : value.length * 2
+export function utf8ByteLength(value) {
+  if (textEncoder) return textEncoder.encode(value).length
+  let bytes = 0
+  for (const char of value) {
+    const code = char.codePointAt(0)
+    bytes += code <= 0x7f ? 1 : code <= 0x7ff ? 2 : code <= 0xffff ? 3 : 4
+  }
+  return bytes
 }
 
 export function isPayloadSizeAllowed(bytes) {
@@ -79,7 +85,7 @@ export function validateCustomMotor(motor) {
 
 function decodeInput(input) {
   if (typeof input === 'object' && input !== null) return input
-  if (typeof input !== 'string' || byteLength(input) > PAYLOAD_LIMITS.jsonBytes) return null
+  if (typeof input !== 'string' || utf8ByteLength(input) > PAYLOAD_LIMITS.jsonBytes) return null
   try {
     return JSON.parse(input)
   } catch {
@@ -150,7 +156,7 @@ export function decodeMigrateValidateNormalize(input, options = {}) {
   const raw = decodeInput(input)
   if (!raw || Array.isArray(raw) || typeof raw !== 'object')
     return failure('malformed', 'Payload is not a JSON object')
-  if (byteLength(JSON.stringify(raw)) > PAYLOAD_LIMITS.jsonBytes)
+  if (utf8ByteLength(JSON.stringify(raw)) > PAYLOAD_LIMITS.jsonBytes)
     return failure('oversized', 'Payload exceeds the supported size limit')
   if (isPayloadFromFuture(raw))
     return failure('future-version', 'Payload was created by a newer RecoverySys version')

@@ -659,7 +659,6 @@ export function runSimulation({ specs, config, customMotor = null }) {
   const burn_s    = parseSpec('burn_time_s', specs.burn_time_s)
   const od_in     = parseSpec('airframe_id_in', specs.airframe_id_in)
   const cd        = parseSpec('drag_cd', specs.drag_cd) ?? CD_DEFAULT
-  const wind_mph  = parseSpec('wind_speed_mph', specs.wind_speed_mph) ?? 0
   const deploy_ft = parseSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft) ?? 500
   // Stays in lockstep with compatibility.js + SuggestPanel.jsx via parseSpec.
   const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
@@ -726,10 +725,6 @@ export function runSimulation({ specs, config, customMotor = null }) {
   const drogue_fps_rounded = Math.round(drogue_fps)
 
   // ── Drift (constraints #9, #10: instant wind coupling, linear interpolation)
-  const wind_fps       = wind_mph * MPH_TO_FPS
-  const effective_time = main_fps
-    ? (total_time_s ?? phase1_time_s)
-    : phase1_time_s + (deploy_ft / drogue_fps)
   const layeredDrift = computeDrift({
     // Shared drift computation uses unrounded descent rates; presentation is
     // rounded only in the returned result.

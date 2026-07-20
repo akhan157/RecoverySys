@@ -1,6 +1,6 @@
 // ── LocalStorage persistence ────────────────────────────────────────────────
 import { SCHEMA_VERSION } from './schema.js'
-import { normalizeStoredPayload, normalizeCustomParts, normalizeCustomMotor, isValidCustomPart as isValidBoundaryPart } from './payloadBoundary.js'
+import { normalizeStoredPayload, normalizeCustomParts, normalizeCustomMotor, isValidCustomPart as isValidBoundaryPart, utf8ByteLength } from './payloadBoundary.js'
 import { PARTS, SLOT_IDS, EMPTY_CONFIG } from '../data/parts.js'
 import { PAYLOAD_LIMITS } from './payloadBoundary.js'
 
@@ -9,7 +9,7 @@ export const STORAGE_KEYS = Object.freeze({ CONFIG: 'recoverysys-config', CUSTOM
 export function loadSaved() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CONFIG)
-    if (!raw) return null
+    if (!raw || utf8ByteLength(raw) > PAYLOAD_LIMITS.jsonBytes) return null
     return normalizeStoredPayload(JSON.parse(raw), { allParts: PARTS, slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG })
   } catch { return null }
 }
@@ -19,14 +19,16 @@ export function isValidCustomPart(part) { return isValidBoundaryPart(part, new S
 export function loadCustomParts() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CUSTOM_PARTS)
-    return normalizeCustomParts(raw ? JSON.parse(raw) : [], SLOT_IDS)
+    if (!raw) return []
+    if (utf8ByteLength(raw) > PAYLOAD_LIMITS.customPartsJsonBytes) return []
+    return normalizeCustomParts(JSON.parse(raw), SLOT_IDS)
   } catch { return [] }
 }
 
 export function canPersistCustomParts(customParts) {
   if (!Array.isArray(customParts) || customParts.length > PAYLOAD_LIMITS.customParts) return false
   try {
-    return JSON.stringify(customParts).length <= PAYLOAD_LIMITS.customPartsJsonBytes
+    return utf8ByteLength(JSON.stringify(customParts)) <= PAYLOAD_LIMITS.customPartsJsonBytes
   } catch { return false }
 }
 
@@ -44,7 +46,7 @@ export function saveCustomPartsToStorage(customParts) {
   try {
     const normalized = normalizeCustomParts(customParts, SLOT_IDS)
     const serialized = JSON.stringify(normalized)
-    if (serialized.length > PAYLOAD_LIMITS.customPartsJsonBytes) return false
+    if (utf8ByteLength(serialized) > PAYLOAD_LIMITS.customPartsJsonBytes) return false
     localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, serialized)
     return true
   } catch { return false }
