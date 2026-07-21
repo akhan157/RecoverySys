@@ -60,3 +60,35 @@ jobs:
           $files = @(Get-ChildItem -LiteralPath $extract -File -Recurse | ForEach-Object { $_.FullName.Substring($extract.Length + 1).Replace('\', '/') })
           if ($files -notcontains 'RecoverySys.exe' -or $files -notcontains 'README.txt') { throw 'Required files missing.' }
           if ($files | Where-Object { $_ -match '\.zip$' }) { throw 'Nested ZIP found.' }
+
+  macos-portable:
+    name: macOS universal portable build
+    if: github.event_name == 'pull_request'
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: RecoverySys
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: RecoverySys/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - run: npm ci
+      - run: npm run portable:macos:build
+      - name: Inspect macOS universal archive
+        run: |
+          test -f RecoverySys-macos-universal.zip
+          verify_dir="$(mktemp -d)"
+          trap 'rm -rf "$verify_dir"' EXIT
+          ditto -x -k RecoverySys-macos-universal.zip "$verify_dir"
+          app="$verify_dir/RecoverySys.app"
+          test -d "$app"
+          codesign --verify --deep --strict "$app"
+          archs="$(lipo -archs "$app/Contents/MacOS/RecoverySys")"
+          [[ " $archs " == *" arm64 "* ]] || { echo "arm64 slice missing: $archs"; exit 1; }
+          [[ " $archs " == *" x86_64 "* ]] || { echo "x86_64 slice missing: $archs"; exit 1; }

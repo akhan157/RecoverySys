@@ -14,6 +14,8 @@
     "tauri:build": "tauri build",
     "portable:package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-portable.ps1",
     "portable:build": "npm run tauri:build && npm run portable:package",
+    "portable:macos:package": "bash scripts/package-portable-macos.sh",
+    "portable:macos:build": "npm run tauri:build -- --target universal-apple-darwin --config src-tauri/tauri.macos.conf.json && npm run portable:macos:package",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
