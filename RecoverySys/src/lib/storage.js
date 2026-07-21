@@ -1,20 +1,38 @@
 // ── LocalStorage persistence ────────────────────────────────────────────────
 import { SCHEMA_VERSION } from './schema.js'
-import { normalizeStoredPayload, normalizeCustomParts, normalizeCustomMotor, isValidCustomPart as isValidBoundaryPart, utf8ByteLength } from './payloadBoundary.js'
+import {
+  normalizeStoredPayload,
+  normalizeCustomParts,
+  normalizeCustomMotor,
+  isValidCustomPart as isValidBoundaryPart,
+  utf8ByteLength,
+} from './payloadBoundary.js'
 import { PARTS, SLOT_IDS, EMPTY_CONFIG } from '../data/parts.js'
 import { PAYLOAD_LIMITS } from './payloadBoundary.js'
 
-export const STORAGE_KEYS = Object.freeze({ CONFIG: 'recoverysys-config', CUSTOM_PARTS: 'recoverysys-custom-parts', THEME: 'recoverysys-theme' })
+export const STORAGE_KEYS = Object.freeze({
+  CONFIG: 'recoverysys-config',
+  CUSTOM_PARTS: 'recoverysys-custom-parts',
+  THEME: 'recoverysys-theme',
+})
 
 export function loadSaved() {
   try {
     const raw = localStorage.getItem(STORAGE_KEYS.CONFIG)
     if (!raw || utf8ByteLength(raw) > PAYLOAD_LIMITS.jsonBytes) return null
-    return normalizeStoredPayload(JSON.parse(raw), { allParts: PARTS, slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG })
-  } catch { return null }
+    return normalizeStoredPayload(JSON.parse(raw), {
+      allParts: PARTS,
+      slotIds: SLOT_IDS,
+      emptyConfig: EMPTY_CONFIG,
+    })
+  } catch {
+    return null
+  }
 }
 
-export function isValidCustomPart(part) { return isValidBoundaryPart(part, new Set(SLOT_IDS)) }
+export function isValidCustomPart(part) {
+  return isValidBoundaryPart(part, new Set(SLOT_IDS))
+}
 
 export function loadCustomParts() {
   try {
@@ -22,23 +40,32 @@ export function loadCustomParts() {
     if (!raw) return []
     if (utf8ByteLength(raw) > PAYLOAD_LIMITS.customPartsJsonBytes) return []
     return normalizeCustomParts(JSON.parse(raw), SLOT_IDS)
-  } catch { return [] }
+  } catch {
+    return []
+  }
 }
 
 export function canPersistCustomParts(customParts) {
   if (!Array.isArray(customParts) || customParts.length > PAYLOAD_LIMITS.customParts) return false
   try {
     return utf8ByteLength(JSON.stringify(customParts)) <= PAYLOAD_LIMITS.customPartsJsonBytes
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 export const rehydrateCustomMotor = normalizeCustomMotor
 
 export function saveConfigToStorage({ config, specs, customMotor }) {
   try {
-    localStorage.setItem(STORAGE_KEYS.CONFIG, JSON.stringify({ schemaVersion: SCHEMA_VERSION, config, specs, customMotor }))
+    localStorage.setItem(
+      STORAGE_KEYS.CONFIG,
+      JSON.stringify({ schemaVersion: SCHEMA_VERSION, config, specs, customMotor })
+    )
     return true
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 export function saveCustomPartsToStorage(customParts) {
@@ -49,7 +76,9 @@ export function saveCustomPartsToStorage(customParts) {
     if (utf8ByteLength(serialized) > PAYLOAD_LIMITS.customPartsJsonBytes) return false
     localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, serialized)
     return true
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 export function loadTheme() {
@@ -58,9 +87,15 @@ export function loadTheme() {
     if (stored === 'dark') return true
     if (stored === 'light') return false
     return window.matchMedia?.('(prefers-color-scheme: dark)').matches ?? false
-  } catch { return false }
+  } catch {
+    return false
+  }
 }
 
 export function saveTheme(darkMode) {
-  try { localStorage.setItem(STORAGE_KEYS.THEME, darkMode ? 'dark' : 'light') } catch { /* storage unavailable */ }
+  try {
+    localStorage.setItem(STORAGE_KEYS.THEME, darkMode ? 'dark' : 'light')
+  } catch {
+    /* storage unavailable */
+  }
 }

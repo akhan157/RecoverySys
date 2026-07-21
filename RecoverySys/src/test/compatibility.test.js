@@ -28,7 +28,9 @@ describe('checkCompatibility', () => {
       config: { main_chute: validMain },
       specs: { ...baseSpecs, rocket_mass_g: '2500g' },
     })
-    expect(warnings.some((w) => w.slot === 'drogue_chute' && w.message.includes('single deploy'))).toBe(true)
+    expect(
+      warnings.some((w) => w.slot === 'drogue_chute' && w.message.includes('single deploy'))
+    ).toBe(true)
     expect(warnings.some((w) => w.slot === 'shock_cord')).toBe(false)
   })
   it('uses the canonical main snatch result for dual-deploy cord warnings', () => {

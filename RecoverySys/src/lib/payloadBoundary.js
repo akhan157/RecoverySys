@@ -233,5 +233,9 @@ export function normalizeCustomParts(raw, slotIds = []) {
 export const normalizeCustomMotor = validateCustomMotor
 
 export function normalizeStoredPayload(raw, options = {}) {
-  try { return normalizePayload(raw, options) } catch { return null }
+  try {
+    return normalizePayload(raw, options)
+  } catch {
+    return null
+  }
 }
