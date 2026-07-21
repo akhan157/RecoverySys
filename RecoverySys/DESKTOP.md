@@ -1,4 +1,4 @@
-# RecoverySys Windows desktop build
+# RecoverySys desktop builds
 
 The Tauri v2 foundation in `src-tauri/` packages the existing Vite SPA into a
 portable Windows executable. Frontend assets from `frontendDist` are embedded
@@ -37,3 +37,21 @@ configurations. Google Fonts, OpenStreetMap tiles, and ThrustCurve motor search
 are network-dependent; when offline they may be absent or unavailable and
 should not be treated as bundled data. Import a local `.eng` file when motor
 search is unavailable.
+
+## macOS universal portable build
+
+The macOS workflow builds both `aarch64-apple-darwin` and `x86_64-apple-darwin`
+and produces `RecoverySys-macos-universal.zip`, containing one universal
+`RecoverySys.app`. It has an ad-hoc signature (not an Apple Developer ID
+signature), is unsigned for trusted distribution, and is not notarized.
+
+After verifying that you trust the source, extract the ZIP, then in Finder
+right-click `RecoverySys.app` and choose **Open**, confirming the prompt. If
+macOS still blocks this app, remove quarantine only from this app:
+`xattr -dr com.apple.quarantine /path/to/RecoverySys.app`.
+Do not disable Gatekeeper globally.
+
+The CI artifact is an Actions-generated outer ZIP containing the portable
+`RecoverySys-macos-universal.zip`; extract twice to reach `RecoverySys.app`.
+When a GitHub Release is added, attach the inner `RecoverySys-macos-universal.zip`
+directly instead.
