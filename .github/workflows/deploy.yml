@@ -48,6 +48,35 @@ jobs:
         with:
           path: RecoverySys/dist
 
+  windows-portable:
+    name: Windows portable release
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: RecoverySys
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: RecoverySys/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - run: npm ci
+      - run: npm run portable:build
+      - name: Stage artifact contents
+        shell: pwsh
+        run: Expand-Archive -LiteralPath RecoverySys-Portable.zip -DestinationPath portable-artifact -Force
+      - name: Upload portable Windows release
+        uses: actions/upload-artifact@v4
+        with:
+          name: RecoverySys-Portable
+          # Upload extracted files so GitHub's generated download is the ZIP.
+          path: RecoverySys/portable-artifact
+          if-no-files-found: error
+
   deploy:
     needs: build
     runs-on: ubuntu-latest

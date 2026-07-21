@@ -121,7 +121,9 @@ describe('payload boundary', () => {
   it('counts UTF-8 bytes for non-ASCII payload limits', () => {
     expect(utf8ByteLength('é')).toBe(2)
     expect(utf8ByteLength('🚀')).toBe(4)
-    expect(utf8ByteLength('x'.repeat(PAYLOAD_LIMITS.jsonBytes - 1) + 'é')).toBe(PAYLOAD_LIMITS.jsonBytes + 1)
+    expect(utf8ByteLength('x'.repeat(PAYLOAD_LIMITS.jsonBytes - 1) + 'é')).toBe(
+      PAYLOAD_LIMITS.jsonBytes + 1
+    )
   })
 
   it('rejects oversized and over-limit custom-part storage', () => {
@@ -156,7 +158,10 @@ describe('payload boundary', () => {
 
   it('rejects oversized raw localStorage values before parsing', () => {
     localStorage.setItem(STORAGE_KEYS.CONFIG, '🚀'.repeat(PAYLOAD_LIMITS.jsonBytes))
-    localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, '🚀'.repeat(PAYLOAD_LIMITS.customPartsJsonBytes))
+    localStorage.setItem(
+      STORAGE_KEYS.CUSTOM_PARTS,
+      '🚀'.repeat(PAYLOAD_LIMITS.customPartsJsonBytes)
+    )
     expect(loadSaved()).toBeNull()
     expect(loadCustomParts()).toEqual([])
   })

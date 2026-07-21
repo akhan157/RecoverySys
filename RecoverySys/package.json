@@ -12,6 +12,8 @@
     "tauri:dev": "tauri dev",
     "build": "vite build",
     "tauri:build": "tauri build",
+    "portable:package": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/package-portable.ps1",
+    "portable:build": "npm run tauri:build && npm run portable:package",
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",

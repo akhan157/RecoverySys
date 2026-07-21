@@ -32,3 +32,31 @@ jobs:
           path: |
             RecoverySys/playwright-report/
             RecoverySys/test-results/
+
+  windows-portable:
+    name: Windows portable build
+    if: github.event_name == 'pull_request'
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: RecoverySys
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: RecoverySys/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+      - run: npm ci
+      - run: npm run portable:build
+      - name: Assert portable archive contents
+        shell: pwsh
+        run: |
+          $archive = Join-Path $PWD 'RecoverySys-Portable.zip'
+          if (-not (Test-Path -LiteralPath $archive -PathType Leaf)) { throw 'Archive missing.' }
+          $extract = Join-Path $PWD 'portable-verify'
+          Expand-Archive -LiteralPath $archive -DestinationPath $extract -Force
+          $files = @(Get-ChildItem -LiteralPath $extract -File -Recurse | ForEach-Object { $_.FullName.Substring($extract.Length + 1).Replace('\', '/') })
+          if ($files -notcontains 'RecoverySys.exe' -or $files -notcontains 'README.txt') { throw 'Required files missing.' }
+          if ($files | Where-Object { $_ -match '\.zip$' }) { throw 'Nested ZIP found.' }

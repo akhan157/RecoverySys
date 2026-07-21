@@ -40,6 +40,21 @@ npm run format:check # check formatting
 npm run check        # run formatting, lint, tests, and build checks
 ```
 
+## Portable Windows release
+
+The Windows release is a no-install portable ZIP. It embeds the Vite frontend
+assets and contains `RecoverySys.exe` plus `README.txt`; it does not use an
+installer or registry shortcuts. Build it from this directory with:
+
+```powershell
+npm run portable:build
+```
+
+This creates the exact archive `RecoverySys-Portable.zip`. Extract it before
+running `RecoverySys.exe`. The Microsoft Edge WebView2 Evergreen Runtime is a
+required Windows system dependency and is not bundled; install it separately
+if needed.
+
 ## GitHub Pages
 
 The Vite configuration currently builds for a GitHub Pages project site at `/RecoverySys/`. Keep that base path when deploying this repository as `https://<account>.github.io/RecoverySys/`. If the repository is published under a different Pages path, update the Vite `base` setting before building; otherwise asset URLs will not match the deployed site.

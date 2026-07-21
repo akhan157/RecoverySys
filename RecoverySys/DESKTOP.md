@@ -1,7 +1,8 @@
 # RecoverySys Windows desktop build
 
-The Tauri v2 foundation in `src-tauri/` packages the existing Vite SPA as a
-per-user Windows NSIS installer.
+The Tauri v2 foundation in `src-tauri/` packages the existing Vite SPA into a
+portable Windows executable. Frontend assets from `frontendDist` are embedded
+in the executable; no installer or registry shortcut is used.
 
 ## Prerequisites
 
@@ -15,13 +16,19 @@ npm 10 or newer are required locally; use the current LTS release.
 ```powershell
 npm install
 npm run tauri:dev
-npm run tauri:build
+npm run portable:build
 ```
 
-The build uses Vite on port 5173 and writes the NSIS installer under
-`src-tauri/target/release/bundle/nsis/`. A normal `npm run build` remains the
-GitHub Pages build and uses `/RecoverySys/`; Tauri builds use relative asset
-paths automatically.
+`npm run portable:build` builds without a Tauri bundle target and creates
+`RecoverySys-Portable.zip` in this directory. The ZIP contains
+`RecoverySys.exe` and a concise `README.txt`. To use it, extract the archive
+before running the executable; it does not install anything. Windows must have
+the Microsoft Edge WebView2 Evergreen Runtime installed separately; WebView2
+is required and is not bundled.
+
+The build uses Vite on port 5173. A normal `npm run build` remains the GitHub
+Pages build and uses `/RecoverySys/`; Tauri builds use relative asset paths
+automatically.
 
 ## Offline behavior
 
