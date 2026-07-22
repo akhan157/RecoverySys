@@ -21,6 +21,7 @@ export default function ConfigBuilder({
   onSetCustomMotor,
   onClearCustomMotor,
   onToast,
+  openExampleConfiguration,
 }) {
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -83,6 +84,9 @@ export default function ConfigBuilder({
 
           <Button variant="secondary" onClick={onShare}>
             {shareState === SHARE_STATES.COPIED ? 'Copied!' : 'Copy Share Link'}
+          </Button>
+          <Button variant="secondary" onClick={openExampleConfiguration}>
+            Open example configuration
           </Button>
         </div>
       </div>
