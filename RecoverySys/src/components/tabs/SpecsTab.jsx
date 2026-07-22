@@ -11,6 +11,7 @@ export default function SpecsTab({
   setCustomMotor,
   clearCustomMotor,
   addToast,
+  openExampleConfiguration,
 }) {
   return (
     <div className="mc-specs-panel">
@@ -32,6 +33,7 @@ export default function SpecsTab({
           onSetCustomMotor={setCustomMotor}
           onClearCustomMotor={clearCustomMotor}
           onToast={addToast}
+          openExampleConfiguration={openExampleConfiguration}
         />
       </div>
     </div>

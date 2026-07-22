@@ -100,12 +100,14 @@ async function addTransferPart(page) {
   await transferCard.click()
 }
 
-test('landing CTA opens the demo app at the public launch URL', async ({ guardedPage }) => {
+test('landing CTA opens the example configuration at the public launch URL', async ({
+  guardedPage,
+}) => {
   await prepareStorage(guardedPage)
   await guardedPage.goto('./landing/')
-  await guardedPage.getByRole('link', { name: /LAUNCH/ }).click()
+  await guardedPage.locator('a[href="../?demo=1"]').first().click()
   await expect(guardedPage).toHaveURL(/\/RecoverySys\/\?demo=1$/)
-  await expect(guardedPage.getByRole('status')).toContainText('DEMO')
+  await expect(guardedPage.getByRole('status')).toContainText('EXAMPLE')
   await expect(guardedPage.getByText('APOGEE_ALTITUDE')).toBeVisible()
 })
 
