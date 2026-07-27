@@ -6,7 +6,7 @@
 // must still boot with sane defaults.
 
 import { SCHEMA_VERSION } from './schema.js'
-import { normalizeStoredPayload, normalizeCustomParts, rehydrateCustomMotor as normalizeCustomMotor, isValidCustomPart as isValidBoundaryPart } from './payloadBoundary.js'
+import { normalizeStoredPayload, normalizeCustomParts, normalizeCustomMotor, isValidCustomPart as isValidBoundaryPart } from './payloadBoundary.js'
 import { SLOT_IDS, EMPTY_CONFIG } from '../data/parts.js'
 
 export const STORAGE_KEYS = Object.freeze({
