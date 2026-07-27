@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
+import { useEffect } from 'react'
 import { TOAST_LEVELS } from '../lib/constants.js'
 
 // Per-level design-system token pairs
 const LEVEL_STYLES = {
-  [TOAST_LEVELS.OK]:    { background: 'var(--cta-bg)',   color: 'var(--cta-fg)'   },
-  [TOAST_LEVELS.WARN]:  { background: 'var(--warn-bg)',  color: 'var(--warn-fg)'  },
+  [TOAST_LEVELS.OK]: { background: 'var(--cta-bg)', color: 'var(--cta-fg)' },
+  [TOAST_LEVELS.WARN]: { background: 'var(--warn-bg)', color: 'var(--warn-fg)' },
   [TOAST_LEVELS.ERROR]: { background: 'var(--error-bg)', color: 'var(--error-fg)' },
 }
 
@@ -56,7 +56,7 @@ export default function ToastContainer({ toasts, onRemove }) {
         zIndex: 200,
       }}
     >
-      {toasts.map(t => (
+      {toasts.map((t) => (
         <Toast key={t.id} toast={t} onRemove={onRemove} />
       ))}
     </div>

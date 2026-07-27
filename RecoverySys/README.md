@@ -18,6 +18,9 @@ RecoverySys is a local-first recovery-bay configuration and flight-estimation to
 
 ## Local development
 
+RecoverySys supports Node.js `^20.19.0 || ^22.13.0 || >=24.0.0` and npm `>=10`.
+CI runs on Node 22.
+
 From this directory:
 
 ```bash
@@ -34,7 +37,23 @@ npm test             # run the test suite once
 npm run test:watch   # run tests in watch mode
 npm run lint         # lint src/
 npm run format:check # check formatting
+npm run check        # run formatting, lint, tests, and build checks
 ```
+
+## Portable Windows release
+
+The Windows release is a no-install portable ZIP. It embeds the Vite frontend
+assets and contains `RecoverySys.exe` plus `README.txt`; it does not use an
+installer or registry shortcuts. Build it from this directory with:
+
+```powershell
+npm run portable:build
+```
+
+This creates the exact archive `RecoverySys-Portable.zip`. Extract it before
+running `RecoverySys.exe`. The Microsoft Edge WebView2 Evergreen Runtime is a
+required Windows system dependency and is not bundled; install it separately
+if needed.
 
 ## GitHub Pages
 

@@ -24,6 +24,8 @@ static-server.mjs
 
 # Test coverage
 coverage/
+test-results/
+playwright-report/
 
 # Editor/OS
 .DS_Store

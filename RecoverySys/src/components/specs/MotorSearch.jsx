@@ -1,4 +1,4 @@
-import React, { useState, useRef, useEffect } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import MotorPill from '../primitives/MotorPill.jsx'
 import Input from '../primitives/Input.jsx'
 
@@ -8,14 +8,14 @@ const THRUSTCURVE_URL = 'https://www.thrustcurve.org/api/v1/search.json'
 // against stale results. Selection writes motor_total_impulse_ns + burn_time_s
 // back into specs — that's all the downstream scalar sim path needs.
 export default function MotorSearch({ onSetSpec }) {
-  const [query,    setQuery]    = useState('')
-  const [results,  setResults]  = useState([])
-  const [loading,  setLoading]  = useState(false)
-  const [error,    setError]    = useState(null)
+  const [query, setQuery] = useState('')
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
   const [selected, setSelected] = useState(null)
-  const [open,     setOpen]     = useState(false)
-  const debounceRef  = useRef(null)
-  const abortRef     = useRef(null)   // AbortController for in-flight fetch
+  const [open, setOpen] = useState(false)
+  const debounceRef = useRef(null)
+  const abortRef = useRef(null) // AbortController for in-flight fetch
   const containerRef = useRef(null)
 
   // Close dropdown on outside click
@@ -28,14 +28,25 @@ export default function MotorSearch({ onSetSpec }) {
   }, [])
 
   // Cancel any pending debounce + in-flight fetch on unmount
-  useEffect(() => () => { clearTimeout(debounceRef.current); abortRef.current?.abort() }, [])
+  useEffect(
+    () => () => {
+      clearTimeout(debounceRef.current)
+      abortRef.current?.abort()
+    },
+    []
+  )
 
   const handleInput = (q) => {
     setQuery(q)
     clearTimeout(debounceRef.current)
     // Cancel any in-flight request immediately — prevents stale results overwriting fresh ones
     abortRef.current?.abort()
-    if (!q || q.trim().length < 2) { setResults([]); setOpen(false); setError(null); return }
+    if (!q || q.trim().length < 2) {
+      setResults([])
+      setOpen(false)
+      setError(null)
+      return
+    }
     debounceRef.current = setTimeout(async () => {
       const controller = new AbortController()
       abortRef.current = controller
@@ -49,7 +60,7 @@ export default function MotorSearch({ onSetSpec }) {
         setResults(Array.isArray(data?.results) ? data.results : [])
         setOpen(true)
       } catch (err) {
-        if (err.name === 'AbortError') return   // stale request — silently drop
+        if (err.name === 'AbortError') return // stale request — silently drop
         setError('ThrustCurve unavailable — enter values manually')
         setResults([])
         setOpen(false)
@@ -77,10 +88,26 @@ export default function MotorSearch({ onSetSpec }) {
     if (isFinite(burn) && burn > 0) onSetSpec('burn_time_s', String(burn.toFixed(2)))
   }
 
-  const clear = () => { abortRef.current?.abort(); setSelected(null); setQuery(''); setResults([]); setOpen(false); setError(null) }
+  const clear = () => {
+    abortRef.current?.abort()
+    setSelected(null)
+    setQuery('')
+    setResults([])
+    setOpen(false)
+    setError(null)
+  }
 
   return (
-    <div ref={containerRef} style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '4px', position: 'relative' }}>
+    <div
+      ref={containerRef}
+      style={{
+        gridColumn: '1 / -1',
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '4px',
+        position: 'relative',
+      }}
+    >
       <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
         Motor <span style={{ fontWeight: 400, opacity: 0.7 }}>(ThrustCurve search)</span>
       </label>
@@ -90,7 +117,11 @@ export default function MotorSearch({ onSetSpec }) {
           designation={selected.designation}
           meta={
             <>
-              {selected.manufacturerAbbrev} — <span className="mono">{Math.round(selected.totImpulseNs)} Ns{selected.burnTimeS != null ? ` / ${Number(selected.burnTimeS).toFixed(1)}s` : ''}</span>
+              {selected.manufacturerAbbrev} —{' '}
+              <span className="mono">
+                {Math.round(selected.totImpulseNs)} Ns
+                {selected.burnTimeS != null ? ` / ${Number(selected.burnTimeS).toFixed(1)}s` : ''}
+              </span>
             </>
           }
           onClear={clear}
@@ -102,48 +133,79 @@ export default function MotorSearch({ onSetSpec }) {
             type="text"
             value={query}
             placeholder="e.g. J350, K185, L1000…"
-            onChange={e => handleInput(e.target.value)}
+            onChange={(e) => handleInput(e.target.value)}
           />
           {loading && (
-            <span style={{
-              position: 'absolute', right: '8px', top: '50%', transform: 'translateY(-50%)',
-              width: '11px', height: '11px', borderRadius: '50%',
-              border: '2px solid var(--border-default)',
-              borderTopColor: 'var(--accent)',
-              animation: 'spin 0.7s linear infinite',
-              display: 'inline-block',
-            }} />
+            <span
+              style={{
+                position: 'absolute',
+                right: '8px',
+                top: '50%',
+                transform: 'translateY(-50%)',
+                width: '11px',
+                height: '11px',
+                borderRadius: '50%',
+                border: '2px solid var(--border-default)',
+                borderTopColor: 'var(--accent)',
+                animation: 'spin 0.7s linear infinite',
+                display: 'inline-block',
+              }}
+            />
           )}
         </div>
       )}
 
-      {error && <span style={{ fontSize: '10px', color: 'var(--error-fg)', lineHeight: 1.3 }}>{error}</span>}
+      {error && (
+        <span style={{ fontSize: '10px', color: 'var(--error-fg)', lineHeight: 1.3 }}>{error}</span>
+      )}
 
       {/* Results dropdown */}
       {open && results.length > 0 && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% - 2px)', left: 0, right: 0, zIndex: 200,
-          background: 'var(--bg-panel)',
-          border: '1px solid var(--accent)',
-          maxHeight: '200px', overflowY: 'auto',
-          boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% - 2px)',
+            left: 0,
+            right: 0,
+            zIndex: 200,
+            background: 'var(--bg-panel)',
+            border: '1px solid var(--accent)',
+            maxHeight: '200px',
+            overflowY: 'auto',
+            boxShadow: '0 4px 16px rgba(0,0,0,0.2)',
+          }}
+        >
           {results.map((m, i) => (
             <button
               key={m.motorId ?? i}
-              onMouseDown={e => { e.preventDefault(); select(m) }}
-              style={{
-                display: 'block', width: '100%', textAlign: 'left',
-                padding: '7px 10px', background: 'none', border: 'none',
-                borderBottom: i < results.length - 1 ? '1px solid var(--border-subtle)' : 'none',
-                cursor: 'pointer', color: 'var(--text-primary)', fontSize: '12px',
+              onMouseDown={(e) => {
+                e.preventDefault()
+                select(m)
               }}
-              onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-right)'}
-              onMouseLeave={e => e.currentTarget.style.background = 'none'}
+              style={{
+                display: 'block',
+                width: '100%',
+                textAlign: 'left',
+                padding: '7px 10px',
+                background: 'none',
+                border: 'none',
+                borderBottom: i < results.length - 1 ? '1px solid var(--border-subtle)' : 'none',
+                cursor: 'pointer',
+                color: 'var(--text-primary)',
+                fontSize: '12px',
+              }}
+              onMouseEnter={(e) => (e.currentTarget.style.background = 'var(--bg-right)')}
+              onMouseLeave={(e) => (e.currentTarget.style.background = 'none')}
             >
-              <span className="mono" style={{ fontWeight: 700 }}>{m.designation}</span>
+              <span className="mono" style={{ fontWeight: 700 }}>
+                {m.designation}
+              </span>
               <span style={{ color: 'var(--text-tertiary)', marginLeft: '8px' }}>
-                {m.manufacturerAbbrev} — <span className="mono">{Math.round(m.totImpulseNs)} Ns{m.burnTimeS != null ? ` / ${Number(m.burnTimeS).toFixed(1)}s` : ''}</span>
+                {m.manufacturerAbbrev} —{' '}
+                <span className="mono">
+                  {Math.round(m.totImpulseNs)} Ns
+                  {m.burnTimeS != null ? ` / ${Number(m.burnTimeS).toFixed(1)}s` : ''}
+                </span>
               </span>
             </button>
           ))}
@@ -151,11 +213,20 @@ export default function MotorSearch({ onSetSpec }) {
       )}
 
       {open && !loading && results.length === 0 && query.trim().length >= 2 && (
-        <div style={{
-          position: 'absolute', top: 'calc(100% - 2px)', left: 0, right: 0, zIndex: 200,
-          background: 'var(--bg-panel)', border: '1px solid var(--border-default)',
-          padding: '8px 10px', fontSize: '12px', color: 'var(--text-tertiary)',
-        }}>
+        <div
+          style={{
+            position: 'absolute',
+            top: 'calc(100% - 2px)',
+            left: 0,
+            right: 0,
+            zIndex: 200,
+            background: 'var(--bg-panel)',
+            border: '1px solid var(--border-default)',
+            padding: '8px 10px',
+            fontSize: '12px',
+            color: 'var(--text-tertiary)',
+          }}
+        >
           No available motors found for "{query}"
         </div>
       )}

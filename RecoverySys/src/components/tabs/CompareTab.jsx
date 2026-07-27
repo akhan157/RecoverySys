@@ -1,33 +1,34 @@
-import React, { useState, useMemo } from 'react'
+import { useMemo } from 'react'
 import { CATEGORIES } from '../../data/parts.js'
-import { partSpecLine } from '../../lib/format.js'
 import { runSimulation } from '../../lib/simulation.js'
 
 /**
  * Config comparison tab. Save a snapshot of the current config ("A"),
  * then modify parts/specs — the tab shows A vs current ("B") side-by-side.
  */
-export default function CompareTab({ state }) {
-  const [snapshot, setSnapshot] = useState(null)
-
-  const saveSnapshot = () => {
-    setSnapshot({
-      config: JSON.parse(JSON.stringify(state.config)),
-      specs: { ...state.specs },
-      customMotor: state.customMotor ? JSON.parse(JSON.stringify(state.customMotor)) : null,
-      savedAt: new Date().toLocaleTimeString(),
-    })
-  }
-
-  const clearSnapshot = () => setSnapshot(null)
-
+export default function CompareTab({
+  state,
+  resultFresh,
+  snapshot,
+  onSaveSnapshot,
+  onClearSnapshot,
+}) {
   // Run sim for the snapshot config
   const snapshotSim = useMemo(() => {
     if (!snapshot) return null
-    return runSimulation({ specs: snapshot.specs, config: snapshot.config, customMotor: snapshot.customMotor })
+    return runSimulation({
+      specs: snapshot.specs,
+      config: snapshot.config,
+      customMotor: snapshot.customMotor,
+    })
   }, [snapshot])
 
-  const currentSim = state.simulation
+  const currentSim = resultFresh ? state.simulation : null
+  const currentBStatus = !state.simulation
+    ? 'No current-B simulation available — run a simulation before using B results.'
+    : !resultFresh
+      ? 'Current-B simulation is stale — rerun before using it.'
+      : null
 
   if (!snapshot) {
     return (
@@ -38,12 +39,19 @@ export default function CompareTab({ state }) {
         <div className="mc-export__content">
           <div className="mc-export__section">
             <div className="mc-metric__label">SNAPSHOT_CONFIG</div>
-            <div style={{ fontSize: 10, color: 'var(--mc-text-dim)', margin: '6px 0 12px', lineHeight: 1.6 }}>
-              Save your current configuration as "Config A". Then change parts or specs —
-              this tab will show A vs B side-by-side so you can compare descent rates,
-              drift, warnings, and part choices.
+            <div
+              style={{
+                fontSize: 10,
+                color: 'var(--mc-text-dim)',
+                margin: '6px 0 12px',
+                lineHeight: 1.6,
+              }}
+            >
+              Save your current configuration as "Config A". Then change parts or specs — this tab
+              will show A vs B side-by-side so you can compare descent rates, drift, warnings, and
+              part choices.
             </div>
-            <button className="mc-run-btn" onClick={saveSnapshot}>
+            <button className="mc-run-btn" onClick={onSaveSnapshot}>
               SAVE_AS_CONFIG_A &rarr;
             </button>
           </div>
@@ -53,7 +61,7 @@ export default function CompareTab({ state }) {
   }
 
   // Build comparison rows
-  const partRows = CATEGORIES.map(cat => {
+  const partRows = CATEGORIES.map((cat) => {
     const a = snapshot.config[cat.id]
     const b = state.config[cat.id]
     const changed = a?.id !== b?.id
@@ -75,31 +83,105 @@ export default function CompareTab({ state }) {
   })
 
   const simRows = [
-    { label: 'Apogee', a: snapshotSim?.apogee_ft, b: currentSim?.apogee_ft, unit: 'ft', fmt: v => v?.toLocaleString() },
-    { label: 'Drogue Rate', a: snapshotSim?.drogue_fps, b: currentSim?.drogue_fps, unit: 'fps', fmt: v => v?.toFixed?.(0) },
-    { label: 'Main Rate', a: snapshotSim?.main_fps, b: currentSim?.main_fps, unit: 'fps', fmt: v => v?.toFixed?.(1) },
-    { label: 'Drift', a: snapshotSim?.drift_ft, b: currentSim?.drift_ft, unit: 'ft', fmt: v => v?.toLocaleString() },
-    { label: 'Total Time', a: snapshotSim?.total_time_s, b: currentSim?.total_time_s, unit: 's', fmt: v => v?.toFixed?.(0) },
-    { label: 'Landing KE', a: snapshotSim?.landing_ke_ftlbf, b: currentSim?.landing_ke_ftlbf, unit: 'ft-lbf', fmt: v => v?.toFixed?.(0) },
+    {
+      label: 'Apogee',
+      a: snapshotSim?.apogee_ft,
+      b: currentSim?.apogee_ft,
+      unit: 'ft',
+      fmt: (v) => v?.toLocaleString(),
+    },
+    {
+      label: 'Drogue Rate',
+      a: snapshotSim?.drogue_fps,
+      b: currentSim?.drogue_fps,
+      unit: 'fps',
+      fmt: (v) => v?.toFixed?.(0),
+    },
+    {
+      label: 'Main Rate',
+      a: snapshotSim?.main_fps,
+      b: currentSim?.main_fps,
+      unit: 'fps',
+      fmt: (v) => v?.toFixed?.(1),
+    },
+    {
+      label: 'Drift',
+      a: snapshotSim?.drift_ft,
+      b: currentSim?.drift_ft,
+      unit: 'ft',
+      fmt: (v) => v?.toLocaleString(),
+    },
+    {
+      label: 'Total Time',
+      a: snapshotSim?.total_time_s,
+      b: currentSim?.total_time_s,
+      unit: 's',
+      fmt: (v) => v?.toFixed?.(0),
+    },
+    {
+      label: 'Landing KE',
+      a: snapshotSim?.landing_ke_ftlbf,
+      b: currentSim?.landing_ke_ftlbf,
+      unit: 'ft-lbf',
+      fmt: (v) => v?.toFixed?.(0),
+    },
   ]
 
   const cellStyle = { padding: '4px 8px', fontSize: 11, borderBottom: '1px solid var(--mc-border)' }
   const changedStyle = { ...cellStyle, color: 'var(--mc-amber)' }
-  const headerStyle = { ...cellStyle, fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', textTransform: 'uppercase', letterSpacing: '0.05em' }
+  const headerStyle = {
+    ...cellStyle,
+    fontSize: 10,
+    fontWeight: 600,
+    color: 'var(--mc-text-dim)',
+    textTransform: 'uppercase',
+    letterSpacing: '0.05em',
+  }
 
   return (
     <div className="mc-export">
-      <h2 className="mc-panel-header" style={{ borderBottom: '1px solid var(--mc-border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <h2
+        className="mc-panel-header"
+        style={{
+          borderBottom: '1px solid var(--mc-border)',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+        }}
+      >
         <span>COMPARE // A vs B</span>
-        <button className="mc-run-btn" style={{ fontSize: 9, padding: '2px 8px' }} onClick={clearSnapshot}>CLEAR</button>
+        <button
+          className="mc-run-btn"
+          style={{ fontSize: 9, padding: '2px 8px' }}
+          onClick={onClearSnapshot}
+        >
+          CLEAR
+        </button>
       </h2>
       <div style={{ padding: '12px', overflowY: 'auto', flex: 1 }}>
         <div style={{ fontSize: 10, color: 'var(--mc-text-dim)', marginBottom: 8 }}>
           Config A saved at {snapshot.savedAt}. Current config is B. Changed values shown in amber.
+          {currentBStatus && <span role="status"> {currentBStatus}</span>}
         </div>
+        {currentBStatus && (
+          <div className="mc-validation mc-validation--warn" role="alert">
+            {currentBStatus}
+          </div>
+        )}
 
         {/* Parts comparison */}
-        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', margin: '12px 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Components</div>
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            color: 'var(--mc-text-dim)',
+            margin: '12px 0 4px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          Components
+        </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -109,7 +191,7 @@ export default function CompareTab({ state }) {
             </tr>
           </thead>
           <tbody>
-            {partRows.map(row => (
+            {partRows.map((row) => (
               <tr key={row.label}>
                 <td style={cellStyle}>{row.label}</td>
                 <td style={cellStyle}>{row.a?.name || '—'}</td>
@@ -120,7 +202,18 @@ export default function CompareTab({ state }) {
         </table>
 
         {/* Specs comparison */}
-        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', margin: '16px 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Specs</div>
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            color: 'var(--mc-text-dim)',
+            margin: '16px 0 4px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          Specs
+        </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -130,7 +223,7 @@ export default function CompareTab({ state }) {
             </tr>
           </thead>
           <tbody>
-            {specRows.map(row => (
+            {specRows.map((row) => (
               <tr key={row.label}>
                 <td style={cellStyle}>{row.label}</td>
                 <td style={cellStyle}>{row.a}</td>
@@ -141,7 +234,18 @@ export default function CompareTab({ state }) {
         </table>
 
         {/* Simulation comparison */}
-        <div style={{ fontSize: 10, fontWeight: 600, color: 'var(--mc-text-dim)', margin: '16px 0 4px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Simulation Results</div>
+        <div
+          style={{
+            fontSize: 10,
+            fontWeight: 600,
+            color: 'var(--mc-text-dim)',
+            margin: '16px 0 4px',
+            textTransform: 'uppercase',
+            letterSpacing: '0.05em',
+          }}
+        >
+          Simulation Results
+        </div>
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr>
@@ -152,7 +256,7 @@ export default function CompareTab({ state }) {
             </tr>
           </thead>
           <tbody>
-            {simRows.map(row => {
+            {simRows.map((row) => {
               const aVal = row.a
               const bVal = row.b
               const aStr = aVal != null ? `${row.fmt(aVal)} ${row.unit}` : '—'
@@ -181,7 +285,7 @@ export default function CompareTab({ state }) {
         </table>
 
         <div style={{ marginTop: 16 }}>
-          <button className="mc-run-btn" onClick={saveSnapshot}>
+          <button className="mc-run-btn" onClick={onSaveSnapshot}>
             RE-SAVE_CONFIG_A &rarr;
           </button>
         </div>

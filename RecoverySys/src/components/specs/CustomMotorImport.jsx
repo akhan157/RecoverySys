@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import { useState, useRef } from 'react'
 import { parseEng } from '../../lib/engParser.js'
 import ThrustCurveSparkline from './ThrustCurveSparkline.jsx'
 import Button from '../primitives/Button.jsx'
@@ -10,9 +10,14 @@ import MotorPill from '../primitives/MotorPill.jsx'
 // downloadable from ThrustCurve.org, and readable by OpenRocket / RockSim.
 // On successful parse, shows a preview card with the designation, key stats,
 // and a mini thrust curve sparkline. User confirms to inject into state.
-export default function CustomMotorImport({ customMotor, onSetCustomMotor, onClearCustomMotor, onToast }) {
+export default function CustomMotorImport({
+  customMotor,
+  onSetCustomMotor,
+  onClearCustomMotor,
+  onToast,
+}) {
   const fileInputRef = useRef(null)
-  const [preview, setPreview] = useState(null)  // parsed motor waiting for confirm
+  const [preview, setPreview] = useState(null) // parsed motor waiting for confirm
 
   const handleFileSelect = (e) => {
     const file = e.target.files?.[0]
@@ -53,7 +58,8 @@ export default function CustomMotorImport({ customMotor, onSetCustomMotor, onCle
           designation={customMotor.designation}
           meta={
             <span className="mono">
-              {Math.round(customMotor.totalImpulse_ns)} Ns / {customMotor.burnTime_s.toFixed(2)}s / peak {Math.round(customMotor.peakThrust_N)} N
+              {Math.round(customMotor.totalImpulse_ns)} Ns / {customMotor.burnTime_s.toFixed(2)}s /
+              peak {Math.round(customMotor.peakThrust_N)} N
             </span>
           }
           onClear={onClearCustomMotor}
@@ -70,19 +76,38 @@ export default function CustomMotorImport({ customMotor, onSetCustomMotor, onCle
         <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
           Custom Motor Preview
         </label>
-        <div style={{
-          padding: '10px 12px',
-          background: 'var(--bg-panel)',
-          border: '1px solid var(--accent)',
-          borderRadius: 'var(--radius)',
-          display: 'flex', flexDirection: 'column', gap: '8px',
-        }}>
+        <div
+          style={{
+            padding: '10px 12px',
+            background: 'var(--bg-panel)',
+            border: '1px solid var(--accent)',
+            borderRadius: 'var(--radius)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '8px',
+          }}
+        >
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline' }}>
-            <span className="mono" style={{ fontWeight: 700, fontSize: '14px' }}>{preview.designation}</span>
-            <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>{preview.manufacturer}</span>
+            <span className="mono" style={{ fontWeight: 700, fontSize: '14px' }}>
+              {preview.designation}
+            </span>
+            <span style={{ fontSize: '10px', color: 'var(--text-tertiary)' }}>
+              {preview.manufacturer}
+            </span>
           </div>
-          <div className="mono" style={{ fontSize: '10px', color: 'var(--text-secondary)', display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '2px 12px' }}>
-            <span>{preview.diameter_mm}×{preview.length_mm} mm</span>
+          <div
+            className="mono"
+            style={{
+              fontSize: '10px',
+              color: 'var(--text-secondary)',
+              display: 'grid',
+              gridTemplateColumns: '1fr 1fr',
+              gap: '2px 12px',
+            }}
+          >
+            <span>
+              {preview.diameter_mm}×{preview.length_mm} mm
+            </span>
             <span>{preview.propellant_kg.toFixed(3)} kg prop</span>
             <span>{Math.round(preview.totalImpulse_ns)} Ns total</span>
             <span>{preview.total_kg.toFixed(3)} kg total</span>
@@ -94,7 +119,12 @@ export default function CustomMotorImport({ customMotor, onSetCustomMotor, onCle
             <Button variant="accent" size="sm" onClick={confirm} style={{ flex: 1 }}>
               Use This Motor
             </Button>
-            <Button variant="secondary" size="sm" onClick={() => setPreview(null)} style={{ flex: 1 }}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={() => setPreview(null)}
+              style={{ flex: 1 }}
+            >
               Cancel
             </Button>
           </div>
@@ -107,7 +137,8 @@ export default function CustomMotorImport({ customMotor, onSetCustomMotor, onCle
   return (
     <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '4px' }}>
       <label style={{ fontSize: '11px', color: 'var(--text-tertiary)', fontWeight: 500 }}>
-        Custom Motor <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional — OpenMotor .eng import)</span>
+        Custom Motor{' '}
+        <span style={{ fontWeight: 400, opacity: 0.7 }}>(optional — OpenMotor .eng import)</span>
       </label>
       <input
         ref={fileInputRef}
@@ -116,10 +147,7 @@ export default function CustomMotorImport({ customMotor, onSetCustomMotor, onCle
         onChange={handleFileSelect}
         style={{ display: 'none' }}
       />
-      <button
-        className="parts-add-custom"
-        onClick={() => fileInputRef.current?.click()}
-      >
+      <button className="parts-add-custom" onClick={() => fileInputRef.current?.click()}>
         + Import Custom Motor (.eng)
       </button>
     </div>

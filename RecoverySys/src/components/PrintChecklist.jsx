@@ -1,4 +1,3 @@
-import React from 'react'
 import { CATEGORIES } from '../data/parts.js'
 import { partSpecLine } from '../lib/format.js'
 import { WARN_LEVELS } from '../lib/constants.js'
@@ -15,15 +14,19 @@ const PACKING_ORDER = [
   'drogue_chute',
 ]
 
-const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map(c => [c.id, c.label]))
+const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label]))
 
-export default function PrintChecklist({ specs, config, simulation, warnings = [] }) {
+export default function PrintChecklist({ specs, config, simulation, resultFresh, warnings = [] }) {
   const date = new Date().toLocaleDateString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric', hour: '2-digit', minute: '2-digit',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
   })
 
-  const selectedParts = CATEGORIES.filter(c => config[c.id])
-  const packingSteps = PACKING_ORDER.filter(slot => config[slot])
+  const selectedParts = CATEGORIES.filter((c) => config[c.id])
+  const packingSteps = PACKING_ORDER.filter((slot) => config[slot])
 
   return (
     <div className="print-checklist">
@@ -35,16 +38,54 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
         <h2>Rocket Specifications</h2>
         <table>
           <tbody>
-            <tr><th>Mass</th><td>{specs.rocket_mass_g || '—'} g</td></tr>
-            <tr><th>Motor Impulse</th><td>{specs.motor_total_impulse_ns || '—'} Ns</td></tr>
-            <tr><th>Burn Time</th><td>{specs.burn_time_s || '—'} s</td></tr>
-            <tr><th>Airframe ID</th><td>{specs.airframe_id_in || '—'} in</td></tr>
-            <tr><th>Bay Length</th><td>{specs.bay_length_in || '—'} in</td></tr>
-            <tr><th>Drag Coeff</th><td>{specs.drag_cd || '0.50'}</td></tr>
-            <tr><th>Main Deploy Alt</th><td>{specs.main_deploy_alt_ft || '500'} ft</td></tr>
-            <tr><th>Ejection G-Factor</th><td>{specs.ejection_g_factor || 'auto'}</td></tr>
-            {specs.wind_speed_mph && <tr><th>Surface Wind</th><td>{specs.wind_speed_mph} mph from {specs.wind_direction_deg || 0}&deg;</td></tr>}
-            {specs.launch_lat && <tr><th>Launch Site</th><td>{specs.launch_lat}, {specs.launch_lon}</td></tr>}
+            <tr>
+              <th>Mass</th>
+              <td>{specs.rocket_mass_g || '—'} g</td>
+            </tr>
+            <tr>
+              <th>Motor Impulse</th>
+              <td>{specs.motor_total_impulse_ns || '—'} Ns</td>
+            </tr>
+            <tr>
+              <th>Burn Time</th>
+              <td>{specs.burn_time_s || '—'} s</td>
+            </tr>
+            <tr>
+              <th>Airframe ID</th>
+              <td>{specs.airframe_id_in || '—'} in</td>
+            </tr>
+            <tr>
+              <th>Bay Length</th>
+              <td>{specs.bay_length_in || '—'} in</td>
+            </tr>
+            <tr>
+              <th>Drag Coeff</th>
+              <td>{specs.drag_cd || '0.50'}</td>
+            </tr>
+            <tr>
+              <th>Main Deploy Alt</th>
+              <td>{specs.main_deploy_alt_ft || '500'} ft</td>
+            </tr>
+            <tr>
+              <th>Ejection G-Factor</th>
+              <td>{specs.ejection_g_factor || 'auto'}</td>
+            </tr>
+            {specs.wind_speed_mph && (
+              <tr>
+                <th>Surface Wind</th>
+                <td>
+                  {specs.wind_speed_mph} mph from {specs.wind_direction_deg || 0}&deg;
+                </td>
+              </tr>
+            )}
+            {specs.launch_lat && (
+              <tr>
+                <th>Launch Site</th>
+                <td>
+                  {specs.launch_lat}, {specs.launch_lon}
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </section>
@@ -57,10 +98,14 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
         ) : (
           <table>
             <thead>
-              <tr><th>Slot</th><th>Part</th><th>Key Specs</th></tr>
+              <tr>
+                <th>Slot</th>
+                <th>Part</th>
+                <th>Key Specs</th>
+              </tr>
             </thead>
             <tbody>
-              {selectedParts.map(cat => {
+              {selectedParts.map((cat) => {
                 const part = config[cat.id]
                 return (
                   <tr key={cat.id}>
@@ -94,29 +139,140 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
       {/* ── Simulation Results ─────────────────────────────────── */}
       <section>
         <h2>Simulation Results</h2>
-        {simulation ? (
+        {simulation && resultFresh ? (
           <table>
             <tbody>
-              <tr><th>Apogee</th><td>{simulation.apogee_ft.toLocaleString()} ft ({simulation.apogee_method})</td></tr>
-              <tr><th>Apogee Time</th><td>{simulation.apogee_t_s} s</td></tr>
-              {simulation.burnout_t_s != null && <tr><th>Burnout</th><td>{simulation.burnout_t_s} s</td></tr>}
-              <tr><th>Drogue Descent</th><td>{simulation.drogue_fps} fps</td></tr>
-              {simulation.main_fps != null && <tr><th>Main Descent</th><td>{simulation.main_fps} fps</td></tr>}
-              <tr><th>Phase 1 (Drogue)</th><td>{simulation.phase1_time_s} s</td></tr>
-              {simulation.phase2_time_s != null && <tr><th>Phase 2 (Main)</th><td>{simulation.phase2_time_s} s</td></tr>}
-              {simulation.total_time_s != null && <tr><th>Total Descent</th><td>{simulation.total_time_s} s</td></tr>}
-              <tr><th>Drift</th><td>{simulation.drift_ft.toLocaleString()} ft</td></tr>
-              {simulation.landing_ke_ftlbf != null && <tr><th>Landing KE</th><td>{simulation.landing_ke_ftlbf} ft-lbf</td></tr>}
+              <tr>
+                <th>Apogee</th>
+                <td>
+                  {simulation.apogee_ft.toLocaleString()} ft ({simulation.apogee_method})
+                </td>
+              </tr>
+              <tr>
+                <th>Apogee Time</th>
+                <td>{simulation.apogee_t_s} s</td>
+              </tr>
+              {simulation.burnout_t_s != null && (
+                <tr>
+                  <th>Burnout</th>
+                  <td>{simulation.burnout_t_s} s</td>
+                </tr>
+              )}
+              <tr>
+                <th>Drogue Descent</th>
+                <td>{simulation.drogue_fps} fps</td>
+              </tr>
+              {simulation.main_fps != null && (
+                <tr>
+                  <th>Main Descent</th>
+                  <td>{simulation.main_fps} fps</td>
+                </tr>
+              )}
+              <tr>
+                <th>Phase 1 (Drogue)</th>
+                <td>{simulation.phase1_time_s} s</td>
+              </tr>
+              {simulation.phase2_time_s != null && (
+                <tr>
+                  <th>Phase 2 (Main)</th>
+                  <td>{simulation.phase2_time_s} s</td>
+                </tr>
+              )}
+              {simulation.total_time_s != null && (
+                <tr>
+                  <th>Total Descent</th>
+                  <td>{simulation.total_time_s} s</td>
+                </tr>
+              )}
+              <tr>
+                <th>Drift</th>
+                <td>{simulation.drift_ft.toLocaleString()} ft</td>
+              </tr>
+              {simulation.landing_ke_ftlbf != null && (
+                <tr>
+                  <th>Landing KE</th>
+                  <td>{simulation.landing_ke_ftlbf} ft-lbf</td>
+                </tr>
+              )}
               {simulation.shock_load && (
                 <>
-                  <tr><th>Shock Load</th><td>{simulation.shock_load.peak_load_lbs} lbs (SF {simulation.shock_load.safety_factor})</td></tr>
-                  <tr><th>Strain Energy</th><td>{simulation.shock_load.strain_energy_J} J</td></tr>
+                  <tr>
+                    <th>Legacy Static Ejection</th>
+                    <td>
+                      {simulation.shock_load.peak_load_lbs} lbs (SF{' '}
+                      {simulation.shock_load.safety_factor})
+                    </td>
+                  </tr>
+                </>
+              )}
+              <tr>
+                <th>Estimated main-deployment snatch</th>
+                <td>
+                  {simulation.main_snatch &&
+                  !['not_evaluated', 'unavailable'].includes(
+                    String(simulation.main_snatch.status || '')
+                      .toLowerCase()
+                      .replace(/[- ]/g, '_')
+                  )
+                    ? `${simulation.main_snatch.peak_force_proxy_lbs ?? '—'} lbs — linear-elastic screening proxy`
+                    : 'NOT EVALUATED'}
+                </td>
+              </tr>
+              {simulation.main_snatch && (
+                <>
+                  <tr>
+                    <th>Snatch screening status</th>
+                    <td>{screeningStatusLabel(simulation.main_snatch.status)}</td>
+                  </tr>
+                  <tr>
+                    <th>Rating margin</th>
+                    <td>{simulation.main_snatch.rating_margin ?? '—'}</td>
+                  </tr>
+                  <tr>
+                    <th>Approach velocity</th>
+                    <td>{simulation.main_snatch.approach_velocity_fps ?? '—'} ft/s</td>
+                  </tr>
+                  <tr>
+                    <th>Predicted extension</th>
+                    <td>{simulation.main_snatch.predicted_extension_m ?? '—'} m</td>
+                  </tr>
+                  <tr>
+                    <th>Snatch source / data quality</th>
+                    <td>
+                      {simulation.main_snatch.approach_velocity_source || 'Core screening model'} /{' '}
+                      {simulation.main_snatch.data_quality || 'Not specified'}
+                    </td>
+                  </tr>
+                  {['not_evaluated', 'unavailable'].includes(
+                    String(simulation.main_snatch.status || '')
+                      .toLowerCase()
+                      .replace(/[- ]/g, '_')
+                  ) && (
+                    <tr>
+                      <th>Snatch unavailable reason</th>
+                      <td>{simulation.main_snatch.reason || 'No reason supplied.'}</td>
+                    </tr>
+                  )}
+                  <tr>
+                    <th>Snatch limitations</th>
+                    <td>
+                      {Array.isArray(simulation.main_snatch.limitations)
+                        ? simulation.main_snatch.limitations.join(' ')
+                        : simulation.main_snatch.limitations ||
+                          simulation.main_snatch.reason ||
+                          'See core screening model documentation.'}
+                    </td>
+                  </tr>
                 </>
               )}
             </tbody>
           </table>
         ) : (
-          <p>No simulation run — click RUN_SIM first</p>
+          <p>
+            {simulation
+              ? 'RESULT_STALE — rerun simulation before printing'
+              : 'No simulation run — click RUN_SIM first'}
+          </p>
         )}
       </section>
 
@@ -127,7 +283,7 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
           <p>No parts selected</p>
         ) : (
           <ol>
-            {packingSteps.map((slot, i) => {
+            {packingSteps.map((slot) => {
               const part = config[slot]
               return (
                 <li key={slot} className="print-check-item">
@@ -140,9 +296,28 @@ export default function PrintChecklist({ specs, config, simulation, warnings = [
         )}
       </section>
 
-      <footer style={{ marginTop: 24, borderTop: '1pt solid #999', paddingTop: 8, fontSize: '9pt', color: '#666' }}>
+      <footer
+        style={{
+          marginTop: 24,
+          borderTop: '1pt solid #999',
+          paddingTop: 8,
+          fontSize: '9pt',
+          color: '#666',
+        }}
+      >
         RecoverySys v1.2 — recoverysys.app — Simulation constraints documented in source
       </footer>
     </div>
   )
+}
+
+function screeningStatusLabel(status) {
+  const normalized = String(status || 'not evaluated')
+    .toLowerCase()
+    .replace(/[-_]/g, ' ')
+  if (normalized === 'screened' || normalized === 'evaluated') return 'SCREENED'
+  if (normalized === 'marginal') return 'MARGINAL'
+  if (normalized === 'exceeds rating') return 'EXCEEDS RATING'
+  if (normalized === 'not evaluated' || normalized === 'unavailable') return 'NOT EVALUATED'
+  return normalized.toUpperCase()
 }

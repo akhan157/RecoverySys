@@ -11,40 +11,53 @@ function decodeSharePayload(encoded) {
 }
 
 const sampleConfig = {
-  main_chute:      { id: 'rk-main-36', name: 'RocketMan 36"', manufacturer: 'RocketMan', category: 'main_chute', specs: { diameter_in: 36, cd: 1.5 } },
-  drogue_chute:    null,
-  shock_cord:      null,
+  main_chute: {
+    id: 'rk-main-36',
+    name: 'RocketMan 36"',
+    manufacturer: 'RocketMan',
+    category: 'main_chute',
+    specs: { diameter_in: 36, cd: 1.5 },
+  },
+  drogue_chute: null,
+  shock_cord: null,
   chute_protector: null,
-  quick_links:     null,
-  chute_device:    null,
+  quick_links: null,
+  chute_device: null,
 }
 
 const sampleSpecs = {
-  rocket_mass_g:          '2500',
+  rocket_mass_g: '2500',
   motor_total_impulse_ns: '640',
-  burn_time_s:            '1.8',
-  airframe_od_in:         '4',
-  airframe_id_in:         '3.9',
-  bay_length_in:          '18',
-  drag_cd:                '0.5',
-  wind_speed_mph:         '10',
-  main_deploy_alt_ft:     '500',
+  burn_time_s: '1.8',
+  airframe_od_in: '4',
+  airframe_id_in: '3.9',
+  bay_length_in: '18',
+  drag_cd: '0.5',
+  wind_speed_mph: '10',
+  main_deploy_alt_ft: '500',
 }
 
 // ── Roundtrip ─────────────────────────────────────────────────────────────────
 
 describe('share-link codec — encode/decode roundtrip', () => {
   it('roundtrips a full config+specs payload without data loss', () => {
-    const payload  = { config: sampleConfig, specs: sampleSpecs }
-    const encoded  = encodeSharePayload(payload)
-    const decoded  = decodeSharePayload(encoded)
+    const payload = { config: sampleConfig, specs: sampleSpecs }
+    const encoded = encodeSharePayload(payload)
+    const decoded = decodeSharePayload(encoded)
     expect(decoded).toEqual(payload)
   })
 
   it('roundtrips an empty config (all null parts)', () => {
     const payload = {
-      config: { main_chute: null, drogue_chute: null, shock_cord: null, chute_protector: null, quick_links: null, chute_device: null },
-      specs:  sampleSpecs,
+      config: {
+        main_chute: null,
+        drogue_chute: null,
+        shock_cord: null,
+        chute_protector: null,
+        quick_links: null,
+        chute_device: null,
+      },
+      specs: sampleSpecs,
     }
     const decoded = decodeSharePayload(encodeSharePayload(payload))
     expect(decoded.config.main_chute).toBeNull()
@@ -53,7 +66,7 @@ describe('share-link codec — encode/decode roundtrip', () => {
   it('roundtrips when all spec fields are empty strings', () => {
     const payload = {
       config: sampleConfig,
-      specs:  Object.fromEntries(Object.keys(sampleSpecs).map(k => [k, ''])),
+      specs: Object.fromEntries(Object.keys(sampleSpecs).map((k) => [k, ''])),
     }
     const decoded = decodeSharePayload(encodeSharePayload(payload))
     expect(decoded.specs.rocket_mass_g).toBe('')
@@ -72,8 +85,11 @@ describe('share-link codec — encode/decode roundtrip', () => {
 describe('share-link codec — Unicode handling', () => {
   it('roundtrips part names with non-Latin-1 characters', () => {
     const payload = {
-      config: { ...sampleConfig, main_chute: { ...sampleConfig.main_chute, name: 'Chute™ — Größe 36"' } },
-      specs:  sampleSpecs,
+      config: {
+        ...sampleConfig,
+        main_chute: { ...sampleConfig.main_chute, name: 'Chute™ — Größe 36"' },
+      },
+      specs: sampleSpecs,
     }
     const decoded = decodeSharePayload(encodeSharePayload(payload))
     expect(decoded.config.main_chute.name).toBe('Chute™ — Größe 36"')
@@ -82,7 +98,7 @@ describe('share-link codec — Unicode handling', () => {
   it('handles Chinese characters in part names without throwing', () => {
     const payload = {
       config: { ...sampleConfig, main_chute: { ...sampleConfig.main_chute, name: '降落伞' } },
-      specs:  sampleSpecs,
+      specs: sampleSpecs,
     }
     const decoded = decodeSharePayload(encodeSharePayload(payload))
     expect(decoded.config.main_chute.name).toBe('降落伞')
@@ -91,7 +107,7 @@ describe('share-link codec — Unicode handling', () => {
   it('handles emoji in part names without throwing', () => {
     const payload = {
       config: { ...sampleConfig, main_chute: { ...sampleConfig.main_chute, name: 'Chute 🚀' } },
-      specs:  sampleSpecs,
+      specs: sampleSpecs,
     }
     expect(() => encodeSharePayload(payload)).not.toThrow()
     const decoded = decodeSharePayload(encodeSharePayload(payload))
@@ -119,14 +135,17 @@ describe('share-link URL length', () => {
   it('stays well under 8000 chars for a fully-populated config', () => {
     const payload = { config: sampleConfig, specs: sampleSpecs }
     const encoded = encodeURIComponent(encodeSharePayload(payload))
-    const url     = `https://example.com/?c=${encoded}`
+    const url = `https://example.com/?c=${encoded}`
     expect(url.length).toBeLessThan(8000)
   })
 
   it('stays under 8000 chars even with custom parts in every slot', () => {
     const customPart = (cat, i) => ({
-      id: `custom-test-${i}`, category: cat, manufacturer: 'Custom',
-      name: `Custom Part ${i}`, specs: { weight_g: 100 },
+      id: `custom-test-${i}`,
+      category: cat,
+      manufacturer: 'Custom',
+      name: `Custom Part ${i}`,
+      specs: { weight_g: 100 },
     })
     const config = {
       main_chute: customPart('main_chute', 1),
@@ -148,8 +167,11 @@ describe('share-link URL length', () => {
 describe('share-link codec — custom part inlining', () => {
   it('inlines custom parts as full objects, catalog parts as { id } only', () => {
     const customChute = {
-      id: 'custom-abc123', category: 'main_chute', manufacturer: 'Custom',
-      name: 'My 54" Toroidal', specs: { diameter_in: 54, cd: 1.5, packed_diam_in: 4, packed_length_in: 8, weight_g: 300 },
+      id: 'custom-abc123',
+      category: 'main_chute',
+      manufacturer: 'Custom',
+      name: 'My 54" Toroidal',
+      specs: { diameter_in: 54, cd: 1.5, packed_diam_in: 4, packed_length_in: 8, weight_g: 300 },
     }
     const catalogPart = sampleConfig.main_chute
     const config = { ...sampleConfig, main_chute: customChute, drogue_chute: catalogPart }

@@ -23,85 +23,169 @@ export const SCHEMA_VERSION = 1
 // labels and run unit-conversion at the boundary.
 export const SPECS_SCHEMA = Object.freeze({
   rocket_mass_g: {
-    type: 'number', unit: 'g', default: '',
-    label: 'Rocket mass', min: 0, exclusiveMin: true,
+    type: 'number',
+    unit: 'g',
+    default: '',
+    label: 'Rocket mass',
+    min: 0,
+    exclusiveMin: true,
   },
   motor_total_impulse_ns: {
-    type: 'number', unit: 'N·s', default: '',
-    label: 'Motor total impulse', min: 0, exclusiveMin: true,
+    type: 'number',
+    unit: 'N·s',
+    default: '',
+    label: 'Motor total impulse',
+    min: 0,
+    max: 1_000_000,
+    exclusiveMin: true,
   },
   burn_time_s: {
-    type: 'number', unit: 's', default: '',
-    label: 'Burn time', min: 0, exclusiveMin: true,
+    type: 'number',
+    unit: 's',
+    default: '',
+    label: 'Burn time',
+    min: 0,
+    max: 120,
+    exclusiveMin: true,
   },
   airframe_id_in: {
-    type: 'number', unit: 'in', default: '',
-    label: 'Airframe ID', min: 0, exclusiveMin: true,
-    note: 'Inner diameter — used for both packing volume and drag area; ' +
-          'wall thickness is negligible for HPR sim per design decision.',
+    type: 'number',
+    unit: 'in',
+    default: '',
+    label: 'Airframe ID',
+    min: 0,
+    exclusiveMin: true,
+    note:
+      'Inner diameter — used for both packing volume and drag area; ' +
+      'wall thickness is negligible for HPR sim per design decision.',
   },
   bay_length_in: {
-    type: 'number', unit: 'in', default: '',
-    label: 'Bay length', min: 0, exclusiveMin: true,
+    type: 'number',
+    unit: 'in',
+    default: '',
+    label: 'Bay length',
+    min: 0,
+    exclusiveMin: true,
   },
   drag_cd: {
-    type: 'number', unit: 'dimensionless', default: '',
-    label: 'Drag coefficient', min: 0, exclusiveMin: true,
+    type: 'number',
+    unit: 'dimensionless',
+    default: '',
+    label: 'Drag coefficient',
+    min: 0,
+    exclusiveMin: true,
   },
   wind_speed_mph: {
-    type: 'number', unit: 'mph', default: '',
-    label: 'Surface wind speed', min: 0,
+    type: 'number',
+    unit: 'mph',
+    default: '',
+    label: 'Surface wind speed',
+    min: 0,
   },
   wind_direction_deg: {
-    type: 'number', unit: 'deg', default: '',
-    label: 'Surface wind direction', min: 0, max: 360,
+    type: 'number',
+    unit: 'deg',
+    default: '',
+    label: 'Surface wind direction',
+    min: 0,
+    max: 360,
     note: '0=N, 90=E, 180=S, 270=W',
   },
   main_deploy_alt_ft: {
-    type: 'number', unit: 'ft', default: '500',
-    label: 'Main deploy altitude', min: 0, exclusiveMin: true,
+    type: 'number',
+    unit: 'ft',
+    default: '500',
+    label: 'Main deploy altitude',
+    min: 0,
+    exclusiveMin: true,
   },
   ejection_g_factor: {
-    type: 'number', unit: 'G', default: '',
-    label: 'Ejection G-factor', min: 0, exclusiveMin: true,
-    note: 'Blank or non-positive = auto (20G for <10kg, 30G for ≥10kg L3-class). ' +
-          'parseSpec returns null for ≤0, letting all three consumers ' +
-          '(compatibility, simulation, SuggestPanel) fall through to the same default.',
+    type: 'number',
+    unit: 'G',
+    default: '',
+    label: 'Ejection G-factor',
+    min: 0,
+    exclusiveMin: true,
+    note:
+      'Blank or non-positive = auto (20G for <10kg, 30G for ≥10kg L3-class). ' +
+      'parseSpec returns null for ≤0, letting all three consumers ' +
+      '(compatibility, simulation, SuggestPanel) fall through to the same default.',
   },
   bay_obstruction_vol_in3: {
-    type: 'number', unit: 'in³', default: '',
-    label: 'Bay obstruction volume', min: 0,
+    type: 'number',
+    unit: 'in³',
+    default: '',
+    label: 'Bay obstruction volume',
+    min: 0,
   },
   launch_lat: {
-    type: 'number', unit: 'deg', default: '',
-    label: 'Launch latitude', min: -90, max: 90,
+    type: 'number',
+    unit: 'deg',
+    default: '',
+    label: 'Launch latitude',
+    min: -90,
+    max: 90,
   },
   launch_lon: {
-    type: 'number', unit: 'deg', default: '',
-    label: 'Launch longitude', min: -180, max: 180,
+    type: 'number',
+    unit: 'deg',
+    default: '',
+    label: 'Launch longitude',
+    min: -180,
+    max: 180,
   },
   // Wind layers — surface uses wind_speed_mph / wind_direction_deg; these
   // add mid and aloft layers for a proper layered wind profile.
   wind_surface_alt_ft: {
-    type: 'number', unit: 'ft', default: '', label: 'Surface wind altitude', min: 0,
+    type: 'number',
+    unit: 'ft',
+    default: '',
+    label: 'Surface wind altitude',
+    min: 0,
   },
   wind_mid_speed_mph: {
-    type: 'number', unit: 'mph', default: '', label: 'Mid wind speed', min: 0,
+    type: 'number',
+    unit: 'mph',
+    default: '',
+    label: 'Mid wind speed',
+    min: 0,
   },
   wind_mid_direction_deg: {
-    type: 'number', unit: 'deg', default: '', label: 'Mid wind direction', min: 0, max: 360,
+    type: 'number',
+    unit: 'deg',
+    default: '',
+    label: 'Mid wind direction',
+    min: 0,
+    max: 360,
   },
   wind_mid_alt_ft: {
-    type: 'number', unit: 'ft', default: '', label: 'Mid wind altitude', min: 0,
+    type: 'number',
+    unit: 'ft',
+    default: '',
+    label: 'Mid wind altitude',
+    min: 0,
   },
   wind_aloft_speed_mph: {
-    type: 'number', unit: 'mph', default: '', label: 'Aloft wind speed', min: 0,
+    type: 'number',
+    unit: 'mph',
+    default: '',
+    label: 'Aloft wind speed',
+    min: 0,
   },
   wind_aloft_direction_deg: {
-    type: 'number', unit: 'deg', default: '', label: 'Aloft wind direction', min: 0, max: 360,
+    type: 'number',
+    unit: 'deg',
+    default: '',
+    label: 'Aloft wind direction',
+    min: 0,
+    max: 360,
   },
   wind_aloft_alt_ft: {
-    type: 'number', unit: 'ft', default: '', label: 'Aloft wind altitude', min: 0,
+    type: 'number',
+    unit: 'ft',
+    default: '',
+    label: 'Aloft wind altitude',
+    min: 0,
   },
 })
 
@@ -140,7 +224,7 @@ export function coerceSpec(key, raw) {
   if (!def) return null
   if (raw == null || raw === '') return null
   if (def.type === 'number') {
-    const n = parseFloat(raw)
+    const n = Number(raw)
     return Number.isFinite(n) ? n : null
   }
   return raw
@@ -174,4 +258,28 @@ export function parseSpec(key, raw) {
   if (def.min != null && clamped < def.min) clamped = def.min
   if (def.max != null && clamped > def.max) clamped = def.max
   return clamped
+}
+
+/**
+ * Normalize the schema-backed values shared by the calculation consumers.
+ * Keeping deployment and ejection defaults here prevents simulation and
+ * compatibility from making different assumptions about the same rocket.
+ */
+export function normalizeCalculationInputs(specs = {}) {
+  const mass_g = parseSpec('rocket_mass_g', specs.rocket_mass_g)
+  const mass_kg = mass_g != null ? mass_g / 1000 : null
+  const deploy_alt_raw = coerceSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft)
+  const deploy_alt_ft = parseSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft) ?? 500
+  const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
+  const g_factor =
+    g_factor_user != null ? Math.max(5, g_factor_user) : mass_kg != null && mass_kg >= 10 ? 30 : 20
+
+  return {
+    mass_g,
+    mass_kg,
+    deploy_alt_raw,
+    deploy_alt_ft,
+    g_factor,
+    g_factor_auto: g_factor_user == null,
+  }
 }

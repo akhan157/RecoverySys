@@ -18,20 +18,20 @@
 import { WARN_LEVELS } from './constants.js'
 
 const COLOR_TOKENS = Object.freeze({
-  ok:      'var(--ok-fg)',
-  warn:    'var(--warn-fg)',
-  error:   'var(--error-fg)',
+  ok: 'var(--ok-fg)',
+  warn: 'var(--warn-fg)',
+  error: 'var(--error-fg)',
   neutral: 'var(--neutral-dot)',
 })
 
 // Sim-result aliases normalize to the canonical alphabet.
 const STATUS_ALIAS = Object.freeze({
-  ok:       'ok',
+  ok: 'ok',
   marginal: 'warn',
-  warn:     'warn',
-  fail:     'error',
-  error:    'error',
-  neutral:  'neutral',
+  warn: 'warn',
+  fail: 'error',
+  error: 'error',
+  neutral: 'neutral',
 })
 
 /**
@@ -50,7 +50,7 @@ export function statusColor(status) {
  * Returns 'ok' for an empty list since "no warnings" means the slot/group is fine.
  */
 export function statusFromWarnings(warnings = []) {
-  if (warnings.some(w => w.level === WARN_LEVELS.ERROR)) return 'error'
-  if (warnings.some(w => w.level === WARN_LEVELS.WARN))  return 'warn'
+  if (warnings.some((w) => w.level === WARN_LEVELS.ERROR)) return 'error'
+  if (warnings.some((w) => w.level === WARN_LEVELS.WARN)) return 'warn'
   return 'ok'
 }

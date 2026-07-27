@@ -48,11 +48,11 @@ export function parseEng(text) {
   // Strip comments (per RASP spec, ';' starts a comment anywhere on a line) and blank lines.
   const lines = normalized
     .split('\n')
-    .map(l => {
+    .map((l) => {
       const c = l.indexOf(';')
       return (c >= 0 ? l.slice(0, c) : l).trim()
     })
-    .filter(l => l.length > 0)
+    .filter((l) => l.length > 0)
 
   if (lines.length < 2) {
     return { success: false, error: 'File has no header and data lines' }
@@ -69,10 +69,10 @@ export function parseEng(text) {
 
   const [designation, diamStr, lenStr, delays, propStr, totalStr, ...manuParts] = headerParts
   const diameter_mm = parseFloat(diamStr)
-  const length_mm   = parseFloat(lenStr)
+  const length_mm = parseFloat(lenStr)
   const propellant_kg = parseFloat(propStr)
-  const total_kg      = parseFloat(totalStr)
-  const manufacturer  = manuParts.join(' ')
+  const total_kg = parseFloat(totalStr)
+  const manufacturer = manuParts.join(' ')
 
   if (!isFinite(diameter_mm) || diameter_mm <= 0) {
     return { success: false, error: `Invalid diameter: "${diamStr}"` }
@@ -87,7 +87,10 @@ export function parseEng(text) {
     return { success: false, error: `Invalid total mass: "${totalStr}"` }
   }
   if (total_kg < propellant_kg) {
-    return { success: false, error: `Total mass (${total_kg} kg) < propellant mass (${propellant_kg} kg)` }
+    return {
+      success: false,
+      error: `Total mass (${total_kg} kg) < propellant mass (${propellant_kg} kg)`,
+    }
   }
 
   // Parse data lines

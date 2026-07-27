@@ -1,8 +1,10 @@
-import React from 'react'
-import { render, screen, act, waitFor } from '@testing-library/react'
+import { render, renderHook, screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import App from '../App.jsx'
+import { encodeSharePayload } from '../lib/shareLink.js'
+import useShareLinkLoader from '../hooks/useShareLinkLoader.js'
+import { EMPTY_CONFIG, SLOT_IDS } from '../data/parts.js'
 
 // Stub clipboard API not supported in jsdom
 Object.assign(navigator, {
@@ -12,6 +14,7 @@ Object.assign(navigator, {
 // ── localStorage helpers ───────────────────────────────────────────────────────
 
 const STORAGE_KEY = 'recoverysys-config'
+const VISITED_KEY = 'recoverysys-visited'
 
 function setLocalStorage(value) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(value))
@@ -19,28 +22,35 @@ function setLocalStorage(value) {
 
 function clearLocalStorage() {
   localStorage.removeItem(STORAGE_KEY)
+  localStorage.removeItem(VISITED_KEY)
+}
+
+// Tests run as returning users (visited = '1') so first-visit demo mode
+// doesn't trigger and interfere with unrelated assertions.
+function setReturningUser() {
+  localStorage.setItem(VISITED_KEY, '1')
 }
 
 // ── Saved session payload (uses a real part ID so rehydration works) ──────────
 
 const SAVED_SESSION = {
   config: {
-    main_chute:      { id: 'cl-24-n' },  // b2 Rocketry 24" Compact Light
-    drogue_chute:    null,
-    shock_cord:      null,
+    main_chute: { id: 'cl-24-n' }, // b2 Rocketry 24" Compact Light
+    drogue_chute: null,
+    shock_cord: null,
     chute_protector: null,
-    quick_links:     null,
-    chute_device:    null,
+    quick_links: null,
+    chute_device: null,
   },
   specs: {
-    rocket_mass_g:          '2500',
+    rocket_mass_g: '2500',
     motor_total_impulse_ns: '640',
-    burn_time_s:            '1.8',
-    airframe_id_in:         '3.9',
-    bay_length_in:          '18',
-    drag_cd:                '0.5',
-    wind_speed_mph:         '10',
-    main_deploy_alt_ft:     '500',
+    burn_time_s: '1.8',
+    airframe_id_in: '3.9',
+    bay_length_in: '18',
+    drag_cd: '0.5',
+    wind_speed_mph: '10',
+    main_deploy_alt_ft: '500',
   },
 }
 
@@ -49,11 +59,11 @@ const SAVED_SESSION = {
 describe('App — restored-session toast', () => {
   beforeEach(() => {
     clearLocalStorage()
+    setReturningUser()
     vi.useFakeTimers()
   })
 
   afterEach(() => {
-    vi.runAllTimers()
     vi.useRealTimers()
     clearLocalStorage()
   })
@@ -103,16 +113,16 @@ describe('App — restored-session toast', () => {
   })
 })
 
-// ── Status bar warning badge (Mission Control layout) ────────────────────────
+// ── Validation badge (Dashboard tab) ────────────────────────────────────────
 
 describe('App — status bar warning badge', () => {
   beforeEach(() => {
     clearLocalStorage()
+    setReturningUser()
     vi.useFakeTimers()
   })
 
   afterEach(() => {
-    vi.runAllTimers()
     vi.useRealTimers()
     clearLocalStorage()
   })
@@ -121,12 +131,12 @@ describe('App — status bar warning badge', () => {
     // A drogue chute with no main chute triggers a 'main_chute' error
     setLocalStorage({
       config: {
-        main_chute:      null,
-        drogue_chute:    { id: 'fr3-12-12', category: 'drogue_chute' },  // Front Range 12" Elliptical
-        shock_cord:      null,
+        main_chute: null,
+        drogue_chute: { id: 'fr3-12-12', category: 'drogue_chute' }, // Front Range 12" Elliptical
+        shock_cord: null,
         chute_protector: null,
-        quick_links:     null,
-        chute_device:    null,
+        quick_links: null,
+        chute_device: null,
       },
       specs: { ...SAVED_SESSION.specs },
     })
@@ -140,8 +150,8 @@ describe('App — status bar warning badge', () => {
       vi.advanceTimersByTime(400)
     })
 
-    // Mission Control layout shows warning count in the status bar badge
-    const badge = document.querySelector('.mc-statusbar__badge--warn')
+    // Dashboard tab shows validation badge when compatibility errors exist
+    const badge = document.querySelector('.mc-validation--warn, .mc-validation--error')
     expect(badge).toBeInTheDocument()
   })
 
@@ -155,7 +165,75 @@ describe('App — status bar warning badge', () => {
       vi.advanceTimersByTime(400)
     })
 
-    const badge = document.querySelector('.mc-statusbar__badge--warn')
+    const badge = document.querySelector('.mc-validation--warn, .mc-validation--error')
     expect(badge).not.toBeInTheDocument()
+  })
+})
+
+// ── Share-link import transaction ────────────────────────────────────────────
+
+describe('App — rejected share-link import', () => {
+  beforeEach(() => {
+    clearLocalStorage()
+    setReturningUser()
+    vi.useFakeTimers()
+  })
+
+  afterEach(() => {
+    vi.runAllTimers()
+    vi.useRealTimers()
+    clearLocalStorage()
+  })
+
+  it('does not apply configuration when inline custom parts exceed storage limits', async () => {
+    const incoming = {
+      id: 'custom-imported',
+      category: 'main_chute',
+      name: 'Should Not Load',
+      specs: {},
+    }
+    const originalSearch = window.location.search
+    Object.defineProperty(window, 'location', {
+      value: {
+        ...window.location,
+        search: `?c=${encodeURIComponent(
+          encodeSharePayload({
+            config: { ...SAVED_SESSION.config, main_chute: incoming },
+            specs: SAVED_SESSION.specs,
+          })
+        )}`,
+      },
+      writable: true,
+      configurable: true,
+    })
+
+    const dispatch = vi.fn()
+    const addToast = vi.fn()
+    const mergeCustomParts = vi.fn(() => ({
+      ok: false,
+      importedCount: 0,
+      error: 'Imported custom parts exceed local storage limits.',
+    }))
+    renderHook(() =>
+      useShareLinkLoader({
+        allParts: [],
+        addToast,
+        mergeCustomParts,
+        dispatch,
+      })
+    )
+
+    expect(mergeCustomParts).toHaveBeenCalledWith([incoming])
+    expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'LOAD_SHARE' }))
+    expect(addToast).toHaveBeenCalledWith(
+      expect.anything(),
+      'Imported custom parts exceed local storage limits.'
+    )
+
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, search: originalSearch },
+      writable: true,
+      configurable: true,
+    })
   })
 })

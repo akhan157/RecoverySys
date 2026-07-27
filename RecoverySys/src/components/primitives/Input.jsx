@@ -1,5 +1,3 @@
-import React from 'react'
-
 /**
  * Token-styled input primitive — JetBrains Mono, 13px, 1px slate border,
  * focus ring via inline `boxShadow`, 0 border-radius (matches DESIGN.md
@@ -23,14 +21,7 @@ import React from 'react'
  * pass through. Focus/blur handlers are managed internally — overriding
  * onFocus/onBlur via props composes with the primitive's behavior.
  */
-export default function Input({
-  invalid = false,
-  mono = true,
-  style,
-  onFocus,
-  onBlur,
-  ...rest
-}) {
+export default function Input({ invalid = false, mono = true, style, onFocus, onBlur, ...rest }) {
   const restingBorder = invalid ? 'var(--error-fg)' : 'var(--border-default)'
 
   const handleFocus = (e) => {

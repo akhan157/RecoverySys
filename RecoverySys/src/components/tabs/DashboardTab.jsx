@@ -1,20 +1,31 @@
-import React from 'react'
 import { CATEGORIES } from '../../data/parts.js'
 import { partSpecLine } from '../../lib/format.js'
 import PartsBrowser from '../PartsBrowser.jsx'
 import SuggestPanel from '../SuggestPanel.jsx'
 
 export default function DashboardTab({
-  state, allParts, customParts, filledSlots, totalMass,
-  hasWarnings, hasErrors, canRun,
-  selectPart, removePart, setCategory, runSim,
-  addCustomPart, deleteCustomPart, editCustomPart,
+  state,
+  allParts,
+  customParts,
+  filledSlots,
+  packingVolume,
+  hasWarnings,
+  hasErrors,
+  canRun,
+  resultFresh,
+  selectPart,
+  removePart,
+  setCategory,
+  runSim,
+  addCustomPart,
+  deleteCustomPart,
+  editCustomPart,
 }) {
   return (
     <div className="mc-dashboard">
       {/* ── Parts Catalog (left) ─────────────────────────────────────── */}
       <div className="mc-parts-panel">
-        <h2 className="mc-panel-header">PARTS_CATALOG_EXPLORER</h2>
+        <h2 className="mc-panel-header">PARTS_CATALOG</h2>
         <div className="mc-parts-scroll">
           <PartsBrowser
             parts={allParts}
@@ -35,11 +46,11 @@ export default function DashboardTab({
       {/* ── Bay Schematic (center) ───────────────────────────────────── */}
       <div className="mc-schematic">
         <h2 className="mc-panel-header">
-          BAY_SCHEMATIC_REALTIME_RENDER
+          BAY_SCHEMATIC
           <span className="mc-panel-header__right">LAYER: 01_INTERNAL &nbsp; SCALE: 1:10</span>
         </h2>
         <div className="mc-bay-grid">
-          {CATEGORIES.map((cat, i) => {
+          {CATEGORIES.map((cat) => {
             const part = state.config[cat.id]
             const isEmpty = !part
             const isActive = state.activeCategory === cat.id
@@ -59,22 +70,22 @@ export default function DashboardTab({
                   }
                 }}
               >
-                <div className="mc-slot__badge">{String(i + 1).padStart(2, '0')}</div>
                 {part && (
                   <button
                     className="mc-slot__remove"
-                    onClick={(e) => { e.stopPropagation(); removePart(cat.id) }}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      removePart(cat.id)
+                    }}
                     title="Remove"
                     aria-label={`Remove ${part.name}`}
-                  >×</button>
+                  >
+                    ×
+                  </button>
                 )}
                 <div className="mc-slot__label">{cat.code}</div>
-                <div className="mc-slot__name">
-                  {part ? part.name : 'NO_COMPONENT_LOADED'}
-                </div>
-                {part && (
-                  <div className="mc-slot__specs">{partSpecLine(part)}</div>
-                )}
+                <div className="mc-slot__name">{part ? part.name : 'NO_COMPONENT_LOADED'}</div>
+                {part && <div className="mc-slot__specs">{partSpecLine(part)}</div>}
               </div>
             )
           })}
@@ -95,59 +106,63 @@ export default function DashboardTab({
       <div className="mc-config-summary">
         <h2 className="mc-panel-header">CONFIG_SUMMARY</h2>
         <div className="mc-summary">
-          {/* Total Mass — gauge range scales to L3 (≥10 kg) if rocket is that big */}
-          {(() => {
-            // Bucket the scale so the label stays stable while the user edits parts:
-            // 5 kg (H/I-class default) → 10 kg (J/K) → 20 kg (L3) → 40 kg (L3 heavy)
-            const gaugeMax_g =
-              totalMass <= 5000  ? 5000  :
-              totalMass <= 10000 ? 10000 :
-              totalMass <= 20000 ? 20000 : 40000
-            const gaugeMax_kg = (gaugeMax_g / 1000).toFixed(1)
-            return (
-              <div className="mc-metric">
-                <div className="mc-metric__label">TOTAL_MASS</div>
+          {/* Packing Volume — how much bay space the selected components consume */}
+          <div className="mc-metric">
+            <div className="mc-metric__label">PACKING_VOLUME</div>
+            {packingVolume.bay_known ? (
+              <>
                 <div className="mc-metric__value">
-                  {(totalMass / 1000).toFixed(2)}<span className="mc-metric__unit">KG</span>
+                  {packingVolume.stacked_in3.toFixed(1)}
+                  <span className="mc-metric__unit">IN³</span>
                 </div>
                 <div className="mc-progress">
                   <div
                     className="mc-progress__fill"
-                    style={{ width: `${Math.min(100, (totalMass / gaugeMax_g) * 100)}%` }}
+                    style={{ width: `${Math.min(100, (packingVolume.fraction ?? 0) * 100)}%` }}
                   />
                 </div>
                 <div className="mc-progress__labels">
-                  <span>0.0KG</span><span>MAX {gaugeMax_kg}KG</span>
+                  <span>0 IN³</span>
+                  <span>MAX {packingVolume.effective_in3.toFixed(1)} IN³</span>
                 </div>
-              </div>
-            )
-          })()}
+              </>
+            ) : (
+              <div className="mc-metric__sub">ENTER_BAY_SPECS_TO_CALCULATE</div>
+            )}
+          </div>
 
           {/* Sim results in summary */}
-          {state.simulation && (
+          {state.simulation && resultFresh && (
             <>
               <div className="mc-metric">
                 <div className="mc-metric__label">APOGEE_ALTITUDE</div>
                 <div className="mc-metric__value">
-                  {state.simulation.apogee_ft.toLocaleString()}<span className="mc-metric__unit">FT</span>
+                  {state.simulation.apogee_ft.toLocaleString()}
+                  <span className="mc-metric__unit">FT</span>
                 </div>
-                <div className="mc-metric__sub">{state.simulation.apogee_method?.toUpperCase() || 'CALCULATED'}</div>
+                <div className="mc-metric__sub">
+                  {state.simulation.apogee_method?.toUpperCase() || 'CALCULATED'}
+                </div>
               </div>
               <div className="mc-metric">
                 <div className="mc-metric__label">DESCENT_RATE</div>
                 <div className="mc-metric__value">
-                  {state.simulation.main_fps != null
-                    ? state.simulation.main_fps.toFixed(1)
-                    : '—'}
+                  {state.simulation.main_fps != null ? state.simulation.main_fps.toFixed(1) : '—'}
                   <span className="mc-metric__unit">FT/S</span>
                 </div>
                 <div className="mc-metric__sub">
                   {state.simulation.main_fps == null
                     ? 'DROGUE_ONLY'
-                    : state.simulation.main_fps > 15 ? 'ABOVE_NOMINAL' : 'WITHIN_LIMITS'}
+                    : state.simulation.main_fps > 15
+                      ? 'ABOVE_NOMINAL'
+                      : 'WITHIN_LIMITS'}
                 </div>
               </div>
             </>
+          )}
+
+          {state.simulation && !resultFresh && (
+            <div className="mc-validation mc-validation--warn">RESULT_STALE // RERUN_REQUIRED</div>
           )}
 
           {/* Slots count */}

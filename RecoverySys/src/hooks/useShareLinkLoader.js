@@ -15,49 +15,59 @@ import { TOAST_LEVELS } from '../lib/constants.js'
  * re-running on `allParts` change would re-import after the user adds
  * a new local custom part).
  */
-export default function useShareLinkLoader({ allParts, addToast, setCustomParts, dispatch }) {
+export default function useShareLinkLoader({
+  allParts,
+  addToast,
+  dispatch,
+  onLoadConfig,
+  mergeCustomParts,
+}) {
   useEffect(() => {
     const c = new URLSearchParams(location.search).get(SHARE_PARAM)
     if (!c) return
     const decoded = decodeSharePayload(c, {
-      allParts, slotIds: SLOT_IDS, emptyConfig: EMPTY_CONFIG,
+      allParts,
+      slotIds: SLOT_IDS,
+      emptyConfig: EMPTY_CONFIG,
     })
-    if (!decoded) return   // malformed or future-version — silently ignore
+    if (!decoded) {
+      addToast(
+        TOAST_LEVELS.ERROR,
+        'Share link rejected — malformed, unsafe, future, or incompatible payload.'
+      )
+      return
+    }
 
-    dispatch({
-      type: 'LOAD_SHARE',
-      config: decoded.config,
-      specs: decoded.specs,
-      customMotor: decoded.customMotor,
-    })
+    if (typeof onLoadConfig === 'function') {
+      onLoadConfig(decoded)
+    } else if (typeof mergeCustomParts === 'function') {
+      const mergeResult = mergeCustomParts(decoded.inlinedCustomParts ?? [])
+      if (!mergeResult?.ok) {
+        addToast(
+          TOAST_LEVELS.ERROR,
+          mergeResult?.error ?? 'Imported custom parts could not be loaded.'
+        )
+        return
+      }
+      dispatch({
+        type: 'LOAD_SHARE',
+        config: decoded.config,
+        specs: decoded.specs,
+        customMotor: decoded.customMotor,
+      })
+    }
 
     if (decoded.catalogMissing > 0) {
       addToast(
         TOAST_LEVELS.WARN,
-        `${decoded.catalogMissing} part${decoded.catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`,
+        `${decoded.catalogMissing} part${decoded.catalogMissing > 1 ? 's' : ''} from this link are no longer in the catalog.`
       )
-    }
-
-    if (decoded.inlinedCustomParts?.length > 0) {
-      let importedCount = 0
-      setCustomParts(prev => {
-        const existingIds = new Set(prev.map(p => p.id))
-        const newParts = decoded.inlinedCustomParts.filter(p => !existingIds.has(p.id))
-        importedCount = newParts.length
-        return importedCount > 0 ? [...prev, ...newParts] : prev
-      })
-      if (importedCount > 0) {
-        addToast(
-          TOAST_LEVELS.OK,
-          `Imported ${importedCount} custom part${importedCount > 1 ? 's' : ''} from share link.`,
-        )
-      }
     }
 
     if (decoded.customMissing > 0) {
       addToast(
         TOAST_LEVELS.WARN,
-        `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be loaded.`,
+        `${decoded.customMissing} custom part${decoded.customMissing > 1 ? 's' : ''} in this link can't be loaded.`
       )
     }
     // Mount-once: link is parsed exactly once at first render.

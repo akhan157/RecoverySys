@@ -24,15 +24,58 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
           cache-dependency-path: RecoverySys/package-lock.json
       - run: npm ci
       - run: npm run build
-      - run: cp -r landing dist/landing
+      - run: node scripts/prepare-e2e.mjs
+      - run: npx playwright install --with-deps chromium
+      - name: Run production-artifact E2E
+        run: npm run e2e
+        env:
+          E2E_ARTIFACT_ONLY: '1'
+      - name: Upload E2E evidence
+        if: ${{ always() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-report-pages-${{ github.run_id }}
+          if-no-files-found: warn
+          path: |
+            RecoverySys/playwright-report/
+            RecoverySys/test-results/
       - uses: actions/upload-pages-artifact@v3
         with:
           path: RecoverySys/dist
+
+  windows-portable:
+    name: Windows portable release
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: RecoverySys
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: RecoverySys/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+      - run: npm ci
+      - run: npm run portable:build
+      - name: Stage artifact contents
+        shell: pwsh
+        run: Expand-Archive -LiteralPath RecoverySys-Portable.zip -DestinationPath portable-artifact -Force
+      - name: Upload portable Windows release
+        uses: actions/upload-artifact@v4
+        with:
+          name: RecoverySys-Portable
+          # Upload extracted files so GitHub's generated download is the ZIP.
+          path: RecoverySys/portable-artifact
+          if-no-files-found: error
 
   deploy:
     needs: build
@@ -43,3 +86,40 @@ jobs:
     steps:
       - uses: actions/deploy-pages@v4
         id: deployment
+
+  macos-portable:
+    name: macOS universal portable release
+    runs-on: macos-latest
+    defaults:
+      run:
+        working-directory: RecoverySys
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: RecoverySys/package-lock.json
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin,x86_64-apple-darwin
+      - run: npm ci
+      - run: npm run portable:macos:build
+      - name: Inspect universal app archive
+        run: |
+          test -f RecoverySys-macos-universal.zip
+          verify_dir="$(mktemp -d)"
+          trap 'rm -rf "$verify_dir"' EXIT
+          ditto -x -k RecoverySys-macos-universal.zip "$verify_dir"
+          app="$verify_dir/RecoverySys.app"
+          test -d "$app"
+          codesign --verify --deep --strict "$app"
+          archs="$(lipo -archs "$app/Contents/MacOS/RecoverySys")"
+          [[ " $archs " == *" arm64 "* ]] || { echo "arm64 slice missing: $archs"; exit 1; }
+          [[ " $archs " == *" x86_64 "* ]] || { echo "x86_64 slice missing: $archs"; exit 1; }
+      - name: Upload macOS universal portable release
+        uses: actions/upload-artifact@v4
+        with:
+          name: RecoverySys-macos-universal
+          path: RecoverySys/RecoverySys-macos-universal.zip
+          if-no-files-found: error

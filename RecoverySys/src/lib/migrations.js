@@ -26,8 +26,7 @@ const MIGRATIONS = [
     from: 0,
     to: 1,
     migrate(payload) {
-      if (payload?.specs?.airframe_od_in != null &&
-          payload?.specs?.airframe_id_in == null) {
+      if (payload?.specs?.airframe_od_in != null && payload?.specs?.airframe_id_in == null) {
         payload.specs.airframe_id_in = payload.specs.airframe_od_in
       }
       // Always remove the ghost key so it doesn't pollute state.specs even
@@ -57,7 +56,7 @@ export function runMigrations(payload, currentVersion = SCHEMA_VERSION) {
   let v = Number.isFinite(payload.schemaVersion) ? payload.schemaVersion : 0
   let p = payload
   while (v < currentVersion) {
-    const m = MIGRATIONS.find(x => x.from === v)
+    const m = MIGRATIONS.find((x) => x.from === v)
     if (!m) break
     p = m.migrate(p) ?? p
     v = m.to

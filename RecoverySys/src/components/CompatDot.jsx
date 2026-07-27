@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { statusColor } from '../lib/statusColor.js'
 
 export default function CompatDot({ status, tooltip }) {
@@ -48,23 +48,25 @@ export default function CompatDot({ status, tooltip }) {
         }}
       />
       {showTooltip && tooltip && (
-        <span style={{
-          position: 'absolute',
-          right: '12px',
-          top: '50%',
-          transform: 'translateY(-50%)',
-          background: '#fff',
-          border: '1px solid var(--border-default)',
-          borderRadius: '4px',
-          padding: '6px 8px',
-          fontSize: '11px',
-          color: 'var(--text-secondary)',
-          maxWidth: '240px',
-          whiteSpace: 'pre-line',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
-          zIndex: 100,
-          lineHeight: 1.4,
-        }}>
+        <span
+          style={{
+            position: 'absolute',
+            right: '12px',
+            top: '50%',
+            transform: 'translateY(-50%)',
+            background: '#fff',
+            border: '1px solid var(--border-default)',
+            borderRadius: '4px',
+            padding: '6px 8px',
+            fontSize: '11px',
+            color: 'var(--text-secondary)',
+            maxWidth: '240px',
+            whiteSpace: 'pre-line',
+            boxShadow: '0 2px 8px rgba(0,0,0,0.12)',
+            zIndex: 100,
+            lineHeight: 1.4,
+          }}
+        >
           {tooltip}
         </span>
       )}
