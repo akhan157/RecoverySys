@@ -28,3 +28,10 @@ Thumbs.db
 .slim/worktrees/
 .slim/worktrees.json
 # END oh-my-opencode-slim worktrees
+
+# Local oh-my-opencode-slim deepwork state
+.slim/deepwork/
+
+# BEGIN oh-my-opencode-slim clonedeps
+.slim/clonedeps/repos/
+# END oh-my-opencode-slim clonedeps
