@@ -8,10 +8,12 @@ import SpecsTab from './tabs/SpecsTab.jsx'
 import ExportTab from './tabs/ExportTab.jsx'
 import CompareTab from './tabs/CompareTab.jsx'
 import FlightLogTab from './tabs/FlightLogTab.jsx'
+import GuidedReview from './GuidedReview.jsx'
 import PrintChecklist from './PrintChecklist.jsx'
 import './MissionControlLayout.css'
 
 const TABS = [
+  { id: 'GUIDED_REVIEW', label: 'GUIDED_REVIEW' },
   { id: 'DASHBOARD',  label: 'DASHBOARD' },
   { id: 'SPECS',      label: 'ROCKET_SPECS' },
   { id: 'SIMULATION', label: 'SIMULATION' },
@@ -28,7 +30,7 @@ export default function MissionControlLayout({
   setCustomMotor, clearCustomMotor, loadConfig, addToast,
   /* darkMode/setDarkMode removed: MC layout is dark-only */
 }) {
-  const [activeTab, setActiveTab] = useState('DASHBOARD')
+  const [activeTab, setActiveTab] = useState('GUIDED_REVIEW')
 
   const filledSlots = useMemo(
     () => CATEGORIES.filter(c => state.config[c.id] != null).length,
@@ -119,6 +121,7 @@ export default function MissionControlLayout({
               editCustomPart={editCustomPart}
             />
           )}
+          {activeTab === 'GUIDED_REVIEW' && <GuidedReview onOpenSpecs={() => setActiveTab('SPECS')} />}
           {activeTab === 'SIMULATION' && (
             <SimulationTab
               state={state}
