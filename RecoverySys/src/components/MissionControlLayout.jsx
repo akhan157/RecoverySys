@@ -8,6 +8,7 @@ import SpecsTab from './tabs/SpecsTab.jsx'
 import ExportTab from './tabs/ExportTab.jsx'
 import CompareTab from './tabs/CompareTab.jsx'
 import FlightLogTab from './tabs/FlightLogTab.jsx'
+import MethodDetailsTab from './tabs/MethodDetailsTab.jsx'
 import PrintChecklist from './PrintChecklist.jsx'
 import './MissionControlLayout.css'
 
@@ -15,6 +16,7 @@ const TABS = [
   { id: 'DASHBOARD',  label: 'DASHBOARD' },
   { id: 'SPECS',      label: 'ROCKET_SPECS' },
   { id: 'SIMULATION', label: 'SIMULATION' },
+  { id: 'METHOD_DETAILS', label: 'METHOD_DOSSIER' },
   { id: 'DISPERSION', label: 'DISPERSION' },
   { id: 'COMPARE',    label: 'COMPARE' },
   { id: 'FLIGHT_LOG', label: 'FLIGHT_LOG' },
@@ -124,9 +126,11 @@ export default function MissionControlLayout({
               state={state}
               runSim={runSim}
               canRun={canRun}
+              onOpenMethodDetails={() => setActiveTab('METHOD_DETAILS')}
             />
           )}
           {activeTab === 'DISPERSION' && <DispersionTab state={state} />}
+          {activeTab === 'METHOD_DETAILS' && <MethodDetailsTab state={state} />}
           {activeTab === 'SPECS' && (
             <SpecsTab
               state={state}

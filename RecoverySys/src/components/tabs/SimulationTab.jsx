@@ -3,7 +3,7 @@ import { WARN_LEVELS } from '../../lib/constants.js'
 import FlightChart from '../FlightChart.jsx'
 import MetricCard from '../MetricCard.jsx'
 
-export default function SimulationTab({ state, runSim, canRun }) {
+export default function SimulationTab({ state, runSim, canRun, onOpenMethodDetails }) {
   const sim = state.simulation
   const shock = sim?.shock_load
 
@@ -33,7 +33,7 @@ export default function SimulationTab({ state, runSim, canRun }) {
 
         {/* Simulation Data */}
         <div className="mc-sim__data">
-          <h2 className="mc-panel-header">SIMULATION_DATA</h2>
+          <h2 className="mc-panel-header">SIMULATION_DATA <button className="mc-inline-link" onClick={onOpenMethodDetails}>OPEN_METHOD_DOSSIER ↗</button></h2>
           <div className="mc-sim__data-grid">
             <MetricCard label="APOGEE_ALTITUDE" value={sim ? sim.apogee_ft.toLocaleString() : '—'} unit="ft" />
             <MetricCard
