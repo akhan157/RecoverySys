@@ -59,6 +59,21 @@ git switch recoverysys/integration-clean
 5. Update README, desktop documentation, roadmap, and changelog only after code/build verification.
 6. Review the exact diff against `27b666e`, push `recoverysys/integration-clean`, then merge into `main` only after approval.
 
+## Baseline verification evidence
+
+Run in `recoverysys/integration-clean` on 2026-07-28:
+
+| Check | Result |
+|---|---|
+| `npm ci` | Completed. npm reported 6 high-severity dependency audit findings; no automated dependency update was applied. |
+| `npm run check` | Passed: formatting, catalog validation (225 parts), lint, 14 test files / 182 tests, and Vite production build. |
+| `npm run e2e` | Passed: 26 Playwright tests across Chromium desktop and mobile. |
+| `npm run portable:build` on Windows | Passed. Built Tauri executable and `RecoverySys-Portable.zip`. |
+| Portable ZIP | SHA-256 `AE4F772E1C6B3FB43E0A9D036EEF5502AC4274BB2231B74779F61A9E0F50726D`; deliberately untracked. |
+| macOS universal build | Pending verification on macOS host. |
+
+The Windows build left `RecoverySys-Portable.zip` untracked. `Cargo.toml` showed an index/line-ending status entry with no content diff; neither file is part of the integration branch commit.
+
 ## Safety rules
 
 - Stage only `RecoverySys/**` and explicitly approved `.github/workflows/**` paths.
