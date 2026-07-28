@@ -9,6 +9,7 @@ export default function DashboardTab({
   hasWarnings, hasErrors, canRun,
   selectPart, removePart, setCategory, runSim,
   addCustomPart, deleteCustomPart, editCustomPart,
+  onOpenDetails,
 }) {
   return (
     <div className="mc-dashboard">
@@ -179,6 +180,7 @@ export default function DashboardTab({
           <button className="mc-run-btn" onClick={runSim} disabled={!canRun}>
             {state.simRunning ? 'RUNNING_SIMULATION...' : 'RUN_SIMULATION →'}
           </button>
+          <button className="mc-method-link" onClick={onOpenDetails}>VIEW_METHOD_DETAILS →</button>
         </div>
       </div>
     </div>

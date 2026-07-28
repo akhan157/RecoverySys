@@ -34,6 +34,7 @@ export default function SimulationTab({ state, runSim, canRun }) {
         {/* Simulation Data */}
         <div className="mc-sim__data">
           <h2 className="mc-panel-header">SIMULATION_DATA</h2>
+          <div className="mc-result-note">ESTIMATES / SCREENINGS — see METHOD_DETAILS for scope</div>
           <div className="mc-sim__data-grid">
             <MetricCard label="APOGEE_ALTITUDE" value={sim ? sim.apogee_ft.toLocaleString() : '—'} unit="ft" />
             <MetricCard
