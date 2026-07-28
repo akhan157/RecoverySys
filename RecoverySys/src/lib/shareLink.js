@@ -1,14 +1,20 @@
-// Share-link codec. Ingress is delegated to the canonical payload boundary.
 import { normalizePayload, isValidCustomPart } from './payloadBoundary.js'
 import { SCHEMA_VERSION } from './schema.js'
 
 export const SHARE_PARAM = 'c'
 
 export function encodeSharePayload({ config, specs, customMotor }) {
-  const configIds = Object.fromEntries(Object.entries(config).map(([cat, part]) => [
-    cat, part ? (part.id?.startsWith('custom-') ? part : { id: part.id }) : null,
-  ]))
-  return btoa(encodeURIComponent(JSON.stringify({ schemaVersion: SCHEMA_VERSION, config: configIds, specs, customMotor })))
+  const configIds = Object.fromEntries(
+    Object.entries(config).map(([cat, part]) => [
+      cat,
+      part ? (part.id?.startsWith('custom-') ? part : { id: part.id }) : null,
+    ])
+  )
+  return btoa(
+    encodeURIComponent(
+      JSON.stringify({ schemaVersion: SCHEMA_VERSION, config: configIds, specs, customMotor })
+    )
+  )
 }
 
 export function buildShareUrl(encoded) {
@@ -21,7 +27,9 @@ export function decodeSharePayload(encoded, options) {
     const decoded = decodeURIComponent(atob(decodeURIComponent(encoded)))
     if (decoded.length > 512 * 1024) return null
     return normalizePayload(JSON.parse(decoded), options)
-  } catch { return null }
+  } catch {
+    return null
+  }
 }
 
 export { isValidCustomPart }

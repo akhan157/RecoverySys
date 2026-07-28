@@ -2,12 +2,12 @@ import { useState, useEffect, useRef, useCallback } from 'react'
 import { runSimulation } from '../lib/simulation.js'
 import { SLOT_IDS } from '../data/parts.js'
 import { SHARE_PARAM } from '../lib/shareLink.js'
-import { normalizeSpecs } from '../lib/payloadBoundary.js'
+import { buildResultEnvelope } from '../lib/resultIntegrity.js'
 
 /**
  * Demo mode bootstrap. Triggered by `?demo=1` (e.g. landing-page LAUNCH
  * button). On first render after a demo URL hits, this hook seeds
- * config + specs from a sample L2 single-deploy + chute-release setup,
+ * config + specs from a sample L3 dual-deploy configuration at FAR Mojave,
  * runs the simulation synchronously so chart + metrics are populated
  * in the same paint, and dispatches LOAD_SHARE + SET_SIM.
  *
@@ -26,46 +26,66 @@ import { normalizeSpecs } from '../lib/payloadBoundary.js'
  * Returns: { demoMode, exitDemo }
  */
 export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch }) {
-  const [demoMode, setDemoMode] = useState(
-    () => typeof window !== 'undefined' && new URLSearchParams(location.search).get('demo') === '1'
-  )
+  const [demoMode] = useState(() => {
+    if (typeof window === 'undefined') return false
+    const params = new URLSearchParams(location.search)
+    if (params.get('demo') === '1') return true
+    if (params.get(SHARE_PARAM)) return false
+    try {
+      const hasConfig = !!localStorage.getItem('recoverysys-config')
+      const hasVisited = !!localStorage.getItem('recoverysys-visited')
+      return !hasConfig && !hasVisited
+    } catch {
+      return false
+    }
+  })
   const demoLoaded = useRef(false)
 
   useEffect(() => {
-    if (demoLoaded.current) return        // StrictMode-safe single load
+    if (demoLoaded.current) return // StrictMode-safe single load
     if (!demoMode) return
-    if (new URLSearchParams(location.search).get(SHARE_PARAM)) return  // share link wins
+    if (new URLSearchParams(location.search).get(SHARE_PARAM)) return // share link wins
     demoLoaded.current = true
 
     const config = Object.fromEntries(
-      SLOT_IDS.map(slot => [slot, allParts.find(p => p.id === demoPartIds[slot] && p.category === slot) ?? null])
+      SLOT_IDS.map((slot) => [
+        slot,
+        allParts.find((p) => p.id === demoPartIds[slot] && p.category === slot) ?? null,
+      ])
     )
     // Run sim synchronously before dispatching so config + results land in
     // the same render batch. safeTimeout would be cleared by StrictMode's
     // unmount/remount cycle.
-    const safeSpecs = normalizeSpecs(demoSpecs)
-    const result = runSimulation({ specs: safeSpecs, config, customMotor: null })
+    const result = runSimulation({ specs: demoSpecs, config, customMotor: null })
     dispatch({
       type: 'LOAD_SHARE',
       config,
-       specs: safeSpecs,
+      specs: { ...demoSpecs },
       customMotor: null,
     })
-    if (result) dispatch({ type: 'SET_SIM', simulation: result })
+    if (result)
+      dispatch({
+        type: 'SET_SIM',
+        simulation: buildResultEnvelope(result, { specs: demoSpecs, config, customMotor: null }, 0),
+      })
     // Mount-once + demoMode-edge: allParts read once is intentional.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [demoMode])
 
   const exitDemo = useCallback(() => {
-    // Demo is transient: never clear the user's saved or current work.
-    setDemoMode(false)
-    // Strip ?demo=1 so a refresh won't re-load the demo.
+    // Clear the saved config so the page reload starts with a blank slate.
+    // We do this before navigating because dispatch(CLEAR_ALL) + usePersistence
+    // would race against the reload and the demo config might win.
     try {
-      const url = new URL(location.href)
-      url.searchParams.delete('demo')
-      history.replaceState(null, '', url.pathname + url.search + url.hash)
-    } catch { /* silent — browsers without history API */ }
-  }, [dispatch])
+      localStorage.removeItem('recoverysys-config')
+      localStorage.setItem('recoverysys-visited', '1')
+    } catch {
+      /* silent */
+    }
+    // Hard-navigate to the clean URL (removes ?demo=1, triggers visible reload).
+    // replaceState would silently mutate the URL bar with no perceived navigation.
+    window.location.replace(window.location.pathname)
+  }, [])
 
   return { demoMode, exitDemo }
 }
