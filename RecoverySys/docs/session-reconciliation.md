@@ -20,6 +20,25 @@
 
 Raw branches retain exact original session context for recovery. They can contain unrelated historical ancestors, which is why they are archive sources only.
 
+## Additional source-history archives
+
+These branches preserve local-only session history that was not already available on GitHub:
+
+- `backup/recoverysys-trust-foundation-source-20260728`
+- `backup/recoverysys-trust-integration-source-20260728`
+- `backup/recoverysys-trust-payload-boundary-source-20260728`
+- `backup/recoverysys-trust-result-integrity-source-20260728`
+- `backup/recoverysys-windows-source-20260728`
+- `backup/recoverysys-publish-source-20260728`
+- `backup/recoverysys-release-source-20260728`
+- `backup/recoverysys-github-readme-source-20260728`
+- `backup/recoverysys-hygiene-source-20260728`
+- `backup/recoverysys-hygiene-integration-source-20260728`
+- `backup/recoverysys-roadmap-source-20260728`
+- `backup/recoverysys-overview-dashboard-source-20260728`
+
+Existing GitHub session branches already preserve portable/macOS, calculation-consistency, parts-catalog, E2E, and snatch-screening histories.
+
 ## Session decisions already established
 
 | Session group | Decision |
