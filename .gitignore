@@ -29,3 +29,6 @@ Thumbs.db
 *.exe
 .claude/settings.local.json
 .claude/skills/gstack/
+
+# Claude skills (not part of RecoverySys project)
+.claude/

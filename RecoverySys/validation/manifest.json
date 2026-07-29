@@ -1,0 +1,14 @@
+{
+  "corpusVersion": "0.1.0",
+  "model": {
+    "id": "recoverysys-current-estimator",
+    "description": "Current RecoverySys ascent, descent, drift, load, and dispersion estimate behavior; implementation version must be recorded when cases are added."
+  },
+  "realFlightCases": false,
+  "cases": [],
+  "scopeLimitations": [
+    "This is an initially empty comparison index; no benchmark is accepted or flight validated.",
+    "Simulator comparisons do not establish real-world accuracy, certification, or launch safety.",
+    "Current model limitations are documented in validation/README.md and the product README.md."
+  ]
+}
