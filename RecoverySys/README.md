@@ -2,7 +2,7 @@
 
 RecoverySys is a local-first recovery-bay configuration and flight-estimation tool for high-power rocketry. It helps you assemble recovery hardware, review configuration warnings, and explore simulated flight and landing behavior before a launch.
 
-**Version 1.2.0.0**
+**Version 1.2.0.1**
 
 ## Capabilities
 
@@ -11,7 +11,7 @@ RecoverySys is a local-first recovery-bay configuration and flight-estimation to
 - Search motor data through ThrustCurve.org or import a RASP `.eng` motor file for a thrust-curve simulation.
 - Run an ascent, descent, drift, shock-load, and landing-energy estimate.
 - Review compatibility checks and warnings for the selected configuration.
-- Generate a dispersion map with predicted drift vectors and uncertainty circles.
+- Generate a Monte Carlo dispersion map with predicted drift vectors and uncertainty circles. This is an estimate of modeled dispersion, not a statistical confidence guarantee.
 - Compare a saved Config A with the current Config B.
 - Save and restore configurations in the browser, copy share links, import/export JSON, and print a recovery checklist.
 - Use light or dark appearance modes.
@@ -37,7 +37,7 @@ npm test             # run the test suite once
 npm run test:watch   # run tests in watch mode
 npm run lint         # lint src/
 npm run format:check # check formatting
-npm run check        # run formatting, lint, tests, and build checks
+npm run check        # catalog validation, formatting, lint, unit tests, and build
 ```
 
 ## Portable Windows release
@@ -61,12 +61,12 @@ The Vite configuration currently builds for a GitHub Pages project site at `/Rec
 
 ## Local-first and privacy
 
-RecoverySys has no application backend or account system. Saved configurations, custom parts, and appearance preference are kept in this browser's `localStorage` and remain on the device unless you export or share them.
+RecoverySys has no application backend or account system. Saved configurations, custom parts, and appearance preference are kept in this browser's `localStorage` and remain on the device unless you export or share them. The portable Windows app stores local data independently under `%LOCALAPPDATA%`.
 
-Share links encode the configuration in the URL. Anyone who receives a share link can read the configuration it contains, and the URL may be retained by browser history, chat, or other services. Use JSON export for an offline backup. Motor search is an optional network feature and requests results from ThrustCurve.org; map tiles and web fonts can also be requested from their configured providers.
+The core catalog, calculations, saved configurations, custom parts, and local `.eng` import work without a network connection. Share links encode the configuration in the URL; anyone who receives one can read its contents, and the URL may be retained by browser history, chat, or other services. Use JSON export for an offline backup. Motor search is optional and requests results from ThrustCurve.org; map tiles and web fonts can also be requested from their configured providers.
 
 ## Limitations and disclaimer
 
-Simulation results are estimates, not flight-certification results or a substitute for engineering review, field procedures, manufacturer guidance, or range rules. The model includes simplifying assumptions: vertical one-degree-of-freedom ascent, generic aerodynamic drag, simplified parachute and descent behavior, layered wind interpolation, and approximate shock-load and Monte Carlo calculations. Actual performance can differ with vehicle geometry, motor behavior, deployment, packing, weather, and build conditions.
+Simulation results are estimates, not flight-certification results or a substitute for engineering review, field procedures, manufacturer guidance, or range rules. The model includes simplifying assumptions: vertical one-degree-of-freedom ascent, generic aerodynamic drag, simplified parachute and descent behavior, layered wind interpolation, and approximate shock-load and Monte Carlo calculations. The dispersion map is a predicted estimate, not a confidence guarantee. Actual performance can differ with vehicle geometry, motor behavior, deployment, packing, weather, and build conditions.
 
 The built-in catalog and user-entered specifications should be checked against current manufacturer documentation. Verify every recovery system, deployment setting, and launch decision independently before flight. RecoverySys does not guarantee safe, legal, or successful operation.

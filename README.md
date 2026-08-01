@@ -1,40 +1,40 @@
 # RecoverySys
 
-RecoverySys is a recovery-first, local-first planning tool for high-power rocketry (HPR). Assemble a recovery-bay configuration, review compatibility warnings, and explore estimated flight and landing behavior before launch—without an account or application backend.
+RecoverySys is a local-first recovery planning tool for high-power rocketry (HPR). Configure a recovery bay, simulate estimated flight and landing behavior, and review actionable warnings before launch—without an account or application backend.
 
 ![RecoverySys recovery planning flow](assets/recoverysys-overview.svg)
 
 ## Start here
 
 - **[Try the live demo](https://akhan157.github.io/RecoverySys/)**
-- **[Latest release: v1.2.0.1](https://github.com/akhan157/RecoverySys/releases/tag/v1.2.0.1)**
-- **[Windows installer available in the v1.2.0.0 release](https://github.com/akhan157/RecoverySys/releases/tag/v1.2.0.0)**
+- **[Current release: v1.2.0.1](https://github.com/akhan157/RecoverySys/releases/tag/v1.2.0.1)**
+- **[Desktop build notes](RecoverySys/DESKTOP.md)** — current-main portable artifacts and historical release context
 
 ## What it does
 
-- Configure main and drogue parachutes, shock cord, chute protection, quick links, and related hardware from the built-in catalog.
-- Enter rocket, motor, airframe, deployment, and wind specifications; search ThrustCurve.org or import a RASP `.eng` thrust curve.
-- Estimate ascent, apogee, descent, drift, shock load, and landing energy, with a dispersion map for predicted landing behavior.
-- Check packing, bay volume, parachute, harness, and other recovery-system compatibility warnings.
-- Compare configurations, save and restore locally, export or import JSON, copy share links, and print a recovery checklist.
+- **Configure recovery hardware** from the catalog, including main and drogue chutes, shock cord, protection, quick links, and related parts.
+- **Add custom parts** when the catalog does not match the hardware on hand.
+- **Simulate estimated flight behavior** from rocket, motor, airframe, deployment, and wind inputs; search ThrustCurve.org or import a RASP `.eng` curve.
+- **Explore Monte Carlo dispersion** as a predicted landing estimate with drift vectors and uncertainty circles—not a confidence guarantee.
+- **Review compatibility warnings** for packing, bay volume, parachutes, harnesses, and other recovery constraints.
+- **Keep a Flight Log** of actual flight records; manage saved configurations, comparisons, JSON export/import, share links, and a printable checklist.
+- **Use dark mode** or light mode while working locally.
+
+## Configure → simulate → review
+
+1. Configure the rocket, recovery hardware, deployment settings, and wind; add custom parts if needed.
+2. Simulate ascent, apogee, descent, drift, shock load, and landing energy.
+3. Review compatibility warnings, the predicted dispersion estimate, and the Flight Log before independently checking the flight plan.
 
 ## Scope and safety
 
-RecoverySys is a transparent recovery-planning aid, not flight-certification software or a substitute for engineering review, field procedures, manufacturer guidance, or range rules. Results are estimates based on simplifying assumptions and may differ from actual flight performance.
-
-It is deliberately narrower than a full flight simulator: it does not provide 6-DOF aerodynamics, stability or rail-exit analysis, detailed motor/airframe performance modeling, accounts, backend persistence, or collaboration. Verify catalog and entered specifications, recovery hardware, deployment settings, weather, and launch decisions independently before flight. RecoverySys does not guarantee safe, legal, or successful operation.
-
-Configurations and preferences are stored in browser `localStorage`; share links encode configuration data in the URL. Motor search, map tiles, and web fonts are optional network-dependent features.
-
-## Quality status
-
-CI runs on Node 22. The project check covers formatting, linting, the 135-test suite, and the production build (`npm run check`).
+RecoverySys is a planning aid, not flight-certification software or a substitute for engineering review, field procedures, manufacturer guidance, or range rules. Results are estimates based on simplifying assumptions and do not guarantee safe, legal, or successful operation. See the [user guide](RecoverySys/README.md) for model, privacy, and network details.
 
 ## Documentation
 
-- [User guide and local-first details](RecoverySys/README.md)
-- [Windows desktop build](RecoverySys/DESKTOP.md)
-- [Roadmap and explicit deferrals](RecoverySys/ROADMAP.md)
+- [User guide, model, privacy, and local-first details](RecoverySys/README.md)
+- [Desktop build notes](RecoverySys/DESKTOP.md)
+- [Roadmap](RecoverySys/ROADMAP.md)
 - [Changelog](RecoverySys/CHANGELOG.md)
 - [Contributing](CONTRIBUTING.md)
 - [MIT License](LICENSE)

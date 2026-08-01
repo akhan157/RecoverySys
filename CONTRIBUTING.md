@@ -21,6 +21,10 @@ Before submitting a change, run the full project check:
 npm run check
 ```
 
+`npm run check` runs catalog validation, formatting checks, linting, the unit test
+suite, and the production build. Run the unit tests alone with `npm test`, and run
+the end-to-end suite with `npm run e2e` (Playwright).
+
 For behavior changes, also run focused tests while iterating and add or update
 tests when appropriate. Keep documentation accurate when behavior, commands,
 limitations, or user-facing workflows change.
