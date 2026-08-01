@@ -1248,7 +1248,7 @@
 .mc-anal-row__label {
   font-size: 10px;
   letter-spacing: 0.07em;
-  color: var(--mc-text-faint);
+  color: var(--mc-text-dim);
   font-weight: 500;
   white-space: nowrap;
   flex-shrink: 0;

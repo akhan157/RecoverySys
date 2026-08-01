@@ -114,6 +114,7 @@ export default function AnalysisTab({ state }) {
   const ap = a
   const warnings = state.warnings ?? []
   const warningStatus = statusFromWarnings(warnings)
+  const priorityWarning = warnings.find((warning) => warning.level === 'error') ?? warnings.find((warning) => warning.level === 'warn')
   const stale = Boolean(state.simulation && !state.resultFresh)
   const motorMethod = state.customMotor
     ? `THRUST CURVE / ${state.customMotor.designation || 'CUSTOM MOTOR'}`
@@ -121,7 +122,9 @@ export default function AnalysisTab({ state }) {
   const flightStatus = !sim ? 'neutral' : warningStatus === 'error' ? 'error' : warningStatus === 'warn' ? 'warn' : 'ok'
   const landingStatus = !sim ? 'neutral' : sim.main_fps > 20 || ap?.ke_status === 'fail' ? 'error' : sim.main_fps > 15 || ap?.ke_status === 'warn' ? 'warn' : 'ok'
   const snatchStatus = String(sim?.main_snatch?.status || '').toLowerCase()
-  const hardwareStatus = !sim ? 'neutral' : warningStatus === 'error' || snatchStatus.includes('fail') || ap?.cord_sf_status === 'fail' ? 'error' : warningStatus === 'warn' || snatchStatus.includes('warn') || ap?.cord_sf_status === 'warn' ? 'warn' : 'ok'
+  const hardwareWarnings = warnings.filter((warning) => HARDWARE_WARNING_SLOTS.has(warning.slot))
+  const hardwareWarningStatus = statusFromWarnings(hardwareWarnings)
+  const hardwareStatus = !sim ? 'neutral' : hardwareWarningStatus === 'error' || snatchStatus.includes('fail') || ap?.cord_sf_status === 'fail' ? 'error' : hardwareWarningStatus === 'warn' || snatchStatus.includes('warn') || ap?.cord_sf_status === 'warn' ? 'warn' : 'ok'
 
   return (
     <div className="mc-analysis">
@@ -132,7 +135,7 @@ export default function AnalysisTab({ state }) {
           <StatusChip status="ok" label="FRESH" />
         </div>
         <div className="mc-analysis__review-signals">
-          <ReviewSignal label="PRIORITY WARNING" value={warnings[0]?.message || 'NO PRIORITY WARNINGS'} status={warningStatus} />
+           <ReviewSignal label="PRIORITY WARNING" value={priorityWarning?.message || 'NO PRIORITY WARNINGS'} status={warningStatus} />
           <ReviewSignal label="LANDING" value={`${sim.drift_ft?.toLocaleString?.() ?? '—'} FT DRIFT · ${sim.main_fps?.toFixed?.(1) ?? '—'} FT/S`} status={landingStatus} />
           <ReviewSignal label="HARDWARE" value={hardwareStatus === 'ok' ? 'PRELIMINARY CHECKS PASS' : 'REVIEW LOADS'} status={hardwareStatus} />
         </div>
@@ -363,12 +366,14 @@ function ReviewSignal({ label, value, status }) {
   return <div className="mc-analysis__review-signal"><span>{label}</span><strong>{value}</strong><StatusChip status={status} label={statusLabelText(status)} /></div>
 }
 
+const HARDWARE_WARNING_SLOTS = new Set(['shock_cord', 'quick_links', 'swivel'])
+
 function statusLabelText(status) {
   return ({ ok: 'REVIEWED', warn: 'REVIEW', error: 'BLOCKED', neutral: 'NO RUN' })[status] || 'REVIEW'
 }
 
 function MethodDisclosure({ method, inputs, defaults, limitations }) {
-  return <details className="mc-analysis__method"><summary>HOW THIS IS ESTIMATED — {method}</summary>{limitations && <p>{limitations}</p>}</details>
+  return <details className="mc-analysis__method"><summary>HOW THIS IS ESTIMATED — {method}</summary><div className="mc-analysis__method-body"><div><strong>Inputs</strong><span>{inputs || 'Not specified'}</span></div><div><strong>Defaults</strong><span>{defaults || 'None specified'}</span></div>{limitations && <p>{limitations}</p>}</div></details>
 }
 
 function DossierItem({ title, text }) {

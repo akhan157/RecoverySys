@@ -91,6 +91,24 @@ describe('analysis transparency hierarchy', () => {
     expect(screen.queryByText('SAMPLE ADDITION')).not.toBeInTheDocument()
   })
 
+  it('renders method inputs and defaults in the closed disclosure body', () => {
+    render(<AnalysisTab state={stateFor(canonicalSimulation())} />)
+    expect(screen.getByText('Mass 2.50 kg · 20G')).toBeInTheDocument()
+    expect(screen.getByText('G-factor auto: 20G below 10 kg; 30G at or above 10 kg.')).toBeInTheDocument()
+    expect(screen.getByText('Mass 2.50 kg · 20G')).not.toBeVisible()
+  })
+
+  it('shows the highest-severity warning and scopes hardware status to hardware warnings', () => {
+    const warnings = [
+      { level: 'warn', slot: 'main_chute', message: 'Landing warning' },
+      { level: 'error', slot: 'shock_cord', message: 'Hardware failure' },
+    ]
+    render(<AnalysisTab state={stateFor(canonicalSimulation(), warnings)} />)
+    expect(screen.getByText('Hardware failure')).toBeInTheDocument()
+    expect(screen.queryByText('Landing warning')).not.toBeInTheDocument()
+    expect(screen.getByText('REVIEW LOADS')).toBeInTheDocument()
+  })
+
   it('shows only the simple stale message without review architecture', () => {
     render(<AnalysisTab state={{ ...stateFor(canonicalSimulation()), resultFresh: false }} />)
     expect(screen.getByText('RESULT_STALE // RERUN_REQUIRED')).toBeInTheDocument()
