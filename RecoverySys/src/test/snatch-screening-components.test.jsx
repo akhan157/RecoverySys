@@ -80,6 +80,51 @@ function stateFor(simulation, warnings = []) {
   return { simulation, resultFresh: true, specs, config, warnings }
 }
 
+describe('analysis transparency hierarchy', () => {
+  it('shows a compact review strip and keeps method details closed', () => {
+    render(<AnalysisTab state={stateFor(canonicalSimulation())} />)
+    expect(screen.getByText('REVIEW FIRST')).toBeInTheDocument()
+    expect(screen.getByText('RK4')).toBeInTheDocument()
+    expect(screen.getByText('NO PRIORITY WARNINGS')).toBeInTheDocument()
+    expect(screen.getAllByText(/HOW THIS IS ESTIMATED/)).toHaveLength(6)
+    expect(
+      screen.queryByText(
+        'A pressure pulse, bay geometry, slack, and peak dynamic load are not solved.'
+      )
+    ).not.toBeVisible()
+    expect(screen.queryByText('SAMPLE ADDITION')).not.toBeInTheDocument()
+  })
+
+  it('renders method inputs and defaults in the closed disclosure body', () => {
+    render(<AnalysisTab state={stateFor(canonicalSimulation())} />)
+    expect(screen.getByText('Mass 2.50 kg · 20G')).toBeInTheDocument()
+    expect(
+      screen.getByText('G-factor auto: 20G below 10 kg; 30G at or above 10 kg.')
+    ).toBeInTheDocument()
+    expect(screen.getByText('Mass 2.50 kg · 20G')).not.toBeVisible()
+  })
+
+  it('shows the highest-severity warning and scopes hardware status to hardware warnings', () => {
+    const warnings = [
+      { level: 'warn', slot: 'main_chute', message: 'Landing warning' },
+      { level: 'error', slot: 'shock_cord', message: 'Hardware failure' },
+    ]
+    render(<AnalysisTab state={stateFor(canonicalSimulation(), warnings)} />)
+    expect(screen.getByText('Hardware failure')).toBeInTheDocument()
+    expect(screen.queryByText('Landing warning')).not.toBeInTheDocument()
+    expect(screen.getByText('REVIEW LOADS')).toBeInTheDocument()
+  })
+
+  it('shows only the simple stale message without review architecture', () => {
+    render(<AnalysisTab state={{ ...stateFor(canonicalSimulation()), resultFresh: false }} />)
+    expect(screen.getByText('RESULT_STALE // RERUN_REQUIRED')).toBeInTheDocument()
+    expect(
+      screen.getByText('Inputs changed. Run the simulation again to refresh analysis.')
+    ).toBeInTheDocument()
+    expect(screen.queryByText('REVIEW FIRST')).not.toBeInTheDocument()
+  })
+})
+
 describe('canonical main snatch component contract', () => {
   it.each([
     [1.5, 'MARGINAL'],
