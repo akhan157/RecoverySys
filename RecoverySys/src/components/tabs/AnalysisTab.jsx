@@ -114,270 +114,394 @@ export default function AnalysisTab({ state }) {
   const ap = a
   const warnings = state.warnings ?? []
   const warningStatus = statusFromWarnings(warnings)
-  const priorityWarning = warnings.find((warning) => warning.level === 'error') ?? warnings.find((warning) => warning.level === 'warn')
+  const priorityWarning =
+    warnings.find((warning) => warning.level === 'error') ??
+    warnings.find((warning) => warning.level === 'warn')
   const stale = Boolean(state.simulation && !state.resultFresh)
   const motorMethod = state.customMotor
     ? `THRUST CURVE / ${state.customMotor.designation || 'CUSTOM MOTOR'}`
     : sim?.apogee_method?.toUpperCase() || 'NOT RUN'
-  const flightStatus = !sim ? 'neutral' : warningStatus === 'error' ? 'error' : warningStatus === 'warn' ? 'warn' : 'ok'
-  const landingStatus = !sim ? 'neutral' : sim.main_fps > 20 || ap?.ke_status === 'fail' ? 'error' : sim.main_fps > 15 || ap?.ke_status === 'warn' ? 'warn' : 'ok'
+  const flightStatus = !sim
+    ? 'neutral'
+    : warningStatus === 'error'
+      ? 'error'
+      : warningStatus === 'warn'
+        ? 'warn'
+        : 'ok'
+  const landingStatus = !sim
+    ? 'neutral'
+    : sim.main_fps > 20 || ap?.ke_status === 'fail'
+      ? 'error'
+      : sim.main_fps > 15 || ap?.ke_status === 'warn'
+        ? 'warn'
+        : 'ok'
   const snatchStatus = String(sim?.main_snatch?.status || '').toLowerCase()
   const hardwareWarnings = warnings.filter((warning) => HARDWARE_WARNING_SLOTS.has(warning.slot))
   const hardwareWarningStatus = statusFromWarnings(hardwareWarnings)
-  const hardwareStatus = !sim ? 'neutral' : hardwareWarningStatus === 'error' || snatchStatus.includes('fail') || ap?.cord_sf_status === 'fail' ? 'error' : hardwareWarningStatus === 'warn' || snatchStatus.includes('warn') || ap?.cord_sf_status === 'warn' ? 'warn' : 'ok'
+  const hardwareStatus = !sim
+    ? 'neutral'
+    : hardwareWarningStatus === 'error' ||
+        snatchStatus.includes('fail') ||
+        ap?.cord_sf_status === 'fail'
+      ? 'error'
+      : hardwareWarningStatus === 'warn' ||
+          snatchStatus.includes('warn') ||
+          ap?.cord_sf_status === 'warn'
+        ? 'warn'
+        : 'ok'
 
   return (
     <div className="mc-analysis">
-      {!sim ? <div className="mc-analysis__empty"><div className="mc-analysis__empty-code">{stale ? 'RESULT_STALE // RERUN_REQUIRED' : 'NO_SIMULATION_DATA'}</div><div className="mc-analysis__empty-sub">{stale ? 'Inputs changed. Run the simulation again to refresh analysis.' : 'Run a simulation from the DASHBOARD or SIMULATION tab to populate physics breakdown'}</div></div> : <>
-      <section className="mc-analysis__review mc-analysis__section--wide" aria-label="Review first">
-        <div className="mc-analysis__review-head">
-          <div><div className="mc-analysis__eyebrow">REVIEW FIRST</div><strong>{motorMethod}</strong></div>
-          <StatusChip status="ok" label="FRESH" />
+      {!sim ? (
+        <div className="mc-analysis__empty">
+          <div className="mc-analysis__empty-code">
+            {stale ? 'RESULT_STALE // RERUN_REQUIRED' : 'NO_SIMULATION_DATA'}
+          </div>
+          <div className="mc-analysis__empty-sub">
+            {stale
+              ? 'Inputs changed. Run the simulation again to refresh analysis.'
+              : 'Run a simulation from the DASHBOARD or SIMULATION tab to populate physics breakdown'}
+          </div>
         </div>
-        <div className="mc-analysis__review-signals">
-           <ReviewSignal label="PRIORITY WARNING" value={priorityWarning?.message || 'NO PRIORITY WARNINGS'} status={warningStatus} />
-          <ReviewSignal label="LANDING" value={`${sim.drift_ft?.toLocaleString?.() ?? '—'} FT DRIFT · ${sim.main_fps?.toFixed?.(1) ?? '—'} FT/S`} status={landingStatus} />
-          <ReviewSignal label="HARDWARE" value={hardwareStatus === 'ok' ? 'PRELIMINARY CHECKS PASS' : 'REVIEW LOADS'} status={hardwareStatus} />
-        </div>
-      </section>
-      {/* ── EJECTION LOADS ──────────────────────────────────────────────── */}
-      <section className="mc-analysis__section">
-        <div className="mc-panel-header">EJECTION_LOADS</div>
-        <MethodDisclosure method="Static impulse screening" inputs={`Mass ${ap.mass_kg.toFixed(2)} kg · ${ap.g_factor}G`} defaults={ap.g_factor_auto ? 'G-factor auto: 20G below 10 kg; 30G at or above 10 kg.' : 'G-factor supplied in Rocket Specs.'} limitations="A pressure pulse, bay geometry, slack, and peak dynamic load are not solved." />
-        <div className="mc-analysis__body">
-          <AnalRow
-            label="G_FACTOR"
-            value={`${ap.g_factor}×`}
-            note={
-              ap.g_factor_auto
-                ? `Auto-selected: ${ap.mass_kg >= 10 ? '≥10 kg rocket → 30G (L3 HPR standard)' : '<10 kg → 20G (L1/L2 standard)'}`
-                : 'User-specified in Rocket Specs'
-            }
-          />
-          <AnalRow
-            label="STATIC_EJECTION_LOAD"
-            value={`${Math.round(ap.static_N)} N`}
-            badge={`${Math.round(ap.static_lbs)} LBS`}
-            note={`F = m × G_factor × g₀ = ${ap.mass_kg.toFixed(2)} kg × ${ap.g_factor} × 9.807 m/s²`}
-          />
-          {ap.cord_sf != null && (
-            <AnalRow
-              label="CORD_SAFETY_FACTOR"
-              value={`${ap.cord_sf.toFixed(1)}×`}
-              badge={
-                ap.cord_sf_status === 'ok'
-                  ? 'PASS'
-                  : ap.cord_sf_status === 'warn'
-                    ? 'MARGINAL'
-                    : 'FAIL'
+      ) : (
+        <>
+          <section
+            className="mc-analysis__review mc-analysis__section--wide"
+            aria-label="Review first"
+          >
+            <div className="mc-analysis__review-head">
+              <div>
+                <div className="mc-analysis__eyebrow">REVIEW FIRST</div>
+                <strong>{motorMethod}</strong>
+              </div>
+              <StatusChip status="ok" label="FRESH" />
+            </div>
+            <div className="mc-analysis__review-signals">
+              <ReviewSignal
+                label="PRIORITY WARNING"
+                value={priorityWarning?.message || 'NO PRIORITY WARNINGS'}
+                status={warningStatus}
+              />
+              <ReviewSignal
+                label="LANDING"
+                value={`${sim.drift_ft?.toLocaleString?.() ?? '—'} FT DRIFT · ${sim.main_fps?.toFixed?.(1) ?? '—'} FT/S`}
+                status={landingStatus}
+              />
+              <ReviewSignal
+                label="HARDWARE"
+                value={hardwareStatus === 'ok' ? 'PRELIMINARY CHECKS PASS' : 'REVIEW LOADS'}
+                status={hardwareStatus}
+              />
+            </div>
+          </section>
+          {/* ── EJECTION LOADS ──────────────────────────────────────────────── */}
+          <section className="mc-analysis__section">
+            <div className="mc-panel-header">EJECTION_LOADS</div>
+            <MethodDisclosure
+              method="Static impulse screening"
+              inputs={`Mass ${ap.mass_kg.toFixed(2)} kg · ${ap.g_factor}G`}
+              defaults={
+                ap.g_factor_auto
+                  ? 'G-factor auto: 20G below 10 kg; 30G at or above 10 kg.'
+                  : 'G-factor supplied in Rocket Specs.'
               }
-              badgeStatus={ap.cord_sf_status}
-              note={`${ap.cord.strength_lbs} lbs rated ÷ ${Math.ceil(ap.static_lbs)} lbs required — ${ap.cord.material} threshold: ${SF_PASS[ap.cord.material] ?? 4}× pass, ${SF_WARN[ap.cord.material] ?? 2}× warn`}
+              limitations="A pressure pulse, bay geometry, slack, and peak dynamic load are not solved."
             />
+            <div className="mc-analysis__body">
+              <AnalRow
+                label="G_FACTOR"
+                value={`${ap.g_factor}×`}
+                note={
+                  ap.g_factor_auto
+                    ? `Auto-selected: ${ap.mass_kg >= 10 ? '≥10 kg rocket → 30G (L3 HPR standard)' : '<10 kg → 20G (L1/L2 standard)'}`
+                    : 'User-specified in Rocket Specs'
+                }
+              />
+              <AnalRow
+                label="STATIC_EJECTION_LOAD"
+                value={`${Math.round(ap.static_N)} N`}
+                badge={`${Math.round(ap.static_lbs)} LBS`}
+                note={`F = m × G_factor × g₀ = ${ap.mass_kg.toFixed(2)} kg × ${ap.g_factor} × 9.807 m/s²`}
+              />
+              {ap.cord_sf != null && (
+                <AnalRow
+                  label="CORD_SAFETY_FACTOR"
+                  value={`${ap.cord_sf.toFixed(1)}×`}
+                  badge={
+                    ap.cord_sf_status === 'ok'
+                      ? 'PASS'
+                      : ap.cord_sf_status === 'warn'
+                        ? 'MARGINAL'
+                        : 'FAIL'
+                  }
+                  badgeStatus={ap.cord_sf_status}
+                  note={`${ap.cord.strength_lbs} lbs rated ÷ ${Math.ceil(ap.static_lbs)} lbs required — ${ap.cord.material} threshold: ${SF_PASS[ap.cord.material] ?? 4}× pass, ${SF_WARN[ap.cord.material] ?? 2}× warn`}
+                />
+              )}
+            </div>
+          </section>
+
+          <MainSnatchSection snatch={sim.main_snatch} />
+
+          {/* ── OPENING SHOCK ───────────────────────────────────────────────── */}
+          {ap.opening_shock_lbs != null && (
+            <section className="mc-analysis__section">
+              <div className="mc-panel-header">OPENING_SHOCK // MAIN_CHUTE</div>
+              <MethodDisclosure
+                method="Opening-load estimate"
+                inputs={`Drogue ${ap.drogue_fps.toFixed(1)} ft/s · deploy ${ap.deploy_ft.toLocaleString()} ft`}
+                defaults={`Shape factor Cx ${ap.main_Cx ?? 1.8}; air density sampled at deployment altitude.`}
+                limitations="Porosity, reefing, line stretch, and actual inflation timing are omitted."
+              />
+              <div className="mc-analysis__body">
+                <AnalRow
+                  label="DEPLOY_ALTITUDE"
+                  value={`${ap.deploy_ft.toLocaleString()} ft AGL`}
+                  note="Altimeter setpoint — main chute opens here"
+                />
+                <AnalRow
+                  label="APPROACH_SPEED"
+                  value={`${ap.drogue_fps} ft/s`}
+                  badge={`${(ap.drogue_fps / FT_PER_M).toFixed(1)} m/s`}
+                  note="Drogue terminal velocity at deploy altitude — rocket speed when main opens"
+                />
+                <AnalRow
+                  label="AIR_DENSITY_ρ"
+                  value={`${ap.rho_deploy_val.toFixed(4)} kg/m³`}
+                  note={`ISA troposphere at ${ap.deploy_ft.toLocaleString()} ft — T = ${(288.15 - 0.0065 * (ap.deploy_ft / FT_PER_M)).toFixed(1)} K`}
+                />
+                <AnalRow
+                  label="OPENING_FACTOR_Cx"
+                  value={`${ap.main_Cx}`}
+                  note={`Shape: ${ap.main?.shape ?? 'unknown'} — flat=1.8, elliptical=1.6, conical=1.5, cruciform=2.2. Deployment bag reduces Cx 30–40%.`}
+                />
+                <AnalRow
+                  label="CHUTE_AREA"
+                  value={`${ap.main_area_m2.toFixed(4)} m²`}
+                  badge={`π × (${(ap.main?.diameter_in / 2).toFixed(2)}")²`}
+                  note={`Nominal flat area of ${ap.main?.diameter_in}" main chute — not projected area (real projected area ≈ 70% of flat)`}
+                />
+                <AnalRow
+                  label="OPENING_LOAD"
+                  value={`${Math.round(ap.opening_shock_N)} N`}
+                  badge={`≈ ${Math.round(ap.opening_shock_lbs)} LBS`}
+                  highlight
+                  note={`Cx × ½ρv²A — constraint: Cx is shape-generic, actual may vary ±30%. No deployment bag modeled.`}
+                />
+              </div>
+            </section>
           )}
-        </div>
-      </section>
 
-      <MainSnatchSection snatch={sim.main_snatch} />
+          {/* ── DESCENT RATES ───────────────────────────────────────────────── */}
+          <section className="mc-analysis__section">
+            <div className="mc-panel-header">DESCENT_RATES</div>
+            <MethodDisclosure
+              method="Terminal velocity by recovery phase"
+              inputs={`Main ${sim.main_fps?.toFixed?.(1) ?? '—'} ft/s · drogue ${sim.drogue_fps?.toFixed?.(1) ?? '—'} ft/s`}
+              defaults="Catalog Cd and sampled air density are used when inputs are available."
+              limitations="Inflation transient, oscillation, and partial inflation are not modeled."
+            />
+            <div className="mc-analysis__body">
+              {sim.drogue_fps && (
+                <>
+                  <AnalRow
+                    label="DROGUE_TERMINAL_V"
+                    value={`${sim.drogue_fps} ft/s`}
+                    note={`v = √(2mg / ρCdA) — sampled at ${Math.round(ap.mid_drogue_ft).toLocaleString()} ft (midpoint of drogue phase); ρ = ${ap.rho_mid.toFixed(4)} kg/m³. Single-altitude approximation; density increases ~40% to ground.`}
+                  />
+                  <AnalRow
+                    label="DROGUE_PHASE"
+                    value={`${sim.phase1_time_s} s`}
+                    badge={`${Math.round(ap.drogue_phase_dist).toLocaleString()} ft`}
+                    note="No transient acceleration — rockets takes 3–10s to reach terminal after deploy; actual drift in that window may be 5–15% underpredicted"
+                  />
+                </>
+              )}
+              {sim.main_fps && (
+                <>
+                  <AnalRow
+                    label="MAIN_TERMINAL_V"
+                    value={`${sim.main_fps} ft/s`}
+                    badgeStatus={sim.main_fps > 20 ? 'fail' : sim.main_fps > 15 ? 'warn' : 'ok'}
+                    badge={
+                      sim.main_fps > 20 ? 'ABOVE_LIMIT' : sim.main_fps > 15 ? 'MARGINAL' : 'OK'
+                    }
+                    note={`v = √(2mg / ρCdA) at ${ap.deploy_ft.toLocaleString()} ft; ρ = ${ap.rho_deploy_val.toFixed(4)} kg/m³. NAR/TRA limit: 15 ft/s warn, 20 ft/s error.`}
+                  />
+                  <AnalRow
+                    label="MAIN_PHASE"
+                    value={`${sim.phase2_time_s} s`}
+                    badge={`${ap.deploy_ft.toLocaleString()} ft to ground`}
+                    note="Time from main deploy to landing"
+                  />
+                </>
+              )}
+              <AnalRow
+                label="LANDING_KE"
+                value={`${ap.ke_ftlbf} ft·lbf`}
+                badge={
+                  ap.ke_status === 'ok' ? 'SAFE' : ap.ke_status === 'warn' ? 'MARGINAL' : 'CRITICAL'
+                }
+                badgeStatus={ap.ke_status}
+                note={`KE = ½mv² = ${ap.landing_ke_J.toFixed(0)} J using main descent rate. NAR/TRA: 75 ft·lbf warn, 100 ft·lbf error. Slightly conservative — actual ground speed is 3–5% lower (denser surface air).`}
+              />
+              {sim.total_time_s && (
+                <AnalRow
+                  label="TOTAL_FLIGHT"
+                  value={`${sim.total_time_s} s`}
+                  note={`Apogee at T+${sim.apogee_t_s}s → main deploy at T+${sim.apogee_t_s + sim.phase1_time_s}s → landing`}
+                />
+              )}
+            </div>
+          </section>
 
-      {/* ── OPENING SHOCK ───────────────────────────────────────────────── */}
-      {ap.opening_shock_lbs != null && (
-      <section className="mc-analysis__section">
-        <div className="mc-panel-header">OPENING_SHOCK // MAIN_CHUTE</div>
-        <MethodDisclosure method="Opening-load estimate" inputs={`Drogue ${ap.drogue_fps.toFixed(1)} ft/s · deploy ${ap.deploy_ft.toLocaleString()} ft`} defaults={`Shape factor Cx ${ap.main_Cx ?? 1.8}; air density sampled at deployment altitude.`} limitations="Porosity, reefing, line stretch, and actual inflation timing are omitted." />
-          <div className="mc-analysis__body">
-            <AnalRow
-              label="DEPLOY_ALTITUDE"
-              value={`${ap.deploy_ft.toLocaleString()} ft AGL`}
-              note="Altimeter setpoint — main chute opens here"
+          {/* ── FLIGHT TIMELINE ─────────────────────────────────────────────── */}
+          <section className="mc-analysis__section">
+            <div className="mc-panel-header">FLIGHT_TIMELINE</div>
+            <MethodDisclosure
+              method="Phase timing from descent rates"
+              inputs={`Apogee ${sim.apogee_ft?.toLocaleString?.() ?? '—'} ft · main deploy ${ap.deploy_ft.toLocaleString()} ft`}
+              defaults="One terminal rate is used for each recovery phase."
+              limitations="Transient inflation and horizontal inertia are omitted."
             />
-            <AnalRow
-              label="APPROACH_SPEED"
-              value={`${ap.drogue_fps} ft/s`}
-              badge={`${(ap.drogue_fps / FT_PER_M).toFixed(1)} m/s`}
-              note="Drogue terminal velocity at deploy altitude — rocket speed when main opens"
-            />
-            <AnalRow
-              label="AIR_DENSITY_ρ"
-              value={`${ap.rho_deploy_val.toFixed(4)} kg/m³`}
-              note={`ISA troposphere at ${ap.deploy_ft.toLocaleString()} ft — T = ${(288.15 - 0.0065 * (ap.deploy_ft / FT_PER_M)).toFixed(1)} K`}
-            />
-            <AnalRow
-              label="OPENING_FACTOR_Cx"
-              value={`${ap.main_Cx}`}
-              note={`Shape: ${ap.main?.shape ?? 'unknown'} — flat=1.8, elliptical=1.6, conical=1.5, cruciform=2.2. Deployment bag reduces Cx 30–40%.`}
-            />
-            <AnalRow
-              label="CHUTE_AREA"
-              value={`${ap.main_area_m2.toFixed(4)} m²`}
-              badge={`π × (${(ap.main?.diameter_in / 2).toFixed(2)}")²`}
-              note={`Nominal flat area of ${ap.main?.diameter_in}" main chute — not projected area (real projected area ≈ 70% of flat)`}
-            />
-            <AnalRow
-              label="OPENING_LOAD"
-              value={`${Math.round(ap.opening_shock_N)} N`}
-              badge={`≈ ${Math.round(ap.opening_shock_lbs)} LBS`}
-              highlight
-              note={`Cx × ½ρv²A — constraint: Cx is shape-generic, actual may vary ±30%. No deployment bag modeled.`}
-            />
-          </div>
-        </section>
+            <div className="mc-analysis__body">
+              <TimelineRow
+                marker="T+0"
+                event="LAUNCH"
+                note="Rail exit — no rail friction or launch-guide losses modeled"
+              />
+              {sim.burnout_t_s != null && (
+                <TimelineRow
+                  marker={`T+${sim.burnout_t_s}s`}
+                  event="MOTOR_BURNOUT"
+                  note={`${parseFloat(specs.motor_total_impulse_ns).toLocaleString()} N·s total impulse consumed`}
+                />
+              )}
+              <TimelineRow
+                marker={`T+${sim.apogee_t_s}s`}
+                event={`APOGEE @ ${sim.apogee_ft.toLocaleString()} FT`}
+                note={`Method: ${sim.apogee_method?.toUpperCase() ?? 'RK4'} — ejection fires, drogue deploys`}
+              />
+              <TimelineRow
+                marker={`T+${sim.apogee_t_s + sim.phase1_time_s}s`}
+                event={`MAIN_DEPLOY @ ${ap.deploy_ft.toLocaleString()} FT`}
+                note="Altimeter fires main — opening shock occurs here"
+              />
+              {sim.total_time_s && (
+                <TimelineRow
+                  marker={`T+${sim.total_time_s}s`}
+                  event={`LANDING @ ${sim.drift_ft.toLocaleString()} FT DOWNWIND`}
+                  note={`Primary wind drift; use DISPERSION tab for uncertainty bounds`}
+                />
+              )}
+            </div>
+          </section>
+
+          {/* ── PACKING VOLUME ──────────────────────────────────────────────── */}
+          {ap.packing.bay_known && (
+            <section className="mc-analysis__section mc-analysis__section--wide">
+              <div className="mc-panel-header">PACKING_VOLUME</div>
+              <MethodDisclosure
+                method="Effective bay volume and representative component volumes"
+                inputs={`Fill ${Math.round((ap.packing.fraction ?? 0) * 100)}%`}
+                defaults="70% packing efficiency accounts for folds, rigging, and fabric bulk."
+                limitations="Actual fold geometry, snag points, wiring, and closure force are not measured."
+              />
+              <div className="mc-analysis__body">
+                <AnalRow
+                  label="STACKED_COMPONENTS"
+                  value={`${ap.packing.stacked_in3.toFixed(1)} IN³`}
+                  badge={`of ${ap.packing.effective_in3.toFixed(1)} IN³ effective`}
+                  note="Cylindrical stacking sum — each component packed height × bay cross-section area"
+                />
+                <PackingGauge fraction={ap.packing.fraction ?? 0} />
+                <AnalRow
+                  label="EFFICIENCY_FACTOR"
+                  value="70%"
+                  note="Real-world packing achieves ~70% of ideal linear stacking (folds, wadding, rigging, harness bulk)"
+                />
+                <AnalRow
+                  label="FILL_FRACTION"
+                  value={`${Math.round((ap.packing.fraction ?? 0) * 100)}%`}
+                  badge={(ap.packing.fraction ?? 0) > 0.85 ? 'TIGHT' : 'OK'}
+                  badgeStatus={(ap.packing.fraction ?? 0) > 0.85 ? 'warn' : 'ok'}
+                  highlight={(ap.packing.fraction ?? 0) > 0.85}
+                  note="Alert threshold: 85% of effective volume. Exceeding this raises packing-too-tight warning."
+                />
+              </div>
+            </section>
+          )}
+          <section className="mc-analysis__dossier">
+            <details>
+              <summary>MODEL ASSUMPTIONS &amp; LIMITS</summary>
+              <div className="mc-analysis__dossier-grid">
+                <DossierItem
+                  title="ASCENT"
+                  text="Vertical 1-DOF trajectory; drag and motor behavior are simplified when no thrust curve is loaded."
+                />
+                <DossierItem
+                  title="DESCENT"
+                  text="Single terminal velocity per phase; chute inflation transients and oscillation are not modeled."
+                />
+                <DossierItem
+                  title="DRIFT"
+                  text="Wind is linearly coupled by altitude; gusts, local obstacles, and correlated layers are omitted."
+                />
+                <DossierItem
+                  title="LOADS"
+                  text="Ejection, snatch, and opening-shock values are preliminary screening models, not certification evidence."
+                />
+              </div>
+            </details>
+          </section>
+        </>
       )}
-
-      {/* ── DESCENT RATES ───────────────────────────────────────────────── */}
-      <section className="mc-analysis__section">
-        <div className="mc-panel-header">DESCENT_RATES</div>
-        <MethodDisclosure method="Terminal velocity by recovery phase" inputs={`Main ${sim.main_fps?.toFixed?.(1) ?? '—'} ft/s · drogue ${sim.drogue_fps?.toFixed?.(1) ?? '—'} ft/s`} defaults="Catalog Cd and sampled air density are used when inputs are available." limitations="Inflation transient, oscillation, and partial inflation are not modeled." />
-        <div className="mc-analysis__body">
-          {sim.drogue_fps && (
-            <>
-              <AnalRow
-                label="DROGUE_TERMINAL_V"
-                value={`${sim.drogue_fps} ft/s`}
-                note={`v = √(2mg / ρCdA) — sampled at ${Math.round(ap.mid_drogue_ft).toLocaleString()} ft (midpoint of drogue phase); ρ = ${ap.rho_mid.toFixed(4)} kg/m³. Single-altitude approximation; density increases ~40% to ground.`}
-              />
-              <AnalRow
-                label="DROGUE_PHASE"
-                value={`${sim.phase1_time_s} s`}
-                badge={`${Math.round(ap.drogue_phase_dist).toLocaleString()} ft`}
-                note="No transient acceleration — rockets takes 3–10s to reach terminal after deploy; actual drift in that window may be 5–15% underpredicted"
-              />
-            </>
-          )}
-          {sim.main_fps && (
-            <>
-              <AnalRow
-                label="MAIN_TERMINAL_V"
-                value={`${sim.main_fps} ft/s`}
-                badgeStatus={sim.main_fps > 20 ? 'fail' : sim.main_fps > 15 ? 'warn' : 'ok'}
-                badge={sim.main_fps > 20 ? 'ABOVE_LIMIT' : sim.main_fps > 15 ? 'MARGINAL' : 'OK'}
-                note={`v = √(2mg / ρCdA) at ${ap.deploy_ft.toLocaleString()} ft; ρ = ${ap.rho_deploy_val.toFixed(4)} kg/m³. NAR/TRA limit: 15 ft/s warn, 20 ft/s error.`}
-              />
-              <AnalRow
-                label="MAIN_PHASE"
-                value={`${sim.phase2_time_s} s`}
-                badge={`${ap.deploy_ft.toLocaleString()} ft to ground`}
-                note="Time from main deploy to landing"
-              />
-            </>
-          )}
-          <AnalRow
-            label="LANDING_KE"
-            value={`${ap.ke_ftlbf} ft·lbf`}
-            badge={
-              ap.ke_status === 'ok' ? 'SAFE' : ap.ke_status === 'warn' ? 'MARGINAL' : 'CRITICAL'
-            }
-            badgeStatus={ap.ke_status}
-            note={`KE = ½mv² = ${ap.landing_ke_J.toFixed(0)} J using main descent rate. NAR/TRA: 75 ft·lbf warn, 100 ft·lbf error. Slightly conservative — actual ground speed is 3–5% lower (denser surface air).`}
-          />
-          {sim.total_time_s && (
-            <AnalRow
-              label="TOTAL_FLIGHT"
-              value={`${sim.total_time_s} s`}
-              note={`Apogee at T+${sim.apogee_t_s}s → main deploy at T+${sim.apogee_t_s + sim.phase1_time_s}s → landing`}
-            />
-          )}
-        </div>
-      </section>
-
-      {/* ── FLIGHT TIMELINE ─────────────────────────────────────────────── */}
-      <section className="mc-analysis__section">
-        <div className="mc-panel-header">FLIGHT_TIMELINE</div>
-        <MethodDisclosure method="Phase timing from descent rates" inputs={`Apogee ${sim.apogee_ft?.toLocaleString?.() ?? '—'} ft · main deploy ${ap.deploy_ft.toLocaleString()} ft`} defaults="One terminal rate is used for each recovery phase." limitations="Transient inflation and horizontal inertia are omitted." />
-        <div className="mc-analysis__body">
-          <TimelineRow
-            marker="T+0"
-            event="LAUNCH"
-            note="Rail exit — no rail friction or launch-guide losses modeled"
-          />
-          {sim.burnout_t_s != null && (
-            <TimelineRow
-              marker={`T+${sim.burnout_t_s}s`}
-              event="MOTOR_BURNOUT"
-              note={`${parseFloat(specs.motor_total_impulse_ns).toLocaleString()} N·s total impulse consumed`}
-            />
-          )}
-          <TimelineRow
-            marker={`T+${sim.apogee_t_s}s`}
-            event={`APOGEE @ ${sim.apogee_ft.toLocaleString()} FT`}
-            note={`Method: ${sim.apogee_method?.toUpperCase() ?? 'RK4'} — ejection fires, drogue deploys`}
-          />
-          <TimelineRow
-            marker={`T+${sim.apogee_t_s + sim.phase1_time_s}s`}
-            event={`MAIN_DEPLOY @ ${ap.deploy_ft.toLocaleString()} FT`}
-            note="Altimeter fires main — opening shock occurs here"
-          />
-          {sim.total_time_s && (
-            <TimelineRow
-              marker={`T+${sim.total_time_s}s`}
-              event={`LANDING @ ${sim.drift_ft.toLocaleString()} FT DOWNWIND`}
-              note={`Primary wind drift; use DISPERSION tab for uncertainty bounds`}
-            />
-          )}
-        </div>
-      </section>
-
-      {/* ── PACKING VOLUME ──────────────────────────────────────────────── */}
-      {ap.packing.bay_known && (
-        <section className="mc-analysis__section mc-analysis__section--wide">
-          <div className="mc-panel-header">PACKING_VOLUME</div>
-          <MethodDisclosure method="Effective bay volume and representative component volumes" inputs={`Fill ${Math.round((ap.packing.fraction ?? 0) * 100)}%`} defaults="70% packing efficiency accounts for folds, rigging, and fabric bulk." limitations="Actual fold geometry, snag points, wiring, and closure force are not measured." />
-          <div className="mc-analysis__body">
-            <AnalRow
-              label="STACKED_COMPONENTS"
-              value={`${ap.packing.stacked_in3.toFixed(1)} IN³`}
-              badge={`of ${ap.packing.effective_in3.toFixed(1)} IN³ effective`}
-              note="Cylindrical stacking sum — each component packed height × bay cross-section area"
-            />
-            <PackingGauge fraction={ap.packing.fraction ?? 0} />
-            <AnalRow
-              label="EFFICIENCY_FACTOR"
-              value="70%"
-              note="Real-world packing achieves ~70% of ideal linear stacking (folds, wadding, rigging, harness bulk)"
-            />
-            <AnalRow
-              label="FILL_FRACTION"
-              value={`${Math.round((ap.packing.fraction ?? 0) * 100)}%`}
-              badge={(ap.packing.fraction ?? 0) > 0.85 ? 'TIGHT' : 'OK'}
-              badgeStatus={(ap.packing.fraction ?? 0) > 0.85 ? 'warn' : 'ok'}
-              highlight={(ap.packing.fraction ?? 0) > 0.85}
-              note="Alert threshold: 85% of effective volume. Exceeding this raises packing-too-tight warning."
-            />
-          </div>
-        </section>
-      )}
-      <section className="mc-analysis__dossier">
-        <details>
-          <summary>MODEL ASSUMPTIONS &amp; LIMITS</summary>
-          <div className="mc-analysis__dossier-grid">
-            <DossierItem title="ASCENT" text="Vertical 1-DOF trajectory; drag and motor behavior are simplified when no thrust curve is loaded." />
-            <DossierItem title="DESCENT" text="Single terminal velocity per phase; chute inflation transients and oscillation are not modeled." />
-            <DossierItem title="DRIFT" text="Wind is linearly coupled by altitude; gusts, local obstacles, and correlated layers are omitted." />
-            <DossierItem title="LOADS" text="Ejection, snatch, and opening-shock values are preliminary screening models, not certification evidence." />
-          </div>
-        </details>
-      </section>
-      </>}
     </div>
   )
 }
 
 function ReviewSignal({ label, value, status }) {
-  return <div className="mc-analysis__review-signal"><span>{label}</span><strong>{value}</strong><StatusChip status={status} label={statusLabelText(status)} /></div>
+  return (
+    <div className="mc-analysis__review-signal">
+      <span>{label}</span>
+      <strong>{value}</strong>
+      <StatusChip status={status} label={statusLabelText(status)} />
+    </div>
+  )
 }
 
 const HARDWARE_WARNING_SLOTS = new Set(['shock_cord', 'quick_links', 'swivel'])
 
 function statusLabelText(status) {
-  return ({ ok: 'REVIEWED', warn: 'REVIEW', error: 'BLOCKED', neutral: 'NO RUN' })[status] || 'REVIEW'
+  return { ok: 'REVIEWED', warn: 'REVIEW', error: 'BLOCKED', neutral: 'NO RUN' }[status] || 'REVIEW'
 }
 
 function MethodDisclosure({ method, inputs, defaults, limitations }) {
-  return <details className="mc-analysis__method"><summary>HOW THIS IS ESTIMATED — {method}</summary><div className="mc-analysis__method-body"><div><strong>Inputs</strong><span>{inputs || 'Not specified'}</span></div><div><strong>Defaults</strong><span>{defaults || 'None specified'}</span></div>{limitations && <p>{limitations}</p>}</div></details>
+  return (
+    <details className="mc-analysis__method">
+      <summary>HOW THIS IS ESTIMATED — {method}</summary>
+      <div className="mc-analysis__method-body">
+        <div>
+          <strong>Inputs</strong>
+          <span>{inputs || 'Not specified'}</span>
+        </div>
+        <div>
+          <strong>Defaults</strong>
+          <span>{defaults || 'None specified'}</span>
+        </div>
+        {limitations && <p>{limitations}</p>}
+      </div>
+    </details>
+  )
 }
 
 function DossierItem({ title, text }) {
-  return <div><span>{title}</span><p>{text}</p></div>
+  return (
+    <div>
+      <span>{title}</span>
+      <p>{text}</p>
+    </div>
+  )
 }
 
 function MainSnatchSection({ snatch }) {
@@ -391,7 +515,12 @@ function MainSnatchSection({ snatch }) {
   return (
     <section className="mc-analysis__section mc-analysis__section--wide mc-analysis__section--screening">
       <div className="mc-panel-header">MAIN_DEPLOYMENT_SNATCH // SCREENING</div>
-      <MethodDisclosure method="Linear-elastic harness screening proxy" inputs={`Approach ${formatValue(snatch?.approach_velocity_fps, ' fps')} · margin ${formatValue(snatch?.rating_margin)}`} defaults="The stopping-time and elasticity model use representative recovery geometry." limitations="This is not peak load, certification, or a substitute for component-specific testing." />
+      <MethodDisclosure
+        method="Linear-elastic harness screening proxy"
+        inputs={`Approach ${formatValue(snatch?.approach_velocity_fps, ' fps')} · margin ${formatValue(snatch?.rating_margin)}`}
+        defaults="The stopping-time and elasticity model use representative recovery geometry."
+        limitations="This is not peak load, certification, or a substitute for component-specific testing."
+      />
       {!evaluated ? (
         <div className="mc-screening-empty">
           <div className="mc-screening-empty__status">{screeningStatusLabel(snatch?.status)}</div>
