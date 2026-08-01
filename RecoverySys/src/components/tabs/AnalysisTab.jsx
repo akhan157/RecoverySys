@@ -121,13 +121,6 @@ export default function AnalysisTab({ state }) {
   const motorMethod = state.customMotor
     ? `THRUST CURVE / ${state.customMotor.designation || 'CUSTOM MOTOR'}`
     : sim?.apogee_method?.toUpperCase() || 'NOT RUN'
-  const flightStatus = !sim
-    ? 'neutral'
-    : warningStatus === 'error'
-      ? 'error'
-      : warningStatus === 'warn'
-        ? 'warn'
-        : 'ok'
   const landingStatus = !sim
     ? 'neutral'
     : sim.main_fps > 20 || ap?.ke_status === 'fail'
