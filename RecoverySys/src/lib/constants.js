@@ -54,7 +54,7 @@ export const PHYSICS = Object.freeze({
 
 // Build/version metadata. Single string owned here so the UI brand badge,
 // CHANGELOG, and any future telemetry share one truth.
-export const VERSION = '1.2.0.0'
+export const VERSION = '1.2.0.1'
 export const VERSION_DISPLAY = 'V1.2'
 
 // Result provenance metadata. Keep these distinct: app release, payload schema,

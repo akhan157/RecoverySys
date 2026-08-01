@@ -1,5 +1,10 @@
 # RecoverySys desktop builds
 
+These are build outputs from the current `main` branch, not automatically attached
+GitHub Release downloads. Current main produces a portable Windows ZIP and a macOS
+universal CI artifact. The historical GitHub v1.2.0.0 release contains the older
+Windows installer asset; do not treat that installer as the current portable build.
+
 The Tauri v2 foundation in `src-tauri/` packages the existing Vite SPA into a
 portable Windows executable. Frontend assets from `frontendDist` are embedded
 in the executable; no installer or registry shortcut is used.
@@ -51,7 +56,11 @@ macOS still blocks this app, remove quarantine only from this app:
 `xattr -dr com.apple.quarantine /path/to/RecoverySys.app`.
 Do not disable Gatekeeper globally.
 
-The CI artifact is an Actions-generated outer ZIP containing the portable
-`RecoverySys-macos-universal.zip`; extract twice to reach `RecoverySys.app`.
-When a GitHub Release is added, attach the inner `RecoverySys-macos-universal.zip`
-directly instead.
+The workflow uploads `RecoverySys-macos-universal.zip` as a GitHub Actions artifact.
+It is not a GitHub Release download: fetch it from the workflow run's artifacts,
+then extract it once to reach `RecoverySys.app`. If a GitHub Release is added, the
+inner `RecoverySys-macos-universal.zip` should be attached directly.
+
+The current-main Windows workflow uploads the extracted contents as the
+`RecoverySys-Portable` Actions artifact; it is not the historical v1.2.0.0
+installer and is not currently a release asset.
