@@ -122,6 +122,40 @@ describe('checkCompatibility', () => {
     expect(errors).toHaveLength(0)
   })
 
+  it('adds stable compatibility metadata without changing warning messages', () => {
+    const warnings = checkCompatibility({ config: { drogue_chute: validDrogue }, specs: baseSpecs })
+    const warning = warnings.find((item) => item.message.startsWith('No main parachute'))
+
+    expect(warning).toMatchObject({
+      level: 'error',
+      slot: 'main_chute',
+      message: 'No main parachute selected — recovery system incomplete',
+      code: 'compatibility.main_chute.no-main-parachute-selected-recovery-system-incomplete',
+      warningCode: 'compatibility.main_chute.no-main-parachute-selected-recovery-system-incomplete',
+      inputPaths: ['config.main_chute'],
+      affectedInputPaths: ['config.main_chute'],
+      partRefs: ['main_chute'],
+      affectedPartRefs: ['main_chute'],
+      remediation: expect.any(String),
+      evidenceClassification: 'derived',
+      sourceClassification: 'calculation',
+      evidence: { classification: 'derived', source: 'compatibility-rule' },
+      source: { classification: 'calculation', reference: 'src/lib/compatibility.js' },
+    })
+  })
+
+  it('emits complete metadata for every compatibility warning', () => {
+    const warnings = checkCompatibility({ config: { drogue_chute: validDrogue }, specs: baseSpecs })
+    for (const warning of warnings) {
+      expect(warning.code).toMatch(/^compatibility\.[a-z_]+\.[a-z0-9-]+$/)
+      expect(warning.inputPaths.length).toBeGreaterThan(0)
+      expect(warning.partRefs.length).toBeGreaterThan(0)
+      expect(warning.remediation).toEqual(expect.any(String))
+      expect(warning.evidenceClassification).toEqual(expect.any(String))
+      expect(warning.sourceClassification).toEqual(expect.any(String))
+    }
+  })
+
   it('returns no-main error when only a drogue is selected', () => {
     const warnings = checkCompatibility({
       config: { drogue_chute: validDrogue },

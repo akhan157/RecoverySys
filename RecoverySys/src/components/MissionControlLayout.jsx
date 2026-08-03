@@ -12,6 +12,7 @@ import CompareTab from './tabs/CompareTab.jsx'
 import FlightLogTab from './tabs/FlightLogTab.jsx'
 import AnalysisTab from './tabs/AnalysisTab.jsx'
 import PrintChecklist from './PrintChecklist.jsx'
+import { buildRecoveryBrief } from '../lib/recoveryBrief.js'
 import './MissionControlLayout.css'
 
 const TABS = [
@@ -66,6 +67,22 @@ export default function MissionControlLayout({
     { specs: state.specs, config: state.config, customMotor: state.customMotor },
     state.inputRevision
   )
+  const confidenceProps = {
+    specs: state.specs,
+    config: state.config,
+    customMotor: state.customMotor,
+    simulation: state.simulation,
+    resultFresh,
+    onNavigate: (path) => setActiveTab(path.startsWith('config.') ? 'DASHBOARD' : 'SPECS'),
+  }
+  const recoveryBrief = buildRecoveryBrief({
+    specs: state.specs,
+    config: state.config,
+    customMotor: state.customMotor,
+    simulation: state.simulation,
+    resultFresh,
+    warnings: state.warnings,
+  })
 
   // Mirror runSimulation's preconditions exactly — inputs are strings from <input>,
   // so '0' and '-5' are truthy. parseFloat(...) > 0 matches what simulation.js rejects.
@@ -134,6 +151,7 @@ export default function MissionControlLayout({
                 addCustomPart={addCustomPart}
                 deleteCustomPart={deleteCustomPart}
                 editCustomPart={editCustomPart}
+                confidenceProps={confidenceProps}
               />
             )}
             {activeTab === 'SIMULATION' && (
@@ -142,9 +160,12 @@ export default function MissionControlLayout({
                 runSim={runSim}
                 canRun={canRun}
                 resultFresh={resultFresh}
+                confidenceProps={confidenceProps}
               />
             )}
-            {activeTab === 'ANALYSIS' && <AnalysisTab state={{ ...state, resultFresh }} />}
+            {activeTab === 'ANALYSIS' && (
+              <AnalysisTab state={{ ...state, resultFresh }} confidenceProps={confidenceProps} />
+            )}
             {activeTab === 'DISPERSION' && (
               <DispersionTab state={state} resultFresh={resultFresh} />
             )}
@@ -159,6 +180,9 @@ export default function MissionControlLayout({
                 setCustomMotor={setCustomMotor}
                 clearCustomMotor={clearCustomMotor}
                 addToast={addToast}
+                onNavigate={(path) => {
+                  if (path.startsWith('config.')) setCategory(path.replace('config.', ''))
+                }}
               />
             )}
             {activeTab === 'COMPARE' && (
@@ -177,6 +201,7 @@ export default function MissionControlLayout({
                 saveConfig={saveConfig}
                 copyShareLink={copyShareLink}
                 onLoadConfig={loadConfig}
+                recoveryBrief={recoveryBrief}
               />
             )}
           </main>
@@ -188,6 +213,7 @@ export default function MissionControlLayout({
         simulation={state.simulation}
         resultFresh={resultFresh}
         warnings={state.warnings}
+        recoveryBrief={recoveryBrief}
       />
     </>
   )

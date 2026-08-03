@@ -2,6 +2,7 @@ import { CATEGORIES } from '../../data/parts.js'
 import { partSpecLine } from '../../lib/format.js'
 import PartsBrowser from '../PartsBrowser.jsx'
 import SuggestPanel from '../SuggestPanel.jsx'
+import ConfidenceStatus from '../ConfidenceStatus.jsx'
 
 export default function DashboardTab({
   state,
@@ -20,6 +21,7 @@ export default function DashboardTab({
   addCustomPart,
   deleteCustomPart,
   editCustomPart,
+  confidenceProps,
 }) {
   return (
     <div className="mc-dashboard">
@@ -106,6 +108,7 @@ export default function DashboardTab({
       <div className="mc-config-summary">
         <h2 className="mc-panel-header">CONFIG_SUMMARY</h2>
         <div className="mc-summary">
+          <ConfidenceStatus {...confidenceProps} compact />
           {/* Packing Volume — how much bay space the selected components consume */}
           <div className="mc-metric">
             <div className="mc-metric__label">PACKING_VOLUME</div>

@@ -1,19 +1,12 @@
 import { useState, useEffect } from 'react'
 import Input from '../primitives/Input.jsx'
-
-const STORAGE_KEY = 'recoverysys-flight-log'
-
-function loadLog() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []
-  } catch {
-    return []
-  }
-}
-
-function saveLog(entries) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(entries))
-}
+import {
+  createFlightEntry,
+  loadFlightLog,
+  saveFlightLog,
+  exportFlightRecords,
+  importFlightRecords,
+} from '../../lib/flightEvidence.js'
 
 function NewEntryForm({ simulation, specs, onSave }) {
   const [form, setForm] = useState({
@@ -25,28 +18,15 @@ function NewEntryForm({ simulation, specs, onSave }) {
     actual_landing_lon: '',
     outcome: 'nominal',
     notes: '',
+    observation_source: 'manual',
+    instrumentation: '',
+    missing_data: [],
   })
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
 
   const handleSave = () => {
-    const entry = {
-      id: Date.now(),
-      ...form,
-      predicted: simulation
-        ? {
-            apogee_ft: simulation.apogee_ft,
-            main_fps: simulation.main_fps,
-            drogue_fps: simulation.drogue_fps,
-            drift_ft: simulation.drift_ft,
-            landing_ke_ftlbf: simulation.landing_ke_ftlbf,
-          }
-        : null,
-      specs_snapshot: {
-        rocket_mass_g: specs.rocket_mass_g,
-        motor_total_impulse_ns: specs.motor_total_impulse_ns,
-      },
-    }
+    const entry = createFlightEntry(form, { simulation, specs, resultFresh: Boolean(simulation) })
     onSave(entry)
     setForm((f) => ({
       ...f,
@@ -178,6 +158,70 @@ function NewEntryForm({ simulation, specs, onSave }) {
           <option value="failure">Failure</option>
           <option value="loss">Loss of Vehicle</option>
         </select>
+      </div>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+        <div>
+          <label
+            htmlFor="flight-observation-source"
+            className="section-label"
+            style={{ marginBottom: 3, display: 'block' }}
+          >
+            Observation Source
+          </label>
+          <select
+            id="flight-observation-source"
+            className="parts-search-input"
+            style={{ width: '100%' }}
+            value={form.observation_source}
+            onChange={(e) => set('observation_source', e.target.value)}
+          >
+            <option value="manual">Manual</option>
+            <option value="altimeter">Altimeter</option>
+            <option value="tracker">Tracker</option>
+            <option value="video">Video</option>
+            <option value="other">Other</option>
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="flight-instrumentation"
+            className="section-label"
+            style={{ marginBottom: 3, display: 'block' }}
+          >
+            Instrumentation
+          </label>
+          <Input
+            id="flight-instrumentation"
+            placeholder="e.g. Raven, GPS"
+            value={form.instrumentation}
+            onChange={(e) => set('instrumentation', e.target.value)}
+            mono={false}
+          />
+        </div>
+      </div>
+      <div>
+        <label
+          htmlFor="flight-missing-data"
+          className="section-label"
+          style={{ marginBottom: 3, display: 'block' }}
+        >
+          Missing Data (optional)
+        </label>
+        <Input
+          id="flight-missing-data"
+          placeholder="e.g. landing coordinates"
+          value={form.missing_data.join(', ')}
+          onChange={(e) =>
+            set(
+              'missing_data',
+              e.target.value
+                .split(',')
+                .map((v) => v.trim())
+                .filter(Boolean)
+            )
+          }
+          mono={false}
+        />
       </div>
       <div>
         <label
@@ -326,14 +370,38 @@ function LogEntry({ entry, onDelete }) {
 
 export default function FlightLogTab({ state, resultFresh }) {
   const usableSimulation = resultFresh ? state.simulation : null
-  const [entries, setEntries] = useState(loadLog)
+  const [entries, setEntries] = useState(loadFlightLog)
 
   useEffect(() => {
-    saveLog(entries)
+    saveFlightLog(entries)
   }, [entries])
 
   const addEntry = (entry) => setEntries((prev) => [entry, ...prev])
   const deleteEntry = (id) => setEntries((prev) => prev.filter((e) => e.id !== id))
+  const download = () => {
+    const url = URL.createObjectURL(
+      new Blob([exportFlightRecords(entries)], { type: 'application/json' })
+    )
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = 'recoverysys-flight-records.json'
+    anchor.click()
+    URL.revokeObjectURL(url)
+  }
+  const importRecords = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        setEntries((prev) => [...importFlightRecords(reader.result), ...prev])
+      } catch {
+        /* reject invalid JSON */
+      }
+      event.target.value = ''
+    }
+    reader.readAsText(file)
+  }
 
   return (
     <div className="mc-export">
@@ -357,6 +425,20 @@ export default function FlightLogTab({ state, resultFresh }) {
           </div>
         )}
         <NewEntryForm simulation={usableSimulation} specs={state.specs} onSave={addEntry} />
+        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+          <button className="mc-run-btn" type="button" onClick={download}>
+            EXPORT_RECORDS
+          </button>
+          <label className="mc-run-btn">
+            IMPORT_RECORDS
+            <input
+              type="file"
+              accept="application/json"
+              onChange={importRecords}
+              style={{ display: 'none' }}
+            />
+          </label>
+        </div>
 
         {entries.length > 0 && (
           <>

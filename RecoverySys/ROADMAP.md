@@ -1,5 +1,12 @@
 # RecoverySys Roadmap
 
+The dependency-ordered implementation source of truth is
+[`docs/v2-execution-plan.md`](docs/v2-execution-plan.md). Update its completion
+ledger and gate evidence as v2 work proceeds.
+
+V3 planning, including the guided first-plan onboarding and externally reviewed
+evidence backlog, lives in [`docs/v3-plan.md`](docs/v3-plan.md).
+
 ## Strategy
 
 RecoverySys is a **recovery-first, high-confidence HPR planning tool**: more useful and actionable than a collection of calculators, but deliberately narrower and more transparent than a full flight simulator. General HPR remains the product core. AeroBing is an early validation context and source of representative workflows—not a reason to make the product AeroBing-specific.

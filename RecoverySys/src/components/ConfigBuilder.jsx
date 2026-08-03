@@ -21,6 +21,7 @@ export default function ConfigBuilder({
   onSetCustomMotor,
   onClearCustomMotor,
   onToast,
+  onNavigate,
 }) {
   return (
     <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
@@ -49,7 +50,7 @@ export default function ConfigBuilder({
       </div>
 
       {/* Compatibility warnings */}
-      {warnings.length > 0 && <WarningBox warnings={warnings} />}
+      {warnings.length > 0 && <WarningBox warnings={warnings} onNavigate={onNavigate} />}
 
       {/* Divider */}
       <div style={{ borderTop: '1px solid var(--border-subtle)', margin: '0 -16px' }} />

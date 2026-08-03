@@ -1,5 +1,6 @@
 import { slotStatus } from '../lib/compatibility.js'
 import { partSpecLine } from '../lib/format.js'
+import PartProvenance from './PartProvenance.jsx'
 
 const ACCENT = {
   ok: 'var(--ok-fg)',
@@ -83,6 +84,7 @@ export default function ConfigSlot({
         >
           {partSpecLine(part, 'detailed')}
         </div>
+        <PartProvenance part={part} compact />
       </div>
       <button
         onClick={() => onRemove(category)}

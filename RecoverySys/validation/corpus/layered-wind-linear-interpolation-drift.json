@@ -1,0 +1,53 @@
+{
+  "id": "layered-wind-linear-interpolation-drift",
+  "kind": "analytic",
+  "domain": "drift",
+  "status": "review",
+  "inputs": {
+    "simulation": { "apogee_ft": 1000, "deploy_ft": 0, "drogue_fps": 10 },
+    "specs": {
+      "wind_speed_mph": "1",
+      "wind_direction_deg": "0",
+      "wind_surface_alt_ft": "0",
+      "wind_mid_speed_mph": "21",
+      "wind_mid_direction_deg": "0",
+      "wind_mid_alt_ft": "1000"
+    }
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "drift_ft",
+        "value": 1613,
+        "unit": "ft",
+        "tolerance": { "absolute": 0, "basis": "analyst-derived" },
+        "notes": "Presentation API rounds 1613.333... ft to 1613 ft."
+      },
+      {
+        "name": "bearing_deg",
+        "value": 180,
+        "unit": "deg",
+        "tolerance": { "absolute": 0, "basis": "analyst-derived" },
+        "notes": "Meteorological wind FROM north produces drift TOWARD south."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www.weather.gov/jetstream/wind",
+    "title": "NOAA National Weather Service wind-direction convention",
+    "accessed": "2026-07-21",
+    "citation": "NOAA meteorological wind direction convention.",
+    "derivation": "Average 1 mph and 21 mph linearly over 1000 ft, convert mph to ft/s, then multiply by the 100 s descent time."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "Browser JavaScript recovery estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Observed rounded drift and bearing equal the analytic interpolation reference."
+  },
+  "notes": "Analytic regression comparison only; not atmospheric or flight validation."
+}

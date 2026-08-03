@@ -1,13 +1,21 @@
 {
-  "corpusVersion": "0.1.0",
+  "corpusVersion": "0.2.0",
   "model": {
-    "id": "recoverysys-current-estimator",
-    "description": "Current RecoverySys ascent, descent, drift, load, and dispersion estimate behavior; implementation version must be recorded when cases are added."
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "The browser JavaScript production estimator. Each case records the exact model and assumptions identity that it exercises."
   },
   "realFlightCases": false,
-  "cases": [],
+  "cases": [
+    "isa-density-sea-level",
+    "isa-density-5000m",
+    "terminal-descent-36in-main-sea-level",
+    "layered-wind-linear-interpolation-drift",
+    "static-ejection-load-nylon-screening"
+  ],
   "scopeLimitations": [
-    "This is an initially empty comparison index; no benchmark is accepted or flight validated.",
+    "These initial analytic cases are in review; no benchmark is accepted-for-comparison or flight validated.",
     "Simulator comparisons do not establish real-world accuracy, certification, or launch safety.",
     "Current model limitations are documented in validation/README.md and the product README.md."
   ]

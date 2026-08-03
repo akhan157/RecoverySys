@@ -23,8 +23,10 @@
     "e2e:narrow": "playwright test e2e/phase1.spec.js",
     "e2e:serve": "npm run build && node scripts/prepare-e2e.mjs && vite preview --host 127.0.0.1 --port 4174",
     "e2e:serve:artifact": "node scripts/prepare-e2e.mjs && vite preview --host 127.0.0.1 --port 4174",
-    "check": "npm run format:check && npm run validate:parts && npm run lint && npm test && npm run build",
+    "check": "npm run format:check && npm run validate:parts && npm run validate:corpus && npm run lint && npm test && npm run build",
     "validate:parts": "node scripts/validate-parts.js",
+    "validate:corpus": "node scripts/validate-corpus.js",
+    "report:catalog-provenance": "node scripts/report-catalog-provenance.js",
     "lint": "eslint src --max-warnings=0",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,css}\""

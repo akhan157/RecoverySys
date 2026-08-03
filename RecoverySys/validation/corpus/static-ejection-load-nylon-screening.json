@@ -1,0 +1,57 @@
+{
+  "id": "static-ejection-load-nylon-screening",
+  "kind": "analytic",
+  "domain": "shock-load",
+  "status": "review",
+  "inputs": {
+    "cordSpecs": {
+      "strength_lbs": 1000,
+      "length_ft": 10,
+      "elongation_pct": 10,
+      "material": "nylon"
+    },
+    "mass_kg": 2,
+    "g_factor": 20
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "peak_load_lbs",
+        "value": 88,
+        "unit": "lbf",
+        "tolerance": { "absolute": 0, "basis": "analyst-derived" },
+        "notes": "Presentation result rounds m * g-factor * g0 / 4.448 to whole pounds-force."
+      },
+      {
+        "name": "safety_factor",
+        "value": 11.3,
+        "unit": "ratio",
+        "tolerance": { "absolute": 0, "basis": "analyst-derived" },
+        "notes": "Presentation result rounds rated strength divided by static load to one decimal place."
+      },
+      {
+        "name": "strain_energy_J",
+        "value": 5.3,
+        "unit": "J",
+        "tolerance": { "absolute": 0, "basis": "analyst-derived" },
+        "notes": "Linear-elastic strain-energy proxy rounds to one decimal place."
+      }
+    ]
+  },
+  "source": {
+    "title": "Static ejection-load screening derivation",
+    "citation": "Newton's second law and linear-elastic strain-energy relation.",
+    "derivation": "Compute F = m * g-factor * g0; use k = rated force / extension and U = F^2 / (2*k). Values are compared after the product's documented presentation rounding."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "Browser JavaScript recovery estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Observed rounded screening metrics equal the independently derived static-screening values."
+  },
+  "notes": "Analytic regression for a simplified screening proxy only; not a dynamic deployment-load test or certification result."
+}

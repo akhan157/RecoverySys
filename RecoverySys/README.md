@@ -10,6 +10,11 @@ RecoverySys is a local-first recovery-bay configuration and flight-estimation to
 - Enter rocket, motor, airframe, deployment, and wind specifications.
 - Search motor data through ThrustCurve.org or import a RASP `.eng` motor file for a thrust-curve simulation.
 - Run an ascent, descent, drift, shock-load, and landing-energy estimate.
+- Review mission-envelope, evidence-posture, stale-result, compatibility, provenance, and deterministic sensitivity disclosures alongside estimates.
+
+The browser JavaScript implementation in `src/lib/simulation.js` is the sole
+production simulation authority. Python engine material is research and
+deferred-only; it is not used by the application or release builds.
 - Review compatibility checks and warnings for the selected configuration.
 - Generate a Monte Carlo dispersion map with predicted drift vectors and uncertainty circles. This is an estimate of modeled dispersion, not a statistical confidence guarantee.
 - Compare a saved Config A with the current Config B.
@@ -37,7 +42,9 @@ npm test             # run the test suite once
 npm run test:watch   # run tests in watch mode
 npm run lint         # lint src/
 npm run format:check # check formatting
-npm run check        # catalog validation, formatting, lint, unit tests, and build
+npm run validate:corpus # validate reproducible comparison cases
+npm run report:catalog-provenance # summarize catalog-source posture
+npm run check        # formatting, catalog/corpus validation, lint, unit tests, and build
 ```
 
 ## Portable Windows release
@@ -69,4 +76,4 @@ The core catalog, calculations, saved configurations, custom parts, and local `.
 
 Simulation results are estimates, not flight-certification results or a substitute for engineering review, field procedures, manufacturer guidance, or range rules. The model includes simplifying assumptions: vertical one-degree-of-freedom ascent, generic aerodynamic drag, simplified parachute and descent behavior, layered wind interpolation, and approximate shock-load and Monte Carlo calculations. The dispersion map is a predicted estimate, not a confidence guarantee. Actual performance can differ with vehicle geometry, motor behavior, deployment, packing, weather, and build conditions.
 
-The built-in catalog and user-entered specifications should be checked against current manufacturer documentation. Verify every recovery system, deployment setting, and launch decision independently before flight. RecoverySys does not guarantee safe, legal, or successful operation.
+The built-in catalog is currently marked unverified unless a source is independently reviewed; custom-part data is user supplied. Comparison cases in the checked-in corpus are review cases, not accepted flight evidence. Verify every recovery system, deployment setting, and launch decision independently before flight. RecoverySys does not guarantee safe, legal, or successful operation.

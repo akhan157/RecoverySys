@@ -3,6 +3,8 @@ import { normalizeCalculationInputs } from '../../lib/schema.js'
 import { computePackingVolume } from '../../lib/compatibility.js'
 import { statusFromWarnings } from '../../lib/statusColor.js'
 import StatusChip from '../primitives/StatusChip.jsx'
+import ConfidenceStatus from '../ConfidenceStatus.jsx'
+import SensitivityPanel from '../SensitivityPanel.jsx'
 
 const G = 9.80665
 const N_PER_LBF = 4.448
@@ -28,7 +30,7 @@ function sfStatus(sf, material) {
   return sf >= pass ? 'ok' : sf >= warn ? 'warn' : 'fail'
 }
 
-export default function AnalysisTab({ state }) {
+export default function AnalysisTab({ state, confidenceProps }) {
   const sim = state.resultFresh ? state.simulation : null
   const specs = state.specs
   const config = state.config
@@ -145,6 +147,7 @@ export default function AnalysisTab({ state }) {
 
   return (
     <div className="mc-analysis">
+      <ConfidenceStatus {...confidenceProps} />
       {!sim ? (
         <div className="mc-analysis__empty">
           <div className="mc-analysis__empty-code">
@@ -158,6 +161,7 @@ export default function AnalysisTab({ state }) {
         </div>
       ) : (
         <>
+          <SensitivityPanel specs={specs} config={config} customMotor={state.customMotor} />
           <section
             className="mc-analysis__review mc-analysis__section--wide"
             aria-label="Review first"

@@ -1,5 +1,12 @@
-import { VERSION } from './constants.js'
-import { isSimulationStale } from './simulationIdentity.js'
+import {
+  VERSION,
+  SIMULATION_MODEL_ID,
+  SIMULATION_MODEL_VERSION,
+  SIMULATION_ASSUMPTIONS_VERSION,
+  SIMULATION_SCHEMA_VERSION,
+  SIMULATION_METHOD,
+} from './constants.js'
+import { captureSimulationProvenance, isSimulationStale } from './simulationIdentity.js'
 
 function stable(value) {
   if (value === null || typeof value !== 'object') return JSON.stringify(value)
@@ -21,7 +28,7 @@ export function buildResultEnvelope(result, inputs, inputRevision) {
     provenance: {
       inputFingerprint: fingerprintInputs(inputs),
       inputRevision,
-      modelVersion: VERSION,
+      ...captureSimulationProvenance(inputs),
     },
   }
 }
@@ -32,7 +39,12 @@ export function isResultFresh(result, inputs, inputRevision) {
     result?.provenance &&
     result.provenance.inputRevision === inputRevision &&
     result.provenance.inputFingerprint === fingerprintInputs(inputs) &&
-    result.provenance.modelVersion === VERSION
+    result.provenance.modelId === SIMULATION_MODEL_ID &&
+    result.provenance.modelVersion === SIMULATION_MODEL_VERSION &&
+    result.provenance.assumptionsVersion === SIMULATION_ASSUMPTIONS_VERSION &&
+    result.provenance.schemaVersion === SIMULATION_SCHEMA_VERSION &&
+    result.provenance.appVersion === VERSION &&
+    result.provenance.method === SIMULATION_METHOD
   )
 }
 

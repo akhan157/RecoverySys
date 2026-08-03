@@ -1,4 +1,8 @@
-const MODEL_VERSION = 'isa-apogee-descent-v1'
+import {
+  SIMULATION_ASSUMPTIONS_VERSION,
+  SIMULATION_MODEL_ID,
+  SIMULATION_MODEL_VERSION,
+} from '../../../lib/constants.js'
 
 const deepFreeze = (value) => {
   if (value && typeof value === 'object' && !Object.isFrozen(value)) {
@@ -22,7 +26,9 @@ export const PHASE2_CASES = deepFreeze([
     kind: 'analytic',
     validationType: 'analytic_regression',
     source,
-    modelVersion: MODEL_VERSION,
+    modelId: SIMULATION_MODEL_ID,
+    modelVersion: SIMULATION_MODEL_VERSION,
+    assumptionsVersion: SIMULATION_ASSUMPTIONS_VERSION,
     inputs: { altitude_m: 0 },
     expected: { value: 1.2249781262, unit: 'kg/m^3', tolerance: 1e-9 },
     assumptions: ['ISA troposphere at sea level', 'dry air and standard gravity'],
@@ -34,7 +40,9 @@ export const PHASE2_CASES = deepFreeze([
     kind: 'analytic',
     validationType: 'analytic_regression',
     source,
-    modelVersion: MODEL_VERSION,
+    modelId: SIMULATION_MODEL_ID,
+    modelVersion: SIMULATION_MODEL_VERSION,
+    assumptionsVersion: SIMULATION_ASSUMPTIONS_VERSION,
     inputs: { altitude_m: 5000 },
     expected: { value: 0.736100614, unit: 'kg/m^3', tolerance: 1e-9 },
     assumptions: ['ISA troposphere lapse rate applies through 5000 m', 'dry air'],
@@ -46,7 +54,9 @@ export const PHASE2_CASES = deepFreeze([
     kind: 'analytic',
     validationType: 'analytic_regression',
     source,
-    modelVersion: MODEL_VERSION,
+    modelId: SIMULATION_MODEL_ID,
+    modelVersion: SIMULATION_MODEL_VERSION,
+    assumptionsVersion: SIMULATION_ASSUMPTIONS_VERSION,
     inputs: { chuteSpecs: { diameter_in: 36, cd: 1.5 }, mass_kg: 2.5, altitude_ft: 0 },
     expected: { value: 20.9141123491, unit: 'ft/s', tolerance: 1e-9 },
     assumptions: ['steady terminal descent', 'flat circular projected area', 'constant Cd'],
@@ -62,7 +72,9 @@ export const PHASE2_CASES = deepFreeze([
       url: 'https://www.weather.gov/jetstream/wind',
       accessDate: '2026-07-21',
     }),
-    modelVersion: MODEL_VERSION,
+    modelId: SIMULATION_MODEL_ID,
+    modelVersion: SIMULATION_MODEL_VERSION,
+    assumptionsVersion: SIMULATION_ASSUMPTIONS_VERSION,
     inputs: {
       simulation: { apogee_ft: 1000, deploy_ft: 0, drogue_fps: 10 },
       specs: {

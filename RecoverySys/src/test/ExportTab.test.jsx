@@ -39,4 +39,19 @@ describe('ExportTab custom-part import', () => {
       )
     )
   })
+
+  it('shows the versioned brief handoff status without changing JSON actions', () => {
+    render(
+      <ExportTab
+        state={{ saveState: 'idle', shareState: 'idle' }}
+        saveConfig={vi.fn()}
+        copyShareLink={vi.fn()}
+        onLoadConfig={vi.fn()}
+        recoveryBrief={{ status: 'stale', confidence: { label: 'Insufficient confidence' } }}
+      />
+    )
+    expect(screen.getByRole('status')).toHaveTextContent(/STALE_RESULT/)
+    expect(screen.getByRole('status')).toHaveTextContent(/Insufficient confidence/)
+    expect(screen.getByRole('button', { name: /PRINT_RECOVERY_BRIEF/i })).toBeInTheDocument()
+  })
 })

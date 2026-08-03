@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
 import { PHASE2_CASES } from './fixtures/validation/phase2-cases.js'
-import { SIMULATION_MODEL_VERSION } from '../lib/constants.js'
+import {
+  SIMULATION_ASSUMPTIONS_VERSION,
+  SIMULATION_MODEL_ID,
+  SIMULATION_MODEL_VERSION,
+} from '../lib/constants.js'
 import { airDensity, computeDescentRate, computeDrift } from '../lib/simulation.js'
 
 const finite = (value, id) =>
@@ -11,6 +15,10 @@ describe('Phase 2 analytic validation foundation', () => {
     expect(testCase.kind, `${testCase.id}: case kind`).toBe('analytic')
     expect(testCase.validationType, `${testCase.id}: validation type`).toBe('analytic_regression')
     expect(testCase.modelVersion, `${testCase.id}: model version`).toBe(SIMULATION_MODEL_VERSION)
+    expect(testCase.modelId, `${testCase.id}: model id`).toBe(SIMULATION_MODEL_ID)
+    expect(testCase.assumptionsVersion, `${testCase.id}: assumptions version`).toBe(
+      SIMULATION_ASSUMPTIONS_VERSION
+    )
   })
 
   it('matches independent ISA density references', () => {

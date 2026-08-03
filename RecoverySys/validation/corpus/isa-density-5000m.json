@@ -1,0 +1,36 @@
+{
+  "id": "isa-density-5000m",
+  "kind": "analytic",
+  "domain": "atmosphere",
+  "status": "review",
+  "inputs": { "altitude_m": 5000 },
+  "expected": {
+    "metrics": [
+      {
+        "name": "density_kg_m3",
+        "value": 0.736100614,
+        "unit": "kg/m^3",
+        "tolerance": { "absolute": 0.000000001, "basis": "analyst-derived" },
+        "notes": "ISA P/(R*T) at 5000 m."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html",
+    "title": "U.S. Standard Atmosphere, 1976 / NASA Glenn Beginner's Guide to Aerodynamics",
+    "accessed": "2026-07-21",
+    "citation": "NASA Glenn atmospheric model reference.",
+    "derivation": "Independently evaluate rho = P / (R * T) using the documented ISA troposphere constants."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "Browser JavaScript recovery estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Observed density differs from the analytic reference by no more than the stated absolute tolerance."
+  },
+  "notes": "Analytic regression comparison only; not real-flight validation."
+}

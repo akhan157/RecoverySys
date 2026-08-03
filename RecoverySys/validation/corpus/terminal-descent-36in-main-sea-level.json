@@ -1,0 +1,40 @@
+{
+  "id": "terminal-descent-36in-main-sea-level",
+  "kind": "analytic",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "chuteSpecs": { "diameter_in": 36, "cd": 1.5 },
+    "mass_kg": 2.5,
+    "altitude_ft": 0
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "descent_rate_fps",
+        "value": 20.9141123491,
+        "unit": "ft/s",
+        "tolerance": { "absolute": 0.000000001, "basis": "analyst-derived" },
+        "notes": "Steady terminal descent for a flat circular projected area."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www.grc.nasa.gov/www/k-12/airplane/termv.html",
+    "title": "NASA Glenn terminal velocity reference",
+    "accessed": "2026-07-21",
+    "citation": "Terminal-velocity drag equation.",
+    "derivation": "Evaluate sqrt(2*m*g/(rho*Cd*A)) with the stated chute diameter, Cd, mass, and ISA sea-level density."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "Browser JavaScript recovery estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Observed terminal descent rate differs from the analytic reference by no more than the stated absolute tolerance."
+  },
+  "notes": "Analytic regression comparison only; not parachute test evidence."
+}

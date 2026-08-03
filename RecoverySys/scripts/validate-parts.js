@@ -3,6 +3,7 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Ajv from 'ajv/dist/2020.js'
 import { PARTS, CATEGORIES } from '../src/data/parts.js'
+import { provenanceForPart } from '../src/data/catalogProvenance.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const PARTS_SCHEMA = JSON.parse(fs.readFileSync(path.join(ROOT, 'parts-schema.json'), 'utf8'))
@@ -59,6 +60,22 @@ export function validateCatalog(parts, categories = CATEGORIES, schema = PARTS_S
         part,
         path: '/specs/deploy_alt_min_ft',
         reason: 'deployment altitude minimum must be less than or equal to maximum',
+      }))
+    }
+    const provenance = provenanceForPart(part)
+    if (!provenance) {
+      diagnostics.push(formatDiagnostic({
+        index,
+        part,
+        path: '/manufacturer',
+        reason: 'has no catalog provenance record',
+      }))
+    } else if (!['verified', 'unverified'].includes(provenance.status)) {
+      diagnostics.push(formatDiagnostic({
+        index,
+        part,
+        path: '/manufacturer',
+        reason: 'has an invalid catalog provenance status',
       }))
     }
   })

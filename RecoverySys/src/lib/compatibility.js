@@ -134,6 +134,60 @@ function buildContext({ config, specs }) {
 const err = (slot, message) => ({ level: WARN_LEVELS.ERROR, slot, message })
 const warn = (slot, message) => ({ level: WARN_LEVELS.WARN, slot, message })
 
+// Keep the rule messages human-readable and backwards compatible, while
+// giving consumers a stable, machine-readable envelope.  The compatibility
+// engine does not have catalog provenance: its evidence is derived from the
+// supplied inputs and the named rule that evaluated them.
+const INPUT_PATHS = {
+  main_chute: ['config.main_chute'],
+  drogue_chute: ['config.drogue_chute'],
+  shock_cord: ['config.shock_cord'],
+  quick_links: ['config.quick_links'],
+  swivel: ['config.swivel'],
+  deployment_bag: ['config.deployment_bag'],
+  chute_device: ['config.chute_device'],
+  bay_volume: ['specs.airframe_id_in', 'specs.bay_length_in'],
+}
+
+const stableCode = (slot, message) => {
+  const normalized = message
+    .toLowerCase()
+    .replace(/[-+]?\d+(?:\.\d+)?/g, '#')
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '')
+  return `compatibility.${slot}.${normalized}`
+}
+
+const remediationFor = (warning) =>
+  warning.level === WARN_LEVELS.ERROR
+    ? 'Correct the affected input or replace the referenced part before flight.'
+    : 'Review the affected input and address the recommendation before flight.'
+
+function normalizeWarning(warning) {
+  const inputPaths = INPUT_PATHS[warning.slot] ?? [`config.${warning.slot}`]
+  const partRefs = [warning.slot]
+  return {
+    ...warning,
+    code: stableCode(warning.slot, warning.message),
+    warningCode: stableCode(warning.slot, warning.message),
+    inputPaths,
+    affectedInputPaths: inputPaths,
+    partRefs,
+    affectedPartRefs: partRefs,
+    remediation: remediationFor(warning),
+    evidenceClassification: 'derived',
+    sourceClassification: 'calculation',
+    evidence: {
+      classification: 'derived',
+      source: 'compatibility-rule',
+    },
+    source: {
+      classification: 'calculation',
+      reference: 'src/lib/compatibility.js',
+    },
+  }
+}
+
 // Generic strength check: flags ERROR if rated < required, WARN if marginal.
 // Returns 0-2 warnings; used by shock_cord, quick_links, swivel ejection-load checks.
 function strengthCheck({ slot, rated_lbs, required_lbs, label, suffix = '', g_factor }) {
@@ -727,7 +781,7 @@ export function checkCompatibility({ config, specs }) {
     const out = rule.length === 2 ? rule(ctx, warnings) : rule(ctx)
     if (out.length > 0) warnings.push(...out)
   }
-  return warnings
+  return warnings.map(normalizeWarning)
 }
 
 /**

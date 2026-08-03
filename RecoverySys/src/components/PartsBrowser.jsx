@@ -4,6 +4,7 @@ import { partSpecLine } from '../lib/format.js'
 import CompatDot from './CompatDot.jsx'
 import CollapsibleGroup from './primitives/CollapsibleGroup.jsx'
 import './PartsBrowser.css'
+import PartProvenance from './PartProvenance.jsx'
 
 // Catalog parts grouped by manufacturer. Cards are simple selection buttons.
 function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen, hasSelected }) {
@@ -21,6 +22,7 @@ function MfrGroup({ mfr, parts, config, onSelectPart, defaultOpen, hasSelected }
           >
             <div className="parts-card__name">{part.name}</div>
             <div className="parts-card__spec mono">{partSpecLine(part)}</div>
+            <PartProvenance part={part} compact />
           </button>
         )
       })}
@@ -44,6 +46,7 @@ function CustomGroup({ parts, config, onSelectPart, onDelete, onEdit }) {
             >
               <div className="parts-card__name">{part.name}</div>
               <div className="parts-card__spec mono">{partSpecLine(part)}</div>
+              <PartProvenance part={part} compact />
             </button>
             {/* Edit + Delete buttons — positioned over card */}
             <div

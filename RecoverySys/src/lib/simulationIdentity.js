@@ -1,7 +1,9 @@
 import {
   VERSION,
   SIMULATION_SCHEMA_VERSION,
+  SIMULATION_MODEL_ID,
   SIMULATION_MODEL_VERSION,
+  SIMULATION_ASSUMPTIONS_VERSION,
   SIMULATION_METHOD,
 } from './constants.js'
 
@@ -40,7 +42,9 @@ export function captureSimulationProvenance(input, generatedAt = new Date().toIS
   return {
     inputKey: simulationInputKey(input),
     revision: simulationRevision(input),
+    modelId: SIMULATION_MODEL_ID,
     modelVersion: SIMULATION_MODEL_VERSION,
+    assumptionsVersion: SIMULATION_ASSUMPTIONS_VERSION,
     schemaVersion: SIMULATION_SCHEMA_VERSION,
     appVersion: VERSION,
     method: SIMULATION_METHOD,
@@ -49,9 +53,27 @@ export function captureSimulationProvenance(input, generatedAt = new Date().toIS
 }
 
 export function isSimulationStale(simulation, input) {
+  if (!simulation) return false
+  const provenance = simulation.provenance
+  if (!provenance) return true
+  const required = [
+    'inputKey',
+    'revision',
+    'modelId',
+    'modelVersion',
+    'assumptionsVersion',
+    'schemaVersion',
+    'appVersion',
+    'method',
+  ]
+  if (required.some((key) => provenance[key] === undefined || provenance[key] === null)) return true
   return (
-    !!simulation &&
-    (!simulation.provenance || simulation.provenance.inputKey !== simulationInputKey(input))
+    provenance.inputKey !== simulationInputKey(input) ||
+    provenance.revision !== simulationRevision(input) ||
+    provenance.modelId !== SIMULATION_MODEL_ID ||
+    provenance.modelVersion !== SIMULATION_MODEL_VERSION ||
+    provenance.assumptionsVersion !== SIMULATION_ASSUMPTIONS_VERSION ||
+    provenance.schemaVersion !== SIMULATION_SCHEMA_VERSION
   )
 }
 

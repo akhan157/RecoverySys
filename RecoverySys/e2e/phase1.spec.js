@@ -84,6 +84,41 @@ test('mount removes the production skeleton and preserves live tab navigation', 
   }
 })
 
+test('confidence posture is visible without implying validation or approval', async ({
+  guardedPage,
+}) => {
+  await openApp(guardedPage)
+  const posture = guardedPage.getByLabel('Insufficient confidence').first()
+  await expect(posture).toContainText('Insufficient confidence')
+  await expect(posture).toContainText('No current simulation result is available yet')
+  await expect(posture).toContainText(/safety approval.*certification/i)
+  await expect(posture).not.toContainText('Supported')
+})
+
+test('analysis shows deterministic sensitivity ranges and uncertainty boundary', async ({
+  guardedPage,
+}) => {
+  await openApp(guardedPage)
+  await configureRocket(guardedPage)
+  await simulate(guardedPage)
+  await guardedPage.getByRole('tab', { name: 'ANALYSIS' }).click()
+  const panel = guardedPage.getByRole('tabpanel')
+  await expect(panel.getByText('SENSITIVITY // ONE-AT-A-TIME')).toBeVisible()
+  await expect(panel.getByText('INFLUENTIAL_INPUTS')).toBeVisible()
+  await expect(panel.getByText(/not measured confidence intervals/i)).toBeVisible()
+})
+
+test('hardware review exposes unverified provenance and actionable warning metadata', async ({
+  guardedPage,
+}) => {
+  await openApp(guardedPage)
+  await configureRocket(guardedPage)
+  await expect(guardedPage.getByText(/CATALOG DATA · UNVERIFIED/).first()).toBeVisible()
+  await guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
+  await expect(guardedPage.getByText(/COMPATIBILITY_REVIEW/)).toBeVisible()
+  await expect(guardedPage.getByText(/Acknowledgement records review only/)).toBeVisible()
+})
+
 test('explicit demo and first-visit bootstrap show a sample and can start fresh', async ({
   guardedPage,
 }) => {

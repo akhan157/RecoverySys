@@ -16,7 +16,14 @@ const PACKING_ORDER = [
 
 const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label]))
 
-export default function PrintChecklist({ specs, config, simulation, resultFresh, warnings = [] }) {
+export default function PrintChecklist({
+  specs,
+  config,
+  simulation,
+  resultFresh,
+  warnings = [],
+  recoveryBrief,
+}) {
   const date = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
     month: 'long',
@@ -32,6 +39,59 @@ export default function PrintChecklist({ specs, config, simulation, resultFresh,
     <div className="print-checklist">
       <h1>RecoverySys Recovery Checklist</h1>
       <p className="print-subtitle">Generated {date}</p>
+      <section className="print-brief-status">
+        <h2>Recovery brief status</h2>
+        <p>
+          {recoveryBrief?.status === 'current'
+            ? 'CURRENT_RESULT — estimates reflect the current inputs.'
+            : recoveryBrief?.status === 'stale'
+              ? 'STALE_RESULT — rerun the simulation before using these estimates.'
+              : 'NO_CURRENT_RESULT — no simulation estimates are available.'}
+        </p>
+        <p>
+          Evidence posture: {recoveryBrief?.confidence?.label || 'Insufficient confidence'}. This is
+          a planning estimate, not a safety approval or certification.
+        </p>
+        <p>{recoveryBrief?.authorization}</p>
+      </section>
+      <section>
+        <h2>Mission envelope and unresolved checks</h2>
+        <p>Envelope status: {recoveryBrief?.missionEnvelope?.status || 'not evaluated'}</p>
+        <ul>
+          {(recoveryBrief?.unresolvedChecks || []).map((check, index) => (
+            <li key={`${check.code}-${index}`}>
+              {check.message}
+              {check.remediation ? ` Review: ${check.remediation}` : ''}
+            </li>
+          ))}
+        </ul>
+        {(recoveryBrief?.unresolvedChecks || []).length === 0 && (
+          <p>No unresolved checks recorded.</p>
+        )}
+      </section>
+      <section>
+        <h2>Evidence and model provenance</h2>
+        <p>{recoveryBrief?.confidence?.evidenceNote}</p>
+        <p>
+          Model: {recoveryBrief?.provenance?.modelId || 'Not available'} · Version:{' '}
+          {recoveryBrief?.provenance?.modelVersion || 'Not available'} · Assumptions:{' '}
+          {recoveryBrief?.provenance?.assumptionsVersion || 'Not available'}
+        </p>
+      </section>
+      <section>
+        <h2>Selected hardware</h2>
+        {recoveryBrief?.selectedHardware?.length ? (
+          <ul>
+            {recoveryBrief.selectedHardware.map((part) => (
+              <li key={part.slot}>
+                <strong>{part.slot}:</strong> {part.name}
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p>No hardware selected.</p>
+        )}
+      </section>
 
       {/* ── Rocket Specs ──────────────────────────────────────── */}
       <section>

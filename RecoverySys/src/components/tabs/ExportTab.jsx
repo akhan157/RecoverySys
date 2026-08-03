@@ -19,7 +19,13 @@ function downloadJson(state) {
   URL.revokeObjectURL(url)
 }
 
-export default function ExportTab({ state, saveConfig, copyShareLink, onLoadConfig }) {
+export default function ExportTab({
+  state,
+  saveConfig,
+  copyShareLink,
+  onLoadConfig,
+  recoveryBrief,
+}) {
   const fileRef = useRef(null)
 
   const handleImport = (e) => {
@@ -73,6 +79,31 @@ export default function ExportTab({ state, saveConfig, copyShareLink, onLoadConf
         EXPORT // SHARE_CONFIGURATION
       </h2>
       <div className="mc-export__content">
+        <div className="mc-export__section">
+          <div className="mc-metric__label">RECOVERY_BRIEF</div>
+          <div
+            style={{
+              fontSize: 10,
+              color: 'var(--mc-text-dim)',
+              margin: '6px 0 12px',
+              lineHeight: 1.6,
+            }}
+          >
+            Review the mission envelope, evidence posture, hardware, estimates, unresolved checks,
+            and model provenance before sharing or printing.
+          </div>
+          <div className="mc-export__brief-status" role="status">
+            {recoveryBrief?.status === 'current'
+              ? 'CURRENT_RESULT'
+              : recoveryBrief?.status === 'stale'
+                ? 'STALE_RESULT // RERUN_REQUIRED'
+                : 'NO_CURRENT_RESULT'}{' '}
+            · {recoveryBrief?.confidence?.label || 'Insufficient confidence'}
+          </div>
+          <button className="mc-run-btn" onClick={() => window.print()}>
+            PRINT_RECOVERY_BRIEF →
+          </button>
+        </div>
         <div className="mc-export__section">
           <div className="mc-metric__label">SAVE_TO_BROWSER</div>
           <div

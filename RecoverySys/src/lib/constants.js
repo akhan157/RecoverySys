@@ -60,5 +60,7 @@ export const VERSION_DISPLAY = 'V1.2'
 // Result provenance metadata. Keep these distinct: app release, payload schema,
 // and the numerical model can evolve independently.
 export const SIMULATION_SCHEMA_VERSION = 1
+export const SIMULATION_MODEL_ID = 'browser-js-recovery'
 export const SIMULATION_MODEL_VERSION = 'isa-apogee-descent-v1'
+export const SIMULATION_ASSUMPTIONS_VERSION = 'recovery-assumptions-v1'
 export const SIMULATION_METHOD = 'deterministic-physics'

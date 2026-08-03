@@ -1,6 +1,7 @@
 import { WARN_LEVELS } from '../lib/constants.js'
+import NormalizedWarningList from './NormalizedWarningList.jsx'
 
-export default function WarningBox({ warnings }) {
+export default function WarningBox({ warnings, onNavigate }) {
   if (!warnings || warnings.length === 0) return null
 
   const hasError = warnings.some((w) => w.level === WARN_LEVELS.ERROR)
@@ -18,6 +19,10 @@ export default function WarningBox({ warnings }) {
       fg: 'var(--warn-fg)',
     },
   }[level]
+
+  if (warnings.some((warning) => warning.code || warning.warningCode)) {
+    return <NormalizedWarningList warnings={warnings} onNavigate={onNavigate} />
+  }
 
   const errorCount = warnings.filter((w) => w.level === WARN_LEVELS.ERROR).length
   const warnCount = warnings.filter((w) => w.level === WARN_LEVELS.WARN).length

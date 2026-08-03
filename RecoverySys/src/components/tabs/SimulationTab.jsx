@@ -1,8 +1,9 @@
 import { WARN_LEVELS } from '../../lib/constants.js'
 import FlightChart from '../FlightChart.jsx'
 import MetricCard from '../MetricCard.jsx'
+import ConfidenceStatus from '../ConfidenceStatus.jsx'
 
-export default function SimulationTab({ state, runSim, canRun, resultFresh }) {
+export default function SimulationTab({ state, runSim, canRun, resultFresh, confidenceProps }) {
   const sim = state.simulation
   const usableSim = resultFresh ? sim : null
   const shock = usableSim?.shock_load
@@ -10,6 +11,7 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh }) {
 
   return (
     <div className="mc-sim">
+      <ConfidenceStatus {...confidenceProps} />
       {/* ── Top: Chart + Data ────────────────────────────────────────── */}
       <div className="mc-sim__top">
         {/* Flight Chart */}
