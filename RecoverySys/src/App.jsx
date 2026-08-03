@@ -261,7 +261,7 @@ export default function App() {
   // sample L3 config + sim so first-time visitors see the tool populated.
   // Share link wins if both are present. Hoisted above usePersistence so demoMode
   // is available to disable auto-save during the demo session.
-  const { demoMode, exitDemo } = useDemoMode({
+  const { demoMode, exitDemo, hasSavedConfig } = useDemoMode({
     allParts,
     demoPartIds: DEMO_PART_IDS,
     demoSpecs: DEMO_SPECS,
@@ -375,6 +375,9 @@ export default function App() {
   }, [state.config, state.specs, state.customMotor, safeTimeout, addToast])
 
   const removeToast = useCallback((id) => dispatch({ type: 'REMOVE_TOAST', id }), [])
+  const openExampleConfiguration = useCallback(() => {
+    window.location.assign(`${window.location.pathname}?demo=1`)
+  }, [])
 
   // ── Session restore toast ─────────────────────────────────────────────────
   useEffect(() => {
@@ -399,7 +402,7 @@ export default function App() {
   // ── Render ────────────────────────────────────────────────────────────────
   return (
     <>
-      {demoMode && <DemoBanner onExit={exitDemo} />}
+      {demoMode && <DemoBanner onExit={exitDemo} hasSavedConfig={hasSavedConfig} />}
       <MissionControlLayout
         state={state}
         allParts={allParts}
@@ -422,6 +425,7 @@ export default function App() {
         clearCompareSnapshot={clearCompareSnapshot}
         darkMode={darkMode}
         setDarkMode={setDarkMode}
+        openExampleConfiguration={openExampleConfiguration}
       />
       <ToastContainer toasts={state.toasts} onRemove={removeToast} />
     </>

@@ -89,20 +89,82 @@ test('explicit demo and first-visit bootstrap show a sample and can start fresh'
 }) => {
   await prepareStorage(guardedPage, { firstVisit: true })
   await guardedPage.goto('./?demo=1')
-  await expect(guardedPage.getByRole('status')).toContainText('DEMO')
+  await expect(guardedPage.getByRole('status')).toContainText('EXAMPLE')
   await expect(guardedPage.getByText('APOGEE_ALTITUDE')).toBeVisible()
-  await guardedPage.getByRole('button', { name: /START_FRESH/ }).click()
+  await guardedPage.getByRole('button', { name: 'Start Fresh' }).click()
   await expect(guardedPage.getByRole('status')).toHaveCount(0)
 
   await guardedPage.reload()
   await expect(guardedPage.getByRole('status')).toHaveCount(0)
   await expect(guardedPage.getByText('NO_COMPONENT_LOADED').first()).toBeVisible()
+  await guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
+  await guardedPage.getByRole('button', { name: 'Open example configuration' }).click()
+  await expect(guardedPage).toHaveURL(/\?demo=1$/)
+  await expect(guardedPage.getByRole('status')).toContainText('EXAMPLE')
+  await expect(guardedPage.getByText('APOGEE_ALTITUDE')).toBeVisible()
 })
 
 test('first visit without saved state bootstraps demo mode', async ({ guardedPage }) => {
   await openApp(guardedPage, { firstVisit: true })
-  await expect(guardedPage.getByRole('status')).toContainText('DEMO')
+  await expect(guardedPage.getByRole('status')).toContainText('EXAMPLE')
   await expect(guardedPage.getByText('APOGEE_ALTITUDE')).toBeVisible()
+})
+
+test('saved configuration is preserved when Start Fresh is cancelled and deleted only on confirmation', async ({
+  guardedPage,
+}) => {
+  await prepareStorage(guardedPage)
+  await guardedPage.goto('./')
+  await guardedPage.evaluate(() => {
+    localStorage.setItem(
+      'recoverysys-config',
+      JSON.stringify({ config: { main_chute: { id: 'cl-24-n' } } })
+    )
+  })
+  await guardedPage.goto('./?demo=1')
+  await guardedPage.getByRole('button', { name: 'Start Fresh' }).click()
+  await expect(guardedPage.getByRole('dialog')).toContainText('saved configuration')
+  await guardedPage.getByRole('button', { name: 'Cancel' }).click()
+  await expect(guardedPage.getByRole('dialog')).toHaveCount(0)
+  await expect(
+    guardedPage.evaluate(() => localStorage.getItem('recoverysys-config'))
+  ).not.toBeNull()
+  await guardedPage.getByRole('button', { name: 'Start Fresh' }).click()
+  await guardedPage.getByRole('button', { name: /Delete saved configuration/ }).click()
+  await expect(guardedPage).toHaveURL(/\/?$/)
+  await expect
+    .poll(() => guardedPage.evaluate(() => localStorage.getItem('recoverysys-config')))
+    .toBeNull()
+})
+
+test('tablist supports keyboard navigation and reaches example configuration action', async ({
+  guardedPage,
+}) => {
+  await openApp(guardedPage)
+  const dashboard = guardedPage.getByRole('tab', { name: 'DASHBOARD' })
+  await dashboard.focus()
+  await dashboard.press('ArrowRight')
+  const specsTab = guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' })
+  await expect(specsTab).toHaveAttribute('aria-selected', 'true')
+  await expect(specsTab).toHaveAttribute('aria-controls', 'mc-panel-specs')
+  const specsPanel = guardedPage.getByRole('tabpanel')
+  await expect(specsPanel).toHaveAttribute('id', 'mc-panel-specs')
+  await expect(specsPanel).toHaveAttribute('aria-labelledby', 'mc-tab-specs')
+  await expect(specsPanel).toContainText('Open example configuration')
+  const exampleButton = specsPanel.getByRole('button', { name: 'Open example configuration' })
+  await exampleButton.focus()
+  await exampleButton.press('Enter')
+  await expect(guardedPage).toHaveURL(/\?demo=1$/)
+  await expect(guardedPage.getByRole('status')).toContainText('EXAMPLE')
+  await expect(guardedPage.getByText('APOGEE_ALTITUDE')).toBeVisible()
+  await guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' }).focus()
+  await guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' }).press('End')
+  await expect(guardedPage.getByRole('tab', { name: 'EXPORT' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  )
+  await guardedPage.getByRole('tab', { name: 'EXPORT' }).press('Home')
+  await expect(dashboard).toHaveAttribute('aria-selected', 'true')
 })
 
 test('configuration simulates, becomes stale after input change, and reruns', async ({

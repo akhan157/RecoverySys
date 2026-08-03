@@ -26,6 +26,13 @@ import { buildResultEnvelope } from '../lib/resultIntegrity.js'
  * Returns: { demoMode, exitDemo }
  */
 export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch }) {
+  const [hasSavedConfig] = useState(() => {
+    try {
+      return !!localStorage.getItem('recoverysys-config')
+    } catch {
+      return false
+    }
+  })
   const [demoMode] = useState(() => {
     if (typeof window === 'undefined') return false
     const params = new URLSearchParams(location.search)
@@ -87,5 +94,5 @@ export default function useDemoMode({ allParts, demoPartIds, demoSpecs, dispatch
     window.location.replace(window.location.pathname)
   }, [])
 
-  return { demoMode, exitDemo }
+  return { demoMode, exitDemo, hasSavedConfig }
 }

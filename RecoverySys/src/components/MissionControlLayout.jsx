@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useRef } from 'react'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
 import { computePackingVolume } from '../lib/compatibility.js'
@@ -45,9 +45,11 @@ export default function MissionControlLayout({
   addToast,
   saveCompareSnapshot,
   clearCompareSnapshot,
+  openExampleConfiguration,
   /* darkMode/setDarkMode removed: MC layout is dark-only */
 }) {
   const [activeTab, setActiveTab] = useState('DASHBOARD')
+  const tabRefs = useRef([])
 
   const filledSlots = useMemo(
     () => CATEGORIES.filter((c) => state.config[c.id] != null).length,
@@ -77,6 +79,23 @@ export default function MissionControlLayout({
   const tabBtnId = (id) => `mc-tab-${id.toLowerCase()}`
   const tabPanelId = (id) => `mc-panel-${id.toLowerCase()}`
 
+  const selectTabWithKeyboard = (index) => {
+    setActiveTab(TABS[index].id)
+    tabRefs.current[index]?.focus()
+  }
+
+  const handleTabKeyDown = (event, index) => {
+    let nextIndex = null
+    if (event.key === 'ArrowRight') nextIndex = (index + 1) % TABS.length
+    if (event.key === 'ArrowLeft') nextIndex = (index - 1 + TABS.length) % TABS.length
+    if (event.key === 'Home') nextIndex = 0
+    if (event.key === 'End') nextIndex = TABS.length - 1
+    if (nextIndex !== null) {
+      event.preventDefault()
+      selectTabWithKeyboard(nextIndex)
+    }
+  }
+
   return (
     <>
       <div className="mc">
@@ -94,8 +113,17 @@ export default function MissionControlLayout({
                   aria-selected={isActive}
                   aria-controls={tabPanelId(tab.id)}
                   tabIndex={isActive ? 0 : -1}
+                  ref={(element) => {
+                    tabRefs.current[TABS.findIndex((item) => item.id === tab.id)] = element
+                  }}
                   className={`mc-header__tab ${isActive ? 'mc-header__tab--active' : ''}`}
                   onClick={() => setActiveTab(tab.id)}
+                  onKeyDown={(event) =>
+                    handleTabKeyDown(
+                      event,
+                      TABS.findIndex((item) => item.id === tab.id)
+                    )
+                  }
                 >
                   {tab.label}
                 </button>
@@ -110,7 +138,7 @@ export default function MissionControlLayout({
         {/* ── Body ────────────────────────────────────────────────────────── */}
         <div className="mc-body">
           <main
-            id="mc-main"
+            id={tabPanelId(activeTab)}
             className="mc-main"
             role="tabpanel"
             aria-labelledby={tabBtnId(activeTab)}
@@ -159,6 +187,7 @@ export default function MissionControlLayout({
                 setCustomMotor={setCustomMotor}
                 clearCustomMotor={clearCustomMotor}
                 addToast={addToast}
+                openExampleConfiguration={openExampleConfiguration}
               />
             )}
             {activeTab === 'COMPARE' && (
@@ -180,6 +209,15 @@ export default function MissionControlLayout({
               />
             )}
           </main>
+          {TABS.filter((tab) => tab.id !== activeTab).map((tab) => (
+            <div
+              key={tab.id}
+              id={tabPanelId(tab.id)}
+              role="tabpanel"
+              aria-labelledby={tabBtnId(tab.id)}
+              hidden
+            />
+          ))}
         </div>
       </div>
       <PrintChecklist

@@ -640,7 +640,7 @@ function LPScroll() {
         <div className="lps-nav-right">
           <span className="lps-nav-meta">BUILD_20260427</span>
           <a href="https://github.com/akhan157/RecoverySys" className="lps-btn lps-btn--ghost">GITHUB →</a>
-          <a href="../?demo=1" className="lps-btn lps-btn--green">LAUNCH ▶</a>
+          <a href="../?demo=1" className="lps-btn lps-btn--green">OPEN EXAMPLE CONFIGURATION ▶</a>
         </div>
       </nav>
 
@@ -671,7 +671,7 @@ function LPScroll() {
               Runs entirely in your browser.
             </p>
             <div className="lps-hero-ctas">
-              <a href="../?demo=1" className="lps-btn lps-btn--green lps-btn--lg">▶ RUN_A_SIMULATION</a>
+              <a href="../?demo=1" className="lps-btn lps-btn--green lps-btn--lg">▶ OPEN EXAMPLE CONFIGURATION</a>
               <a href="../?demo=1#parts" className="lps-btn lps-btn--lg">PARTS_CATALOG →</a>
             </div>
             <div className="lps-hero-dots">
@@ -1049,7 +1049,7 @@ function LPScroll() {
           Your configurations save locally and stay on your machine.
         </p>
         <div className="lps-cta-row">
-          <a href="../?demo=1" className="lps-btn lps-btn--green lps-btn--lg">▶ OPEN_THE_TOOL</a>
+          <a href="../?demo=1" className="lps-btn lps-btn--green lps-btn--lg">▶ OPEN EXAMPLE CONFIGURATION</a>
           <a href="https://github.com/akhan157/RecoverySys" className="lps-btn lps-btn--lg">GITHUB →</a>
         </div>
       </section>
