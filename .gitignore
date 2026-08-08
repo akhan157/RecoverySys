@@ -32,3 +32,11 @@ Thumbs.db
 
 # Claude skills (not part of RecoverySys project)
 .claude/
+
+# BEGIN oh-my-opencode-slim worktrees
+.slim/worktrees/
+.slim/worktrees.json
+# END oh-my-opencode-slim worktrees
+
+# Local deepwork state
+.slim/deepwork/

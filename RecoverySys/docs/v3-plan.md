@@ -4,6 +4,10 @@
 
 V3 turns the v2 workflow into a guided first-plan experience and carries forward evidence work that cannot be completed by implementation alone. It does not weaken v2 disclosures or recast estimates as approval, certification, or a probability of success.
 
+The implementation-ready interface redesign is defined in [`ui-redesign-plan.md`](./ui-redesign-plan.md). It restores the original mission-control hierarchy while integrating V2 capabilities with less repetition and clearer action paths.
+
+The Analysis surface has a dedicated intention-first plan in [`analysis-tab-redesign-plan.md`](./analysis-tab-redesign-plan.md).
+
 ## V3 first product slice: guided first plan
 
 **Goal:** help a first-time user move from an empty plan to a reviewable recovery brief without hiding assumptions, warnings, or confidence limitations.
