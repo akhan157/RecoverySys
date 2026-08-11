@@ -13,7 +13,9 @@
     "terminal-descent-36in-main-sea-level",
     "landing-energy-36in-main-sea-level",
     "layered-wind-linear-interpolation-drift",
-    "static-ejection-load-nylon-screening"
+    "static-ejection-load-nylon-screening",
+    "end-to-end-scalar-2kg-main-500ft",
+    "end-to-end-curve-2kg-main-500ft"
   ],
   "scopeLimitations": [
     "These initial analytic cases are in review; no benchmark is accepted-for-comparison or flight validated.",

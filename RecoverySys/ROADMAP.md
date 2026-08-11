@@ -75,7 +75,9 @@ fully qualified v2/v3 release.
 
 ### Not Yet Complete
 
-- Only six review-only validation cases exist. There are no accepted comparison cases or real-flight evidence cases.
+- Eight review-only validation cases now exist, including scalar and curve
+  representative end-to-end plans. There are no accepted comparison cases or
+  real-flight evidence cases.
 - Catalog provenance is still primarily manufacturer-level and unverified; per-part source review is not complete.
 - The Analysis tab now has the integrated cause-to-consequence review surface and canonical semantic support, but cross-artifact parity and broader application redesign remain incomplete.
 - `GuidedReview.jsx` is connected as the first-plan entry with explicit new/resume/import/pause/start-fresh actions, live result state, direct tab navigation, and App-owned persistence/reset handling. `DetailsTab.jsx` and `MethodDetailsTab.jsx` remain snapshot/prototype work outside this integration.
@@ -159,7 +161,9 @@ stronger product claims.
 
 Work:
 
-- Add corpus coverage beyond the six current review cases for atmosphere, scalar and curve ascent, descent, drift, landing energy, screening loads, unit conversions, edge cases, metamorphic behavior, and representative end-to-end plans.
+- Expand the corpus beyond the eight current review cases with explicit
+  atmosphere, ascent-domain, unit-conversion, edge-case, metamorphic, and
+  additional representative end-to-end coverage.
 - Add deterministic machine-readable case summaries and coverage by output domain.
 - Seed dispersion runs and make all stochastic fixtures reproducible.
 - Document tolerance derivation, input equivalence, units, model identity, and scope for every case.
@@ -328,8 +332,8 @@ verification above:
 
 - **Independent evidence:** no accepted comparison cases, independent reviewer
   identity, trusted simulator artifact, manufacturer/test dataset, or traceable
-  real-flight observation has been supplied. The six current corpus cases remain
-  review-only.
+  real-flight observation has been supplied. The eight current corpus cases
+  remain review-only.
 - **macOS qualification:** no macOS host run has verified the universal artifact;
   macOS support remains unverified.
 - **Windows release artifact:** the historical portable build is documented, but

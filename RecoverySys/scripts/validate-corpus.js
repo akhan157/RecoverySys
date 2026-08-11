@@ -7,8 +7,13 @@ import {
   SIMULATION_MODEL_ID,
   SIMULATION_MODEL_VERSION,
 } from '../src/lib/constants.js'
-import { airDensity, computeDescentRate, computeDrift } from '../src/lib/simulation.js'
-import { computeShockLoad } from '../src/lib/simulation.js'
+import {
+  airDensity,
+  computeDescentRate,
+  computeDrift,
+  computeShockLoad,
+  runSimulation,
+} from '../src/lib/simulation.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const CORPUS_DIR = path.join(ROOT, 'validation', 'corpus')
@@ -79,6 +84,32 @@ const evaluators = Object.freeze({
         0.5 * inputs.mass_kg * landingSpeedMps * landingSpeedMps * 0.7376
       ),
     }
+  },
+  'end-to-end-scalar-2kg-main-500ft': (inputs) => {
+    const result = runSimulation(inputs)
+    return result
+      ? {
+          apogee_ft: result.apogee_ft,
+          apogee_t_s: result.apogee_t_s,
+          burnout_t_s: result.burnout_t_s,
+          deploy_ft: result.deploy_ft,
+          landing_ke_ftlbf: result.landing_ke_ftlbf,
+          total_time_s: result.total_time_s,
+        }
+      : {}
+  },
+  'end-to-end-curve-2kg-main-500ft': (inputs) => {
+    const result = runSimulation(inputs)
+    return result
+      ? {
+          apogee_ft: result.apogee_ft,
+          apogee_t_s: result.apogee_t_s,
+          burnout_t_s: result.burnout_t_s,
+          deploy_ft: result.deploy_ft,
+          landing_ke_ftlbf: result.landing_ke_ftlbf,
+          total_time_s: result.total_time_s,
+        }
+      : {}
   },
   'static-ejection-load-nylon-screening': (inputs) => {
     const result = computeShockLoad(inputs.cordSpecs, inputs.mass_kg, inputs.g_factor)

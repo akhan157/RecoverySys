@@ -302,8 +302,10 @@ stored shape, result identity, and evidence claim has an explicit owner.
 - Reconcile the product contract, runtime identities, migrations, persistence,
   share links, JSON, briefs, flight records, and validation corpus.
 - Keep the browser JavaScript model as the sole production authority.
-- Expand executable validation beyond the six current review cases and keep
-  review-only, accepted-comparison, and real-flight evidence separate.
+- Expand executable validation beyond the eight current review cases, including
+  explicit ascent, unit-conversion, edge-case, metamorphic, and representative
+  end-to-end coverage, while keeping review-only, accepted-comparison, and
+  real-flight evidence separate.
 - Record supported-runtime, formatting, parts, corpus, lint, unit, build, and
   E2E evidence from a clean install.
 

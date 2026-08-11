@@ -1,0 +1,84 @@
+{
+  "id": "end-to-end-curve-2kg-main-500ft",
+  "kind": "analytic",
+  "domain": "end-to-end",
+  "status": "review",
+  "inputs": {
+    "specs": {
+      "rocket_mass_g": "2000",
+      "motor_total_impulse_ns": "2000",
+      "burn_time_s": "5",
+      "airframe_id_in": "6",
+      "drag_cd": "0.5",
+      "wind_speed_mph": "10",
+      "main_deploy_alt_ft": "500",
+      "ejection_g_factor": "20"
+    },
+    "config": {
+      "main_chute": { "specs": { "diameter_in": 36, "cd": 1.5 } }
+    },
+    "customMotor": {
+      "curve": [
+        { "t": 0, "thrust_N": 0 },
+        { "t": 2.5, "thrust_N": 1600 },
+        { "t": 5, "thrust_N": 0 }
+      ],
+      "propellant_kg": 0.1
+    }
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "apogee_ft",
+        "value": 6035,
+        "unit": "ft",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" }
+      },
+      {
+        "name": "apogee_t_s",
+        "value": 13,
+        "unit": "s",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" }
+      },
+      {
+        "name": "burnout_t_s",
+        "value": 5,
+        "unit": "s",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" }
+      },
+      {
+        "name": "deploy_ft",
+        "value": 500,
+        "unit": "ft",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" }
+      },
+      {
+        "name": "landing_ke_ftlbf",
+        "value": 24,
+        "unit": "ft-lbf",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" }
+      },
+      {
+        "name": "total_time_s",
+        "value": 82,
+        "unit": "s",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" }
+      }
+    ]
+  },
+  "source": {
+    "citation": "RecoverySys browser JavaScript production evaluator replay with a fixed custom thrust-curve recovery plan.",
+    "derivation": "Run runSimulation with the checked-in thrust samples and record the rounded presentation outputs. This is a review-only deterministic contract fixture, not an independent accuracy or flight reference."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "The browser JavaScript production estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Review-only replay outputs remain finite and reproducible; numerical agreement is not promoted to an accepted evidence claim."
+  },
+  "notes": "Covers the custom thrust-curve path through ascent, deployment, landing energy, and total duration without changing the evidence boundary."
+}

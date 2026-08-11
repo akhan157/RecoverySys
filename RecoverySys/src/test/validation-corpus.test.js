@@ -3,7 +3,7 @@ import { validateCorpus } from '../../scripts/validate-corpus.js'
 
 describe('validation corpus gate', () => {
   it('validates the checked-in corpus and production model identity', () => {
-    expect(validateCorpus()).toMatchObject({ valid: true, diagnostics: [], cases: 6 })
+    expect(validateCorpus()).toMatchObject({ valid: true, diagnostics: [], cases: 8 })
   })
 
   it('reports deterministic output-domain coverage without promoting review cases', () => {
@@ -55,6 +55,28 @@ describe('validation corpus gate', () => {
         },
         acceptedCaseIds: [],
         unreviewedCaseIds: ['layered-wind-linear-interpolation-drift'],
+      },
+      {
+        domain: 'end-to-end',
+        caseCount: 2,
+        caseIds: ['end-to-end-curve-2kg-main-500ft', 'end-to-end-scalar-2kg-main-500ft'],
+        outputMetrics: [
+          'apogee_ft',
+          'apogee_t_s',
+          'burnout_t_s',
+          'deploy_ft',
+          'landing_ke_ftlbf',
+          'total_time_s',
+        ],
+        statusCounts: {
+          draft: 0,
+          review: 2,
+          'accepted-for-comparison': 0,
+          superseded: 0,
+          rejected: 0,
+        },
+        acceptedCaseIds: [],
+        unreviewedCaseIds: ['end-to-end-curve-2kg-main-500ft', 'end-to-end-scalar-2kg-main-500ft'],
       },
       {
         domain: 'landing-energy',
