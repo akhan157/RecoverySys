@@ -7,6 +7,7 @@ import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 
 import { runSensitivity } from '../../lib/sensitivity.js'
 import { CRITERION_IDS, evaluateCriterion, shockSafetyFactorBands } from '../../lib/criteria.js'
+import { aggregateCriterionStatus, presentCriterion } from '../../lib/criterionPresentation.js'
 import { densityAtAltitudeFt, FEET_PER_METER, isa, standardGravity } from '../../lib/atmosphere.js'
 import { statusFromWarnings } from '../../lib/statusColor.js'
 import StatusChip from '../primitives/StatusChip.jsx'
@@ -115,21 +116,19 @@ export default function AnalysisTab({ state, confidenceProps }) {
     if (!sim) return null
 
     const { mass_g, mass_kg, g_factor, g_factor_auto } = normalizeCalculationInputs(specs)
-
     const static_N = mass_kg * g_factor * standardGravity
     const static_lbs = static_N / N_PER_LBF
-
-    // Shock cord derived values
     const cord = config.shock_cord?.specs ?? null
     let cord_sf = null,
-      cord_sf_status = null
+      cord_sf_status = null,
+      cord_sf_presentation = null
     if (cord) {
       cord_sf = cord.strength_lbs / static_lbs
       const criterion = evaluateCriterion(CRITERION_IDS.SHOCK_SAFETY_FACTOR, cord_sf, {
         bands: shockSafetyFactorBands(cord.material),
       })
-      cord_sf_status =
-        criterion.severity === 'error' ? 'fail' : criterion.severity === 'warn' ? 'warn' : 'ok'
+      cord_sf_presentation = presentCriterion(criterion)
+      cord_sf_status = cord_sf_presentation.status
     }
 
     // Opening shock: main chute opens at deploy_ft while descending at drogue speed
@@ -158,12 +157,9 @@ export default function AnalysisTab({ state, confidenceProps }) {
     const ke_ftlbf = sim.landing_ke_ftlbf
     const descentCriterion = evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, sim.main_fps)
     const landingCriterion = evaluateCriterion(CRITERION_IDS.LANDING_ENERGY, ke_ftlbf)
-    const ke_status =
-      landingCriterion.severity === 'error'
-        ? 'fail'
-        : landingCriterion.severity === 'warn'
-          ? 'warn'
-          : 'ok'
+    const descentCriterionPresentation = presentCriterion(descentCriterion)
+    const landingCriterionPresentation = presentCriterion(landingCriterion)
+    const ke_status = landingCriterionPresentation.status
 
     const packing = computePackingVolume({ config, specs })
     const packingCriterion = evaluateCriterion(
@@ -183,6 +179,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
       cord,
       cord_sf,
       cord_sf_status,
+      cord_sf_presentation,
       opening_shock_N,
       opening_shock_lbs,
       main_Cx,
@@ -195,6 +192,8 @@ export default function AnalysisTab({ state, confidenceProps }) {
       deploy_temperature_K: deployAtmosphere.T,
       rho_deploy_val,
       landing_ke_J,
+      descentCriterionPresentation,
+      landingCriterionPresentation,
       ke_ftlbf,
       descentCriterion,
       landingCriterion,
@@ -214,11 +213,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
     : sim?.apogee_method?.toUpperCase() || 'NOT RUN'
   const landingStatus = !sim
     ? 'neutral'
-    : ap?.descentCriterion?.severity === 'error' || ap?.ke_status === 'fail'
-      ? 'error'
-      : ap?.descentCriterion?.severity === 'warn' || ap?.ke_status === 'warn'
-        ? 'warn'
-        : 'ok'
+    : aggregateCriterionStatus([ap?.descentCriterion, ap?.landingCriterion])
   const snatchStatus = String(sim?.main_snatch?.status || '').toLowerCase()
   const snatchSeverity =
     snatchStatus === 'exceeds_rating' ? 'error' : snatchStatus === 'marginal' ? 'warn' : 'neutral'
@@ -228,13 +223,15 @@ export default function AnalysisTab({ state, confidenceProps }) {
     ? 'neutral'
     : hardwareWarningStatus === 'error' ||
         snatchSeverity === 'error' ||
-        ap?.cord_sf_status === 'fail'
+        ap?.cord_sf_status === 'error'
       ? 'error'
       : hardwareWarningStatus === 'warn' ||
           snatchSeverity === 'warn' ||
           ap?.cord_sf_status === 'warn'
         ? 'warn'
-        : 'ok'
+        : ap?.cord_sf_status === 'neutral'
+          ? 'neutral'
+          : 'ok'
   const sensitivityResult = useMemo(
     () =>
       state.testedResponse ??
@@ -441,13 +438,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
                   <AnalRow
                     label="CORD_SAFETY_FACTOR"
                     value={`${ap.cord_sf.toFixed(1)}×`}
-                    badge={
-                      ap.cord_sf_status === 'ok'
-                        ? 'SCREENING AVAILABLE'
-                        : ap.cord_sf_status === 'warn'
-                          ? 'MARGINAL'
-                          : 'EXCEEDS CRITERION'
-                    }
+                    badge={ap.cord_sf_presentation?.label ?? 'NOT EVALUATED'}
                     badgeStatus={ap.cord_sf_status}
                     note={`${ap.cord.strength_lbs} lbs rated ÷ ${Math.ceil(ap.static_lbs)} lbs required — ${ap.cord.material} criterion: ${cordFailThreshold ?? 'not evaluated'}× fail, ${cordWarnThreshold ?? 'not evaluated'}× warn`}
                   />
@@ -534,20 +525,8 @@ export default function AnalysisTab({ state, confidenceProps }) {
                     <AnalRow
                       label="MAIN_TERMINAL_V"
                       value={`${sim.main_fps} ft/s`}
-                      badgeStatus={
-                        ap.descentCriterion?.severity === 'error'
-                          ? 'fail'
-                          : ap.descentCriterion?.severity === 'warn'
-                            ? 'warn'
-                            : 'ok'
-                      }
-                      badge={
-                        ap.descentCriterion?.severity === 'error'
-                          ? 'ABOVE CRITERION'
-                          : ap.descentCriterion?.severity === 'warn'
-                            ? 'MARGINAL'
-                            : 'WITHIN CRITERION'
-                      }
+                      badgeStatus={ap.descentCriterionPresentation.status}
+                      badge={ap.descentCriterionPresentation.label}
                       note={`v = √(2mg / ρCdA) at ${ap.deploy_ft.toLocaleString()} ft; ρ = ${ap.rho_deploy_val.toFixed(4)} kg/m³. Criterion: ${ap.descentCriterion?.policyVersion ?? 'not evaluated'}.`}
                     />
                     <AnalRow
@@ -561,26 +540,12 @@ export default function AnalysisTab({ state, confidenceProps }) {
                 <AnalRow
                   label="LANDING_KE"
                   value={`${ap.ke_ftlbf} ft·lbf`}
-                  badge={
-                    ap.ke_status === 'ok'
-                      ? 'WITHIN CRITERION'
-                      : ap.ke_status === 'warn'
-                        ? 'MARGINAL'
-                        : 'ABOVE CRITERION'
-                  }
+                  badge={ap.landingCriterionPresentation.label}
                   badgeStatus={ap.ke_status}
                   note={`KE = ½mv² = ${ap.landing_ke_J.toFixed(0)} J using main descent rate. Criterion: ${ap.landingCriterion?.policyVersion ?? 'not evaluated'}. Slightly conservative — actual ground speed is 3–5% lower (denser surface air).`}
                 />
-                {sim.total_time_s && (
-                  <AnalRow
-                    label="TOTAL_FLIGHT"
-                    value={`${sim.total_time_s} s`}
-                    note={`Apogee at T+${sim.apogee_t_s}s → main deploy at T+${sim.apogee_t_s + sim.phase1_time_s}s → landing`}
-                  />
-                )}
               </div>
             </section>
-
             {/* ── FLIGHT TIMELINE ─────────────────────────────────────────────── */}
             <section className="mc-analysis__section">
               <div className="mc-panel-header">FLIGHT_TIMELINE</div>

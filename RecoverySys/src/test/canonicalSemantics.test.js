@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { ASSESSMENT_STATUS, EVIDENCE_STATE, VALIDITY, buildAssessment } from '../lib/assessment.js'
 import { buildResultEnvelope } from '../lib/resultIntegrity.js'
 import { CRITERION_IDS, evaluateCriterion } from '../lib/criteria.js'
+import { presentCriterion } from '../lib/criterionPresentation.js'
 import { buildFinding, compatibilityFindingCode, normalizeFinding } from '../lib/findings.js'
 
 describe('canonical assessment contract', () => {
@@ -73,6 +74,75 @@ describe('canonical criteria', () => {
       policyVersion: expect.any(String),
     })
   })
+})
+
+describe('shared criterion presentation', () => {
+  it.each([
+    [
+      { evaluated: false, category: 'not-evaluated', severity: 'neutral', reasonCode: 'MISSING' },
+      {
+        status: 'neutral',
+        token: 'CRITERION_NOT_EVALUATED',
+        label: 'NOT EVALUATED',
+        evaluated: false,
+      },
+    ],
+    [
+      { evaluated: true, category: 'nominal', severity: 'none' },
+      {
+        status: 'ok',
+        token: 'CRITERION_NOMINAL',
+        label: 'WITHIN TESTED CRITERION',
+        evaluated: true,
+      },
+    ],
+    [
+      { evaluated: true, category: 'fast', severity: 'warn' },
+      { status: 'warn', token: 'CRITERION_REVIEW', label: 'REVIEW REQUIRED', evaluated: true },
+    ],
+    [
+      { evaluated: true, category: 'hard-landing', severity: 'error' },
+      {
+        status: 'error',
+        token: 'CRITERION_EXCEEDED',
+        label: 'CRITERION EXCEEDED',
+        evaluated: true,
+      },
+    ],
+  ])('maps canonical criterion state %j consistently', (criterion, expected) => {
+    expect(presentCriterion(criterion)).toMatchObject(expected)
+  })
+
+  it('preserves the exact evaluator boundary state for a criterion presentation', () => {
+    expect(presentCriterion(evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, 20))).toMatchObject({
+      status: 'warn',
+      token: 'CRITERION_REVIEW',
+      label: 'REVIEW REQUIRED',
+    })
+    expect(
+      presentCriterion(evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, 20.0001))
+    ).toMatchObject({
+      status: 'error',
+      token: 'CRITERION_EXCEEDED',
+      label: 'CRITERION EXCEEDED',
+    })
+  })
+})
+
+it('projects canonical criterion states to MetricCard status values', () => {
+  expect(
+    [
+      presentCriterion({ evaluated: false }),
+      presentCriterion({ evaluated: true, category: 'nominal', severity: 'none' }),
+      presentCriterion({ evaluated: true, category: 'fast', severity: 'warn' }),
+      presentCriterion({ evaluated: true, category: 'hard-landing', severity: 'error' }),
+    ].map(({ metricStatus, metricLabel }) => ({ metricStatus, metricLabel }))
+  ).toEqual([
+    { metricStatus: 'neutral', metricLabel: 'NOT EVALUATED' },
+    { metricStatus: 'ok', metricLabel: 'OK' },
+    { metricStatus: 'marginal', metricLabel: 'MARGINAL' },
+    { metricStatus: 'fail', metricLabel: 'FAIL' },
+  ])
 })
 
 describe('stable finding contract', () => {

@@ -1,5 +1,6 @@
 import { WARN_LEVELS } from '../../lib/constants.js'
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
+import { presentCriterion } from '../../lib/criterionPresentation.js'
 import FlightChart from '../FlightChart.jsx'
 import MetricCard from '../MetricCard.jsx'
 import ConfidenceStatus from '../ConfidenceStatus.jsx'
@@ -10,6 +11,7 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
   const resultDetails = RESULT_STATUS_DETAILS[resultStatus]
   const usableSim = resultFresh ? sim : null
   const shock = usableSim?.shock_load
+  const shockPresentation = presentCriterion(shock?.criterion)
   const snatch = usableSim?.main_snatch
 
   return (
@@ -89,20 +91,8 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
                   label="LEGACY_STATIC_EJECTION_SF"
                   value={shock.safety_factor.toFixed(1) + '×'}
                   unit=""
-                  status={
-                    shock.sf_status === 'pass'
-                      ? 'ok'
-                      : shock.sf_status === 'warn'
-                        ? 'marginal'
-                        : 'fail'
-                  }
-                  statusLabel={
-                    shock.sf_status === 'pass'
-                      ? 'OK'
-                      : shock.sf_status === 'warn'
-                        ? 'MARGINAL'
-                        : 'FAIL'
-                  }
+                  status={shockPresentation.metricStatus}
+                  statusLabel={shockPresentation.metricLabel}
                 />
               </>
             )}
