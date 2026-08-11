@@ -263,6 +263,11 @@ agree on finding codes, values, currentness, and unresolved review actions.
 
 **Priority:** P1
 **Status:** Partial
+
+**Completed increment:** Print output now scopes Simulation Results to the
+checklist artifact only; stale estimates remain withheld. M4 remains Partial
+because the on-screen brief, export/import parity, and evidence-loop gates
+remain open.
 **Goal:** turn a current plan into one traceable handoff artifact and preserve
 later observations without promoting them automatically to evidence.
 

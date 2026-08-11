@@ -205,7 +205,7 @@ export default function PrintChecklist({
       </section>
 
       {/* ── Simulation Results ─────────────────────────────────── */}
-      <section>
+      <section className="print-artifact--checklist">
         <h2>Simulation Results</h2>
         {simulation && resultFresh ? (
           <table>
