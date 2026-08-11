@@ -111,6 +111,28 @@ const evaluators = Object.freeze({
         }
       : {}
   },
+  'ascent-apogee-scalar-2kg-2000ns': (inputs) => {
+    const result = runSimulation(inputs)
+    return result
+      ? {
+          apogee_ft: result.apogee_ft,
+          apogee_t_s: result.apogee_t_s,
+          burnout_t_s: result.burnout_t_s,
+        }
+      : {}
+  },
+  'recovery-descent-main-2kg-500ft': (inputs) => ({
+    descent_rate_fps: computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft),
+  }),
+  'terminal-descent-mass-doubling-metamorphic': (inputs) => ({
+    descent_rate_ratio:
+      computeDescentRate(
+        inputs.transformed.chuteSpecs,
+        inputs.transformed.mass_kg,
+        inputs.transformed.altitude_ft
+      ) /
+      computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
+  }),
   'terminal-descent-altitude-ft-unit-conversion': (inputs) => ({
     descent_rate_fps: computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft),
   }),

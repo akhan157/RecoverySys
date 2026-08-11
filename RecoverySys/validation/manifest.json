@@ -14,9 +14,12 @@
     "terminal-descent-altitude-ft-unit-conversion",
     "terminal-descent-invalid-chute-edge",
     "terminal-descent-diameter-doubling-metamorphic",
+    "terminal-descent-mass-doubling-metamorphic",
+    "recovery-descent-main-2kg-500ft",
     "landing-energy-36in-main-sea-level",
     "layered-wind-linear-interpolation-drift",
     "static-ejection-load-nylon-screening",
+    "ascent-apogee-scalar-2kg-2000ns",
     "end-to-end-scalar-2kg-main-500ft",
     "end-to-end-curve-2kg-main-500ft"
   ],

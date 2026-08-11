@@ -36,3 +36,11 @@ sorted by domain and reports case IDs, expected output metric names, status coun
 accepted comparison IDs, and unreviewed case IDs. Review and draft cases remain
 structural/reproducibility checks; they never gate numerical agreement and are never
 reported as accepted evidence.
+
+The current review-only expansion includes explicit scalar ascent coverage
+(`ascent-apogee-scalar-2kg-2000ns`), deployment-altitude main-descent coverage
+(`recovery-descent-main-2kg-500ft`), and a mass-doubling terminal-descent
+metamorphic case (`terminal-descent-mass-doubling-metamorphic`). Seeded
+dispersion remains an API/unit-test reproducibility concern rather than a
+corpus case until the validator has a stable scalar summary contract; no
+accepted comparison or real-flight metadata is implied.

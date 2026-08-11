@@ -3,7 +3,7 @@ import { validateCorpus } from '../../scripts/validate-corpus.js'
 
 describe('validation corpus gate', () => {
   it('validates the checked-in corpus and production model identity', () => {
-    expect(validateCorpus()).toMatchObject({ valid: true, diagnostics: [], cases: 11 })
+    expect(validateCorpus()).toMatchObject({ valid: true, diagnostics: [], cases: 14 })
   })
 
   it('reports deterministic output-domain coverage without promoting review cases', () => {
@@ -11,6 +11,21 @@ describe('validation corpus gate', () => {
     expect(validateCorpus()).toEqual(result)
 
     expect(result.domainCoverage).toEqual([
+      {
+        domain: 'ascent',
+        caseCount: 1,
+        caseIds: ['ascent-apogee-scalar-2kg-2000ns'],
+        outputMetrics: ['apogee_ft', 'apogee_t_s', 'burnout_t_s'],
+        statusCounts: {
+          draft: 0,
+          review: 1,
+          'accepted-for-comparison': 0,
+          superseded: 0,
+          rejected: 0,
+        },
+        acceptedCaseIds: [],
+        unreviewedCaseIds: ['ascent-apogee-scalar-2kg-2000ns'],
+      },
       {
         domain: 'atmosphere',
         caseCount: 2,
@@ -28,27 +43,31 @@ describe('validation corpus gate', () => {
       },
       {
         domain: 'descent',
-        caseCount: 4,
+        caseCount: 6,
         caseIds: [
+          'recovery-descent-main-2kg-500ft',
           'terminal-descent-36in-main-sea-level',
           'terminal-descent-altitude-ft-unit-conversion',
           'terminal-descent-diameter-doubling-metamorphic',
           'terminal-descent-invalid-chute-edge',
+          'terminal-descent-mass-doubling-metamorphic',
         ],
         outputMetrics: ['descent_rate_fps', 'descent_rate_ratio'],
         statusCounts: {
           draft: 0,
-          review: 4,
+          review: 6,
           'accepted-for-comparison': 0,
           superseded: 0,
           rejected: 0,
         },
         acceptedCaseIds: [],
         unreviewedCaseIds: [
+          'recovery-descent-main-2kg-500ft',
           'terminal-descent-36in-main-sea-level',
           'terminal-descent-altitude-ft-unit-conversion',
           'terminal-descent-diameter-doubling-metamorphic',
           'terminal-descent-invalid-chute-edge',
+          'terminal-descent-mass-doubling-metamorphic',
         ],
       },
       {

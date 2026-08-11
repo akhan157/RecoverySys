@@ -1,0 +1,46 @@
+{
+  "id": "terminal-descent-mass-doubling-metamorphic",
+  "kind": "metamorphic",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "base": {
+      "chuteSpecs": { "diameter_in": 36, "cd": 1.5 },
+      "mass_kg": 2.5,
+      "altitude_ft": 0
+    },
+    "transformed": {
+      "chuteSpecs": { "diameter_in": 36, "cd": 1.5 },
+      "mass_kg": 5,
+      "altitude_ft": 0
+    }
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "descent_rate_ratio",
+        "value": 1.4142135623730951,
+        "unit": "ratio",
+        "tolerance": { "absolute": 0.000000000001, "basis": "analyst-derived" },
+        "notes": "Holding chute area, Cd, and altitude constant while doubling mass scales terminal rate by sqrt(2) in this model."
+      }
+    ],
+    "notes": "Metamorphic invariant of the browser terminal-descent implementation."
+  },
+  "source": {
+    "citation": "Analytic terminal-velocity mass scaling.",
+    "derivation": "The browser model uses terminal rate proportional to the square root of mass when all other inputs remain constant; doubling mass therefore gives a transformed/base ratio of sqrt(2).",
+    "notes": "This invariant does not establish real-world parachute performance."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "The browser JavaScript production estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "metamorphic",
+    "decisionRule": "The transformed/base browser output ratio remains sqrt(2) within the stated analytic tolerance; this review case never gates agreement."
+  },
+  "notes": "Review-only metamorphic coverage; not accepted evidence."
+}

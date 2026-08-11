@@ -1,0 +1,41 @@
+{
+  "id": "recovery-descent-main-2kg-500ft",
+  "kind": "analytic",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "chuteSpecs": { "diameter_in": 36, "cd": 1.5 },
+    "mass_kg": 2,
+    "altitude_ft": 500
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "descent_rate_fps",
+        "value": 18.8437339436,
+        "unit": "ft/s",
+        "tolerance": { "absolute": 0.000000001, "basis": "analyst-derived" },
+        "notes": "Steady main-canopy terminal descent evaluated at the 500 ft deployment altitude using ISA density."
+      }
+    ],
+    "notes": "Review-only recovery/descent output coverage; not a parachute test or flight result."
+  },
+  "source": {
+    "url": "https://www.grc.nasa.gov/www/k-12/airplane/termv.html",
+    "title": "NASA Glenn terminal velocity reference",
+    "accessed": "2026-07-21",
+    "citation": "Terminal-velocity drag equation with ISA density at deployment altitude.",
+    "derivation": "Evaluate sqrt(2*m*g/(rho*Cd*A)) for a 2 kg payload and 36 in, Cd 1.5 circular main at 500 ft; convert metres per second to feet per second."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "The browser JavaScript production estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Observed browser output is recorded for review within the stated analytic tolerance; this case does not gate agreement."
+  },
+  "notes": "Explicit deployment-altitude recovery coverage; not accepted evidence."
+}

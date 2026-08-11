@@ -1,0 +1,63 @@
+{
+  "id": "ascent-apogee-scalar-2kg-2000ns",
+  "kind": "analytic",
+  "domain": "ascent",
+  "status": "review",
+  "inputs": {
+    "specs": {
+      "rocket_mass_g": "2000",
+      "motor_total_impulse_ns": "2000",
+      "burn_time_s": "5",
+      "airframe_id_in": "6",
+      "drag_cd": "0.5",
+      "wind_speed_mph": "0",
+      "main_deploy_alt_ft": "500"
+    },
+    "config": {
+      "main_chute": { "specs": { "diameter_in": 36, "cd": 1.5 } }
+    },
+    "customMotor": null
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "apogee_ft",
+        "value": 4682,
+        "unit": "ft",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" },
+        "notes": "Rounded browser output for the scalar impulse ascent path."
+      },
+      {
+        "name": "apogee_t_s",
+        "value": 11,
+        "unit": "s",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" },
+        "notes": "Rounded browser output for time to apogee."
+      },
+      {
+        "name": "burnout_t_s",
+        "value": 5,
+        "unit": "s",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" },
+        "notes": "Burn time from the scalar input."
+      }
+    ],
+    "notes": "Review-only browser replay of the scalar ascent path; not an accuracy or flight reference."
+  },
+  "source": {
+    "citation": "RecoverySys browser JavaScript production evaluator replay with a fixed scalar-motor ascent plan.",
+    "derivation": "Run runSimulation with the checked-in scalar inputs and record the rounded ascent outputs. This is a deterministic contract fixture, not an independent vehicle or flight reference.",
+    "notes": "The browser model's vertical RK4 ascent, generic drag, and scalar propellant assumptions remain in force."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "The browser JavaScript production estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Review-only replay outputs remain finite and reproducible; numerical agreement is not promoted to an accepted evidence claim."
+  },
+  "notes": "Explicit ascent-domain coverage; review-only and not flight validated."
+}
