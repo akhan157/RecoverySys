@@ -1,5 +1,14 @@
 import { runSimulation } from './simulation.js'
-import { evaluateMissionEnvelope } from './missionEnvelope.js'
+import { evaluateMissionEnvelope, ENVELOPE_STATUS } from './missionEnvelope.js'
+import {
+  SIMULATION_ASSUMPTIONS_VERSION,
+  SIMULATION_MODEL_ID,
+  SIMULATION_MODEL_VERSION,
+} from './constants.js'
+
+const SENSITIVITY_ANALYSIS_VERSION = 'sensitivity-one-at-a-time-v2'
+const RANGE_BASIS_VERSION = 'sensitivity-range-v1'
+const OUTPUT_KEYS = Object.freeze(['apogee_ft', 'drift_ft', 'main_fps', 'landing_ke_ftlbf'])
 
 const VARIATIONS = [
   {
@@ -26,6 +35,7 @@ const VARIATIONS = [
 ]
 
 function numeric(value) {
+  if (value == null || value === '') return null
   const parsed = Number(value)
   return Number.isFinite(parsed) ? parsed : null
 }
@@ -55,6 +65,46 @@ function range(values) {
   return { min: Math.min(...numbers), max: Math.max(...numbers) }
 }
 
+function outputDeltas(output, baselineOutput) {
+  if (!output || !baselineOutput) return null
+  return OUTPUT_KEYS.reduce((deltas, key) => {
+    const value = numeric(output[key])
+    const baseline = numeric(baselineOutput[key])
+    deltas[key] = value == null || baseline == null ? null : value - baseline
+    return deltas
+  }, {})
+}
+
+function envelopeFor(envelope) {
+  return {
+    status: envelope.status,
+    assumptionsVersion: envelope.assumptionsVersion,
+    reasons: envelope.reasons.map(({ code, message, remediation, path }) => ({
+      code,
+      message,
+      remediation,
+      path,
+    })),
+  }
+}
+
+function variantStatus(result, envelope) {
+  if (!result) return 'unusable'
+  return envelope.status
+}
+
+function variantReason(result, envelope) {
+  if (!result) return 'Simulation did not produce a valid result for this variant.'
+  if (envelope.status === ENVELOPE_STATUS.OUT_OF_SCOPE) {
+    return 'Variant is outside the declared mission envelope.'
+  }
+  return null
+}
+
+function isUsableVariant(result, envelope) {
+  return Boolean(result) && envelope.status !== ENVELOPE_STATUS.OUT_OF_SCOPE
+}
+
 function buildRow(definition, specs, config, customMotor, baseResult) {
   const base = numeric(specs[definition.key])
   if (base == null || base <= 0) {
@@ -63,15 +113,22 @@ function buildRow(definition, specs, config, customMotor, baseResult) {
       status: 'unavailable',
       reason: `Enter ${definition.label.toLowerCase()} to test this variation.`,
       variants: [],
+      usableVariants: [],
+      unusableVariants: [],
       ranges: null,
+      deltas: null,
+      criterionCrossings: [],
     }
   }
 
+  const baselineOutput = outputFor(baseResult)
   const variants = definition.deltas.map((delta) => {
     const value = variantValue(base, delta, definition.key)
     const variantSpecs = copySpecs(specs, definition.key, value)
     const envelope = evaluateMissionEnvelope({ specs: variantSpecs, config, customMotor })
     const result = runSimulation({ specs: variantSpecs, config, customMotor })
+    const output = outputFor(result)
+    const usable = isUsableVariant(result, envelope)
     return {
       label:
         delta === 0
@@ -79,27 +136,44 @@ function buildRow(definition, specs, config, customMotor, baseResult) {
           : `${delta > 0 ? '+' : ''}${definition.key === 'main_deploy_alt_ft' ? delta : Math.round(delta * 100) + '%'}`,
       value,
       valid: Boolean(result),
+      usable,
+      status: variantStatus(result, envelope),
+      reason: variantReason(result, envelope),
+      envelope: envelopeFor(envelope),
       envelopeStatus: envelope.status,
       envelopeReasons: envelope.reasons.map(({ code, message }) => ({ code, message })),
-      output: outputFor(result),
+      output,
+      deltas: outputDeltas(output, baselineOutput),
     }
   })
 
-  const outputs = variants.map(({ output }) => output).filter(Boolean)
+  const usableVariants = variants.filter(({ usable }) => usable)
+  const unusableVariants = variants.filter(({ usable }) => !usable)
+  const outputs = usableVariants.map(({ output }) => output).filter(Boolean)
+  const ranges = OUTPUT_KEYS.reduce((result, key) => {
+    result[key] = range(outputs.map((output) => output[key]))
+    return result
+  }, {})
+  const deltas = OUTPUT_KEYS.reduce((result, key) => {
+    result[key] = range(
+      usableVariants.map((variant) => variant.deltas?.[key]).filter((value) => value != null)
+    )
+    return result
+  }, {})
+
   return {
     ...definition,
-    status: variants.every(({ valid }) => valid) ? 'tested' : 'partially-tested',
-    reason: variants.some(({ valid }) => !valid)
-      ? 'One or more variants could not produce a result at this deployment relationship.'
+    status: unusableVariants.length > 0 ? 'partially-tested' : 'tested',
+    reason: unusableVariants.length
+      ? 'One or more variants are unusable or outside the declared mission envelope.'
       : null,
     variants,
-    ranges: {
-      apogee_ft: range(outputs.map((output) => output.apogee_ft)),
-      drift_ft: range(outputs.map((output) => output.drift_ft)),
-      main_fps: range(outputs.map((output) => output.main_fps)),
-      landing_ke_ftlbf: range(outputs.map((output) => output.landing_ke_ftlbf)),
-    },
-    baseOutput: outputFor(baseResult),
+    usableVariants,
+    unusableVariants,
+    ranges,
+    deltas,
+    baseOutput: baselineOutput,
+    criterionCrossings: [],
   }
 }
 
@@ -114,7 +188,11 @@ function buildWindRow(specs, config, customMotor, baseResult) {
       status: 'unavailable',
       reason: 'Enter a positive surface wind speed to test this variation.',
       variants: [],
+      usableVariants: [],
+      unusableVariants: [],
       ranges: null,
+      deltas: null,
+      criterionCrossings: [],
     }
   }
   return buildRow(
@@ -132,6 +210,10 @@ function buildWindRow(specs, config, customMotor, baseResult) {
   )
 }
 
+function baselineEnvelope(specs, config, customMotor) {
+  return envelopeFor(evaluateMissionEnvelope({ specs, config, customMotor }))
+}
+
 export function runSensitivity({ specs = {}, config = {}, customMotor = null } = {}) {
   const baseResult = runSimulation({ specs, config, customMotor })
   if (!baseResult) {
@@ -139,31 +221,39 @@ export function runSensitivity({ specs = {}, config = {}, customMotor = null } =
       status: 'unavailable',
       reason: 'Run a valid base simulation before testing sensitivity.',
       rows: [],
+      criterionCrossings: [],
     }
   }
 
+  const baseOutput = outputFor(baseResult)
+  const envelope = baselineEnvelope(specs, config, customMotor)
   const rows = [
     ...VARIATIONS.map((definition) => buildRow(definition, specs, config, customMotor, baseResult)),
     buildWindRow(specs, config, customMotor, baseResult),
   ]
-  const testedRows = rows.filter((row) => row.status !== 'unavailable')
-  const influence = testedRows
-    .map((row) => {
-      const apogee = row.ranges?.apogee_ft
-      const drift = row.ranges?.drift_ft
-      const landing = row.ranges?.landing_ke_ftlbf
-      const spread = [apogee, drift, landing]
-        .filter(Boolean)
-        .reduce((total, current) => total + current.max - current.min, 0)
-      return { key: row.key, label: row.label, spread }
-    })
-    .sort((a, b) => b.spread - a.spread)
 
   return {
     status: 'complete',
-    baseOutput: outputFor(baseResult),
+    baseline: {
+      identity: {
+        modelId: SIMULATION_MODEL_ID,
+        modelVersion: SIMULATION_MODEL_VERSION,
+        assumptionsVersion: SIMULATION_ASSUMPTIONS_VERSION,
+        envelopeAssumptionsVersion: envelope.assumptionsVersion,
+        sensitivityVersion: SENSITIVITY_ANALYSIS_VERSION,
+      },
+      output: baseOutput,
+      envelope,
+    },
+    baseOutput,
+    scenario: {
+      method: 'one-at-a-time',
+      rangeBasisVersion: RANGE_BASIS_VERSION,
+      criteriaVersion: null,
+    },
     rows,
-    influentialInputs: influence,
-    method: 'Deterministic one-at-a-time variations; no random sampling or confidence interval.',
+    criterionCrossings: [],
+    method:
+      'Deterministic one-at-a-time variations; ranges are model response, not probability or confidence intervals.',
   }
 }
