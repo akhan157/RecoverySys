@@ -302,6 +302,11 @@ export default function App() {
     [mergeCustomParts]
   )
 
+  const clearAll = useCallback(() => {
+    dispatch({ type: 'CLEAR_ALL' })
+    setImportSession(false)
+  }, [])
+
   const addToast = useCallback((level, message) => {
     dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
   }, [])
@@ -417,6 +422,7 @@ export default function App() {
         setCustomMotor={setCustomMotor}
         clearCustomMotor={clearCustomMotor}
         loadConfig={loadConfig}
+        clearAll={clearAll}
         addToast={addToast}
         saveCompareSnapshot={saveCompareSnapshot}
         clearCompareSnapshot={clearCompareSnapshot}
