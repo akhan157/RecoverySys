@@ -32,6 +32,7 @@ RecoverySys is a planning aid, not flight-certification software or a substitute
 
 ## Documentation
 
+- [Product Strategy Brief](RecoverySys/PRODUCT-STRATEGY-BRIEF.md) - product definition, requirements, feature breakdown, acceptance criteria, metrics, risks, release strategy, and six-phase roadmap
 - [User guide, model, privacy, and local-first details](RecoverySys/README.md)
 - [Desktop build notes](RecoverySys/DESKTOP.md)
 - [Roadmap](RecoverySys/ROADMAP.md)

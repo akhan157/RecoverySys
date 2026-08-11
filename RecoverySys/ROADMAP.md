@@ -1,13 +1,14 @@
 # RecoverySys Product Roadmap
 
-**Roadmap revision:** 2026-08-10
+**Roadmap revision:** 2026-08-11
 **Current branch:** `main`
 **Current release:** `1.2.0.1`
 
 This is the high-level source of truth for product direction and progress. The
 detailed implementation plans remain useful, but they are subordinate to this
-document:
+document and the complete strategy brief:
 
+- [`PRODUCT-STRATEGY-BRIEF.md`](PRODUCT-STRATEGY-BRIEF.md) - complete product definition, requirements outline, feature breakdown, acceptance criteria, metrics, risks, release strategy, and six-phase roadmap.
 - [`docs/v2-execution-plan.md`](docs/v2-execution-plan.md) - validation, evidence, trust, and release gates.
 - [`docs/v3-plan.md`](docs/v3-plan.md) - guided first-plan experience, UI remediation, E2E coverage, and external evidence.
 - [`docs/ui-redesign-plan.md`](docs/ui-redesign-plan.md) - screen-by-screen interface implementation.
@@ -75,42 +76,47 @@ fully qualified v2/v3 release.
 - The Recovery Brief is not yet a complete on-screen artifact, and brief/checklist print actions currently share the same rendering path.
 - Flight evidence is stored locally, but candidate-evidence export and external review intake are not complete.
 - `engine/` contains a FastAPI/SciPy RK45 research implementation, but it is not wired into the app, not validated as a second production authority, and not bundled into desktop builds. See [`M8-architecture-decision-report.md`](M8-architecture-decision-report.md) for the deferred-engine decision and security evidence.
-- The integrated worktree is intentionally uncommitted; CI remains pinned to Node 22, while local Node 26 Vitest requires `NODE_OPTIONS=--localstorage-file=/tmp/recoverys-final-localstorage`.
+- The integrated checkpoint is committed and pushed on `main`; the working tree is clean. CI remains pinned to Node 22, while local verification used Node 26.
 
 ### Baseline Evidence Snapshot
 
-Observed on this roadmap revision:
+Observed after the consolidated product work was merged:
 
 | Check | Result |
-| `git status` | Intentional uncommitted Analysis and GuidedReview integration; `ROADMAP.md` preserved |
+| `git status` | Clean at `498c886`; `origin/main` matches |
 | `npm run validate:parts` | Passes; 225 parts |
 | `npm run validate:corpus` | Passes; 6 review cases |
-| `npm run build` | Passes |
-| `NODE_OPTIONS=--localstorage-file=/tmp/recoverys-final-localstorage npm test` | 262/262 pass |
+| `npm test` | 33 files and 263 tests pass locally |
 | `npm run lint` | Passes with zero warnings |
 | `npm run format:check` | Passes |
-| `npm run e2e` | 32/32 pass on desktop and mobile Chromium |
+| `npm run build` | Passes |
+| `npm run e2e` | Last recorded result: 32/32 on desktop and mobile Chromium |
 
-This snapshot was observed after the Analysis and GuidedReview integrations and their verification. Broader cross-artifact and external evidence gates remain open.
+This snapshot verifies the consolidated implementation locally. Broader
+cross-artifact, clean-install, platform, and external evidence gates remain
+open.
 
 ## Delivery Sequence
 
-The roadmap is dependency-ordered. Do not jump to broader physics or automation
-while the trust and transfer foundations below remain ambiguous.
+The core product roadmap has six phases. M0 through M6 are grouped so the
+release path stays legible; M7 through M9 are deferred tracks after the core
+release boundary.
 
 ```text
-M0 Green baseline and roadmap reconciliation
-  -> M1 Validation and evidence foundation
-  -> M2 Canonical result semantics
-      -> M3 Decision-first workflow UI
-          -> M4 Recovery Brief and evidence loop
-              -> M5 Guided first-plan onboarding
-                  -> M6 Release qualification
+Phase 1 Trust foundation (M0 + M1)
+  -> Phase 2 Canonical semantics (M2)
+      -> Phase 3 Decision-first workflow (M3)
+          -> Phase 4 Recovery Brief and evidence loop (M4)
+              -> Phase 5 Guided first plan (M5)
+                  -> Phase 6 Release qualification (M6)
 
-M1 + M2 -> M7 Evidence-led model decisions
-M6 + M7 -> M8 Advanced engine and optional compute architecture
+Phase 1 + Phase 2 -> M7 Evidence-led model decisions
+Phase 6 + M7 -> M8 Advanced engine and optional compute architecture
 M8 -> M9 Longer-term expansion, only if product scope still supports it
 ```
+
+The complete phase goals and exit criteria are in
+[`PRODUCT-STRATEGY-BRIEF.md`](PRODUCT-STRATEGY-BRIEF.md#15-six-phase-product-roadmap).
 
 ## Milestones
 
@@ -146,7 +152,7 @@ stronger product claims.
 
 Work:
 
-- Expand the corpus beyond the five review cases to cover atmosphere, scalar and curve ascent, descent, drift, landing energy, screening loads, unit conversions, edge cases, metamorphic behavior, and representative end-to-end plans.
+- Add corpus coverage beyond the six current review cases for atmosphere, scalar and curve ascent, descent, drift, landing energy, screening loads, unit conversions, edge cases, metamorphic behavior, and representative end-to-end plans.
 - Add deterministic machine-readable case summaries and coverage by output domain.
 - Seed dispersion runs and make all stochastic fixtures reproducible.
 - Document tolerance derivation, input equivalence, units, model identity, and scope for every case.

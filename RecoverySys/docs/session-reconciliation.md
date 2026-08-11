@@ -1,11 +1,12 @@
 # RecoverySys Session Reconciliation
 
-## Safe continuation point
+## Current continuation point
 
-- Current consolidated baseline commit: `59d2b57` (`checkpoint: add .claude/skills toolset from recoverysys/integration-clean-2`).
-- Current reconciliation branch: `main` with an intentionally uncommitted integration checkpoint.
-- `origin/main` currently points at the same consolidated baseline; `origin/recoverysys/integration-clean` remains an integration target, not an assumption about this checkout.
-- Do not merge raw backup branches into `main`.
+- Current consolidated commit: `498c886` (`merge reviewed sensitivity integrity child snapshot`).
+- Current branch: `main`, committed and pushed to `origin/main`.
+- All ten child snapshots were committed, reviewed, merged with explicit parent-preserving resolutions, and their worktrees were removed after approval.
+- The current source of truth is [`../PRODUCT-STRATEGY-BRIEF.md`](../PRODUCT-STRATEGY-BRIEF.md) and [`../ROADMAP.md`](../ROADMAP.md).
+- Do not merge raw backup branches or resurrect removed child worktrees without a new review.
 
 ## What was preserved remotely
 
@@ -52,33 +53,29 @@ Existing GitHub session branches already preserve portable/macOS, calculation-co
 
 ## Other-device workflow
 
+Use the pushed main branch for current work:
+
 ```powershell
 git clone https://github.com/akhan157/RecoverySys.git
 cd RecoverySys
-git fetch --all --prune
-git switch --track origin/recoverysys/integration-clean
+git switch main
+git pull --ff-only origin main
+cd RecoverySys
+npm install
 ```
 
-Inspect a preserved session without touching integration work:
+The historical archive branches listed above preserve session context only.
+Inspect them read-only and do not merge them into current product work without
+a fresh review against `main`.
 
-```powershell
-git switch --track origin/backup/recoverysys-transparency-dossier-raw-20260728
-```
+## Current maintenance order
 
-Return to normal integration work:
-
-```powershell
-git switch recoverysys/integration-clean
-```
-
-## Integration order
-
-1. Treat `59d2b57` as the current consolidated baseline; run focused checks for changed behavior and reserve the full matrix for release qualification.
-2. Create a keep/replace/discard ledger for every candidate file.
-3. Choose one transparency design; the GuidedReview path is integrated and tested, while Method Details remains a deferred snapshot surface.
-4. Verify Windows portable build; verify macOS build on a Mac before claiming release support.
-5. Update README, desktop documentation, roadmap, and changelog only after code/build verification.
-6. Review the exact diff against the selected baseline; keep the worktree uncommitted until approval.
+1. Read `PRODUCT-STRATEGY-BRIEF.md` for product intent, requirements, metrics, and phase boundaries.
+2. Read `ROADMAP.md` for the current milestone status and ordered queue.
+3. Run focused checks for changed behavior, then the release matrix when a release claim is being considered.
+4. Keep browser JavaScript as the production simulation authority and Python as research-only.
+5. Update contracts, migrations, tests, roadmap, strategy brief, and release notes together when durable behavior changes.
+6. Review the exact diff, commit the change, and push only after verification.
 
 ## Historical baseline verification evidence
 

@@ -3,6 +3,7 @@
 RecoverySys is a local-first recovery-bay configuration and flight-estimation tool for high-power rocketry. It helps you assemble recovery hardware, review configuration warnings, and explore simulated flight and landing behavior before a launch.
 
 **Version 1.2.0.1**
+The complete product strategy, requirements outline, feature breakdown, acceptance criteria, metrics, risks, release strategy, and six-phase roadmap are in [`PRODUCT-STRATEGY-BRIEF.md`](PRODUCT-STRATEGY-BRIEF.md).
 
 ## Capabilities
 

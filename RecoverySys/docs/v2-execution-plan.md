@@ -23,7 +23,7 @@ detailed plan records the implementation boundary beneath it:
 
 | Identity | Value | Runtime owner |
 |---|---|---|
-| App release | `1.2.0.1` | `src/lib/constants.js`, `package.json`, `VERSION` |
+| App release | `1.2.0.1` | `src/lib/constants.js`, `package.json` |
 | Simulation schema | `1` | `src/lib/constants.js` |
 | Simulation model | `browser-js-recovery` / `isa-apogee-descent-v1` | `src/lib/constants.js` |
 | Simulation assumptions | `recovery-assumptions-v1` | `src/lib/constants.js` |
@@ -40,9 +40,9 @@ accepted evidence is absent, and cross-artifact parity is incomplete. Those are
 open contract gates, not reasons to describe the implemented evaluator as
 future-only.
 
-The integrated worktree is intentionally uncommitted. Baseline command results
-and the current release status are recorded in `ROADMAP.md`; this ledger must
-not describe the working tree as a clean release candidate.
+The integrated checkpoint is committed and pushed on `main`. Baseline command
+results and the current release status are recorded in `ROADMAP.md`; this
+ledger must not describe the product as a fully qualified release candidate.
 
 
 ## V2 release claim
@@ -618,7 +618,7 @@ Update `Status`, `Evidence`, and `Decision` when each gate closes.
 |---|---|---|---|
 | V2-00 Baseline and contract ledger | Partial | Runtime, manifest, and validation cases share the browser model/assumptions identities; roadmap snapshot records current command results | Close clean-install/runtime qualification, contract inventory, archived-prototype decision, and documentation reconciliation |
 | V2-01 Executable validation gate | Complete | `validate:corpus` exists and validates schema, manifest, identities, evaluator registration, and accepted-case gate behavior | Review cases report structural health; only accepted cases will gate numerical agreement |
-| V2-02 Initial validation corpus | In progress; externally gated | Five checked-in review cases cover atmosphere, descent, drift, and static load screening | Add domain coverage and independent review before any case becomes accepted |
+| V2-02 Initial validation corpus | In progress; externally gated | Six checked-in review cases cover atmosphere, descent, drift, and static load screening | Add domain coverage and independent review before any case becomes accepted |
 | V2-03 Mission envelope | Complete | Pure evaluator, stable reason codes, and unit tests; integrated as a visible review boundary | No unsupported numeric operating boundaries invented |
 | V2-04 Confidence evaluation | Partial | Pure evidence-coverage/confidence evaluator and decision-table tests exist; current UI and brief deliberately inject E0/review-only coverage | Add accepted-evidence indexing and a separate confidence-rule version before Supported can appear |
 | V2-05 Confidence/stale UI | Partial | Current/stale/no-result posture, provenance, accessible text, and remediation exist; broader parity is not complete | Keep stale and insufficient states conservative until every consuming artifact agrees |

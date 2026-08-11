@@ -1,6 +1,7 @@
 # Product
 
 <!-- impeccable:product-schema 1 -->
+The complete strategy, requirements outline, feature breakdown, acceptance criteria, and six-phase roadmap are in [`PRODUCT-STRATEGY-BRIEF.md`](PRODUCT-STRATEGY-BRIEF.md).
 
 ## Platform
 

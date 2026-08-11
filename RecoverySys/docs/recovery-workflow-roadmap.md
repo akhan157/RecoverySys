@@ -1,9 +1,9 @@
 # Recovery workflow roadmap
 
-Future-only backlog for turning current estimates into a clearer recovery
-planning workflow. Confidence, evidence-coverage, mission-envelope, and stale
-result foundations now exist in code, but this document does not claim accepted
-validation or complete cross-artifact production capability.
+**Status:** Historical supporting roadmap. Use [`../PRODUCT-STRATEGY-BRIEF.md`](../PRODUCT-STRATEGY-BRIEF.md) for the current product contract and [`../ROADMAP.md`](../ROADMAP.md) for current phase status.
+
+This document preserves the earlier recovery-workflow framing. It is not the
+current priority order and must not override the six-phase roadmap.
 
 
 ## Phase 0 — foundation (highest priority)

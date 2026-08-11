@@ -17,7 +17,7 @@ metadata.
   `accepted-for-comparison` cases and ranks accepted evidence by level.
 - `src/components/ConfidenceStatus.jsx` and
   `src/lib/recoveryBrief.js` currently inject an uncovered/review-only
-  coverage posture. This is deliberate: the five checked-in corpus cases are
+  coverage posture. This is deliberate: the six checked-in corpus cases are
   not accepted, so current results remain `Insufficient confidence` even when
   fresh and in scope.
 - `src/lib/simulationIdentity.js` and `src/lib/resultIntegrity.js` carry
@@ -33,7 +33,7 @@ The current browser production authority is:
 
 | Identity | Current value | Owner |
 |---|---|---|
-| App release | `1.2.0.1` | `src/lib/constants.js`, `package.json`, `VERSION` |
+| App release | `1.2.0.1` | `src/lib/constants.js`, `package.json` |
 | Simulation schema | `1` | `src/lib/constants.js` |
 | Simulation model | `browser-js-recovery` / `isa-apogee-descent-v1` | `src/lib/constants.js` |
 | Simulation assumptions | `recovery-assumptions-v1` | `src/lib/constants.js` |
