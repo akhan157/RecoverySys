@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
+import { RESULT_ACTION_DESTINATIONS } from '../lib/assessment.js'
 import CausalityRow from '../components/analysis/CausalityRow.jsx'
 import DetailInspector from '../components/analysis/DetailInspector.jsx'
 import ResultUsabilityStrip from '../components/analysis/ResultUsabilityStrip.jsx'
@@ -30,7 +31,42 @@ describe('Analysis shared review primitives', () => {
     await user.keyboard('{Enter}')
     expect(onAction).toHaveBeenCalledWith(
       expect.objectContaining({ label: 'Rerun simulation' }),
-      undefined
+      RESULT_ACTION_DESTINATIONS.SIMULATION
+    )
+  })
+
+  it('routes the default not-run action to simulation', async () => {
+    const user = userEvent.setup()
+    const onAction = vi.fn()
+    render(<ResultUsabilityStrip state="not-run" onAction={onAction} />)
+
+    await user.click(screen.getByRole('button', { name: 'Run simulation' }))
+
+    expect(onAction).toHaveBeenCalledWith(
+      expect.objectContaining({ label: 'Run simulation' }),
+      RESULT_ACTION_DESTINATIONS.SIMULATION
+    )
+  })
+
+  it('preserves an explicit action destination over the canonical fallback', async () => {
+    const user = userEvent.setup()
+    const onAction = vi.fn()
+    render(
+      <ResultUsabilityStrip
+        state="stale"
+        action={{ label: 'Review analysis', destination: RESULT_ACTION_DESTINATIONS.ANALYSIS }}
+        onAction={onAction}
+      />
+    )
+
+    await user.click(screen.getByRole('button', { name: 'Review analysis' }))
+
+    expect(onAction).toHaveBeenCalledWith(
+      expect.objectContaining({
+        label: 'Review analysis',
+        destination: RESULT_ACTION_DESTINATIONS.ANALYSIS,
+      }),
+      RESULT_ACTION_DESTINATIONS.ANALYSIS
     )
   })
 

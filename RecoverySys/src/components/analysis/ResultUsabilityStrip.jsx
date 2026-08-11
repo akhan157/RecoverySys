@@ -44,11 +44,20 @@ function normalizeState(value) {
   return STATE_LABELS[normalized] ? normalized : 'not-run'
 }
 
-function normalizeAction(action, state) {
-  if (typeof action === 'string') return { label: action }
-  if (action && typeof action === 'object') return action
-  if (state === 'not-run' || state === 'missing') return { label: 'Run simulation' }
-  if (state === 'stale') return { label: 'Rerun simulation' }
+function normalizeAction(action, state, canonicalDestination) {
+  if (typeof action === 'string') return { label: action, destination: canonicalDestination }
+  if (action && typeof action === 'object') {
+    return {
+      ...action,
+      destination: action.destination ?? action.path ?? action.id ?? canonicalDestination,
+    }
+  }
+  if (state === 'not-run' || state === 'missing') {
+    return { label: 'Run simulation', destination: canonicalDestination }
+  }
+  if (state === 'stale') {
+    return { label: 'Rerun simulation', destination: canonicalDestination }
+  }
   return null
 }
 
@@ -73,7 +82,14 @@ export default function ResultUsabilityStrip({
   const source = usability ?? result ?? {}
   const normalizedState = normalizeState(state ?? source.state ?? source.status)
   const stateLabel = STATE_LABELS[normalizedState]
-  const actionSpec = normalizeAction(action ?? source.nextAction ?? source.action, normalizedState)
+  const canonicalDetails =
+    RESULT_STATUS_DETAILS[normalizedState] ?? RESULT_STATUS_DETAILS['not-run']
+  const canonicalDestination = source.actionDestination ?? canonicalDetails.actionDestination
+  const actionSpec = normalizeAction(
+    action ?? source.nextAction ?? source.action,
+    normalizedState,
+    canonicalDestination
+  )
   const actionHandler = onAction ?? actionSpec?.onActivate ?? actionSpec?.onClick
   const actionDestination = actionSpec?.destination ?? actionSpec?.path ?? actionSpec?.id
   const reasonText = displayValue(reason ?? source.reason) ?? DEFAULT_REASON[normalizedState]
