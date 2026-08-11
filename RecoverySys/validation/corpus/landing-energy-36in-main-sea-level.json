@@ -1,0 +1,40 @@
+{
+  "id": "landing-energy-36in-main-sea-level",
+  "kind": "analytic",
+  "domain": "landing-energy",
+  "status": "review",
+  "inputs": {
+    "chuteSpecs": { "diameter_in": 36, "cd": 1.5 },
+    "mass_kg": 2.5,
+    "altitude_ft": 0
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "landing_ke_ftlbf",
+        "value": 37,
+        "unit": "ft-lbf",
+        "tolerance": { "absolute": 0, "basis": "analyst-derived" },
+        "notes": "Presentation result rounds terminal-velocity kinetic energy to whole foot-pounds-force."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www.grc.nasa.gov/www/k-12/airplane/termv.html",
+    "title": "NASA Glenn terminal velocity reference",
+    "accessed": "2026-07-21",
+    "citation": "Terminal-velocity drag equation and kinetic-energy relation.",
+    "derivation": "Evaluate terminal descent speed from sqrt(2*m*g/(rho*Cd*A)), then compute 0.5*m*v² and convert joules to foot-pounds-force using the production presentation conversion."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "Browser JavaScript recovery estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Observed rounded landing kinetic energy equals the independently derived terminal-velocity energy reference."
+  },
+  "notes": "Analytic regression comparison only; not impact testing, injury-risk validation, or flight validation."
+}

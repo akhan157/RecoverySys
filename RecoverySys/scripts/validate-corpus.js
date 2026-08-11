@@ -31,6 +31,15 @@ const evaluators = Object.freeze({
   'terminal-descent-36in-main-sea-level': (inputs) => ({
     descent_rate_fps: computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft),
   }),
+  'landing-energy-36in-main-sea-level': (inputs) => {
+    const descentRateFps = computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft)
+    const landingSpeedMps = descentRateFps / 3.28084
+    return {
+      landing_ke_ftlbf: Math.round(
+        0.5 * inputs.mass_kg * landingSpeedMps * landingSpeedMps * 0.7376
+      ),
+    }
+  },
   'layered-wind-linear-interpolation-drift': (inputs) => {
     const drift = computeDrift(inputs)
     return drift ? { drift_ft: drift.drift_ft, bearing_deg: drift.bearing_deg } : {}
@@ -54,6 +63,42 @@ function modelMatches(model) {
     model?.assumptionsVersion === SIMULATION_ASSUMPTIONS_VERSION
   )
 }
+const STATUS_ORDER = ['draft', 'review', 'accepted-for-comparison', 'superseded', 'rejected']
+
+function reportDomainCoverage(cases) {
+  const byDomain = new Map()
+
+  for (const { testCase } of cases) {
+    const entry = byDomain.get(testCase.domain) ?? {
+      domain: testCase.domain,
+      caseIds: [],
+      outputMetrics: new Set(),
+      statusCounts: Object.fromEntries(STATUS_ORDER.map((status) => [status, 0])),
+      acceptedCaseIds: [],
+      unreviewedCaseIds: [],
+    }
+    entry.caseIds.push(testCase.id)
+    for (const metric of testCase.expected.metrics) entry.outputMetrics.add(metric.name)
+    entry.statusCounts[testCase.status] += 1
+    if (testCase.status === 'accepted-for-comparison') entry.acceptedCaseIds.push(testCase.id)
+    if (testCase.status === 'draft' || testCase.status === 'review')
+      entry.unreviewedCaseIds.push(testCase.id)
+    byDomain.set(testCase.domain, entry)
+  }
+
+  return [...byDomain.values()]
+    .sort((left, right) => (left.domain < right.domain ? -1 : left.domain > right.domain ? 1 : 0))
+    .map(({ domain, caseIds, outputMetrics, statusCounts, acceptedCaseIds, unreviewedCaseIds }) => ({
+      domain,
+      caseCount: caseIds.length,
+      caseIds: caseIds.sort(),
+      outputMetrics: [...outputMetrics].sort(),
+      statusCounts,
+      acceptedCaseIds: acceptedCaseIds.sort(),
+      unreviewedCaseIds: unreviewedCaseIds.sort(),
+    }))
+}
+
 
 export function validateCorpus() {
   const diagnostics = []
@@ -68,6 +113,7 @@ export function validateCorpus() {
     .filter((file) => file.endsWith('.json') && file !== 'schema.json')
     .sort()
   const cases = files.map((file) => ({ file, testCase: readJson(path.join(CORPUS_DIR, file)) }))
+  const validCases = []
   const seen = new Set()
 
   if (!modelMatches(manifest.model)) diagnostics.push('manifest model identity does not match production')
@@ -78,6 +124,7 @@ export function validateCorpus() {
       for (const error of validate.errors ?? []) diagnostics.push(`${file}${error.instancePath} ${error.message}`)
       continue
     }
+    validCases.push({ file, testCase })
     if (seen.has(testCase.id)) diagnostics.push(`${file}: duplicate case id ${testCase.id}`)
     seen.add(testCase.id)
     if (!manifest.cases?.includes(testCase.id)) diagnostics.push(`${file}: ${testCase.id} missing from manifest`)
@@ -106,14 +153,16 @@ export function validateCorpus() {
   }
 
   for (const id of manifest.cases ?? []) if (!seen.has(id)) diagnostics.push(`manifest: case ${id} has no corpus file`)
-  return { valid: diagnostics.length === 0, diagnostics, cases: cases.length }
+  return {
+    valid: diagnostics.length === 0,
+    diagnostics,
+    cases: cases.length,
+    domainCoverage: reportDomainCoverage(validCases),
+  }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const result = validateCorpus()
-  if (result.valid) console.log(`validation corpus valid (${result.cases} cases; review cases do not gate agreement)`)
-  else {
-    console.error(result.diagnostics.join('\n'))
-    process.exitCode = 1
-  }
+  console.log(JSON.stringify(result))
+  if (!result.valid) process.exitCode = 1
 }

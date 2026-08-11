@@ -1,5 +1,5 @@
 {
-  "corpusVersion": "0.2.0",
+  "corpusVersion": "0.3.0",
   "model": {
     "id": "browser-js-recovery",
     "version": "isa-apogee-descent-v1",
@@ -11,6 +11,7 @@
     "isa-density-sea-level",
     "isa-density-5000m",
     "terminal-descent-36in-main-sea-level",
+    "landing-energy-36in-main-sea-level",
     "layered-wind-linear-interpolation-drift",
     "static-ejection-load-nylon-screening"
   ],

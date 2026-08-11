@@ -8,7 +8,7 @@
   "properties": {
     "id": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$" },
     "kind": { "enum": ["analytic", "trusted-simulator", "real-flight", "metamorphic"] },
-    "domain": { "enum": ["atmosphere", "ascent", "descent", "drift", "shock-load", "dispersion", "end-to-end", "mission-envelope", "hardware-fit", "deployment-plan", "loads", "brief", "other"] },
+    "domain": { "enum": ["atmosphere", "ascent", "descent", "landing-energy", "drift", "shock-load", "dispersion", "end-to-end", "mission-envelope", "hardware-fit", "deployment-plan", "loads", "brief", "other"] },
     "status": { "enum": ["draft", "review", "accepted-for-comparison", "superseded", "rejected"] },
     "inputs": { "type": "object", "additionalProperties": true },
     "expected": {
