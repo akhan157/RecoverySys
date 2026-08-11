@@ -1,8 +1,8 @@
 # RecoverySys v2 execution plan
 
-## Purpose
-
 This is the controlling implementation plan for RecoverySys v2. Execute work packages in dependency order, record evidence in the completion ledger, and do not advance through a gate on intent alone.
+
+Package objectives and acceptance criteria remain the target v2 contract. The reconciled ledger below distinguishes code that exists in the current checkout from evidence, review, and platform gates that are still open; an implementation status never closes an external gate.
 
 V2 makes RecoverySys a more defensible recovery-planning workflow. It does not turn the product into flight-certification software, a complete vehicle simulator, or a launch approval authority.
 
@@ -20,6 +20,14 @@ V2 makes RecoverySys a more defensible recovery-planning workflow. It does not t
 ## V2 release claim
 
 At v2 release, a user can create a recovery plan, see whether the mission and its outputs are within documented model scope, understand important assumptions and evidence limitations, review hardware and deployment concerns, compare uncertainty-sensitive scenarios, and produce a traceable recovery brief. Every displayed conclusion is current, reasoned, and no stronger than its evidence.
+
+## Current checkout posture
+
+- Production authority is the browser JavaScript estimator. The checked-in identity is `browser-js-recovery` / `isa-apogee-descent-v1` with `recovery-assumptions-v1`, schema `1`, app `1.2.0.1`, and method `deterministic-physics`.
+- Result provenance and stale-result blocking are implemented. Input, selected hardware, custom motor, model, assumptions, and schema identities are captured with each result.
+- The confidence evaluator implements the four states and precedence rules, but the UI and recovery brief intentionally supply E0 review-only coverage. Therefore a fresh in-scope result currently remains `Insufficient confidence`; no accepted applicable case is available to produce `Supported`.
+- The validation corpus contains five schema-checked review cases. They exercise atmosphere, descent, drift, and static load screening; none is accepted-for-comparison or real-flight evidence.
+- Flight records are local, versioned, and exportable with prediction identity snapshots. They remain observations (`corpusEvidence: false`) and are not candidate corpus evidence exports.
 
 ## Release exclusions
 
@@ -88,7 +96,7 @@ All release-required packages -> V2-12 release qualification
 
 ### V2-00 Baseline and contract ledger
 
-**Status:** in progress; browser authority and result identity are complete.
+**Status:** complete for the current browser-authority baseline; external evidence and platform gates remain open.
 
 **Objective:** freeze the known-good starting point and identify every contract that v2 may change.
 
@@ -556,25 +564,26 @@ Update `Status`, `Evidence`, and `Decision` when each gate closes.
 
 | Package | Status | Evidence | Decision |
 |---|---|---|---|
-| V2-00 Baseline and contract ledger | Complete | `npm run check`, `npm run e2e`, and `git diff --check` passed; browser-authority and provenance baseline recorded | Existing parts validation and snatch screening treated as shipped foundations |
-| V2-01 Executable validation gate | Complete | `npm run validate:corpus` validates schema, manifest, identities, evaluator registration, and accepted-case gate behavior | Review cases report structural health; only accepted cases will gate numerical agreement |
-| V2-02 Initial validation corpus | In progress; externally gated | Five checked-in review cases cover atmosphere, descent, drift, and static load screening | Add domain coverage and independent review before any case becomes accepted |
-| V2-03 Mission envelope | Complete | Pure evaluator, stable reason codes, and unit tests; integrated as a visible review boundary | No unsupported numeric operating boundaries invented |
-| V2-04 Confidence evaluation | Complete | Pure evidence-coverage/confidence decision table and UI integration; unsupported states are prevented by tests | No numeric confidence score; no Supported state without accepted evidence |
-| V2-05 Confidence/stale UI | Complete | Accessible desktop/mobile E2E and focused tests show current/stale/no-result posture and remediation | Review-only corpus remains insufficient confidence |
-| V2-06 Sensitivity workflow | Complete | Deterministic one-at-a-time analysis, focused tests, and desktop/mobile E2E | Separate model response from probability or confidence interval |
-| V2-07 Catalog provenance | Complete within available evidence | Registry/report covers all built-ins; UI labels catalog data unverified and custom data user-supplied | Per-part verification remains externally gated |
-| V2-08 Hardware/deployment review | Complete within available evidence | Stable compatibility metadata, review UI, acknowledgement boundary, focused tests, and desktop/mobile E2E | Existing rule coverage retained; component-specific validation remains external |
-| V2-09 Recovery brief | Complete | Versioned view model, export/print status, provenance, and focused tests | Existing config/share format remains unchanged |
-| V2-10 Flight evidence capture | Complete | Versioned local records, migration, immutable prediction snapshot, local JSON transfer, and focused tests | User records never auto-promote to corpus evidence |
+| V2-00 Baseline and contract ledger | Complete for current checkout | Browser authority, result identity, validation manifest identity, and baseline evidence are recorded; the current consolidated baseline is `59d2b57` | Keep stored-shape ownership and identity versions explicit; do not treat this documentation pass as a release qualification |
+| V2-01 Executable validation gate | Implemented | `scripts/validate-corpus.js` uses Ajv, checks manifest/case identity, invokes browser-engine evaluators, rejects non-finite outputs, and gates only `accepted-for-comparison` agreement; `npm run check` includes `validate:corpus` | Review cases remain report-only until independent review promotes them |
+| V2-02 Initial validation corpus | In progress; externally gated | Five checked-in cases cover atmosphere, descent, drift, and static load screening; all remain `review` | Add missing ascent/thrust/landing/metamorphic coverage and independent review before any case becomes accepted |
+| V2-03 Mission envelope | Implemented in code | Pure evaluator returns `in-scope`, `conditional`, or `out-of-scope` with stable reason codes, paths, remediation, and `mission-envelope-v1` | Keep unknown or unsupported conditions conservative; do not invent numeric boundaries |
+| V2-04 Confidence evaluation | Implemented conservatively; evidence-index work open | Pure evaluator and focused decision-table tests enforce freshness, envelope, coverage, sensitivity, and review-only precedence; UI/brief coverage is intentionally hardcoded to E0 review-only | Add accepted-case indexing and applicability before claiming Supported in the product |
+| V2-05 Confidence/stale UI | Implemented current/stale posture; broader qualification open | Dashboard, simulation, analysis, export, and print surfaces receive result freshness and confidence posture; stale values are withheld or marked unusable | Complete reason-specific remediation and full fresh/stale/conditional/sensitivity E2E in the v3 verification plan |
+| V2-06 Sensitivity workflow | Implemented with terminology follow-up | Deterministic one-at-a-time sensitivity and seeded dispersion paths are present with focused tests; current UI still needs terminology review where uncertainty is presented | Keep sensitivity/dispersion separate from evidence confidence and remove any confidence-interval implication through the planned copy review |
+| V2-07 Catalog provenance | Implemented within available evidence | `catalog-provenance-v1` records catalog-family provenance; built-in entries remain `unverified` and custom values remain user-supplied | Per-part source, access-date, and verification review remains external |
+| V2-08 Hardware/deployment review | Implemented within available evidence | Compatibility metadata, warning review, acknowledgement boundary, packing/deployment checks, and proxy load language are wired and tested | Component-specific load behavior and field/deployment review remain external |
+| V2-09 Recovery brief | Implemented v1 view model; full transfer qualification open | `recovery-brief-v1` carries envelope, confidence, unresolved checks, estimates, sensitivity, authorization boundary, and simulation provenance into export/print | Complete migration/round-trip and artifact parity evidence before release qualification |
+| V2-10 Flight evidence capture | Implemented local observation records; candidate intake open | Version-2 flight records preserve prediction/spec snapshots, observation provenance, instrumentation, missing data, local storage, and JSON transfer; records remain `corpusEvidence: false` | Add documented candidate-evidence export and independent review intake without auto-promotion |
 | V2-11 Model refinement decisions | Externally gated | Corpus CLI and sensitivity workflow expose evidence needed for decisions | No physics change without a reviewed, decision-relevant discrepancy |
-| V2-12 Release qualification | Complete for the Windows/web build; externally limited | Clean `npm ci`, `npm run check` (28 files / 234 tests), `npm run e2e` (32 desktop/mobile tests), `npm run portable:build`, and `git diff --check` passed. Windows portable SHA-256: `914BEDE4EE27625E0546A8C74CCFDC5E4FA67D6D12A7478EF7476DF8DAEDFF59` | Do not claim macOS support, accepted comparison evidence, manufacturer verification, or real-flight validation until their external gates close |
+| V2-12 Release qualification | Not release-qualified | Existing ledger evidence records prior web/Windows checks, but this reconciliation did not rerun the clean-install/release matrix; macOS and independent evidence remain open | Do not claim v2 release, macOS support, accepted comparison evidence, manufacturer verification, or real-flight validation |
 
-## First execution queue
+## Next execution queue
 
 Execute these next without reopening product strategy:
 
-1. Finish V2-00 contract inventory, manifest identity reconciliation, and backlog cleanup.
-2. Implement V2-01 corpus CLI and wire it into `npm run check`.
-3. Migrate existing fixtures and build V2-02 coverage domain by domain.
-4. Close G2 with a coverage/disagreement report before implementing confidence presentation.
+1. Keep the contract inventory and this ledger aligned with each shipped identity or payload change.
+2. Expand V2-02 coverage and obtain independent review for any case intended to become `accepted-for-comparison`.
+3. Add evidence indexing/applicability so the implemented confidence evaluator can consume accepted cases without weakening its precedence rules.
+4. Finish V2-09/V2-10 transfer artifacts, candidate-evidence intake, and generated-brief parity before G9/G10 review.
+5. Run V2-12 only after the external gates and clean-install artifact matrix are actually complete.

@@ -2,8 +2,9 @@
 
 ## Safe continuation point
 
-- Product baseline: `27b666e`.
-- Normal continuation branch: `recoverysys/integration-clean`.
+- Current consolidated baseline commit: `59d2b57` (`checkpoint: add .claude/skills toolset from recoverysys/integration-clean-2`).
+- Current reconciliation branch: `akhan157/recoverysys-m0-reconcile`.
+- `origin/main` currently points at the same consolidated baseline; `origin/recoverysys/integration-clean` remains an integration target, not an assumption about this checkout.
 - Do not merge raw backup branches into `main`.
 - `main` remains unchanged during reconciliation.
 
@@ -46,7 +47,9 @@ Existing GitHub session branches already preserve portable/macOS, calculation-co
 | Trust/hardening branches | Baseline already contains integrated successors. Do not cherry-pick old whole commits; add only a focused tested fix when baseline audit proves a missing behavior. |
 | Windows/macOS portable work | Baseline contains current packaging scripts/config. Do not stage local ZIPs, `.ignore`, or generated schema noise. Verify platform builds separately. |
 | Branding, README, hygiene, GitHub refresh | Baseline already includes their meaningful content. Keep only docs that match verified behavior. |
-| Transparency candidates | Choose one method-details concept before integration. Method Dossier and Method Details compete; Guided Review is a separate onboarding choice. |
+| Transparency candidates | `MethodDetailsTab.jsx` and `GuidedReview.jsx` remain separate source candidates and are not wired into the current main tab set. Choose one transparency concept before wiring either; do not merge raw prototypes wholesale. |
+| Confidence and evidence | Current code has conservative confidence/stale evaluators, but the product is wired to E0 review-only corpus coverage. Preserve `Insufficient confidence` until accepted applicable evidence exists. |
+| Flight evidence | Current local flight records preserve prediction identity and remain observations; never treat them as accepted corpus evidence without external review. |
 
 ## Other-device workflow
 
@@ -71,17 +74,16 @@ git switch recoverysys/integration-clean
 
 ## Integration order
 
-1. Run the baseline checks: `npm ci`, `npm run check`, `npm run e2e` from `RecoverySys/`.
+1. Treat `59d2b57` as the current consolidated baseline; run focused checks for changed behavior and reserve the full matrix for release qualification.
 2. Create a keep/replace/discard ledger for every candidate file.
-3. Choose one transparency design; copy/rebuild only that selected behavior into `recoverysys/integration-clean` with tests.
+3. Choose one transparency design; copy/rebuild only that selected behavior into the integration target with tests.
 4. Verify Windows portable build; verify macOS build on a Mac before claiming release support.
 5. Update README, desktop documentation, roadmap, and changelog only after code/build verification.
-6. Review the exact diff against `27b666e`, push `recoverysys/integration-clean`, then merge into `main` only after approval.
+6. Review the exact diff against the selected baseline, push the integration target, then merge into `main` only after approval.
 
-## Baseline verification evidence
+## Historical baseline verification evidence
 
-Run in `recoverysys/integration-clean` on 2026-07-28:
-
+These rows document the `recoverysys/integration-clean` baseline run on 2026-07-28. They are preserved for provenance, not as fresh release evidence for the current reconciliation checkout; this task intentionally did not rerun project-wide validation.
 | Check | Result |
 |---|---|
 | `npm ci` | Completed. npm reported 6 high-severity dependency audit findings; no automated dependency update was applied. |
