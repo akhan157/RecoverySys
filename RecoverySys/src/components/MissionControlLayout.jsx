@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import GuidedReview from './GuidedReview.jsx'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
@@ -52,6 +52,19 @@ export default function MissionControlLayout({
   /* darkMode/setDarkMode removed: MC layout is dark-only */
 }) {
   const [activeTab, setActiveTab] = useState('GUIDED_REVIEW')
+  const [printMode, setPrintMode] = useState(null)
+
+  useEffect(() => {
+    if (!printMode) return undefined
+    const timerId = window.setTimeout(() => window.print(), 0)
+    return () => window.clearTimeout(timerId)
+  }, [printMode])
+
+  useEffect(() => {
+    const resetPrintMode = () => setPrintMode(null)
+    window.addEventListener('afterprint', resetPrintMode)
+    return () => window.removeEventListener('afterprint', resetPrintMode)
+  }, [])
 
   const filledSlots = useMemo(
     () => CATEGORIES.filter((c) => state.config[c.id] != null).length,
@@ -219,6 +232,8 @@ export default function MissionControlLayout({
                 copyShareLink={copyShareLink}
                 onLoadConfig={loadConfig}
                 recoveryBrief={recoveryBrief}
+                onPrintBrief={() => setPrintMode('brief')}
+                onPrintChecklist={() => setPrintMode('checklist')}
               />
             )}
           </main>
@@ -231,6 +246,7 @@ export default function MissionControlLayout({
         resultFresh={resultFresh}
         warnings={state.warnings}
         recoveryBrief={recoveryBrief}
+        printMode={printMode ?? 'checklist'}
       />
     </>
   )

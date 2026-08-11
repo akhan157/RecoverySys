@@ -40,18 +40,26 @@ describe('ExportTab custom-part import', () => {
     )
   })
 
-  it('shows the versioned brief handoff status without changing JSON actions', () => {
+  it('shows the versioned brief handoff status and routes distinct print actions', () => {
+    const onPrintBrief = vi.fn()
+    const onPrintChecklist = vi.fn()
     render(
       <ExportTab
         state={{ saveState: 'idle', shareState: 'idle' }}
         saveConfig={vi.fn()}
         copyShareLink={vi.fn()}
         onLoadConfig={vi.fn()}
+        onPrintBrief={onPrintBrief}
+        onPrintChecklist={onPrintChecklist}
         recoveryBrief={{ status: 'stale', confidence: { label: 'Insufficient confidence' } }}
       />
     )
     expect(screen.getByRole('status')).toHaveTextContent(/STALE_RESULT/)
     expect(screen.getByRole('status')).toHaveTextContent(/Insufficient confidence/)
-    expect(screen.getByRole('button', { name: /PRINT_RECOVERY_BRIEF/i })).toBeInTheDocument()
+
+    fireEvent.click(screen.getByRole('button', { name: /PRINT_RECOVERY_BRIEF/i }))
+    fireEvent.click(screen.getByRole('button', { name: /PRINT_CHECKLIST/i }))
+    expect(onPrintBrief).toHaveBeenCalledOnce()
+    expect(onPrintChecklist).toHaveBeenCalledOnce()
   })
 })

@@ -25,4 +25,32 @@ describe('PrintChecklist recovery brief', () => {
     expect(screen.getByText('Rerun before use.')).toBeInTheDocument()
     expect(screen.getByText('This brief does not authorize launch.')).toBeInTheDocument()
   })
+
+  it('renders distinct brief and checklist artifact modes', () => {
+    const { container, rerender } = render(
+      <PrintChecklist
+        specs={{}}
+        config={{}}
+        simulation={null}
+        recoveryBrief={{ status: 'not-run' }}
+        printMode="brief"
+      />
+    )
+    expect(container.querySelector('.print-checklist--brief')).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'RecoverySys Recovery Brief' })).toBeInTheDocument()
+
+    rerender(
+      <PrintChecklist
+        specs={{}}
+        config={{}}
+        simulation={null}
+        recoveryBrief={{ status: 'not-run' }}
+        printMode="checklist"
+      />
+    )
+    expect(container.querySelector('.print-checklist--checklist')).toBeInTheDocument()
+    expect(
+      screen.getByRole('heading', { name: 'RecoverySys Recovery Checklist' })
+    ).toBeInTheDocument()
+  })
 })

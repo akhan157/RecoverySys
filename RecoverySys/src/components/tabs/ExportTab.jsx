@@ -25,6 +25,8 @@ export default function ExportTab({
   copyShareLink,
   onLoadConfig,
   recoveryBrief,
+  onPrintBrief = () => window.print(),
+  onPrintChecklist = () => window.print(),
 }) {
   const fileRef = useRef(null)
 
@@ -100,7 +102,7 @@ export default function ExportTab({
                 : 'NO_CURRENT_RESULT'}{' '}
             · {recoveryBrief?.confidence?.label || 'Insufficient confidence'}
           </div>
-          <button className="mc-run-btn" onClick={() => window.print()}>
+          <button className="mc-run-btn" onClick={onPrintBrief}>
             PRINT_RECOVERY_BRIEF →
           </button>
         </div>
@@ -186,7 +188,7 @@ export default function ExportTab({
             Print a recovery checklist with specs, selected parts, compatibility warnings,
             simulation results, and a packing order with checkboxes.
           </div>
-          <button className="mc-run-btn" onClick={() => window.print()}>
+          <button className="mc-run-btn" onClick={onPrintChecklist}>
             PRINT_CHECKLIST &rarr;
           </button>
         </div>

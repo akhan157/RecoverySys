@@ -23,6 +23,7 @@ export default function PrintChecklist({
   resultFresh,
   warnings = [],
   recoveryBrief,
+  printMode = 'brief',
 }) {
   const date = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
@@ -36,10 +37,12 @@ export default function PrintChecklist({
   const packingSteps = PACKING_ORDER.filter((slot) => config[slot])
 
   return (
-    <div className="print-checklist">
-      <h1>RecoverySys Recovery Checklist</h1>
+    <div className={`print-checklist print-checklist--${printMode}`}>
+      <h1>
+        {printMode === 'brief' ? 'RecoverySys Recovery Brief' : 'RecoverySys Recovery Checklist'}
+      </h1>
       <p className="print-subtitle">Generated {date}</p>
-      <section className="print-brief-status">
+      <section className="print-brief-status print-artifact--brief">
         <h2>Recovery brief status</h2>
         <p>
           {recoveryBrief?.status === 'current'
@@ -54,7 +57,7 @@ export default function PrintChecklist({
         </p>
         <p>{recoveryBrief?.authorization}</p>
       </section>
-      <section>
+      <section className="print-artifact--brief">
         <h2>Mission envelope and unresolved checks</h2>
         <p>Envelope status: {recoveryBrief?.missionEnvelope?.status || 'not evaluated'}</p>
         <ul>
@@ -69,7 +72,7 @@ export default function PrintChecklist({
           <p>No unresolved checks recorded.</p>
         )}
       </section>
-      <section>
+      <section className="print-artifact--brief">
         <h2>Evidence and model provenance</h2>
         <p>{recoveryBrief?.confidence?.evidenceNote}</p>
         <p>
@@ -78,7 +81,7 @@ export default function PrintChecklist({
           {recoveryBrief?.provenance?.assumptionsVersion || 'Not available'}
         </p>
       </section>
-      <section>
+      <section className="print-artifact--brief">
         <h2>Selected hardware</h2>
         {recoveryBrief?.selectedHardware?.length ? (
           <ul>
@@ -94,7 +97,7 @@ export default function PrintChecklist({
       </section>
 
       {/* ── Rocket Specs ──────────────────────────────────────── */}
-      <section>
+      <section className="print-artifact--checklist">
         <h2>Rocket Specifications</h2>
         <table>
           <tbody>
@@ -151,7 +154,7 @@ export default function PrintChecklist({
       </section>
 
       {/* ── Selected Components ────────────────────────────────── */}
-      <section>
+      <section className="print-artifact--checklist">
         <h2>Selected Components</h2>
         {selectedParts.length === 0 ? (
           <p>No parts selected</p>
@@ -181,7 +184,7 @@ export default function PrintChecklist({
       </section>
 
       {/* ── Compatibility Warnings ─────────────────────────────── */}
-      <section>
+      <section className="print-artifact--checklist">
         <h2>Compatibility Warnings</h2>
         {warnings.length === 0 ? (
           <p>All systems nominal</p>
@@ -337,7 +340,7 @@ export default function PrintChecklist({
       </section>
 
       {/* ── Packing Order ─────────────────────────────────────── */}
-      <section>
+      <section className="print-artifact--checklist">
         <h2>Packing Order (bottom of bay to top)</h2>
         {packingSteps.length === 0 ? (
           <p>No parts selected</p>
