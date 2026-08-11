@@ -18,10 +18,10 @@ describe('recovery brief view model', () => {
     expect(brief.confidence.label).toBe('Insufficient confidence')
     expect(brief.confidence.evidenceNote).toMatch(/No accepted/i)
     expect(brief.authorization).toMatch(/does not authorize launch/i)
-    expect(brief.unresolvedChecks.some(({ code }) => code === 'RESULT_MISSING')).toBe(true)
+    expect(brief.unresolvedChecks.some(({ code }) => code === 'NO_CURRENT_RESULT')).toBe(true)
   })
 
-  it('marks a stale result and retains hardware, warnings, estimates, and provenance', () => {
+  it('marks a stale result, retains hardware/warnings/provenance, and withholds estimates', () => {
     const simulation = {
       apogee_ft: 3000,
       drift_ft: 700,
@@ -40,7 +40,7 @@ describe('recovery brief view model', () => {
     })
     expect(brief.status).toBe('stale')
     expect(brief.selectedHardware[0].name).toBe('Main')
-    expect(brief.keyEstimates.apogee_ft).toBe(3000)
+    expect(brief.keyEstimates).toBeNull()
     expect(brief.provenance.modelVersion).toBe('test-model')
     expect(brief.sensitivity.status).toBe('complete')
     expect(brief.unresolvedChecks.some(({ code }) => code === 'RESULT_STALE')).toBe(true)

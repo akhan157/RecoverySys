@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import Input from '../primitives/Input.jsx'
 import {
   createFlightEntry,
@@ -8,7 +9,7 @@ import {
   importFlightRecords,
 } from '../../lib/flightEvidence.js'
 
-function NewEntryForm({ simulation, specs, onSave }) {
+function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
   const [form, setForm] = useState({
     date: new Date().toISOString().slice(0, 10),
     location: '',
@@ -26,7 +27,7 @@ function NewEntryForm({ simulation, specs, onSave }) {
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
 
   const handleSave = () => {
-    const entry = createFlightEntry(form, { simulation, specs, resultFresh: Boolean(simulation) })
+    const entry = createFlightEntry(form, { simulation, specs, resultFresh })
     onSave(entry)
     setForm((f) => ({
       ...f,
@@ -421,10 +422,15 @@ export default function FlightLogTab({ state, resultFresh }) {
         </div>
         {state.simulation && !resultFresh && (
           <div className="mc-validation mc-validation--warn" style={{ marginBottom: 10 }}>
-            RESULT_STALE — rerun simulation before logging predicted values
+            {RESULT_STATUS_DETAILS.stale.reasonCode} — {RESULT_STATUS_DETAILS.stale.remediation}
           </div>
         )}
-        <NewEntryForm simulation={usableSimulation} specs={state.specs} onSave={addEntry} />
+        <NewEntryForm
+          simulation={usableSimulation}
+          resultFresh={resultFresh}
+          specs={state.specs}
+          onSave={addEntry}
+        />
         <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
           <button className="mc-run-btn" type="button" onClick={download}>
             EXPORT_RECORDS

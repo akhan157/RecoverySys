@@ -1,7 +1,7 @@
+import { RESULT_STATUS_DETAILS } from '../lib/assessment.js'
 import { evaluateConfidence } from '../lib/confidence.js'
 import { EVIDENCE_LEVEL } from '../lib/evidenceCoverage.js'
 import { evaluateMissionEnvelope } from '../lib/missionEnvelope.js'
-
 const LABELS = {
   supported: 'Supported',
   conditional: 'Conditional',
@@ -24,6 +24,8 @@ export default function ConfidenceStatus({
   onNavigate,
   compact = false,
 }) {
+  const resultStatus = !simulation ? 'not-run' : resultFresh ? 'current' : 'stale'
+  const resultDetails = RESULT_STATUS_DETAILS[resultStatus]
   const envelope = evaluateMissionEnvelope({ specs, config, customMotor })
   // The checked-in corpus is review-only. Never imply Supported until an
   // accepted applicable case exists.
@@ -52,17 +54,11 @@ export default function ConfidenceStatus({
           <div className="mc-confidence__eyebrow">ESTIMATE / EVIDENCE POSTURE</div>
           <h2 id="confidence-status-title">{LABELS[confidence.state]}</h2>
         </div>
-        <span className="mc-confidence__freshness">
+        <span className="mc-confidence__freshness" data-reason-code={resultDetails.reasonCode}>
           {simulation && resultFresh ? 'CURRENT_RESULT' : simulation ? 'STALE_RESULT' : 'NO_RESULT'}
         </span>
       </div>
-      <p className="mc-confidence__summary">
-        {simulation && resultFresh
-          ? 'This is a planning estimate, not a safety approval or certification.'
-          : simulation
-            ? 'Current result is stale because inputs or selected hardware changed. Rerun the simulation.'
-            : 'No current simulation result is available yet.'}
-      </p>
+      <p className="mc-confidence__summary">{resultDetails.summary}</p>
       <ul className="mc-confidence__reasons">
         {reasons.slice(0, compact ? 2 : 4).map((code) => (
           <li key={code}>{reasonText(code)}</li>

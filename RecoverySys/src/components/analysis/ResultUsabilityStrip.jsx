@@ -1,3 +1,4 @@
+import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import Button from '../primitives/Button.jsx'
 import SectionLabel from '../primitives/SectionLabel.jsx'
 import StatusChip from '../primitives/StatusChip.jsx'
@@ -24,10 +25,10 @@ const STATE_STATUS = Object.freeze({
 })
 
 const DEFAULT_REASON = Object.freeze({
-  'not-run': 'No current simulation result is available.',
-  missing: 'No current simulation result is available.',
-  stale: 'The result is stale because an input or selected hardware value changed.',
-  current: 'This is a current planning estimate; it is not a safety approval or certification.',
+  'not-run': RESULT_STATUS_DETAILS['not-run'].reason,
+  missing: RESULT_STATUS_DETAILS['not-run'].reason,
+  stale: RESULT_STATUS_DETAILS.stale.reason,
+  current: RESULT_STATUS_DETAILS.current.reason,
   conditional: 'The result is current but limited by its stated scope or evidence.',
   insufficient:
     'The result is limited; review the stated scope and assumptions before relying on it.',

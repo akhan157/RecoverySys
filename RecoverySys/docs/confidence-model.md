@@ -17,9 +17,10 @@ metadata.
   `accepted-for-comparison` cases and ranks accepted evidence by level.
 - `src/components/ConfidenceStatus.jsx` and
   `src/lib/recoveryBrief.js` currently inject an uncovered/review-only
-  coverage posture. This is deliberate: the eight checked-in corpus cases are
-  not accepted, so current results remain `Insufficient confidence` even when
-  fresh and in scope.
+  coverage posture. This is deliberate: the 11 checked-in corpus cases remain
+  review-only and are not accepted, including descent unit-conversion,
+  invalid-input edge, and metamorphic coverage. Current results therefore
+  remain `Insufficient confidence` even when fresh and in scope.
 - `src/lib/simulationIdentity.js` and `src/lib/resultIntegrity.js` carry
   input, model, assumptions, schema, app, and method provenance and prevent
   stale results from being treated as current.

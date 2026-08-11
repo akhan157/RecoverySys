@@ -28,6 +28,16 @@ describe('flight evidence storage', () => {
     expect(Object.isFrozen(entry.predicted)).toBe(true)
   })
 
+  it('never snapshots predictions from a stale simulation', () => {
+    const entry = createFlightEntry(
+      { date: '2026-01-01', observation_source: 'manual' },
+      { simulation: { apogee_ft: 4000 }, specs: {}, resultFresh: false }
+    )
+
+    expect(entry.predicted).toBeNull()
+    expect(entry.simulationProvenance).toBeNull()
+  })
+
   it('validates export/import envelope', () => {
     const records = [{ id: 1, date: '2026-01-01' }]
     expect(importFlightRecords(exportFlightRecords(records))).toHaveLength(1)

@@ -102,14 +102,16 @@ These items are planning and review work, not tasks that code can self-certify.
 
 ### V3-E1: independent validation-case review
 
-- Review the current eight corpus cases for reproducibility, source fidelity,
-  units, tolerance basis, and applicability.
+- Review the current 11 corpus cases for reproducibility, source fidelity,
+  units, tolerance basis, and applicability. The new descent coverage includes
+  unit-conversion, invalid-input edge, and metamorphic cases; all remain
+  review-only.
 - Record reviewer identity/date in the corpus only after an actual independent
   review.
 - Promote only defensible cases to `accepted-for-comparison`; rejected or
   superseded cases remain historical.
-- Add explicit ascent-domain, dispersion, and metamorphic cases only with
-  recorded derivation and scope; the current corpus includes scalar/curve
+- Add explicit ascent-domain, dispersion, and remaining metamorphic cases only
+  with recorded derivation and scope; the current corpus includes scalar/curve
   representative end-to-end replay cases.
 
 ### V3-E2: catalog source review

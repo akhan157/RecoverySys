@@ -1,0 +1,39 @@
+{
+  "id": "terminal-descent-invalid-chute-edge",
+  "kind": "analytic",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "chuteSpecs": { "diameter_in": 0, "cd": 1.5 },
+    "mass_kg": 2.5,
+    "altitude_ft": 0
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "descent_rate_fps",
+        "value": 0,
+        "unit": "ft/s",
+        "tolerance": { "absolute": 0, "basis": "not-applicable" },
+        "notes": "The browser model returns its explicit invalid-chute sentinel for a non-positive diameter."
+      }
+    ],
+    "notes": "Edge-case behavior is documented for review and is not a physical descent result."
+  },
+  "source": {
+    "citation": "Browser model invalid-input guard for terminal descent.",
+    "derivation": "Evaluate the production browser function with a zero chute diameter and retain its explicit zero sentinel.",
+    "notes": "This is behavior coverage, not evidence that a zero-area chute can descend."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "Browser JavaScript recovery estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "qualitative",
+    "decisionRule": "The invalid-input sentinel remains deterministic and review-only."
+  },
+  "notes": "Review-only edge-case coverage; not accepted evidence."
+}

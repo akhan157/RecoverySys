@@ -1,3 +1,4 @@
+import { RESULT_STATUS_DETAILS, currentResultOrNull } from './assessment.js'
 import { evaluateConfidence } from './confidence.js'
 import { EVIDENCE_LEVEL } from './evidenceCoverage.js'
 import { evaluateMissionEnvelope } from './missionEnvelope.js'
@@ -21,6 +22,9 @@ export function buildRecoveryBrief({
   warnings = [],
   sensitivity = undefined,
 } = {}) {
+  const status = !simulation ? 'not-run' : resultFresh ? 'current' : 'stale'
+  const resultDetails = RESULT_STATUS_DETAILS[status]
+  const usableSimulation = currentResultOrNull(simulation, status === 'current')
   const envelope = evaluateMissionEnvelope({ specs, config, customMotor })
   // The checked-in corpus contains review-only analytic cases and no accepted
   // comparison or flight evidence. Keep the brief conservative until that changes.
@@ -52,22 +56,23 @@ export function buildRecoveryBrief({
   if (!simulation) {
     unresolvedChecks.push({
       type: 'result',
-      code: 'RESULT_MISSING',
-      message: 'Run a simulation before interpreting derived recovery estimates.',
+      code: resultDetails.reasonCode,
+      message: resultDetails.remediation,
+      remediation: resultDetails.nextAction,
     })
-  } else if (!resultFresh) {
+  } else if (status === 'stale') {
     unresolvedChecks.push({
       type: 'result',
-      code: 'RESULT_STALE',
-      message: 'The printed estimates are stale because inputs or selected hardware changed.',
-      remediation: 'Rerun the simulation before using current results.',
+      code: resultDetails.reasonCode,
+      message: resultDetails.reason,
+      remediation: resultDetails.remediation,
     })
   }
 
   return {
     briefVersion: RECOVERY_BRIEF_VERSION,
     generatedAt: new Date().toISOString(),
-    status: simulation && resultFresh ? 'current' : simulation ? 'stale' : 'not-run',
+    status,
     missionEnvelope: {
       status: envelope.status,
       reasons: envelope.reasons,
@@ -83,13 +88,13 @@ export function buildRecoveryBrief({
     },
     selectedHardware,
     warnings,
-    keyEstimates: simulation
+    keyEstimates: usableSimulation
       ? {
-          apogee_ft: simulation.apogee_ft,
-          drift_ft: simulation.drift_ft,
-          drogue_fps: simulation.drogue_fps,
-          main_fps: simulation.main_fps,
-          landing_ke_ftlbf: simulation.landing_ke_ftlbf,
+          apogee_ft: usableSimulation.apogee_ft,
+          drift_ft: usableSimulation.drift_ft,
+          drogue_fps: usableSimulation.drogue_fps,
+          main_fps: usableSimulation.main_fps,
+          landing_ke_ftlbf: usableSimulation.landing_ke_ftlbf,
         }
       : null,
     sensitivity:

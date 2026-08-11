@@ -75,8 +75,9 @@ fully qualified v2/v3 release.
 
 ### Not Yet Complete
 
-- Eight review-only validation cases now exist, including scalar and curve
-  representative end-to-end plans. There are no accepted comparison cases or
+- Eleven review-only validation cases now exist, including scalar and curve
+  representative end-to-end plans plus descent unit-conversion, invalid-input
+  edge, and metamorphic coverage. There are no accepted comparison cases or
   real-flight evidence cases.
 - Catalog provenance is still primarily manufacturer-level and unverified; per-part source review is not complete.
 - The Analysis tab now has the integrated cause-to-consequence review surface and canonical semantic support, but cross-artifact parity and broader application redesign remain incomplete.
@@ -94,7 +95,7 @@ Observed after the consolidated product work was merged:
 | Check | Result |
 | `git status` | Clean at `498c886`; `origin/main` matches |
 | `npm run validate:parts` | Passes; 225 parts |
-| `npm run validate:corpus` | Passes; 6 review cases |
+| `npm run validate:corpus` | Passes; 11 review cases |
 | `npm test` | 33 files and 263 tests pass locally |
 | `npm run lint` | Passes with zero warnings |
 | `npm run format:check` | Passes |
@@ -161,9 +162,9 @@ stronger product claims.
 
 Work:
 
-- Expand the corpus beyond the eight current review cases with explicit
-  atmosphere, ascent-domain, unit-conversion, edge-case, metamorphic, and
-  additional representative end-to-end coverage.
+- Expand the corpus beyond the current 11 review cases with explicit atmosphere,
+  ascent-domain, additional unit-conversion, edge-case, metamorphic, and
+  representative end-to-end coverage.
 - Add deterministic machine-readable case summaries and coverage by output domain.
 - Seed dispersion runs and make all stochastic fixtures reproducible.
 - Document tolerance derivation, input equivalence, units, model identity, and scope for every case.
@@ -332,8 +333,8 @@ verification above:
 
 - **Independent evidence:** no accepted comparison cases, independent reviewer
   identity, trusted simulator artifact, manufacturer/test dataset, or traceable
-  real-flight observation has been supplied. The eight current corpus cases
-  remain review-only.
+  real-flight observation has been supplied. The 11 current corpus cases remain
+  review-only.
 - **macOS qualification:** no macOS host run has verified the universal artifact;
   macOS support remains unverified.
 - **Windows release artifact:** the historical portable build is documented, but

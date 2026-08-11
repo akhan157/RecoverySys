@@ -18,6 +18,53 @@ export const EVIDENCE_STATE = Object.freeze({
   UNAVAILABLE: 'unavailable',
   NOT_EVALUATED: 'not-evaluated',
 })
+export const RESULT_REASON_CODES = Object.freeze({
+  NO_CURRENT_RESULT: 'NO_CURRENT_RESULT',
+  RESULT_STALE: 'RESULT_STALE',
+  CURRENT_RESULT: 'CURRENT_RESULT',
+})
+
+export const RESULT_ACTION_DESTINATIONS = Object.freeze({
+  SIMULATION: 'SIMULATION',
+  ANALYSIS: 'ANALYSIS',
+})
+
+/**
+ * Authored result-status semantics shared by review, brief, and artifact
+ * surfaces. Consumers should reuse these codes, destinations, and copy rather
+ * than inventing a surface-specific stale/missing interpretation.
+ */
+export const RESULT_STATUS_DETAILS = Object.freeze({
+  'not-run': Object.freeze({
+    reasonCode: RESULT_REASON_CODES.NO_CURRENT_RESULT,
+    reason: 'No simulation result is available for review.',
+    summary: 'No current simulation result is available yet.',
+    nextAction: 'Run a simulation before interpreting estimates.',
+    actionDestination: RESULT_ACTION_DESTINATIONS.SIMULATION,
+    remediation: 'Run a simulation before interpreting derived recovery estimates.',
+  }),
+  stale: Object.freeze({
+    reasonCode: RESULT_REASON_CODES.RESULT_STALE,
+    reason: 'The stored result no longer matches the active inputs or model identity.',
+    summary:
+      'Current result is stale because inputs or selected hardware changed. Rerun the simulation.',
+    nextAction: 'Rerun the simulation before interpreting estimates.',
+    actionDestination: RESULT_ACTION_DESTINATIONS.SIMULATION,
+    remediation: 'Rerun the simulation before using current results.',
+  }),
+  current: Object.freeze({
+    reasonCode: RESULT_REASON_CODES.CURRENT_RESULT,
+    reason: 'The current simulation result is available for review.',
+    summary: 'This is a planning estimate, not a safety approval or certification.',
+    nextAction: 'Review prioritized findings and supporting detail.',
+    actionDestination: RESULT_ACTION_DESTINATIONS.ANALYSIS,
+    remediation: null,
+  }),
+})
+
+export function currentResultOrNull(result, fresh) {
+  return result && fresh ? result : null
+}
 
 const uniqueStrings = (values) => [
   ...new Set((Array.isArray(values) ? values : values == null ? [] : [values]).filter(Boolean)),

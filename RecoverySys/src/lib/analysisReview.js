@@ -1,3 +1,9 @@
+import {
+  RESULT_ACTION_DESTINATIONS,
+  RESULT_STATUS_DETAILS,
+  currentResultOrNull,
+} from './assessment.js'
+
 /**
  * Deterministic, presentation-ready contract for the Analysis review surface.
  *
@@ -21,8 +27,8 @@ export const FINDING_STATES = Object.freeze({
 })
 
 export const REVIEW_ACTION_DESTINATIONS = Object.freeze({
-  ANALYSIS: 'ANALYSIS',
-  SIMULATION: 'SIMULATION',
+  ANALYSIS: RESULT_ACTION_DESTINATIONS.ANALYSIS,
+  SIMULATION: RESULT_ACTION_DESTINATIONS.SIMULATION,
   SPECS: 'SPECS',
 })
 
@@ -598,26 +604,7 @@ export function buildResultUsability(input = {}) {
       : fresh === false
         ? RESULT_USABILITY_STATES.STALE
         : RESULT_USABILITY_STATES.CURRENT
-  const details = {
-    [RESULT_USABILITY_STATES.NOT_RUN]: {
-      reasonCode: 'NO_CURRENT_RESULT',
-      reason: 'No simulation result is available for review.',
-      nextAction: 'Run a simulation before interpreting estimates.',
-      actionDestination: REVIEW_ACTION_DESTINATIONS.SIMULATION,
-    },
-    [RESULT_USABILITY_STATES.STALE]: {
-      reasonCode: 'RESULT_STALE',
-      reason: 'The stored result no longer matches the active inputs or model identity.',
-      nextAction: 'Rerun the simulation before interpreting estimates.',
-      actionDestination: REVIEW_ACTION_DESTINATIONS.SIMULATION,
-    },
-    [RESULT_USABILITY_STATES.CURRENT]: {
-      reasonCode: 'CURRENT_RESULT',
-      reason: 'The current simulation result is available for review.',
-      nextAction: 'Review prioritized findings and supporting detail.',
-      actionDestination: REVIEW_ACTION_DESTINATIONS.ANALYSIS,
-    },
-  }[status]
+  const details = RESULT_STATUS_DETAILS[status]
   return { status, state: status, ...details }
 }
 
@@ -625,11 +612,15 @@ export function buildAnalysisReviewModel(input = {}) {
   const value = isObject(input) ? input : {}
   const result = firstDefined(value.result, value.simulation, null)
   const resultUsability = buildResultUsability(value)
+  const usableResult = currentResultOrNull(
+    result,
+    resultUsability.status === RESULT_USABILITY_STATES.CURRENT
+  )
   const summary = summarizeReviewFindings(value)
   const causalityRows = buildCausalityRows(value, summary)
   const testedResponse = buildTestedResponse(value)
-  const keyEstimates = buildKeyEstimates(result, value)
-  const detailRefs = buildDetailReferences(value, result)
+  const keyEstimates = buildKeyEstimates(usableResult, value)
+  const detailRefs = buildDetailReferences(value, usableResult)
   const reviewSummary = {
     errorCount: summary.errorCount,
     warningCount: summary.warningCount,

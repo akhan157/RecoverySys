@@ -3,7 +3,7 @@ import { validateCorpus } from '../../scripts/validate-corpus.js'
 
 describe('validation corpus gate', () => {
   it('validates the checked-in corpus and production model identity', () => {
-    expect(validateCorpus()).toMatchObject({ valid: true, diagnostics: [], cases: 8 })
+    expect(validateCorpus()).toMatchObject({ valid: true, diagnostics: [], cases: 11 })
   })
 
   it('reports deterministic output-domain coverage without promoting review cases', () => {
@@ -28,18 +28,28 @@ describe('validation corpus gate', () => {
       },
       {
         domain: 'descent',
-        caseCount: 1,
-        caseIds: ['terminal-descent-36in-main-sea-level'],
-        outputMetrics: ['descent_rate_fps'],
+        caseCount: 4,
+        caseIds: [
+          'terminal-descent-36in-main-sea-level',
+          'terminal-descent-altitude-ft-unit-conversion',
+          'terminal-descent-diameter-doubling-metamorphic',
+          'terminal-descent-invalid-chute-edge',
+        ],
+        outputMetrics: ['descent_rate_fps', 'descent_rate_ratio'],
         statusCounts: {
           draft: 0,
-          review: 1,
+          review: 4,
           'accepted-for-comparison': 0,
           superseded: 0,
           rejected: 0,
         },
         acceptedCaseIds: [],
-        unreviewedCaseIds: ['terminal-descent-36in-main-sea-level'],
+        unreviewedCaseIds: [
+          'terminal-descent-36in-main-sea-level',
+          'terminal-descent-altitude-ft-unit-conversion',
+          'terminal-descent-diameter-doubling-metamorphic',
+          'terminal-descent-invalid-chute-edge',
+        ],
       },
       {
         domain: 'drift',

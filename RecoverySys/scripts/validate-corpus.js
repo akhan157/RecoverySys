@@ -111,6 +111,21 @@ const evaluators = Object.freeze({
         }
       : {}
   },
+  'terminal-descent-altitude-ft-unit-conversion': (inputs) => ({
+    descent_rate_fps: computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft),
+  }),
+  'terminal-descent-invalid-chute-edge': (inputs) => ({
+    descent_rate_fps: computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft),
+  }),
+  'terminal-descent-diameter-doubling-metamorphic': (inputs) => ({
+    descent_rate_ratio:
+      computeDescentRate(
+        inputs.transformed.chuteSpecs,
+        inputs.transformed.mass_kg,
+        inputs.transformed.altitude_ft
+      ) /
+      computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
+  }),
   'static-ejection-load-nylon-screening': (inputs) => {
     const result = computeShockLoad(inputs.cordSpecs, inputs.mass_kg, inputs.g_factor)
     return result

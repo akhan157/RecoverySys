@@ -1,0 +1,39 @@
+{
+  "id": "terminal-descent-altitude-ft-unit-conversion",
+  "kind": "analytic",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "chuteSpecs": { "diameter_in": 36, "cd": 1.5 },
+    "mass_kg": 2.5,
+    "altitude_ft": 3280.839895
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "descent_rate_fps",
+        "value": 21.9545738888,
+        "unit": "ft/s",
+        "tolerance": { "absolute": 0.000000001, "basis": "analyst-derived" },
+        "notes": "Altitude is supplied in feet and converted to metres by the browser model before ISA density evaluation; 3280.839895 ft represents 1000 m."
+      }
+    ],
+    "notes": "Unit-conversion regression only; review evidence, not real-flight validation."
+  },
+  "source": {
+    "citation": "Exact foot-to-metre conversion used by the browser model.",
+    "derivation": "Evaluate the terminal descent model at 3280.839895 ft, which is 1000 m to the stated precision, and retain the model's internal altitude conversion.",
+    "notes": "No independent simulator or flight evidence is implied."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "Browser JavaScript recovery estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Observed browser-engine output is recorded for review within the stated analytic tolerance; this case does not gate agreement."
+  },
+  "notes": "Review-only unit-conversion coverage; not accepted evidence."
+}

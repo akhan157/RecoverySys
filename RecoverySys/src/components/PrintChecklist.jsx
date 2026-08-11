@@ -1,7 +1,7 @@
 import { CATEGORIES } from '../data/parts.js'
 import { partSpecLine } from '../lib/format.js'
 import { WARN_LEVELS } from '../lib/constants.js'
-
+import { RESULT_STATUS_DETAILS } from '../lib/assessment.js'
 // Physical packing order (bottom of bay → top). Only selected parts are shown.
 const PACKING_ORDER = [
   'shock_cord',
@@ -35,6 +35,9 @@ export default function PrintChecklist({
 
   const selectedParts = CATEGORIES.filter((c) => config[c.id])
   const packingSteps = PACKING_ORDER.filter((slot) => config[slot])
+  const resultStatus =
+    recoveryBrief?.status ?? (simulation ? (resultFresh ? 'current' : 'stale') : 'not-run')
+  const resultDetails = RESULT_STATUS_DETAILS[resultStatus]
 
   return (
     <div className={`print-checklist print-checklist--${printMode}`}>
@@ -45,11 +48,13 @@ export default function PrintChecklist({
       <section className="print-brief-status print-artifact--brief">
         <h2>Recovery brief status</h2>
         <p>
-          {recoveryBrief?.status === 'current'
-            ? 'CURRENT_RESULT — estimates reflect the current inputs.'
-            : recoveryBrief?.status === 'stale'
-              ? 'STALE_RESULT — rerun the simulation before using these estimates.'
-              : 'NO_CURRENT_RESULT — no simulation estimates are available.'}
+          {resultDetails
+            ? `${resultStatus === 'current' ? 'CURRENT_RESULT' : resultStatus === 'stale' ? 'STALE_RESULT' : 'NO_CURRENT_RESULT'} — ${
+                resultStatus === 'current'
+                  ? 'estimates reflect the current inputs.'
+                  : resultDetails.remediation
+              }`
+            : 'NO_CURRENT_RESULT — no simulation estimates are available.'}
         </p>
         <p>
           Evidence posture: {recoveryBrief?.confidence?.label || 'Insufficient confidence'}. This is
@@ -332,9 +337,9 @@ export default function PrintChecklist({
           </table>
         ) : (
           <p>
-            {simulation
-              ? 'RESULT_STALE — rerun simulation before printing'
-              : 'No simulation run — click RUN_SIM first'}
+            {resultDetails
+              ? `${resultDetails.reasonCode} — ${resultDetails.remediation}`
+              : 'NO_CURRENT_RESULT — no simulation estimates are available.'}
           </p>
         )}
       </section>

@@ -203,6 +203,22 @@ describe('buildAnalysisReviewModel', () => {
   })
 })
 
+it('withholds stale result estimates and provenance from the review model', () => {
+  const model = buildAnalysisReviewModel({
+    simulation: currentResult,
+    resultFresh: false,
+    warnings: [],
+  })
+
+  expect(model.resultUsability).toMatchObject({
+    status: RESULT_USABILITY_STATES.STALE,
+    reasonCode: 'RESULT_STALE',
+    actionDestination: 'SIMULATION',
+  })
+  expect(model.keyEstimates).toEqual([])
+  expect(model.detailRefs).toEqual([])
+})
+
 describe('buildTestedResponse', () => {
   it('returns an explicit not-evaluated state when no response data exists', () => {
     expect(buildTestedResponse({})).toEqual({
