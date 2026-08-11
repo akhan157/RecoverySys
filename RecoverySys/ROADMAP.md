@@ -31,6 +31,13 @@ RecoverySys does not authorize a launch, certify hardware, establish flight
 readiness, or replace independent review. Confidence states describe evidence
 and input posture, not probability of success or a safety score.
 
+**North-star goal:** Make RecoverySys the clearest and most trustworthy
+local-first recovery-planning review instrument for high-power rocketry by
+moving a planner from inputs to a current, traceable, independently reviewable
+decision without overstating what the model or evidence can prove. The six
+phase goal plan is defined in
+[`PRODUCT-STRATEGY-BRIEF.md`](PRODUCT-STRATEGY-BRIEF.md#15-six-phase-product-roadmap).
+
 ## How To Use This Roadmap
 
 Use the milestone table and the ordered queue to decide what to build next. A

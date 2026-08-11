@@ -271,6 +271,164 @@ A product increment is accepted only when the relevant criteria below pass:
 
 The core roadmap has six phases. M7 through M9 are deferred tracks, not additional release phases.
 
+### North-star product goal
+
+**Make RecoverySys the clearest and most trustworthy local-first recovery-planning review instrument for high-power rocketry by helping a planner move from inputs to a current, traceable, independently reviewable recovery decision without overstating what the model or evidence can prove.**
+
+The goal is complete only when the six phases work as one chain:
+
+```text
+Trustworthy foundations
+  -> consistent meaning
+    -> actionable review
+      -> traceable handoff
+        -> guided completion
+          -> qualified release
+```
+
+### Phase goal plan
+
+Each phase has one outcome goal, a bounded set of workstreams, measurable proof,
+and a gate. A phase is not complete because code exists. It is complete when the
+user outcome and evidence gate are both met.
+
+#### Phase 1: Trust foundation
+
+**Goal:** Establish one reproducible baseline in which every important input,
+stored shape, result identity, and evidence claim has an explicit owner.
+
+**Workstreams:**
+
+- Reconcile the product contract, runtime identities, migrations, persistence,
+  share links, JSON, briefs, flight records, and validation corpus.
+- Keep the browser JavaScript model as the sole production authority.
+- Expand executable validation beyond the six current review cases and keep
+  review-only, accepted-comparison, and real-flight evidence separate.
+- Record supported-runtime, formatting, parts, corpus, lint, unit, build, and
+  E2E evidence from a clean install.
+
+**Proof:** No unowned durable contract, no hidden evidence promotion, deterministic
+validation output, and a documented list of external evidence still missing.
+
+**Gate:** The baseline is green on the supported runtime, but no stronger product
+claim is made until independent evidence exists.
+
+#### Phase 2: Canonical semantics
+
+**Goal:** Make a result mean the same thing across calculation, screen,
+comparison, export, print, Recovery Brief, and Flight Log.
+
+**Workstreams:**
+
+- Centralize assessments, criteria, findings, reason codes, freshness, validity,
+  envelope, evidence, units, and method identity.
+- Make stale, invalid, unsupported, unknown, conditional, and
+  sensitivity-flagged states explicit and deterministic.
+- Ensure acknowledgement records review history but cannot resolve evidence or
+  change confidence posture.
+
+**Proof:** Screen-independent boundary tests demonstrate semantic parity and
+  stale results cannot produce current conclusions.
+
+**Gate:** No consuming surface invents a threshold, status, or physics meaning.
+
+#### Phase 3: Decision-first workflow
+
+**Goal:** Let the first review viewport answer what needs attention, which
+  recovery outcome it affects, why it matters, and what to check next.
+
+**Workstreams:**
+
+- Complete the Analysis cause-to-consequence flow: driver, affected outcome,
+  finding or unknown state, and direct remediation.
+- Apply shared result status and reason-specific remediation to the surrounding
+  workflow.
+- Preserve technical detail through accessible disclosures instead of making
+  every user parse a dossier before acting.
+- Qualify desktop, narrow-mobile, keyboard, focus, contrast, and reduced-motion
+  behavior for the critical review path.
+
+**Proof:** A reviewer can move from a finding to its affected input or hardware
+  review section without guessing, and no warning hierarchy hides a higher-risk
+  issue.
+
+**Gate:** The review surface is actionable without becoming an approval surface.
+
+#### Phase 4: Recovery Brief and evidence loop
+
+**Goal:** Turn a current plan into a traceable handoff artifact and preserve
+  later observations without silently upgrading them into validation.
+
+**Workstreams:**
+
+- Complete the on-screen Recovery Brief from the versioned brief view-model.
+- Separate brief output from checklist output.
+- Preserve plan identity, generated time, currentness, envelope, hardware,
+  deployment, estimates, sensitivity, evidence, unresolved checks, and review
+  boundaries in screen, print, export, and import.
+- Add candidate flight-evidence export and intake with source, units, conditions,
+  reviewer status, and immutable prediction identity.
+
+**Proof:** Fresh-context transfer and print checks show identical values, units,
+  identities, statuses, and unresolved checks. Stale artifacts remain visibly stale.
+
+**Gate:** A reviewer can trust what the artifact contains without treating it as
+  certification or flight approval.
+
+#### Phase 5: Guided first plan
+
+**Goal:** Help a first-time planner reach a reviewable plan while preserving
+  expert control, explicit assumptions, and every important warning.
+
+**Workstreams:**
+
+- Guide start and scope, rocket and motor, recovery hardware, deployment and
+  weather, simulation and review, and Recovery Brief.
+- Support new, demo, import, resume, pause, start-fresh, invalid, stale, and
+  insufficient-confidence paths without data loss.
+- Keep direct-navigation tabs available for experienced users.
+- Qualify keyboard, labels, focus, mobile layout, and error/remediation behavior.
+
+**Proof:** Desktop and narrow-mobile deterministic flows reach a reviewable brief
+  without implying approval, hiding optionality, or confusing demo data with a
+  user's plan.
+
+**Gate:** Guided completion improves access to the product without weakening its
+  evidence boundary.
+
+#### Phase 6: Release qualification
+
+**Goal:** Release only the workflows, targets, and claims that code, evidence,
+  platform checks, and documentation support.
+
+**Workstreams:**
+
+- Run clean-install formatting, parts validation, corpus validation, lint, unit,
+  build, and Playwright checks on the supported runtime.
+- Exercise fresh, stale, invalid, out-of-envelope, conditional,
+  sensitivity-flagged, and insufficient-confidence workflows.
+- Verify import/export/share migration, print artifacts, accessibility, privacy,
+  provenance, prohibited-claim copy, and version identities.
+- Launch and record each claimed desktop artifact on its target host.
+
+**Proof:** Every release claim has an artifact, command result, target host,
+  evidence posture, and documented limitation.
+
+**Gate:** Unsupported platform or evidence claims remain explicitly unsupported.
+
+### Goal review cadence
+
+- **At phase start:** confirm dependencies, user outcome, and the smallest
+  evidence needed to avoid building on an ambiguous contract.
+- **During implementation:** update the owning detailed plan, tests, migrations,
+  and source identities with the change.
+- **At phase exit:** review the acceptance criteria, release risks, and external
+  gates. Record what passed, what remains partial, and what must not be claimed.
+- **Before reprioritization:** apply the P0 through P3 framework. Expansion work
+  cannot outrank a trust, privacy, accessibility, or release blocker.
+
+### Phase summary
+
 | Phase | Milestones | Goal | Exit condition | Status |
 |---|---|---|---|---|
 | 1. Trust foundation | M0, M1 | Establish a green baseline, versioned contracts, executable validation, and evidence boundaries | Supported-runtime checks pass; every stored/transfer shape has an owner; corpus status is explicit | Partial; external evidence gate |
