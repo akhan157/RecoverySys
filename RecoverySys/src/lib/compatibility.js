@@ -2,6 +2,8 @@ import { airDensity, computeDescentRate } from './simulation.js'
 import { WARN_LEVELS, PHYSICS } from './constants.js'
 import { parseSpec, coerceSpec } from './schema.js'
 import { computeDrogueDeploymentVelocity, computeMainSnatchLoad } from './recoveryLoad.js'
+import { CRITERION_IDS, evaluateCriterion } from './criteria.js'
+import { normalizeFinding } from './findings.js'
 
 /**
  * Compatibility rules engine.
@@ -48,18 +50,7 @@ const MID_DROGUE_ALT_FT = 5000 // air ~15% thinner here vs sea level
 // Rule thresholds — moving these out of rule bodies so a future tuning
 // doesn't require finding them inside an if/else maze.
 const PACKING_EFFICIENCY = 0.7 // real-world packing is ~70% of ideal linear stacking
-const KE_WARN_FTLBF = 75 // NAR/TRA guideline
-const KE_ERROR_FTLBF = 100
-const MAIN_FPS_WARN = 15
-const MAIN_FPS_ERROR = 20
-const MAIN_FPS_DRIFT_RISK = 5
-const DROGUE_FPS_TOO_SLOW = 30
-const DROGUE_FPS_TOO_FAST = 150
-const DEPLOY_ALT_LOW_WARN = 200
-const DEPLOY_ALT_HIGH_WARN = 10000
-const SF_MARGINAL_RATIO = 1.5 // strength check warns if rated < required × this
 const SF_MARGINAL_RATIO_QL = 1.2 // looser ratio for ql-vs-cord (links rarely exceed cord by much)
-const PACKING_TIGHT_RATIO = 0.85 // bay volume warns above this fraction of capacity
 const SHAPE_OPENING_FACTOR_Cx = {
   flat: 1.8,
   elliptical: 1.6,
@@ -131,8 +122,8 @@ function buildContext({ config, specs }) {
 
 // ── Rule helpers ────────────────────────────────────────────────────────────
 
-const err = (slot, message) => ({ level: WARN_LEVELS.ERROR, slot, message })
-const warn = (slot, message) => ({ level: WARN_LEVELS.WARN, slot, message })
+const err = (slot, message, metadata = {}) => ({ level: WARN_LEVELS.ERROR, slot, message, ...metadata })
+const warn = (slot, message, metadata = {}) => ({ level: WARN_LEVELS.WARN, slot, message, ...metadata })
 
 // Keep the rule messages human-readable and backwards compatible, while
 // giving consumers a stable, machine-readable envelope.  The compatibility
@@ -149,62 +140,63 @@ const INPUT_PATHS = {
   bay_volume: ['specs.airframe_id_in', 'specs.bay_length_in'],
 }
 
-const stableCode = (slot, message) => {
-  const normalized = message
-    .toLowerCase()
-    .replace(/[-+]?\d+(?:\.\d+)?/g, '#')
-    .replace(/[^a-z0-9]+/g, '-')
-    .replace(/^-|-$/g, '')
-  return `compatibility.${slot}.${normalized}`
-}
-
-const remediationFor = (warning) =>
-  warning.level === WARN_LEVELS.ERROR
-    ? 'Correct the affected input or replace the referenced part before flight.'
-    : 'Review the affected input and address the recommendation before flight.'
 
 function normalizeWarning(warning) {
   const inputPaths = INPUT_PATHS[warning.slot] ?? [`config.${warning.slot}`]
   const partRefs = [warning.slot]
+  const finding = normalizeFinding({
+    ...warning,
+    rule: warning.rule ?? warning.message,
+    inputPaths,
+    affectedPartIds: partRefs,
+    classification: 'calculation',
+    source: {
+      classification: 'calculation',
+      reference: 'src/lib/compatibility.js',
+    },
+  })
   return {
     ...warning,
-    code: stableCode(warning.slot, warning.message),
-    warningCode: stableCode(warning.slot, warning.message),
+    ...finding,
+    warningCode: finding.code,
     inputPaths,
     affectedInputPaths: inputPaths,
     partRefs,
     affectedPartRefs: partRefs,
-    remediation: remediationFor(warning),
+    remediation:
+      warning.remediation ??
+      (warning.level === WARN_LEVELS.ERROR
+        ? 'Correct the affected input or replace the referenced part before flight.'
+        : 'Review the affected input and address the recommendation before flight.'),
     evidenceClassification: 'derived',
     sourceClassification: 'calculation',
     evidence: {
       classification: 'derived',
       source: 'compatibility-rule',
     },
-    source: {
-      classification: 'calculation',
-      reference: 'src/lib/compatibility.js',
-    },
+    source: finding.source,
   }
 }
-
 // Generic strength check: flags ERROR if rated < required, WARN if marginal.
 // Returns 0-2 warnings; used by shock_cord, quick_links, swivel ejection-load checks.
 function strengthCheck({ slot, rated_lbs, required_lbs, label, suffix = '', g_factor }) {
   if (!Number.isFinite(rated_lbs) || !Number.isFinite(required_lbs)) return []
-  if (rated_lbs < required_lbs) {
+  const criterion = evaluateCriterion(CRITERION_IDS.STRENGTH_MARGIN, rated_lbs / required_lbs)
+  if (criterion.category === 'below-rating') {
     return [
       err(
         slot,
-        `${label} rated ${rated_lbs} lbs may fail at ejection (need ~${Math.ceil(required_lbs)} lbs at ${g_factor}G${suffix})`
+        `${label} rated ${rated_lbs} lbs may fail at ejection (need ~${Math.ceil(required_lbs)} lbs at ${g_factor}G${suffix})`,
+        { criterion }
       ),
     ]
   }
-  if (rated_lbs < required_lbs * SF_MARGINAL_RATIO) {
+  if (criterion.category === 'marginal') {
     return [
       warn(
         slot,
-        `${label} rated ${rated_lbs} lbs — marginal safety factor at ${g_factor}G ejection load (~${Math.ceil(required_lbs)} lbs required)`
+        `${label} rated ${rated_lbs} lbs — marginal safety factor at ${g_factor}G ejection load (~${Math.ceil(required_lbs)} lbs required)`,
+        { criterion }
       ),
     ]
   }
@@ -216,27 +208,31 @@ function strengthCheck({ slot, rated_lbs, required_lbs, label, suffix = '', g_fa
 function rule_deployAltSanity(ctx) {
   const { deploy_alt_raw } = ctx
   if (!Number.isFinite(deploy_alt_raw)) return []
-  if (deploy_alt_raw <= 0) {
+  const criterion = evaluateCriterion(CRITERION_IDS.DEPLOY_ALTITUDE, deploy_alt_raw)
+  if (criterion.category === 'invalid') {
     return [
       err(
         'main_chute',
-        `Deploy altitude ${deploy_alt_raw} ft is invalid — must be above ground level`
+        `Deploy altitude ${deploy_alt_raw} ft is invalid — must be above ground level`,
+        { criterion }
       ),
     ]
   }
-  if (deploy_alt_raw < DEPLOY_ALT_LOW_WARN) {
+  if (criterion.category === 'low') {
     return [
       warn(
         'main_chute',
-        `Deploy altitude ${deploy_alt_raw} ft is dangerously low — minimum ${DEPLOY_ALT_LOW_WARN} ft recommended for reliable chute inflation`
+        `Deploy altitude ${deploy_alt_raw} ft is dangerously low — minimum ${criterion.threshold} ft recommended for reliable chute inflation`,
+        { criterion }
       ),
     ]
   }
-  if (deploy_alt_raw > DEPLOY_ALT_HIGH_WARN) {
+  if (criterion.category === 'high') {
     return [
       warn(
         'main_chute',
-        `Deploy altitude ${deploy_alt_raw.toLocaleString()} ft is unusually high — verify this is intentional`
+        `Deploy altitude ${deploy_alt_raw.toLocaleString()} ft is unusually high — verify this is intentional`,
+        { criterion }
       ),
     ]
   }
@@ -248,23 +244,30 @@ function rule_mainDescentRate(ctx) {
   if (!config.main_chute || !mass_kg) return []
   const { diameter_in, cd } = config.main_chute.specs
   const fps = computeDescentRate({ diameter_in, cd }, mass_kg, deploy_alt_ft)
-  if (fps > MAIN_FPS_ERROR)
+  const criterion = evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, fps)
+  if (criterion.category === 'hard-landing')
     return [
       err(
         'main_chute',
-        `Main descent rate ${fps.toFixed(1)} fps exceeds ${MAIN_FPS_ERROR} fps — hard landing risk`
+        `Main descent rate ${fps.toFixed(1)} fps exceeds ${criterion.threshold} fps — hard landing risk`,
+        { criterion }
       ),
     ]
-  if (fps > MAIN_FPS_WARN)
+  if (criterion.category === 'fast')
     return [
       warn(
         'main_chute',
-        `Main descent rate ${fps.toFixed(1)} fps is above ${MAIN_FPS_WARN} fps — consider a larger chute`
+        `Main descent rate ${fps.toFixed(1)} fps is above ${criterion.threshold} fps — consider a larger chute`,
+        { criterion }
       ),
     ]
-  if (fps < MAIN_FPS_DRIFT_RISK)
+  if (criterion.category === 'slow-drift')
     return [
-      warn('main_chute', `Main descent rate ${fps.toFixed(1)} fps is very slow — high drift risk`),
+      warn(
+        'main_chute',
+        `Main descent rate ${fps.toFixed(1)} fps is very slow — high drift risk`,
+        { criterion }
+      ),
     ]
   return []
 }
@@ -281,19 +284,22 @@ function rule_landingKE(ctx) {
   if (!landing_fps || landing_fps <= 0) return []
   const landing_mps = landing_fps / FT_PER_M
   const ke_ftlbf = 0.5 * mass_kg * landing_mps * landing_mps * PHYSICS.J_TO_FTLBF
-  if (ke_ftlbf > KE_ERROR_FTLBF) {
+  const criterion = evaluateCriterion(CRITERION_IDS.LANDING_ENERGY, ke_ftlbf)
+  if (criterion.category === 'high-energy') {
     return [
       err(
         'main_chute',
-        `Landing KE ~${Math.round(ke_ftlbf)} ft-lbf exceeds ${KE_ERROR_FTLBF} ft-lbf — high risk of damage or injury`
+        `Landing KE ~${Math.round(ke_ftlbf)} ft-lbf exceeds ${criterion.threshold} ft-lbf — high risk of damage or injury`,
+        { criterion }
       ),
     ]
   }
-  if (ke_ftlbf > KE_WARN_FTLBF) {
+  if (criterion.category === 'elevated-energy') {
     return [
       warn(
         'main_chute',
-        `Landing KE ~${Math.round(ke_ftlbf)} ft-lbf exceeds ${KE_WARN_FTLBF} ft-lbf guideline — consider a larger main chute`
+        `Landing KE ~${Math.round(ke_ftlbf)} ft-lbf exceeds ${criterion.threshold} ft-lbf guideline — consider a larger main chute`,
+        { criterion }
       ),
     ]
   }
@@ -306,19 +312,22 @@ function rule_drogueDescentRate(ctx) {
   const { diameter_in, cd } = config.drogue_chute.specs
   const mid_alt = Math.max(deploy_alt_ft, MID_DROGUE_ALT_FT)
   const fps = computeDescentRate({ diameter_in, cd }, mass_kg, mid_alt)
-  if (fps < DROGUE_FPS_TOO_SLOW) {
+  const criterion = evaluateCriterion(CRITERION_IDS.DROGUE_DESCENT_RATE, fps)
+  if (criterion.category === 'slow-drift') {
     return [
       warn(
         'drogue_chute',
-        `Drogue descent rate ${fps.toFixed(1)} fps is too slow — excessive drift before main deploy`
+        `Drogue descent rate ${fps.toFixed(1)} fps is too slow — excessive drift before main deploy`,
+        { criterion }
       ),
     ]
   }
-  if (fps > DROGUE_FPS_TOO_FAST) {
+  if (criterion.category === 'fast-shock') {
     return [
       warn(
         'drogue_chute',
-        `Drogue descent rate ${fps.toFixed(1)} fps is very fast — high ejection shock load`
+        `Drogue descent rate ${fps.toFixed(1)} fps is very fast — high ejection shock load`,
+        { criterion }
       ),
     ]
   }
@@ -341,19 +350,22 @@ function rule_openingShock(ctx) {
   const ql_lbs = config.quick_links?.specs.strength_lbs
   const weakest = Math.min(cord_lbs ?? Infinity, ql_lbs ?? Infinity)
   if (weakest === Infinity) return []
-  if (F_open_lbs > weakest) {
+  const criterion = evaluateCriterion(CRITERION_IDS.OPENING_SHOCK_RATIO, F_open_lbs / weakest)
+  if (criterion.category === 'exceeds-rating') {
     return [
       err(
         'main_chute',
-        `Main chute opening shock ~${Math.round(F_open_lbs)} lbs at ${drogue_at_deploy.toFixed(0)} fps may exceed hardware rated ${Math.round(weakest)} lbs — consider a deployment bag or reefing`
+        `Main chute opening shock ~${Math.round(F_open_lbs)} lbs at ${drogue_at_deploy.toFixed(0)} fps may exceed hardware rated ${Math.round(weakest)} lbs — consider a deployment bag or reefing`,
+        { criterion }
       ),
     ]
   }
-  if (F_open_lbs > weakest * 0.7) {
+  if (criterion.category === 'close-to-rating') {
     return [
       warn(
         'main_chute',
-        `Main chute opening shock ~${Math.round(F_open_lbs)} lbs at ${drogue_at_deploy.toFixed(0)} fps is close to hardware limit (${Math.round(weakest)} lbs)`
+        `Main chute opening shock ~${Math.round(F_open_lbs)} lbs at ${drogue_at_deploy.toFixed(0)} fps is close to hardware limit (${Math.round(weakest)} lbs)`,
+        { criterion }
       ),
     ]
   }
@@ -373,20 +385,23 @@ function rule_shockCordStrength(ctx) {
     const strain_J = (peak_N * peak_N) / (2 * k)
     strainNote = ` Strain energy: ${strain_J.toFixed(1)} J.`
   }
-
   const out = []
-  if (strength_lbs < required_lbs) {
+
+  const staticCriterion = evaluateCriterion(CRITERION_IDS.STRENGTH_MARGIN, strength_lbs / required_lbs)
+  if (staticCriterion.category === 'below-rating') {
     out.push(
       err(
         'shock_cord',
-        `Shock cord rated ${strength_lbs} lbs may fail at ejection (need ~${Math.ceil(required_lbs)} lbs at ${g_factor}G for ${mass_kg.toFixed(1)} kg rocket).${strainNote}`
+        `Shock cord rated ${strength_lbs} lbs may fail at ejection (need ~${Math.ceil(required_lbs)} lbs at ${g_factor}G for ${mass_kg.toFixed(1)} kg rocket).${strainNote}`,
+        { criterion: staticCriterion }
       )
     )
-  } else if (strength_lbs < required_lbs * SF_MARGINAL_RATIO) {
+  } else if (staticCriterion.category === 'marginal') {
     out.push(
       warn(
         'shock_cord',
-        `Shock cord rated ${strength_lbs} lbs — marginal safety factor at ${g_factor}G ejection load (~${Math.ceil(required_lbs)} lbs required).${strainNote}`
+        `Shock cord rated ${strength_lbs} lbs — marginal safety factor at ${g_factor}G ejection load (~${Math.ceil(required_lbs)} lbs required).${strainNote}`,
+        { criterion: staticCriterion }
       )
     )
   }
@@ -396,17 +411,23 @@ function rule_shockCordStrength(ctx) {
   if (elongation_pct > 0) {
     const snatch_multiplier = Math.sqrt(1 / (elongation_pct / 100))
     const dynamic_load_lbs = required_lbs * snatch_multiplier
-    if (strength_lbs < dynamic_load_lbs) {
+    const dynamicCriterion = evaluateCriterion(
+      CRITERION_IDS.STRENGTH_MARGIN,
+      strength_lbs / dynamic_load_lbs
+    )
+    if (dynamicCriterion.category === 'below-rating') {
       out.push({
         level: material === 'kevlar' ? WARN_LEVELS.ERROR : WARN_LEVELS.WARN,
         slot: 'shock_cord',
         message: `${material === 'kevlar' ? 'Kevlar' : 'Cord'} with ${elongation_pct}% elongation amplifies snatch force ~${snatch_multiplier.toFixed(1)}× (${Math.round(dynamic_load_lbs)} lbs dynamic vs. ${Math.ceil(required_lbs)} lbs static). Cord rated ${strength_lbs} lbs may fail. ${material === 'kevlar' ? 'Switch to tubular nylon or rate ≥' + Math.ceil(dynamic_load_lbs) + ' lbs.' : 'Consider a longer cord or higher rating.'}`,
+        criterion: dynamicCriterion,
       })
-    } else if (strength_lbs < dynamic_load_lbs * SF_MARGINAL_RATIO) {
+    } else if (dynamicCriterion.category === 'marginal') {
       out.push(
         warn(
           'shock_cord',
-          `Snatch force at ${elongation_pct}% elongation is ~${snatch_multiplier.toFixed(1)}× static load (~${Math.round(dynamic_load_lbs)} lbs) — marginal safety factor for ${strength_lbs} lbs cord`
+          `Snatch force at ${elongation_pct}% elongation is ~${snatch_multiplier.toFixed(1)}× static load (~${Math.round(dynamic_load_lbs)} lbs) — marginal safety factor for ${strength_lbs} lbs cord`,
+          { criterion: dynamicCriterion }
         )
       )
     }
@@ -644,20 +665,26 @@ function rule_bayVolumeStacked(ctx) {
   if (stacked_vol <= 0) return []
   const obstrNote =
     obstruction_vol > 0 ? ` (${obstruction_vol.toFixed(1)} in³ obstructions subtracted)` : ''
-  if (stacked_vol > effective_usable) {
+  const criterion = evaluateCriterion(
+    CRITERION_IDS.PACKING_CAPACITY_RATIO,
+    stacked_vol / effective_usable
+  )
+  if (criterion.category === 'exceeds-capacity') {
     return [
       err(
         'bay_volume',
-        `Packed components ~${stacked_vol.toFixed(0)} in³ exceed ~${effective_usable.toFixed(0)} in³ effective bay capacity (${Math.round(PACKING_EFFICIENCY * 100)}% packing efficiency of ${usable_volume.toFixed(0)} in³${obstrNote}) — won't close`
+        `Packed components ~${stacked_vol.toFixed(0)} in³ exceed ~${effective_usable.toFixed(0)} in³ effective bay capacity (${Math.round(PACKING_EFFICIENCY * 100)}% packing efficiency of ${usable_volume.toFixed(0)} in³${obstrNote}) — won't close`,
+        { criterion }
       ),
     ]
   }
-  if (stacked_vol > effective_usable * PACKING_TIGHT_RATIO) {
+  if (criterion.category === 'tight') {
     const pct = Math.round((stacked_vol / effective_usable) * 100)
     return [
       warn(
         'bay_volume',
-        `Bay is ${pct}% of effective capacity (~${stacked_vol.toFixed(0)} in³ of ~${effective_usable.toFixed(0)} in³ at ${Math.round(PACKING_EFFICIENCY * 100)}% packing efficiency${obstrNote}) — very tight`
+        `Bay is ${pct}% of effective capacity (~${stacked_vol.toFixed(0)} in³ of ~${effective_usable.toFixed(0)} in³ at ${Math.round(PACKING_EFFICIENCY * 100)}% packing efficiency${obstrNote}) — very tight`,
+        { criterion }
       ),
     ]
   }
