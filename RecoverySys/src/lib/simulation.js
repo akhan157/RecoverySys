@@ -1,5 +1,13 @@
 import { parseSpec } from './schema.js'
 import { computeDrogueDeploymentVelocity, computeMainSnatchLoad } from './recoveryLoad.js'
+import {
+  CRITERION_IDS,
+  evaluateCriterion,
+  SHOCK_SF_THRESHOLDS,
+  shockSafetyFactorBands,
+} from './criteria.js'
+import { airDensity, isa } from './atmosphere.js'
+export { airDensity }
 
 /**
  * ── Known constraints & simplifications ─────────────────────────────────────
@@ -98,31 +106,6 @@ const N_PER_LBF = 4.448 // Newtons per pound-force
 const MPH_TO_FPS = 5280 / 3600 // mph → ft/s
 const APCP_ISP = 195 // s — typical APCP specific impulse (see constraint #4)
 const CD_DEFAULT = 0.5 // typical subsonic HPR drag coefficient
-const GAMMA = 1.4 // ratio of specific heats for air
-const R_AIR = 287.058 // J/(kg·K) — specific gas constant for dry air
-
-// ── ISA Atmosphere ──────────────────────────────────────────────────────────
-
-/**
- * International Standard Atmosphere (ISA) — full troposphere model.
- * Returns { rho, T, P, a } at a given altitude in metres.
- *   rho = air density (kg/m³)
- *   T   = temperature (K)
- *   P   = pressure (Pa)
- *   a   = speed of sound (m/s)
- */
-function isa(alt_m) {
-  const h = Math.min(Math.max(0, alt_m), 11000)
-  const T = 288.15 - 0.0065 * h
-  const P = 101325 * Math.pow(T / 288.15, 5.2559)
-  const rho = P / (R_AIR * T)
-  const a = Math.sqrt(GAMMA * R_AIR * T)
-  return { rho, T, P, a }
-}
-
-export function airDensity(alt_m) {
-  return isa(alt_m).rho
-}
 
 // ── Mach-dependent drag ─────────────────────────────────────────────────────
 
@@ -306,10 +289,8 @@ function integrateAscent(
 
 // ── Shock load ──────────────────────────────────────────────────────────────
 
-const SF_THRESHOLDS = {
-  nylon: { pass: 4, warn: 2 },
-  kevlar: { pass: 8, warn: 4 },
-}
+// Material-specific thresholds are owned by criteria.js so simulation and
+// compatibility consumers cannot drift at exact safety-factor boundaries.
 
 export function computeShockLoad(cordSpecs, mass_kg, g_factor) {
   if (!cordSpecs) return null
@@ -322,10 +303,12 @@ export function computeShockLoad(cordSpecs, mass_kg, g_factor) {
   const k_N_per_m = (strength_lbs * N_PER_LBF) / (length_ft * 0.3048 * (elongation_pct / 100))
   const strain_energy_J = (peak_load_N * peak_load_N) / (2 * k_N_per_m)
   const safety_factor = strength_lbs / peak_load_lbs
-
-  const thresholds = SF_THRESHOLDS[material] ?? SF_THRESHOLDS.nylon
-  const sf_status =
-    safety_factor >= thresholds.pass ? 'pass' : safety_factor >= thresholds.warn ? 'warn' : 'fail'
+  const normalizedMaterial = material ?? 'nylon'
+  const thresholds = SHOCK_SF_THRESHOLDS[normalizedMaterial] ?? SHOCK_SF_THRESHOLDS.nylon
+  const criterion = evaluateCriterion(CRITERION_IDS.SHOCK_SAFETY_FACTOR, safety_factor, {
+    bands: shockSafetyFactorBands(normalizedMaterial),
+  })
+  const sf_status = criterion.category === 'nominal' ? 'pass' : criterion.category
 
   return {
     peak_load_lbs: Math.round(peak_load_lbs),
@@ -333,7 +316,8 @@ export function computeShockLoad(cordSpecs, mass_kg, g_factor) {
     strain_energy_J: Math.round(strain_energy_J * 10) / 10,
     sf_status,
     sf_thresholds: thresholds,
-    material: material ?? 'nylon',
+    material: normalizedMaterial,
+    criterion,
   }
 }
 

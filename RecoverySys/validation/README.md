@@ -2,7 +2,11 @@
 
 ## Purpose and scope
 
-This directory records reproducible comparison cases for RecoverySys's current estimates and future confidence work. It is an evidence register and authoring protocol, not a runtime contract or a substitute for engineering review.
+This directory records reproducible comparison cases for RecoverySys's current
+estimates and the implemented confidence/evidence primitives. It is an evidence
+register and authoring protocol, not a runtime contract or a substitute for
+engineering review. Review-only corpus entries do not make a result
+`Supported`.
 
 ## Boundary
 
@@ -23,3 +27,12 @@ These artifacts do not certify a vehicle, approve a launch, establish safety, or
 ## Current model limitations
 
 The current model remains an estimate with simplifying assumptions documented in the product README: vertical one-degree-of-freedom ascent, generic drag, simplified parachute/descent behavior, layered wind interpolation, and approximate shock-load and Monte Carlo calculations. Results can differ because of geometry, motor behavior, deployment, packing, weather, and build conditions.
+
+
+## Machine-readable coverage
+
+`node scripts/validate-corpus.js` emits a JSON report. The `domainCoverage` array is
+sorted by domain and reports case IDs, expected output metric names, status counts,
+accepted comparison IDs, and unreviewed case IDs. Review and draft cases remain
+structural/reproducibility checks; they never gate numerical agreement and are never
+reported as accepted evidence.

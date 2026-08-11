@@ -11,6 +11,7 @@
     "isa-density-sea-level",
     "isa-density-5000m",
     "terminal-descent-36in-main-sea-level",
+    "landing-energy-36in-main-sea-level",
     "layered-wind-linear-interpolation-drift",
     "static-ejection-load-nylon-screening"
   ],

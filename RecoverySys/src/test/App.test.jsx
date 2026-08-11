@@ -1,7 +1,7 @@
 import { render, renderHook, screen, act, waitFor } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
-import App from '../App.jsx'
+import App, { reducer } from '../App.jsx'
 import { encodeSharePayload } from '../lib/shareLink.js'
 import useShareLinkLoader from '../hooks/useShareLinkLoader.js'
 import { EMPTY_CONFIG, SLOT_IDS } from '../data/parts.js'
@@ -144,6 +144,9 @@ describe('App — status bar warning badge', () => {
     await act(async () => {
       render(<App />)
     })
+    await act(async () => {
+      screen.getByRole('tab', { name: 'DASHBOARD' }).click()
+    })
 
     // Advance past the 300ms compatibility debounce and flush React updates
     await act(async () => {
@@ -159,6 +162,9 @@ describe('App — status bar warning badge', () => {
     // Default state — no components, no errors
     await act(async () => {
       render(<App />)
+    })
+    await act(async () => {
+      screen.getByRole('tab', { name: 'DASHBOARD' }).click()
     })
 
     await act(async () => {
@@ -235,5 +241,32 @@ describe('App — rejected share-link import', () => {
       writable: true,
       configurable: true,
     })
+  })
+})
+
+describe('App — imported state freshness', () => {
+  it('clears warnings from the replaced local configuration before debounce refresh', () => {
+    const previousState = {
+      config: { drogue_chute: { id: 'old-drogue' } },
+      specs: { rocket_mass_g: '2500' },
+      customMotor: null,
+      simulation: { apogee_ft: 2200 },
+      warnings: [{ slot: 'drogue_chute', message: 'Old configuration warning' }],
+      inputRevision: 4,
+    }
+    const importedConfig = { main_chute: { id: 'new-main' } }
+
+    const nextState = reducer(previousState, {
+      type: 'LOAD_SHARE',
+      config: importedConfig,
+      specs: { rocket_mass_g: '3000' },
+      customMotor: null,
+    })
+
+    expect(nextState.config).toBe(importedConfig)
+    expect(nextState.specs).toEqual({ rocket_mass_g: '3000' })
+    expect(nextState.simulation).toBeNull()
+    expect(nextState.warnings).toEqual([])
+    expect(nextState.inputRevision).toBe(5)
   })
 })

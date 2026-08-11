@@ -14,14 +14,50 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const CORPUS_DIR = path.join(ROOT, 'validation', 'corpus')
 const MANIFEST_PATH = path.join(ROOT, 'validation', 'manifest.json')
 const SCHEMA_PATH = path.join(CORPUS_DIR, 'schema.json')
+const STATUS_ORDER = ['draft', 'review', 'accepted-for-comparison', 'superseded', 'rejected']
+
+function reportDomainCoverage(cases) {
+  const byDomain = new Map()
+
+  for (const { testCase } of cases) {
+    const entry = byDomain.get(testCase.domain) ?? {
+      domain: testCase.domain,
+      caseIds: [],
+      outputMetrics: new Set(),
+      statusCounts: Object.fromEntries(STATUS_ORDER.map((status) => [status, 0])),
+      acceptedCaseIds: [],
+      unreviewedCaseIds: [],
+    }
+    entry.caseIds.push(testCase.id)
+    for (const metric of testCase.expected.metrics) entry.outputMetrics.add(metric.name)
+    entry.statusCounts[testCase.status] += 1
+    if (testCase.status === 'accepted-for-comparison') entry.acceptedCaseIds.push(testCase.id)
+    if (testCase.status === 'draft' || testCase.status === 'review')
+      entry.unreviewedCaseIds.push(testCase.id)
+    byDomain.set(testCase.domain, entry)
+  }
+
+  return [...byDomain.values()]
+    .sort((left, right) => left.domain.localeCompare(right.domain))
+    .map(
+      ({ domain, caseIds, outputMetrics, statusCounts, acceptedCaseIds, unreviewedCaseIds }) => ({
+        domain,
+        caseCount: caseIds.length,
+        caseIds: caseIds.sort(),
+        outputMetrics: [...outputMetrics].sort(),
+        statusCounts,
+        acceptedCaseIds: acceptedCaseIds.sort(),
+        unreviewedCaseIds: unreviewedCaseIds.sort(),
+      })
+    )
+}
 
 const readJson = (file) => JSON.parse(fs.readFileSync(file, 'utf8'))
 const compare = (actual, expected, tolerance) => {
   const difference = Math.abs(actual - expected)
   const absolutePass = tolerance.absolute == null || difference <= tolerance.absolute
   const relativePass =
-    tolerance.relative == null ||
-    difference <= Math.abs(expected || 1) * tolerance.relative
+    tolerance.relative == null || difference <= Math.abs(expected || 1) * tolerance.relative
   return { difference, pass: absolutePass && relativePass }
 }
 
@@ -34,6 +70,15 @@ const evaluators = Object.freeze({
   'layered-wind-linear-interpolation-drift': (inputs) => {
     const drift = computeDrift(inputs)
     return drift ? { drift_ft: drift.drift_ft, bearing_deg: drift.bearing_deg } : {}
+  },
+  'landing-energy-36in-main-sea-level': (inputs) => {
+    const descentRateFps = computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft)
+    const landingSpeedMps = descentRateFps / 3.28084
+    return {
+      landing_ke_ftlbf: Math.round(
+        0.5 * inputs.mass_kg * landingSpeedMps * landingSpeedMps * 0.7376
+      ),
+    }
   },
   'static-ejection-load-nylon-screening': (inputs) => {
     const result = computeShockLoad(inputs.cordSpecs, inputs.mass_kg, inputs.g_factor)
@@ -68,20 +113,32 @@ export function validateCorpus() {
     .filter((file) => file.endsWith('.json') && file !== 'schema.json')
     .sort()
   const cases = files.map((file) => ({ file, testCase: readJson(path.join(CORPUS_DIR, file)) }))
+  const validCases = []
   const seen = new Set()
 
-  if (!modelMatches(manifest.model)) diagnostics.push('manifest model identity does not match production')
+  if (!modelMatches(manifest.model))
+    diagnostics.push('manifest model identity does not match production')
   if (!Array.isArray(manifest.cases)) diagnostics.push('manifest cases must be an array')
 
   for (const { file, testCase } of cases) {
     if (!validate(testCase)) {
-      for (const error of validate.errors ?? []) diagnostics.push(`${file}${error.instancePath} ${error.message}`)
+      for (const error of validate.errors ?? [])
+        diagnostics.push(`${file}${error.instancePath} ${error.message}`)
       continue
     }
+    validCases.push({ file, testCase })
     if (seen.has(testCase.id)) diagnostics.push(`${file}: duplicate case id ${testCase.id}`)
     seen.add(testCase.id)
-    if (!manifest.cases?.includes(testCase.id)) diagnostics.push(`${file}: ${testCase.id} missing from manifest`)
-    if (!modelMatches(testCase.model)) diagnostics.push(`${file}: model identity does not match production`)
+    if (!manifest.cases?.includes(testCase.id))
+      diagnostics.push(`${file}: ${testCase.id} missing from manifest`)
+    if (!modelMatches(testCase.model))
+      diagnostics.push(`${file}: model identity does not match production`)
+    if (
+      testCase.status === 'accepted-for-comparison' &&
+      (!testCase.comparison.reviewedBy || !testCase.comparison.reviewedAt)
+    ) {
+      diagnostics.push(`${file}: accepted-for-comparison requires reviewer identity and date`)
+    }
 
     const evaluate = evaluators[testCase.id]
     if (!evaluate) {
@@ -105,13 +162,23 @@ export function validateCorpus() {
     }
   }
 
-  for (const id of manifest.cases ?? []) if (!seen.has(id)) diagnostics.push(`manifest: case ${id} has no corpus file`)
-  return { valid: diagnostics.length === 0, diagnostics, cases: cases.length }
+  for (const id of manifest.cases ?? [])
+    if (!seen.has(id)) diagnostics.push(`manifest: case ${id} has no corpus file`)
+  return {
+    valid: diagnostics.length === 0,
+    diagnostics,
+    cases: cases.length,
+    domainCoverage: reportDomainCoverage(validCases),
+  }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const result = validateCorpus()
-  if (result.valid) console.log(`validation corpus valid (${result.cases} cases; review cases do not gate agreement)`)
+  if (process.argv.includes('--json')) console.log(JSON.stringify(result))
+  else if (result.valid)
+    console.log(
+      `validation corpus valid (${result.cases} cases; review cases do not gate agreement)`
+    )
   else {
     console.error(result.diagnostics.join('\n'))
     process.exitCode = 1

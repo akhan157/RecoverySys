@@ -4,32 +4,78 @@
   "title": "RecoverySys validation case",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "kind", "domain", "status", "inputs", "expected", "source", "model", "comparison", "notes"],
+  "required": [
+    "id",
+    "kind",
+    "domain",
+    "status",
+    "inputs",
+    "expected",
+    "source",
+    "model",
+    "comparison",
+    "notes"
+  ],
   "properties": {
     "id": { "type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]*$" },
     "kind": { "enum": ["analytic", "trusted-simulator", "real-flight", "metamorphic"] },
-    "domain": { "enum": ["atmosphere", "ascent", "descent", "drift", "shock-load", "dispersion", "end-to-end", "mission-envelope", "hardware-fit", "deployment-plan", "loads", "brief", "other"] },
+    "domain": {
+      "enum": [
+        "atmosphere",
+        "ascent",
+        "descent",
+        "drift",
+        "landing-energy",
+        "landing",
+        "shock-load",
+        "dispersion",
+        "end-to-end",
+        "mission-envelope",
+        "hardware-fit",
+        "deployment-plan",
+        "loads",
+        "brief",
+        "other"
+      ]
+    },
     "status": { "enum": ["draft", "review", "accepted-for-comparison", "superseded", "rejected"] },
     "inputs": { "type": "object", "additionalProperties": true },
     "expected": {
-      "type": "object", "additionalProperties": false, "required": ["metrics"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["metrics"],
       "properties": {
         "metrics": {
-          "type": "array", "items": {
-            "type": "object", "additionalProperties": false,
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
             "required": ["name", "value", "unit", "tolerance"],
             "properties": {
               "name": { "type": "string", "minLength": 1 },
               "value": {},
               "unit": { "type": "string", "minLength": 1 },
               "tolerance": {
-                "type": "object", "additionalProperties": false, "required": ["basis"],
+                "type": "object",
+                "additionalProperties": false,
+                "required": ["basis"],
                 "properties": {
                   "absolute": { "type": "number", "minimum": 0 },
                   "relative": { "type": "number", "minimum": 0 },
-                  "basis": { "enum": ["source-stated", "analyst-derived", "engineering-judgment", "not-applicable"] }
+                  "basis": {
+                    "enum": [
+                      "source-stated",
+                      "analyst-derived",
+                      "engineering-judgment",
+                      "not-applicable"
+                    ]
+                  }
                 },
-                "anyOf": [{ "required": ["absolute"] }, { "required": ["relative"] }, { "required": ["basis"] }]
+                "anyOf": [
+                  { "required": ["absolute"] },
+                  { "required": ["relative"] },
+                  { "required": ["basis"] }
+                ]
               },
               "notes": { "type": "string" }
             }
@@ -39,7 +85,9 @@
       }
     },
     "source": {
-      "type": "object", "additionalProperties": false, "required": ["citation", "derivation"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["citation", "derivation"],
       "properties": {
         "url": { "type": "string", "format": "uri" },
         "title": { "type": "string" },
@@ -52,13 +100,24 @@
       }
     },
     "model": {
-      "type": "object", "additionalProperties": false, "required": ["id", "version", "assumptionsVersion", "description"],
-      "properties": { "id": { "type": "string", "minLength": 1 }, "description": { "type": "string", "minLength": 1 }, "version": { "type": "string", "minLength": 1 }, "assumptionsVersion": { "type": "string", "minLength": 1 } }
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["id", "version", "assumptionsVersion", "description"],
+      "properties": {
+        "id": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "version": { "type": "string", "minLength": 1 },
+        "assumptionsVersion": { "type": "string", "minLength": 1 }
+      }
     },
     "comparison": {
-      "type": "object", "additionalProperties": false, "required": ["method", "decisionRule"],
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["method", "decisionRule"],
       "properties": {
-        "method": { "enum": ["absolute-and-relative", "absolute", "relative", "qualitative", "metamorphic"] },
+        "method": {
+          "enum": ["absolute-and-relative", "absolute", "relative", "qualitative", "metamorphic"]
+        },
         "decisionRule": { "type": "string", "minLength": 1 },
         "observed": { "type": "object", "additionalProperties": true },
         "reviewedBy": { "type": "string" },

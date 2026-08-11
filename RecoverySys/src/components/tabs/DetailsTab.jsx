@@ -1,21 +1,175 @@
-import React, { useState } from 'react'
+import { useState } from 'react'
 
 const MODEL_CARDS = [
-  ['Ascent & Apogee', 'ESTIMATE', 'estimate', 'Vertical flight estimate', 'F = T − D − mg  →  integrate velocity and altitude', 'RK4 integration when a thrust curve is available; otherwise a simplified motor model is used.', 'Rocket mass, motor impulse / thrust curve, burn time, airframe diameter, drag coefficient', 'Cd 0.50 when blank · APCP Isp 195 s when no .eng file is loaded', '1-DOF vertical flight; no launch-angle, weathercocking, rail-friction, or guide-loss model. Drag curve assumes a 4:1 ogive.', 'Wind-induced trajectory tilt and detailed motor geometry are not represented.', 'Inputs: current Rocket Specs and selected motor data. Method label reflects the current run.'],
-  ['Descent & Landing', 'ESTIMATE', 'estimate', 'Phase-based terminal velocity', 'vₜ = √(2mg / ρACᴅ)', 'One terminal descent rate is sampled for each recovery phase, then used to estimate phase time and landing kinetic energy.', 'Mass, chute area and Cd, deployment altitude, and air density at the sampled altitude', 'Main deployment altitude 500 ft when blank · single sampled rate per phase', 'The model starts each phase at terminal velocity; actual inflation and transient acceleration can take several seconds.', 'Chute oscillation, partial inflation, and ground-level speed changes are not modeled in detail.', 'Catalog Cd is the manufacturer’s ideal rated value, not a measured flight value.'],
-  ['Drift & Dispersion', 'ESTIMATE', 'estimate', 'Wind-profile displacement estimate', 'Δx = ∫ vwind(h) · dt', 'Wind is linearly interpolated across surface, mid, and aloft layers while the rocket descends.', 'Wind speed and direction by layer, descent timing, launch coordinates', 'Blank mid/aloft layers fall back to the available wind profile', 'Instant wind coupling; no horizontal inertia. Layer winds are independent for Monte Carlo dispersion.', 'The friction-layer profile, gusts, local obstacles, and correlated weather are omitted.', 'The map is a predicted landing location, not a surveyed recovery area.'],
-  ['Static Ejection Load', 'SCREENING', 'screening', 'Static impulse screening', 'F = m × G × g₀', 'Applies the entered or inferred ejection G-factor to rocket mass and compares the resulting load with selected hardware ratings.', 'Rocket mass, ejection G-factor, shock cord strength and material', 'Auto G-factor: 20G for L1/L2, 30G for L3 (≥10 kg)', 'A static impulse stands in for a pressure pulse; peak load can vary with bay volume, separation velocity, and slack.', 'Dynamic pressure history and detailed bay geometry are not solved. The static approach can differ by about ±30%.', 'Hardware ratings come from the selected catalog entries; user-entered ratings are treated as supplied.'],
-  ['Main Snatch Screening', 'SCREENING', 'screening', 'Harness load screening', 'F ≈ m × Δv / Δt', 'Uses recovery-phase speeds and a simplified stopping-time model to flag high transient demand on the main harness.', 'Mass, drogue and main descent rates, harness length, deployment configuration', 'Minimum harness length guidance scales with mass: 5 / 10 / 15 ft tiers', 'The line catches load as a simplified event; real slack, elasticity, and deployment sequence change the pulse.', 'Detailed line deployment timing, reefing, and fabric inflation are not resolved.', 'This surface explains a screening rule; it is not a substitute for a component-specific test.'],
-  ['Opening Shock', 'SCREENING', 'screening', 'Main-chute opening load screening', 'Fopen ≈ ½ρv²A·Cx', 'Estimates opening load at main deployment speed using projected area and shape factor, then compares it with the weakest selected hardware rating.', 'Main chute diameter, chute shape, deployment speed, and selected hardware rating', 'Cx 1.8 when shape-specific data is unavailable · deployment bag reduction 30–40%', 'The chute is represented by a single idealized shape factor; a deployment bag changes the effective inflation event.', 'Porosity, reefing, line stretch, and actual inflation timing are omitted; result may differ by roughly 30%.', 'The caveat is shown beside the screening result so the comparison is not read as a certification.'],
-  ['Packing & Compatibility', 'ASSUMPTION-BASED', 'assumption', 'Bay volume and component-rule review', 'Vusable = Vbay − Vobstruction', 'Adds representative component volumes and applies compatibility rules for deployment sequence, connections, and bay capacity.', 'Airframe ID, bay length, obstruction volume, selected component dimensions and ratings', '70% packing efficiency of ideal stacked volume · obstruction defaults to 0 in³', 'Packed items are approximated as idealized volumes; real packing order and fabric compression vary.', 'Fabric fold geometry, wiring routes, snag points, and closure force are not measured.', 'Notices are derived from the current configuration and catalog metadata; blanks can widen uncertainty.'],
+  [
+    'Ascent & Apogee',
+    'ESTIMATE',
+    'estimate',
+    'Vertical flight estimate',
+    'F = T − D − mg  →  integrate velocity and altitude',
+    'RK4 integration when a thrust curve is available; otherwise a simplified motor model is used.',
+    'Rocket mass, motor impulse / thrust curve, burn time, airframe diameter, drag coefficient',
+    'Cd 0.50 when blank · APCP Isp 195 s when no .eng file is loaded',
+    '1-DOF vertical flight; no launch-angle, weathercocking, rail-friction, or guide-loss model. Drag curve assumes a 4:1 ogive.',
+    'Wind-induced trajectory tilt and detailed motor geometry are not represented.',
+    'Inputs: current Rocket Specs and selected motor data. Method label reflects the current run.',
+  ],
+  [
+    'Descent & Landing',
+    'ESTIMATE',
+    'estimate',
+    'Phase-based terminal velocity',
+    'vₜ = √(2mg / ρACᴅ)',
+    'One terminal descent rate is sampled for each recovery phase, then used to estimate phase time and landing kinetic energy.',
+    'Mass, chute area and Cd, deployment altitude, and air density at the sampled altitude',
+    'Main deployment altitude 500 ft when blank · single sampled rate per phase',
+    'The model starts each phase at terminal velocity; actual inflation and transient acceleration can take several seconds.',
+    'Chute oscillation, partial inflation, and ground-level speed changes are not modeled in detail.',
+    'Catalog Cd is the manufacturer’s ideal rated value, not a measured flight value.',
+  ],
+  [
+    'Drift & Dispersion',
+    'ESTIMATE',
+    'estimate',
+    'Wind-profile displacement estimate',
+    'Δx = ∫ vwind(h) · dt',
+    'Wind is linearly interpolated across surface, mid, and aloft layers while the rocket descends.',
+    'Wind speed and direction by layer, descent timing, launch coordinates',
+    'Blank mid/aloft layers fall back to the available wind profile',
+    'Instant wind coupling; no horizontal inertia. Layer winds are independent for Monte Carlo dispersion.',
+    'The friction-layer profile, gusts, local obstacles, and correlated weather are omitted.',
+    'The map is a predicted landing location, not a surveyed recovery area.',
+  ],
+  [
+    'Static Ejection Load',
+    'SCREENING',
+    'screening',
+    'Static impulse screening',
+    'F = m × G × g₀',
+    'Applies the entered or inferred ejection G-factor to rocket mass and compares the resulting load with selected hardware ratings.',
+    'Rocket mass, ejection G-factor, shock cord strength and material',
+    'Auto G-factor: 20G for L1/L2, 30G for L3 (≥10 kg)',
+    'A static impulse stands in for a pressure pulse; peak load can vary with bay volume, separation velocity, and slack.',
+    'Dynamic pressure history and detailed bay geometry are not solved. The static approach can differ by about ±30%.',
+    'Hardware ratings come from the selected catalog entries; user-entered ratings are treated as supplied.',
+  ],
+  [
+    'Main Snatch Screening',
+    'SCREENING',
+    'screening',
+    'Harness load screening',
+    'F ≈ m × Δv / Δt',
+    'Uses recovery-phase speeds and a simplified stopping-time model to flag high transient demand on the main harness.',
+    'Mass, drogue and main descent rates, harness length, deployment configuration',
+    'Minimum harness length guidance scales with mass: 5 / 10 / 15 ft tiers',
+    'The line catches load as a simplified event; real slack, elasticity, and deployment sequence change the pulse.',
+    'Detailed line deployment timing, reefing, and fabric inflation are not resolved.',
+    'This surface explains a screening rule; it is not a substitute for a component-specific test.',
+  ],
+  [
+    'Opening Shock',
+    'SCREENING',
+    'screening',
+    'Main-chute opening load screening',
+    'Fopen ≈ ½ρv²A·Cx',
+    'Estimates opening load at main deployment speed using projected area and shape factor, then compares it with the weakest selected hardware rating.',
+    'Main chute diameter, chute shape, deployment speed, and selected hardware rating',
+    'Cx 1.8 when shape-specific data is unavailable · deployment bag reduction 30–40%',
+    'The chute is represented by a single idealized shape factor; a deployment bag changes the effective inflation event.',
+    'Porosity, reefing, line stretch, and actual inflation timing are omitted; result may differ by roughly 30%.',
+    'The caveat is shown beside the screening result so the comparison is not read as a certification.',
+  ],
+  [
+    'Packing & Compatibility',
+    'ASSUMPTION-BASED',
+    'assumption',
+    'Bay volume and component-rule review',
+    'Vusable = Vbay − Vobstruction',
+    'Adds representative component volumes and applies compatibility rules for deployment sequence, connections, and bay capacity.',
+    'Airframe ID, bay length, obstruction volume, selected component dimensions and ratings',
+    '70% packing efficiency of ideal stacked volume · obstruction defaults to 0 in³',
+    'Packed items are approximated as idealized volumes; real packing order and fabric compression vary.',
+    'Fabric fold geometry, wiring routes, snag points, and closure force are not measured.',
+    'Notices are derived from the current configuration and catalog metadata; blanks can widen uncertainty.',
+  ],
 ]
 
 export default function DetailsTab({ state }) {
   const [open, setOpen] = useState('Ascent & Apogee')
   const sim = state.simulation
-  return <div className="details-page">
-    <header className="details-hero"><div><div className="details-kicker">TRANSPARENCY // METHOD_REGISTER</div><h2>How to read these results</h2><p>Results are estimates and screenings for design review. Expand a model to see the method, inputs, defaults, and where the model stops.</p></div><div className="details-run-summary"><span>LAST RUN</span><strong>{sim ? 'AVAILABLE' : 'NO RUN YET'}</strong>{sim && <small>Apogee {sim.apogee_ft.toLocaleString()} ft · Drift {sim.drift_ft.toLocaleString()} ft</small>}</div></header>
-    <div className="details-notice"><span>i</span><p><strong>Scope note:</strong> A displayed number is a model output, not a guarantee about hardware or flight conditions. Review the assumptions before using it to make a decision.</p></div>
-    <section className="details-list" aria-label="Model details">{MODEL_CARDS.map((c, i) => { const expanded = open === c[0]; return <article className={`details-card ${expanded ? 'details-card--open' : ''}`} key={c[0]}><button className="details-card__toggle" onClick={() => setOpen(expanded ? null : c[0])} aria-expanded={expanded}><span className="details-card__number">0{i + 1}</span><span className="details-card__title"><strong>{c[0]}</strong><small>{c[3]}</small></span><span className={`details-tag details-tag--${c[2]}`}>{c[1]}</span><span className="details-chevron">{expanded ? '−' : '+'}</span></button>{expanded && <div className="details-card__body"><div className="details-equation"><span>EQUATION / CORE IDEA</span><code>{c[4]}</code></div><dl className="details-rows">{[['Method', c[5]], ['Inputs / units', c[6]], ['Defaults', c[7]], ['Assumptions', c[8]], ['Omissions', c[9]], ['Evidence', c[10]]].map(([label, value]) => <div className="details-row" key={label}><dt>{label}</dt><dd>{value}</dd></div>)}</dl></div>}</article> })}</section>
-  </div>
+  return (
+    <div className="details-page">
+      <header className="details-hero">
+        <div>
+          <div className="details-kicker">TRANSPARENCY // METHOD_REGISTER</div>
+          <h2>How to read these results</h2>
+          <p>
+            Results are estimates and screenings for design review. Expand a model to see the
+            method, inputs, defaults, and where the model stops.
+          </p>
+        </div>
+        <div className="details-run-summary">
+          <span>LAST RUN</span>
+          <strong>{sim ? 'AVAILABLE' : 'NO RUN YET'}</strong>
+          {sim && (
+            <small>
+              Apogee {sim.apogee_ft.toLocaleString()} ft · Drift {sim.drift_ft.toLocaleString()} ft
+            </small>
+          )}
+        </div>
+      </header>
+      <div className="details-notice">
+        <span>i</span>
+        <p>
+          <strong>Scope note:</strong> A displayed number is a model output, not a guarantee about
+          hardware or flight conditions. Review the assumptions before using it to make a decision.
+        </p>
+      </div>
+      <section className="details-list" aria-label="Model details">
+        {MODEL_CARDS.map((c, i) => {
+          const expanded = open === c[0]
+          return (
+            <article className={`details-card ${expanded ? 'details-card--open' : ''}`} key={c[0]}>
+              <button
+                className="details-card__toggle"
+                onClick={() => setOpen(expanded ? null : c[0])}
+                aria-expanded={expanded}
+              >
+                <span className="details-card__number">0{i + 1}</span>
+                <span className="details-card__title">
+                  <strong>{c[0]}</strong>
+                  <small>{c[3]}</small>
+                </span>
+                <span className={`details-tag details-tag--${c[2]}`}>{c[1]}</span>
+                <span className="details-chevron">{expanded ? '−' : '+'}</span>
+              </button>
+              {expanded && (
+                <div className="details-card__body">
+                  <div className="details-equation">
+                    <span>EQUATION / CORE IDEA</span>
+                    <code>{c[4]}</code>
+                  </div>
+                  <dl className="details-rows">
+                    {[
+                      ['Method', c[5]],
+                      ['Inputs / units', c[6]],
+                      ['Defaults', c[7]],
+                      ['Assumptions', c[8]],
+                      ['Omissions', c[9]],
+                      ['Evidence', c[10]],
+                    ].map(([label, value]) => (
+                      <div className="details-row" key={label}>
+                        <dt>{label}</dt>
+                        <dd>{value}</dd>
+                      </div>
+                    ))}
+                  </dl>
+                </div>
+              )}
+            </article>
+          )
+        })}
+      </section>
+    </div>
+  )
 }

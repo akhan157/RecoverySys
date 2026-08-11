@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import GuidedReview from './GuidedReview.jsx'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
 import { computePackingVolume } from '../lib/compatibility.js'
@@ -16,6 +17,7 @@ import { buildRecoveryBrief } from '../lib/recoveryBrief.js'
 import './MissionControlLayout.css'
 
 const TABS = [
+  { id: 'GUIDED_REVIEW', label: 'GUIDED_REVIEW' },
   { id: 'DASHBOARD', label: 'DASHBOARD' },
   { id: 'SPECS', label: 'ROCKET_SPECS' },
   { id: 'SIMULATION', label: 'SIMULATION' },
@@ -43,12 +45,13 @@ export default function MissionControlLayout({
   setCustomMotor,
   clearCustomMotor,
   loadConfig,
+  clearAll,
   addToast,
   saveCompareSnapshot,
   clearCompareSnapshot,
   /* darkMode/setDarkMode removed: MC layout is dark-only */
 }) {
-  const [activeTab, setActiveTab] = useState('DASHBOARD')
+  const [activeTab, setActiveTab] = useState('GUIDED_REVIEW')
 
   const filledSlots = useMemo(
     () => CATEGORIES.filter((c) => state.config[c.id] != null).length,
@@ -133,6 +136,20 @@ export default function MissionControlLayout({
             aria-labelledby={tabBtnId(activeTab)}
             tabIndex={0}
           >
+            {activeTab === 'GUIDED_REVIEW' && (
+              <GuidedReview
+                resultFresh={resultFresh}
+                state={state}
+                onOpenDashboard={() => setActiveTab('DASHBOARD')}
+                onOpenSpecs={() => setActiveTab('SPECS')}
+                onOpenSimulation={() => setActiveTab('SIMULATION')}
+                onOpenImport={() => setActiveTab('EXPORT')}
+                onStartFresh={() => {
+                  clearAll()
+                  setActiveTab('SPECS')
+                }}
+              />
+            )}
             {activeTab === 'DASHBOARD' && (
               <DashboardTab
                 state={state}

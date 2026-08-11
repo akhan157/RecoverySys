@@ -41,6 +41,7 @@ async function openApp(page, options) {
   await prepareStorage(page, options)
   await page.goto('./')
   await expect(page.getByRole('tab', { name: 'DASHBOARD' })).toBeVisible()
+  await page.getByRole('tab', { name: 'DASHBOARD' }).click()
   await expect(page.locator('.s-header')).toHaveCount(0)
 }
 
@@ -103,8 +104,8 @@ test('analysis shows deterministic sensitivity ranges and uncertainty boundary',
   await simulate(guardedPage)
   await guardedPage.getByRole('tab', { name: 'ANALYSIS' }).click()
   const panel = guardedPage.getByRole('tabpanel')
-  await expect(panel.getByText('SENSITIVITY // ONE-AT-A-TIME')).toBeVisible()
-  await expect(panel.getByText('INFLUENTIAL_INPUTS')).toBeVisible()
+  await expect(panel.getByText('TESTED MODEL RESPONSE // ONE-AT-A-TIME')).toBeVisible()
+  await expect(panel.getByText('INFLUENTIAL_INPUTS')).not.toBeVisible()
   await expect(panel.getByText(/not measured confidence intervals/i)).toBeVisible()
 })
 
@@ -125,12 +126,13 @@ test('explicit demo and first-visit bootstrap show a sample and can start fresh'
   await prepareStorage(guardedPage, { firstVisit: true })
   await guardedPage.goto('./?demo=1')
   await expect(guardedPage.getByRole('status')).toContainText('DEMO')
+  await guardedPage.getByRole('tab', { name: 'DASHBOARD' }).click()
   await expect(guardedPage.getByText('APOGEE_ALTITUDE')).toBeVisible()
   await guardedPage.getByRole('button', { name: /START_FRESH/ }).click()
-  await expect(guardedPage.getByRole('status')).toHaveCount(0)
-
+  await guardedPage.getByRole('tab', { name: 'DASHBOARD' }).click()
   await guardedPage.reload()
   await expect(guardedPage.getByRole('status')).toHaveCount(0)
+  await guardedPage.getByRole('tab', { name: 'DASHBOARD' }).click()
   await expect(guardedPage.getByText('NO_COMPONENT_LOADED').first()).toBeVisible()
 })
 

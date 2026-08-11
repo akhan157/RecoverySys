@@ -189,7 +189,7 @@ function reducer(state, action) {
       }
     case 'CLEAR_COMPARE_SNAPSHOT':
       return { ...state, compareSnapshot: null }
-    // Atomically replace config + specs from a share link.
+    // Atomically replace config + specs from a share link or JSON import.
     // Doing this in one action prevents the receiver's localStorage-restored values
     // from bleeding through for slots/keys that are null or absent in the payload.
     case 'LOAD_SHARE':
@@ -199,7 +199,12 @@ function reducer(state, action) {
         specs: action.specs,
         customMotor: action.customMotor ?? null,
         simulation: null,
+        // Imported state replaces the inputs immediately; clear the previous
+        // compatibility result before the debounced watcher evaluates them.
+        warnings: [],
+        inputRevision: state.inputRevision + 1,
       }
+
     // Demo "Start Fresh" — wipe slots, reset specs to defaults, clear sim.
     // Custom parts and toasts are preserved.
     case 'CLEAR_ALL':
@@ -215,6 +220,7 @@ function reducer(state, action) {
       return state
   }
 }
+export { reducer }
 
 // ── App ──────────────────────────────────────────────────────────────────────
 
@@ -301,6 +307,10 @@ export default function App() {
     },
     [mergeCustomParts]
   )
+  const clearAll = useCallback(() => {
+    dispatch({ type: 'CLEAR_ALL' })
+    setImportSession(false)
+  }, [])
 
   const addToast = useCallback((level, message) => {
     dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
@@ -417,6 +427,7 @@ export default function App() {
         setCustomMotor={setCustomMotor}
         clearCustomMotor={clearCustomMotor}
         loadConfig={loadConfig}
+        clearAll={clearAll}
         addToast={addToast}
         saveCompareSnapshot={saveCompareSnapshot}
         clearCompareSnapshot={clearCompareSnapshot}

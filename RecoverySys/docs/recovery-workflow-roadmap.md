@@ -1,12 +1,17 @@
 # Recovery workflow roadmap
 
-Future-only backlog for turning current estimates into a clearer recovery planning workflow. This document preserves current contracts and does not claim production validation.
+Future-only backlog for turning current estimates into a clearer recovery
+planning workflow. Confidence, evidence-coverage, mission-envelope, and stale
+result foundations now exist in code, but this document does not claim accepted
+validation or complete cross-artifact production capability.
+
 
 ## Phase 0 — foundation (highest priority)
 
 - **Research/design complete:** define shared vocabulary, evidence/provenance posture, stale-result dependency, and review boundaries.
 - Create a case corpus and review process using analytic, trusted-simulator, metamorphic, and eventually real-flight evidence.
-- **Dependency:** validation artifacts and the Session 1 stale-result design must precede confidence UI or contract work.
+- **Dependency:** the implemented confidence/stale foundation must be extended
+  with accepted evidence, broader corpus coverage, and cross-artifact parity.
 - **Not yet validated production capability:** no accepted cases or real-flight cases are present.
 
 ## Phase 1 — mission envelope

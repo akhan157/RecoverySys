@@ -7,6 +7,7 @@ import {
   SIMULATION_METHOD,
 } from './constants.js'
 import { captureSimulationProvenance, isSimulationStale } from './simulationIdentity.js'
+import { buildResultAssessments } from './assessment.js'
 
 function stable(value) {
   if (value === null || typeof value !== 'object') return JSON.stringify(value)
@@ -25,6 +26,9 @@ export function buildResultEnvelope(result, inputs, inputRevision) {
   if (!result) return null
   return {
     ...result,
+    assessments: buildResultAssessments(result, {
+      fresh: true,
+    }),
     provenance: {
       inputFingerprint: fingerprintInputs(inputs),
       inputRevision,

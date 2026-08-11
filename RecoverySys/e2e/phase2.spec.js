@@ -106,6 +106,7 @@ test('landing CTA opens the demo app at the public launch URL', async ({ guarded
   await guardedPage.getByRole('link', { name: /LAUNCH/ }).click()
   await expect(guardedPage).toHaveURL(/\/RecoverySys\/\?demo=1$/)
   await expect(guardedPage.getByRole('status')).toContainText('DEMO')
+  await guardedPage.getByRole('tab', { name: 'DASHBOARD' }).click()
   await expect(guardedPage.getByText('APOGEE_ALTITUDE')).toBeVisible()
 })
 

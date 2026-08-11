@@ -1,20 +1,24 @@
+import { densityAtAltitudeFt } from './atmosphere.js'
+
 export const MAIN_SNATCH_MODEL = 'linear-elastic-energy-v1'
 
 const G = 9.80665
 const FT_PER_M = 3.28084
 const N_PER_LBF = 4.448
-const R_AIR = 287.05
+
+const OPENING_SHOCK_CX = Object.freeze({
+  flat: 1.8,
+  elliptical: 1.6,
+  conical: 1.5,
+  cruciform: 2.2,
+  toroidal: 1.4,
+})
+
+export const OPENING_SHOCK_MODEL = 'drag-opening-load-v1'
 
 const finitePositive = (value) => {
   const n = typeof value === 'number' || typeof value === 'string' ? Number(value) : NaN
   return Number.isFinite(n) && n > 0 ? n : null
-}
-
-function densityAtAltitude(altitude_ft) {
-  const h = Math.min(Math.max(0, altitude_ft / FT_PER_M), 11000)
-  const temperature = 288.15 - 0.0065 * h
-  const pressure = 101325 * Math.pow(temperature / 288.15, 5.2559)
-  return pressure / (R_AIR * temperature)
 }
 
 export function computeDrogueDeploymentVelocity(drogueSpecs, mass_kg, deploy_alt_ft) {
@@ -25,8 +29,37 @@ export function computeDrogueDeploymentVelocity(drogueSpecs, mass_kg, deploy_alt
   if (!mass || !altitude || !diameter || !cd) return null
   const radius_m = (diameter * 0.0254) / 2
   const area_m2 = Math.PI * radius_m * radius_m
-  const velocity_mps = Math.sqrt((2 * mass * G) / (densityAtAltitude(altitude) * cd * area_m2))
+  const velocity_mps = Math.sqrt((2 * mass * G) / (densityAtAltitudeFt(altitude) * cd * area_m2))
   return Number.isFinite(velocity_mps) ? velocity_mps * FT_PER_M : null
+}
+
+export function computeOpeningShockLoad({ mainSpecs, deploy_alt_ft, approach_velocity_fps } = {}) {
+  const altitude = finitePositive(deploy_alt_ft)
+  const velocity = finitePositive(approach_velocity_fps)
+  const diameter = finitePositive(mainSpecs?.diameter_in)
+  if (!altitude || !velocity || !diameter) {
+    return {
+      model: OPENING_SHOCK_MODEL,
+      status: 'unavailable',
+      reason: 'missing-main-chute-or-approach-velocity',
+    }
+  }
+  const rho = densityAtAltitudeFt(altitude)
+  const radius_m = (diameter * 0.0254) / 2
+  const area_m2 = Math.PI * radius_m * radius_m
+  const coefficient = OPENING_SHOCK_CX[mainSpecs?.shape] ?? OPENING_SHOCK_CX.flat
+  const velocity_mps = velocity / FT_PER_M
+  const force_N = coefficient * 0.5 * rho * velocity_mps ** 2 * area_m2
+  return {
+    model: OPENING_SHOCK_MODEL,
+    status: 'evaluated',
+    reason: null,
+    coefficient,
+    density_kg_m3: rho,
+    area_m2,
+    force_N,
+    force_lbs: force_N / N_PER_LBF,
+  }
 }
 
 const unavailable = (reason, limitations = []) => ({
