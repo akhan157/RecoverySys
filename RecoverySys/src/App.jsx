@@ -125,7 +125,7 @@ function buildInitialState() {
   }
 }
 
-function reducer(state, action) {
+export function reducer(state, action) {
   switch (action.type) {
     case 'SELECT_PART':
       return {
@@ -199,6 +199,10 @@ function reducer(state, action) {
         specs: action.specs,
         customMotor: action.customMotor ?? null,
         simulation: null,
+        // Imported state replaces the inputs immediately; clear the previous
+        // compatibility result before the debounced watcher evaluates them.
+        warnings: [],
+        inputRevision: state.inputRevision + 1,
       }
     // Demo "Start Fresh" — wipe slots, reset specs to defaults, clear sim.
     // Custom parts and toasts are preserved.
