@@ -3,6 +3,8 @@ import { normalizeCalculationInputs } from '../../lib/schema.js'
 import { computePackingVolume } from '../../lib/compatibility.js'
 import { computeOpeningShockLoad } from '../../lib/recoveryLoad.js'
 import { buildAnalysisReviewModel } from '../../lib/analysisReview.js'
+import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
+
 import { runSensitivity } from '../../lib/sensitivity.js'
 import { CRITERION_IDS, evaluateCriterion, shockSafetyFactorBands } from '../../lib/criteria.js'
 import { densityAtAltitudeFt, FEET_PER_METER, isa, standardGravity } from '../../lib/atmosphere.js'
@@ -205,7 +207,8 @@ export default function AnalysisTab({ state, confidenceProps }) {
 
   const ap = a
   const warnings = state.warnings ?? []
-  const stale = Boolean(state.simulation && !state.resultFresh)
+  const resultStatus = state.simulation ? (state.resultFresh ? 'current' : 'stale') : 'not-run'
+  const resultDetails = RESULT_STATUS_DETAILS[resultStatus]
   const motorMethod = state.customMotor
     ? `THRUST CURVE / ${state.customMotor.designation || 'CUSTOM MOTOR'}`
     : sim?.apogee_method?.toUpperCase() || 'NOT RUN'
@@ -272,13 +275,9 @@ export default function AnalysisTab({ state, confidenceProps }) {
       <ConfidenceStatus {...confidenceProps} />
       {!sim ? (
         <div className="mc-analysis__empty">
-          <div className="mc-analysis__empty-code">
-            {stale ? 'RESULT_STALE // RERUN_REQUIRED' : 'NO_SIMULATION_DATA'}
-          </div>
+          <div className="mc-analysis__empty-code">{resultDetails.reasonCode}</div>
           <div className="mc-analysis__empty-sub">
-            {stale
-              ? 'Inputs changed. Run the simulation again to refresh analysis.'
-              : 'Run a simulation from the DASHBOARD or SIMULATION tab to populate physics breakdown'}
+            {resultDetails.remediation || resultDetails.nextAction}
           </div>
         </div>
       ) : (

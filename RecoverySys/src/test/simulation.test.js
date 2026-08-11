@@ -514,6 +514,35 @@ describe('runSimulation', () => {
     expect(result).not.toBeNull()
     expect(result.scatter.every((p) => Number.isFinite(p.lat) && Number.isFinite(p.lon))).toBe(true)
   })
+
+  it('makes seeded dispersion runs reproducible without replacing Math.random', () => {
+    const input = {
+      simulation: { apogee_ft: 4000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
+      specs: { wind_speed_mph: '10', wind_direction_deg: '0', launch_lat: '39', launch_lon: '-98' },
+      iterations: 100,
+      seed: 12345,
+    }
+    const originalRandom = Math.random
+    const first = runDispersionMonteCarlo(input)
+    const second = runDispersionMonteCarlo(input)
+    const differentSeed = runDispersionMonteCarlo({ ...input, seed: 54321 })
+
+    expect(first).toEqual(second)
+    expect(differentSeed.scatter).not.toEqual(first.scatter)
+    expect(Math.random).toBe(originalRandom)
+  })
+
+  it('falls back safely when a dispersion seed is absent or invalid', () => {
+    const input = {
+      simulation: { apogee_ft: 4000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
+      specs: { wind_speed_mph: '10', wind_direction_deg: '0', launch_lat: '39', launch_lon: '-98' },
+      iterations: 100,
+    }
+
+    expect(() => runDispersionMonteCarlo({ ...input, seed: 'not-a-seed' })).not.toThrow()
+    expect(runDispersionMonteCarlo({ ...input, seed: 'not-a-seed' })).not.toBeNull()
+    expect(runDispersionMonteCarlo(input)).not.toBeNull()
+  })
 })
 
 // ── interpolateThrust ─────────────────────────────────────────────────────────

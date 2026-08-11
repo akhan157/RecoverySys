@@ -506,10 +506,23 @@ export function computeDrift({ simulation, specs }) {
  * Perturbs: wind (±30% speed, ±15° dir), Cd (±10%), mass (±2%),
  * deploy altitude (±50 ft), motor impulse (±3%).
  *
+ * An optional safe-integer `seed` selects a local deterministic generator.
+ * Missing or invalid seeds retain the existing Math.random behavior.
+ *
  * constraint #15: apogee perturbation is linear scaling, not re-integrated.
  * constraint #16: wind layers perturbed independently (real weather correlates them).
  */
-export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 }) {
+function createSeededRandom(seed) {
+  let state = seed >>> 0
+  return () => {
+    state = (state + 0x6d2b79f5) | 0
+    let t = Math.imul(state ^ (state >>> 15), 1 | state)
+    t ^= t + Math.imul(t ^ (t >>> 7), 61 | t)
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296
+  }
+}
+
+export function runDispersionMonteCarlo({ simulation, specs, iterations = 500, seed }) {
   if (!simulation) return null
 
   const baseLayers = parseWindLayers(specs)
@@ -525,12 +538,22 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500 })
   const ALT_STEP = 200
   const deploy = deploy_ft || 500
   const effective_main_fps = main_fps && main_fps > 0 ? main_fps : drogue_fps
+  const seeded = Number.isSafeInteger(seed)
+  const random = seeded ? createSeededRandom(seed) : Math.random
+
+  function randomUnit() {
+    const value = Number(random())
+    if (!Number.isFinite(value)) return 0.5
+    if (value <= 0) return Number.MIN_VALUE
+    if (value >= 1) return 1 - Number.EPSILON
+    return value
+  }
 
   function gaussRand() {
     let u = 0,
       v = 0
-    while (u === 0) u = Math.random()
-    while (v === 0) v = Math.random()
+    while (u === 0) u = seeded ? randomUnit() : Math.random()
+    while (v === 0) v = seeded ? randomUnit() : Math.random()
     return Math.sqrt(-2.0 * Math.log(u)) * Math.cos(2.0 * Math.PI * v)
   }
 

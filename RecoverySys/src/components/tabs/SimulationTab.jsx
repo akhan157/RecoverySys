@@ -1,10 +1,13 @@
 import { WARN_LEVELS } from '../../lib/constants.js'
+import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import FlightChart from '../FlightChart.jsx'
 import MetricCard from '../MetricCard.jsx'
 import ConfidenceStatus from '../ConfidenceStatus.jsx'
 
 export default function SimulationTab({ state, runSim, canRun, resultFresh, confidenceProps }) {
   const sim = state.simulation
+  const resultStatus = sim ? (resultFresh ? 'current' : 'stale') : 'not-run'
+  const resultDetails = RESULT_STATUS_DETAILS[resultStatus]
   const usableSim = resultFresh ? sim : null
   const shock = usableSim?.shock_load
   const snatch = usableSim?.main_snatch
@@ -19,11 +22,11 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
           <h2 className="mc-panel-header">
             FLIGHT_PROFILE // ALT_vs_TIME
             <span className="mc-panel-header__right">
-              {sim && !resultFresh
-                ? 'RESULT_STALE // RERUN_REQUIRED'
+              {resultStatus === 'stale'
+                ? `${resultDetails.reasonCode} — ${resultDetails.remediation}`
                 : sim
                   ? `REF_ID: STR-SIM-${String(Math.abs((sim.apogee_ft || 0) * 7 + (sim.drift_ft || 0)) % 9999).padStart(4, '0')}`
-                  : 'AWAITING_DATA'}
+                  : resultDetails.reasonCode}
             </span>
           </h2>
           <div className="mc-sim__chart-area">

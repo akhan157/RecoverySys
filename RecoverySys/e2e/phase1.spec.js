@@ -62,7 +62,7 @@ async function simulate(page) {
   await page.getByRole('tab', { name: 'SIMULATION' }).click()
   await page.getByRole('button', { name: /RUN_SIMULATION/ }).click()
   await expect(page.getByText('APOGEE_ALTITUDE')).toBeVisible()
-  await expect(page.getByText('RESULT_STALE // RERUN_REQUIRED')).toHaveCount(0)
+  await expect(page.getByText(/RESULT_STALE/)).toHaveCount(0)
 }
 
 test('mount removes the production skeleton and preserves live tab navigation', async ({
@@ -73,15 +73,15 @@ test('mount removes the production skeleton and preserves live tab navigation', 
   const panels = [
     ['ROCKET_SPECS', 'ROCKET_SPECS'],
     ['SIMULATION', 'FLIGHT_PROFILE // ALT_vs_TIME'],
-    ['ANALYSIS', 'NO_SIMULATION_DATA'],
-    ['DISPERSION', 'NO_SIMULATION_DATA'],
+    ['ANALYSIS', 'NO_CURRENT_RESULT'],
+    ['DISPERSION', 'NO_CURRENT_RESULT'],
     ['EXPORT', 'EXPORT // SHARE_CONFIGURATION'],
     ['FLIGHT_LOG', 'FLIGHT_LOG'],
     ['DASHBOARD', 'BAY_SCHEMATIC'],
   ]
   for (const [tab, panel] of panels) {
     await guardedPage.getByRole('tab', { name: tab }).click()
-    await expect(guardedPage.getByRole('tabpanel').getByText(panel, { exact: false })).toBeVisible()
+    await expect(guardedPage.getByRole('tabpanel').getByText(panel, { exact: false }).first()).toBeVisible()
   }
 })
 
@@ -152,9 +152,9 @@ test('configuration simulates, becomes stale after input change, and reruns', as
   await guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
   await guardedPage.locator('#mass').fill('2600')
   await guardedPage.getByRole('tab', { name: 'SIMULATION' }).click()
-  await expect(guardedPage.getByText('RESULT_STALE // RERUN_REQUIRED')).toBeVisible()
+  await expect(guardedPage.getByText(/RESULT_STALE/).first()).toBeVisible()
   await guardedPage.getByRole('button', { name: /RUN_SIMULATION/ }).click()
-  await expect(guardedPage.getByText('RESULT_STALE // RERUN_REQUIRED')).toHaveCount(0)
+  await expect(guardedPage.getByText(/RESULT_STALE/)).toHaveCount(0)
 })
 
 test('Compare preserves Config A while editing B in Specs and recovers after rerun', async ({
@@ -175,7 +175,7 @@ test('Compare preserves Config A while editing B in Specs and recovers after rer
   await expect(guardedPage.getByRole('alert')).toContainText('Current-B simulation is stale')
   await guardedPage.getByRole('tab', { name: 'SIMULATION' }).click()
   await guardedPage.getByRole('button', { name: /RUN_SIMULATION/ }).click()
-  await expect(guardedPage.getByText('RESULT_STALE // RERUN_REQUIRED')).toHaveCount(0)
+  await expect(guardedPage.getByText(/RESULT_STALE/)).toHaveCount(0)
   await guardedPage.getByRole('tab', { name: 'COMPARE' }).click()
   await expect(guardedPage.getByRole('alert')).toHaveCount(0)
   await expect(guardedPage.getByText('Config A saved at')).toBeVisible()

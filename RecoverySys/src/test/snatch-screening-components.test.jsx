@@ -117,9 +117,9 @@ describe('analysis transparency hierarchy', () => {
 
   it('shows only the simple stale message without review architecture', () => {
     render(<AnalysisTab state={{ ...stateFor(canonicalSimulation()), resultFresh: false }} />)
-    expect(screen.getByText('RESULT_STALE // RERUN_REQUIRED')).toBeInTheDocument()
+    expect(screen.getByText('RESULT_STALE')).toBeInTheDocument()
     expect(
-      screen.getByText('Inputs changed. Run the simulation again to refresh analysis.')
+      screen.getByText('Rerun the simulation before using current results.')
     ).toBeInTheDocument()
     expect(screen.queryByText('REVIEW FIRST')).not.toBeInTheDocument()
   })

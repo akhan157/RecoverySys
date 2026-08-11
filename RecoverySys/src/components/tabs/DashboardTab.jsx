@@ -1,3 +1,4 @@
+import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import { CATEGORIES } from '../../data/parts.js'
 import { partSpecLine } from '../../lib/format.js'
 import PartsBrowser from '../PartsBrowser.jsx'
@@ -23,6 +24,8 @@ export default function DashboardTab({
   editCustomPart,
   confidenceProps,
 }) {
+  const resultDetails =
+    RESULT_STATUS_DETAILS[state.simulation ? (resultFresh ? 'current' : 'stale') : 'not-run']
   return (
     <div className="mc-dashboard">
       {/* ── Parts Catalog (left) ─────────────────────────────────────── */}
@@ -165,7 +168,9 @@ export default function DashboardTab({
           )}
 
           {state.simulation && !resultFresh && (
-            <div className="mc-validation mc-validation--warn">RESULT_STALE // RERUN_REQUIRED</div>
+            <div className="mc-validation mc-validation--warn">
+              {resultDetails.reasonCode} — {resultDetails.remediation}
+            </div>
           )}
 
           {/* Slots count */}

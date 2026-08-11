@@ -82,7 +82,7 @@ fully qualified v2/v3 release.
 - Catalog provenance is still primarily manufacturer-level and unverified; per-part source review is not complete.
 - The Analysis tab now has the integrated cause-to-consequence review surface and canonical semantic support, but cross-artifact parity and broader application redesign remain incomplete.
 - `GuidedReview.jsx` is connected as the first-plan entry with explicit new/resume/import/pause/start-fresh actions, live result state, direct tab navigation, and App-owned persistence/reset handling. `DetailsTab.jsx` and `MethodDetailsTab.jsx` remain snapshot/prototype work outside this integration.
-- Sensitivity coverage is incomplete and Monte Carlo dispersion is not seeded for reproducibility; cross-unit influence ranking has been removed from the Analysis contract.
+- Sensitivity coverage is incomplete; dispersion now accepts an explicit safe-integer seed for reproducible runs while retaining stochastic behavior without a seed. Broader dispersion validation and cross-unit influence ranking remain incomplete.
 - The Recovery Brief is not yet a complete on-screen artifact, and brief/checklist print actions currently share the same rendering path.
 - Flight evidence is stored locally, but candidate-evidence export and external review intake are not complete.
 - `engine/` contains a FastAPI/SciPy RK45 research implementation, but it is not wired into the app, not validated as a second production authority, and not bundled into desktop builds. See [`M8-architecture-decision-report.md`](M8-architecture-decision-report.md) for the deferred-engine decision and security evidence.
@@ -156,7 +156,8 @@ decision.
 ### M1 - Validation And Evidence Foundation
 
 **Priority:** P0
-**Status:** Partial; external gate
+**Status:** Partial; external gate (seeded dispersion fixtures implemented;
+broader validation and evidence gates remain).
 **Goal:** know which outputs are covered by which kind of evidence before making
 stronger product claims.
 
@@ -166,7 +167,7 @@ Work:
   ascent-domain, additional unit-conversion, edge-case, metamorphic, and
   representative end-to-end coverage.
 - Add deterministic machine-readable case summaries and coverage by output domain.
-- Seed dispersion runs and make all stochastic fixtures reproducible.
+- Seed dispersion runs and make stochastic fixtures reproducible; explicit seeded dispersion fixtures now exist, while broader stochastic fixture coverage remains incomplete.
 - Document tolerance derivation, input equivalence, units, model identity, and scope for every case.
 - Promote cases to `accepted-for-comparison` only after independent review metadata exists.
 - Add per-part catalog source metadata and a deterministic provenance report.

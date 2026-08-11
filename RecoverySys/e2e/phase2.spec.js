@@ -190,8 +190,10 @@ test('JSON download imports a selected custom part into a fresh state', async ({
 test('Dispersion reports fresh, no-result, and stale states', async ({ guardedPage }) => {
   await openApp(guardedPage)
   await guardedPage.getByRole('tab', { name: 'DISPERSION' }).click()
-  await expect(guardedPage.getByText('AWAITING_SIMULATION')).toBeVisible()
-  await expect(guardedPage.getByText('NO_SIMULATION_DATA')).toBeVisible()
+  await expect(guardedPage.getByText('NO_CURRENT_RESULT').first()).toBeVisible()
+  await expect(
+    guardedPage.getByText(/Run a simulation before interpreting derived recovery estimates/).first()
+  ).toBeVisible()
 
   await configureRocket(guardedPage)
   await configureDispersionProfile(guardedPage)
@@ -220,11 +222,9 @@ test('Dispersion reports fresh, no-result, and stale states', async ({ guardedPa
   await expect(guardedPage.locator('#launch-lon')).toHaveValue('-117.8083')
   await guardedPage.locator('#mass').fill('2600')
   await guardedPage.getByRole('tab', { name: 'DISPERSION' }).click()
-  await expect(
-    guardedPage.getByRole('tabpanel').getByText('RESULT_STALE // RERUN_REQUIRED').first()
-  ).toBeVisible()
-})
+  await expect(guardedPage.getByRole('tabpanel').getByText(/RESULT_STALE/).first()).toBeVisible()
 
+})
 test('print action invokes the browser and checklist reflects current versus stale results', async ({
   guardedPage,
 }) => {

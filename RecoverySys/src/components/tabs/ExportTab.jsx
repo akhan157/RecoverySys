@@ -1,4 +1,5 @@
 import { useRef } from 'react'
+import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import { SAVE_STATES, SHARE_STATES } from '../../lib/constants.js'
 import {
   encodeJsonPayload,
@@ -95,11 +96,8 @@ export default function ExportTab({
             and model provenance before sharing or printing.
           </div>
           <div className="mc-export__brief-status" role="status">
-            {recoveryBrief?.status === 'current'
-              ? 'CURRENT_RESULT'
-              : recoveryBrief?.status === 'stale'
-                ? 'STALE_RESULT // RERUN_REQUIRED'
-                : 'NO_CURRENT_RESULT'}{' '}
+            {RESULT_STATUS_DETAILS[recoveryBrief?.status || 'not-run']?.reasonCode ||
+              RESULT_STATUS_DETAILS['not-run'].reasonCode}{' '}
             · {recoveryBrief?.confidence?.label || 'Insufficient confidence'}
           </div>
           <button className="mc-run-btn" onClick={onPrintBrief}>

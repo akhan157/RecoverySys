@@ -54,7 +54,7 @@ describe('ExportTab custom-part import', () => {
         recoveryBrief={{ status: 'stale', confidence: { label: 'Insufficient confidence' } }}
       />
     )
-    expect(screen.getByRole('status')).toHaveTextContent(/STALE_RESULT/)
+    expect(screen.getByRole('status')).toHaveTextContent(/RESULT_STALE/)
     expect(screen.getByRole('status')).toHaveTextContent(/Insufficient confidence/)
 
     fireEvent.click(screen.getByRole('button', { name: /PRINT_RECOVERY_BRIEF/i }))

@@ -332,8 +332,8 @@ incomplete.
 
 **Depends on:** V2-04.
 **Status:** Partial; deterministic one-at-a-time sensitivity is implemented,
-while domain coverage remains incomplete and stochastic dispersion is not
-seeded for reproducibility.
+and the dispersion API now supports seeded reproducibility for fixtures, while
+domain coverage and broader stochastic validation remain incomplete.
 
 **Objective:** show which uncertain inputs can materially change a recovery decision without pretending Monte Carlo scatter is a measured confidence interval.
 

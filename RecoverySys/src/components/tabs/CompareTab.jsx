@@ -1,5 +1,6 @@
 import { useMemo } from 'react'
 import { CATEGORIES } from '../../data/parts.js'
+import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import { runSimulation } from '../../lib/simulation.js'
 
 /**
@@ -25,9 +26,9 @@ export default function CompareTab({
 
   const currentSim = resultFresh ? state.simulation : null
   const currentBStatus = !state.simulation
-    ? 'No current-B simulation available — run a simulation before using B results.'
+    ? `${RESULT_STATUS_DETAILS['not-run'].reasonCode} — No current-B simulation available — ${RESULT_STATUS_DETAILS['not-run'].remediation}`
     : !resultFresh
-      ? 'Current-B simulation is stale — rerun before using it.'
+      ? `${RESULT_STATUS_DETAILS.stale.reasonCode} — Current-B simulation is stale — ${RESULT_STATUS_DETAILS.stale.remediation}`
       : null
 
   if (!snapshot) {

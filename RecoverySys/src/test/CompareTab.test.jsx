@@ -1,6 +1,7 @@
 import React from 'react'
 import { describe, it, expect } from 'vitest'
 import { fireEvent, render, screen } from '@testing-library/react'
+import { RESULT_STATUS_DETAILS } from '../lib/assessment.js'
 import CompareTab from '../components/tabs/CompareTab.jsx'
 
 const state = {
@@ -35,7 +36,8 @@ describe('CompareTab current-B result integrity', () => {
         onClearSnapshot={() => {}}
       />
     )
-    expect(screen.getByRole('alert')).toHaveTextContent(/no current-b simulation available/i)
+    expect(screen.getByRole('alert')).toHaveTextContent(RESULT_STATUS_DETAILS['not-run'].reasonCode)
+    expect(screen.getByRole('alert')).toHaveTextContent('No current-B simulation available')
 
     rerender(
       <CompareTab
@@ -46,6 +48,7 @@ describe('CompareTab current-B result integrity', () => {
         onClearSnapshot={() => {}}
       />
     )
-    expect(screen.getByRole('alert')).toHaveTextContent(/current-b simulation is stale/i)
+    expect(screen.getByRole('alert')).toHaveTextContent(RESULT_STATUS_DETAILS.stale.reasonCode)
+    expect(screen.getByRole('alert')).toHaveTextContent('Current-B simulation is stale')
   })
 })
