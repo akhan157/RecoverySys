@@ -143,7 +143,7 @@ export default function MissionControlLayout({
         {/* ── Body ────────────────────────────────────────────────────────── */}
         <div className="mc-body">
           <main
-            id="mc-main"
+            id={tabPanelId(activeTab)}
             className="mc-main"
             role="tabpanel"
             aria-labelledby={tabBtnId(activeTab)}

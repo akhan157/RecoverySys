@@ -176,6 +176,31 @@ describe('App — status bar warning badge', () => {
   })
 })
 
+describe('MissionControl tab semantics', () => {
+  beforeEach(() => {
+    clearLocalStorage()
+    setReturningUser()
+  })
+
+  afterEach(() => {
+    clearLocalStorage()
+  })
+
+  it('matches the active tab aria-controls target to the main panel id', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    const analysisTab = screen.getByRole('tab', { name: 'ANALYSIS' })
+    expect(analysisTab).toHaveAttribute('aria-controls', 'mc-panel-analysis')
+
+    await user.click(analysisTab)
+
+    const analysisPanel = screen.getByRole('tabpanel')
+    expect(analysisPanel).toHaveAttribute('id', 'mc-panel-analysis')
+    expect(analysisTab).toHaveAttribute('aria-controls', analysisPanel.id)
+  })
+})
+
 // ── Share-link import transaction ────────────────────────────────────────────
 
 describe('App — rejected share-link import', () => {
