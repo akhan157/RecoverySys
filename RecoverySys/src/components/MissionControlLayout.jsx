@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from 'react'
+import { useState, useMemo, useEffect, useRef } from 'react'
 import GuidedReview from './GuidedReview.jsx'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
@@ -53,6 +53,7 @@ export default function MissionControlLayout({
 }) {
   const [activeTab, setActiveTab] = useState('GUIDED_REVIEW')
   const [printMode, setPrintMode] = useState(null)
+  const tabRefs = useRef(new Map())
 
   useEffect(() => {
     if (!printMode) return undefined
@@ -109,6 +110,37 @@ export default function MissionControlLayout({
 
   const tabBtnId = (id) => `mc-tab-${id.toLowerCase()}`
   const tabPanelId = (id) => `mc-panel-${id.toLowerCase()}`
+  const focusTab = (index) => {
+    const tab = TABS[index]
+    setActiveTab(tab.id)
+    tabRefs.current.get(tab.id)?.focus()
+  }
+
+  const handleTabKeyDown = (event, index) => {
+    let nextIndex
+
+    switch (event.key) {
+      case 'ArrowRight':
+      case 'ArrowDown':
+        nextIndex = (index + 1) % TABS.length
+        break
+      case 'ArrowLeft':
+      case 'ArrowUp':
+        nextIndex = (index - 1 + TABS.length) % TABS.length
+        break
+      case 'Home':
+        nextIndex = 0
+        break
+      case 'End':
+        nextIndex = TABS.length - 1
+        break
+      default:
+        return
+    }
+
+    event.preventDefault()
+    focusTab(nextIndex)
+  }
 
   return (
     <>
@@ -117,11 +149,15 @@ export default function MissionControlLayout({
         <header className="mc-header">
           <h1 className="mc-header__brand">RECOVERYSYS_{VERSION_DISPLAY}</h1>
           <nav className="mc-header__tabs" role="tablist" aria-label="Main navigation">
-            {TABS.map((tab) => {
+            {TABS.map((tab, index) => {
               const isActive = activeTab === tab.id
               return (
                 <button
                   key={tab.id}
+                  ref={(element) => {
+                    if (element) tabRefs.current.set(tab.id, element)
+                    else tabRefs.current.delete(tab.id)
+                  }}
                   id={tabBtnId(tab.id)}
                   role="tab"
                   aria-selected={isActive}
@@ -129,6 +165,7 @@ export default function MissionControlLayout({
                   tabIndex={isActive ? 0 : -1}
                   className={`mc-header__tab ${isActive ? 'mc-header__tab--active' : ''}`}
                   onClick={() => setActiveTab(tab.id)}
+                  onKeyDown={(event) => handleTabKeyDown(event, index)}
                 >
                   {tab.label}
                 </button>

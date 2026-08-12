@@ -199,6 +199,40 @@ describe('MissionControl tab semantics', () => {
     expect(analysisPanel).toHaveAttribute('id', 'mc-panel-analysis')
     expect(analysisTab).toHaveAttribute('aria-controls', analysisPanel.id)
   })
+  it('supports wrapping arrow navigation and Home/End with roving focus', async () => {
+    const user = userEvent.setup()
+    render(<App />)
+
+    const guidedTab = screen.getByRole('tab', { name: 'GUIDED_REVIEW' })
+    const dashboardTab = screen.getByRole('tab', { name: 'DASHBOARD' })
+    const exportTab = screen.getByRole('tab', { name: 'EXPORT' })
+
+    guidedTab.focus()
+    await user.keyboard('{ArrowLeft}')
+    expect(exportTab).toHaveFocus()
+    expect(exportTab).toHaveAttribute('aria-selected', 'true')
+    expect(exportTab).toHaveAttribute('tabindex', '0')
+    expect(guidedTab).toHaveAttribute('tabindex', '-1')
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('id', 'mc-panel-export')
+
+    await user.keyboard('{ArrowDown}')
+    expect(guidedTab).toHaveFocus()
+    expect(guidedTab).toHaveAttribute('aria-selected', 'true')
+
+    await user.keyboard('{ArrowRight}')
+    expect(dashboardTab).toHaveFocus()
+    expect(dashboardTab).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('id', 'mc-panel-dashboard')
+
+    await user.keyboard('{ArrowUp}')
+    expect(guidedTab).toHaveFocus()
+
+    await user.keyboard('{End}')
+    expect(exportTab).toHaveFocus()
+
+    await user.keyboard('{Home}')
+    expect(guidedTab).toHaveFocus()
+  })
 })
 
 // ── Share-link import transaction ────────────────────────────────────────────
