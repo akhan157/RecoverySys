@@ -1,6 +1,6 @@
 # RecoverySys Product Roadmap
 
-**Roadmap revision:** 2026-08-11
+**Roadmap revision:** 2026-08-12
 **Current branch:** `main`
 **Current release:** `1.2.0.1`
 
@@ -40,9 +40,9 @@ phase goal plan is defined in
 
 ## How To Use This Roadmap
 
-Use the milestone table and the ordered queue to decide what to build next. A
-milestone is complete only when its exit criteria and evidence are met, not when
-the code exists or a design document is written.
+Use the milestone progress map and the execution order to decide what to build
+next. A milestone is complete only when its exit criteria and evidence are met,
+not when the code exists or a design document is written.
 
 When work changes a contract, also update the relevant detailed plan, tests,
 migrations, and release notes. Record the implementing commit and verification
@@ -55,6 +55,26 @@ date in this document when a milestone changes state.
 - **Planned** - designed or specified, but not integrated into the product.
 - **External gate** - cannot be completed by code alone; requires independent review, hardware, or field evidence.
 - **Deferred** - intentionally outside the near-term product boundary.
+
+## Milestone Progress Map
+
+The roadmap is dependency-ordered, but implementation has progressed across
+M0-M6 in parallel. Crossed-out bullets inside a milestone represent verified
+increments, not a completed milestone. A milestone remains partial until its
+full exit criteria and evidence gates pass.
+
+| Milestone | Status | Verified progress | Main remaining gate |
+| --- | --- | --- | --- |
+| M0 | Partial | Local formatting, lint, tests, build, and validation gates | Supported Node 22 run, ledger reconciliation, and contract inventory |
+| M1 | Partial | 14 review cases and seeded dispersion support | Broader corpus, provenance, and independent evidence |
+| M2 | Partial | Canonical contracts and Analysis semantic slice | Stale-result closure and cross-artifact parity |
+| M3 | Partial | Cause-to-consequence Analysis surface | Full Analysis UX/accessibility closure; broader UI remains deferred |
+| M4 | Partial | On-screen Brief and separate Brief/Checklist print artifacts | Evidence transfer and import/export/share/Flight Log parity |
+| M5 | Partial | GuidedReview entry, guided state paths, and qualification coverage | Full supported-runtime critical-path qualification |
+| M6 | Partial | Local qualification gates and print-media inspection | Node 22, Windows, macOS, transfer, and external-evidence gates |
+| M7 | Deferred | No promoted model changes | Evidence-backed model decision |
+| M8 | Deferred research | Python research engine exists but remains disconnected | M6, M7, comparison, security, privacy, and packaging gates |
+| M9 | Deferred | No committed expansion work | Future product decision after trust-centered workflow stabilizes |
 
 ## Current Baseline
 
@@ -70,39 +90,42 @@ fully qualified v2/v3 release.
 - ThrustCurve motor search and local `.eng` import.
 - Result freshness and simulation identity, mission-envelope checks, evidence posture, confidence states, deterministic sensitivity analysis, and dispersion mapping.
 - Local persistence, schema migrations, share links, JSON import/export, custom motor/part round trips, configuration comparison, and a local Flight Log.
-- Versioned Recovery Brief view-model and print output.
+- Versioned Recovery Brief view-model and print output, with separate Recovery Brief and Recovery Checklist print artifacts.
+- Guided first-plan entry through `GuidedReview.jsx`, including new, resume, import, pause, start-fresh, stale, and insufficient-confidence paths, while preserving direct expert-tab navigation.
 - Web deployment and Tauri desktop packaging foundations, including a Windows portable build and an unverified macOS universal build path.
 
 ### Not Yet Complete
 
 - Fourteen review-only validation cases now exist, including scalar and curve representative end-to-end plans plus descent unit-conversion, invalid-input edge, and metamorphic coverage. There are no accepted comparison cases or real-flight evidence cases.
 - Catalog provenance is still primarily manufacturer-level and unverified; per-part source review is not complete.
-- The Analysis tab now has the integrated cause-to-consequence review surface and canonical semantic support, but cross-artifact parity and broader application redesign remain incomplete.
-- `GuidedReview.jsx` is connected as the first-plan entry with explicit new/resume/import/pause/start-fresh actions, live result state, direct tab navigation, and App-owned persistence/reset handling. `DetailsTab.jsx` and `MethodDetailsTab.jsx` remain snapshot/prototype work outside this integration.
-- Sensitivity coverage is incomplete; dispersion now accepts an explicit safe-integer seed for reproducible runs while retaining stochastic behavior without a seed. Broader dispersion validation and cross-unit influence ranking remain incomplete.
+- The Analysis tab has the integrated cause-to-consequence review surface and canonical semantic support, but stale-result closure, cross-artifact parity, and broader application redesign remain incomplete.
+- `DetailsTab.jsx` and `MethodDetailsTab.jsx` remain snapshot/prototype work outside the GuidedReview integration.
+- Sensitivity coverage is incomplete; dispersion accepts an explicit safe-integer seed for reproducible runs while retaining stochastic behavior without a seed. Broader dispersion validation and cross-unit influence ranking remain incomplete.
 - The versioned Recovery Brief is available on screen, and separate brief/checklist print modes are implemented. Chromium print-media qualification verifies that each mode exposes only its intended artifact sections and that stale estimates remain withheld; broader screen/export/import/share and Flight Log parity remains incomplete.
 - Flight evidence is stored locally, but candidate-evidence export and external review intake are not complete.
 - `engine/` contains a FastAPI/SciPy RK45 research implementation, but it is not wired into the app, not validated as a second production authority, and not bundled into desktop builds. See [`M8-architecture-decision-report.md`](M8-architecture-decision-report.md) for the deferred-engine decision and security evidence.
-- The 2026-08-11 qualification record documents the verified M5 guided branch and M6 local gates. Local verification uses Node 26; CI remains pinned to Node 22.
+- The 2026-08-11 qualification record documents the verified M5 guided branch and M6 local gates. Local verification uses Node 26; CI remains pinned to Node 22. The current branch is `c863eff` on `main`; supported-runtime, platform, transfer-parity, and external-evidence gates remain open.
 
 ### Baseline Evidence Snapshot
 
-Observed after the 2026-08-11 print qualification increment:
+Observed on 2026-08-12 at current `main` HEAD `c863eff`. Items marked as
+qualification-record evidence were verified on 2026-08-11; the unit-test and
+production-build rows were re-run locally on 2026-08-12.
 
 | Check | Result |
-| `git status` | Clean at `82dac6b`; qualification branch pushed to `origin/akhan157/recoverysys-roadmap-continue` |
-| `npm run validate:parts` | Passes; 225 parts |
-| `npm run validate:corpus` | Passes; 14 review cases |
-| `npm test` | 34 files and 281 tests pass locally |
-| `npm run lint` | Passes with zero warnings |
-| `npm run format:check` | Passes |
+| `git status` | Clean at `c863eff` on `main`, tracking `origin/main` |
+| `npm run validate:parts` | Qualification record: passes; 225 parts |
+| `npm run validate:corpus` | Qualification record: passes; 14 review cases |
+| `npm test` | Passes; 34 files and 281 tests |
+| `npm run lint` | Qualification record: passes with zero warnings |
+| `npm run format:check` | Qualification record: passes |
 | `npm run build` | Passes |
-| `npm run e2e` | 36/36 on desktop and Pixel 5 mobile Chromium before the print qualification increment |
-| `npm test -- --run src/test/PrintChecklist.brief.test.jsx` | 3/3 pass after the print qualification increment |
-| `npm run e2e -- e2e/phase2.spec.js` | 10/10 pass across Chromium desktop and Pixel 5 after the print qualification increment |
-| `npm run check` | Passes after the print qualification increment |
+| `npm run e2e` | Qualification record: 36/36 on desktop and Pixel 5 mobile Chromium |
+| `npm test -- --run src/test/PrintChecklist.brief.test.jsx` | Qualification record: 3/3 pass after print qualification |
+| `npm run e2e -- e2e/phase2.spec.js` | Qualification record: 10/10 across Chromium desktop and Pixel 5 |
+| `npm run check` | Qualification record: passes after print qualification |
 
-The 2026-08-11 qualification record is [`docs/release-qualification-2026-08-11.md`](docs/release-qualification-2026-08-11.md). It records the verified M5 guided first-plan increment and M6 local gates, including print artifact media inspection, while keeping supported-runtime, Windows, macOS, independent-evidence, and remaining transfer-parity gates open.
+The 2026-08-11 qualification record is [`docs/release-qualification-2026-08-11.md`](docs/release-qualification-2026-08-11.md). It records the verified M5 guided first-plan increment and M6 local gates, including print artifact media inspection, while keeping supported-runtime, Windows, macOS, independent, and remaining transfer-parity gates open.
 
 This snapshot verifies the consolidated implementation locally. Broader
 cross-artifact, clean-install, platform, and external evidence gates remain
@@ -112,7 +135,8 @@ open.
 
 The core product roadmap has six phases. M0 through M6 are grouped so the
 release path stays legible; M7 through M9 are deferred tracks after the core
-release boundary.
+release boundary. The dependency-ordered execution plan and parallel-work
+lanes are defined in the [Execution Order](#execution-order) section below.
 
 ```text
 Phase 1 Trust foundation (M0 + M1)
@@ -173,6 +197,7 @@ Work:
 - Document tolerance derivation, input equivalence, units, model identity, and scope for every case.
 - Promote cases to `accepted-for-comparison` only after independent review metadata exists.
 - Add per-part catalog source metadata and a deterministic provenance report.
+- Define the source metadata and review contract that any future automated catalog sourcing must satisfy.
 - Keep real-flight records separate from accepted validation evidence.
 
 **Exit criteria:** every production output has at least invariant coverage;
@@ -187,7 +212,7 @@ implementation alone.
 ### M2 - Canonical Result Semantics
 
 **Priority:** P0
-**Status:** Partial; canonical contracts and Analysis slice integrated; cross-artifact parity remains
+**Status:** Partial; canonical contracts and the Analysis slice are integrated; stale-result closure and cross-artifact parity remain
 **Goal:** make every result, warning, threshold, and evidence state mean the same
 thing across calculation, UI, print, export, and flight records.
 
@@ -271,7 +296,7 @@ artifact only; stale estimates remain withheld; and Chromium print-media
 inspection verifies distinct Recovery Brief and Recovery Checklist artifact
 sections. M4 remains Partial because screen/export/import/share parity and the
 evidence-loop gates remain open.
-+
+
 **Goal:** turn a current plan into one traceable handoff artifact and preserve
 later observations without promoting them automatically to evidence.
 
@@ -450,7 +475,15 @@ Potential work, subject to a future product decision:
 - Non-developer catalog update/review tooling.
 - Broader validated component and motor data workflows.
 - Additional recovery tradeoff and scenario tools.
+- Automatic sourcing and pulling of parts data from manufacturer or approved supplier sites, with explicit source URLs, fetch dates, version history, field-level change review, rate-limit compliance, and human approval before catalog updates.
 - More complete offline and platform distribution experience.
+
+Automatic sourcing is deferred until the M1 provenance contract and M6
+privacy, security, and release gates are satisfied. It must be staged as
+catalog review tooling, then dry-run sourcing with field-level diffs, then
+human-approved updates, then controlled refreshes. It must not silently
+overwrite catalog data or imply manufacturer endorsement, accuracy,
+availability, or flight suitability.
 
 These are not commitments yet. They must not displace validation, semantic
 consistency, accessibility, or artifact reliability.
@@ -466,25 +499,166 @@ The following are intentionally outside the current product boundary:
 - Automatic optimization before the objective function and model evidence are defensible.
 - Becoming an AeroBing-specific product; AeroBing may supply representative cases only.
 
-## Immediate Ordered Queue
+## Execution Order
 
-This is the next practical queue. Complete it in order unless a new evidence or
-product decision changes the roadmap.
+This is the dependency-ordered execution plan for the milestones. M0 through M6
+are the core release path and must be finished in order: each milestone is gated
+on the one before it. M7 through M9 are deferred tracks that start only after
+the core boundary and evidence gates pass. Completed increments are removed
+from this queue; partial milestones remain until their exit criteria and
+evidence gates are complete.
 
-1. Restore a green baseline on the supported CI runtime and run the full E2E suite.
-2. Reconcile the v2 ledger, confidence posture, version identities, and current documentation.
-3. Decide which transparency prototype, if any, becomes the product direction.
-4. Fix stale-result and Recovery Brief contract inconsistencies.
-5. Expand the validation corpus and make dispersion fixtures reproducible.
-6. Centralize criteria, findings, domain assessments, and sensitivity semantics.
-7. Implement shared result status and reason-specific remediation links.
-8. Finalize the Analysis tab UI/UX end to end, including semantic alignment,
-   responsive behavior, accessibility, review actions, and visual polish.
-9. Defer the broader Dashboard, compatibility, Simulation, Dispersion, Compare,
-   Flight Log, and whole-application UI sequence until explicit approval.
-10. Complete on-screen brief, distinct print artifacts, static-order boundary, and evidence transfer.
-11. Integrate the guided first-plan flow and qualify the release artifacts.
-12. Only after M6 and M7, evaluate the advanced engine architecture; do not wire the deferred Python service into the frontend before its comparison, security, privacy, and packaging gates pass.
+```text
+M0 baseline
+  -> M1 validation + provenance
+      -> M2 canonical semantics
+          -> M3 Analysis
+              -> M4 artifact/evidence parity
+                  -> M5 guided onboarding qualification
+                      -> M6 release qualification
+                          -> M7 evidence-led model decisions
+                              -> M8 advanced engine decision
+                                  -> M9 expansion, including automated parts sourcing
+```
+
+### Parallel work
+
+Independent evidence collection can start during M1 and continue through M6.
+Windows and macOS artifact preparation can start during M0, but qualification
+belongs in M6. Detailed design for automated catalog sourcing can begin during
+M1, but implementation must wait until the M1 provenance contract and M6
+privacy, security, and release gates are satisfied. Documentation updates
+happen continuously, not at the end. Test fixtures can be expanded during M1
+and M2.
+
+### Step 1: Finish M0 - Green Baseline And Reconciliation
+
+1. Run the full project check on the supported Node 22 runtime from a clean install.
+2. Run the complete Playwright suite from a clean install.
+3. Reconcile the v2 completion ledger with the actual code and evidence.
+4. Resolve the documentation conflict between future-facing confidence posture and implemented confidence modules.
+5. Inventory stored and transferred contracts: local storage, share links, JSON, simulation envelopes, briefs, and flight records.
+6. Decide which transparency prototype, if any, remains the product direction; archive the alternatives.
+7. Track dependency audit findings separately from feature work.
+8. Keep the roadmap, release qualification record, changelog, and version identity aligned.
+
+**Output:** one reproducible baseline on the supported runtime.
+
+### Step 2: Finish M1 - Validation, Evidence, And Catalog Provenance
+
+1. Expand the validation corpus beyond the current 14 review cases.
+2. Add deterministic machine-readable case summaries and coverage by output domain.
+3. Complete seeded dispersion coverage and make stochastic fixtures reproducible.
+4. Document tolerance derivation, input equivalence, units, model identity, and scope for every case.
+5. Add per-part catalog source metadata and a deterministic provenance report.
+6. Define the source metadata and review contract that any future automated catalog sourcing must satisfy.
+7. Keep real-flight records separate from accepted validation evidence.
+8. Start collecting independent evidence in parallel; it cannot be produced by code alone.
+
+**Output:** every result has a known evidence posture, and catalog data has traceable provenance.
+
+### Step 3: Finish M2 - Canonical Result Semantics
+
+1. Centralize domain assessments with value, unit, freshness, validity, envelope, evidence, reason codes, and method/policy identity.
+2. Replace message-derived compatibility codes with authored stable finding codes.
+3. Centralize threshold criteria and exact boundary behavior.
+4. Make stale results unusable for conclusions, comparisons, briefs, and flight-log predictions.
+5. Separate invalid, unsupported, unknown, conditional, sensitivity-flagged, and insufficient-confidence states.
+6. Replace aggregate cross-unit sensitivity ranking with per-output model response and defensible criterion crossings only.
+7. Remove prohibited or overstated labels such as `SAFE`, `REVIEWED`, `PRELIMINARY CHECKS PASS`, and unsupported confidence-interval language.
+8. Define shared status and remediation contracts.
+
+**Output:** the same input produces the same meaning on the screen, Analysis tab, Brief, print, export, import, and Flight Log.
+
+### Step 4: Finish M3 - Complete The Analysis Experience
+
+M3 depends on M2. Do not expand the whole application yet.
+
+1. Add a shared plan/result strip for plan identity, completeness, currentness, and the next action.
+2. Finish review summaries, remediation links, accessible disclosures, and canonical finding rows.
+3. Finish the cause-to-consequence board: driver, affected outcome, finding, and next action.
+4. Finish tested model-response presentation with per-output ranges and assumptions.
+5. Finish progressive detail with formulas, intermediate values, provenance, evidence IDs, scenario tables, and method notes.
+6. Close keyboard, mobile, focus, contrast, reduced-motion, and no-color-only status behavior.
+7. Keep the broader Dashboard, Compatibility, Simulation, Dispersion, Compare, Flight Log, and whole-application redesign deferred until explicit approval.
+
+**Output:** an experienced user can identify what needs review, why it matters, and what to do next from the first viewport.
+
+### Step 5: Finish M4 - Artifact And Evidence Transfer Parity
+
+1. Make the on-screen Brief, print Brief, and Checklist agree on values, identity, status, units, and unresolved checks.
+2. Complete the static checklist-order boundary; keep packing-volume screening separate.
+3. Fix stale-result withholding across every artifact; stale artifacts cannot appear current.
+4. Complete JSON export/import parity.
+5. Complete share-link migration parity.
+6. Complete Flight Log parity; keep observations distinct from interpretation and validation.
+7. Add candidate-evidence export and external review intake with source, units, conditions, reviewer status, and immutable prediction identity.
+8. Verify all of this in fresh browser contexts.
+
+**Output:** a plan moves between screen, print, export, import, sharing, and Flight Log without changing meaning.
+
+### Step 6: Finish M5 - Qualify The Guided First-Plan Flow
+
+1. Qualify new-plan, resume, import, and invalid-import flows.
+2. Qualify pause and start-fresh behavior.
+3. Qualify stale and insufficient-confidence states.
+4. Verify required, optional, defaulted, catalog, and user-supplied values are explicit.
+5. Verify demo data cannot be mistaken for a user plan.
+6. Run the complete desktop and Pixel 5 mobile critical path, including keyboard activation.
+7. Verify that guided completion never implies approval or flight readiness.
+
+**Output:** a first-time user can reach a reviewable Brief without bypassing the trust boundaries.
+
+### Step 7: Finish M6 - Release Qualification
+
+1. Run all checks from a clean Node 22 install: formatting, parts validation, corpus validation, lint, unit tests, build, and Playwright E2E.
+2. Run representative fresh, stale, invalid, out-of-envelope, conditional, sensitivity-flagged, and insufficient workflows.
+3. Complete the import/export/share migration matrix, print artifact inspection, and no current/stale or unit mismatch.
+4. Verify accessibility, copy, privacy, provenance, and prohibited-claim behavior.
+5. Launch and hash the Windows portable artifact.
+6. Verify the macOS artifact on macOS before making a macOS support claim; otherwise it remains unverified.
+7. Align documentation, changelog, release notes, and version identities with the shipped artifacts.
+
+**Output:** a release-qualified core RecoverySys version, with every remaining external limitation stated in the release documentation.
+
+### Step 8: M7 - Evidence-Led Model Decisions
+
+Do not improve the model merely because a result looks wrong or a test is inconvenient.
+
+For each proposed physics change:
+
+1. Reproduce the discrepancy.
+2. Verify units and reference assumptions.
+3. Compare old and new behavior.
+4. Measure decision impact.
+5. Decide whether to retain, narrow, add uncertainty, or change the model.
+6. Update model identity, assumptions, corpus cases, stale behavior, tests, and documentation together.
+
+**Output:** evidence-backed model changes only.
+
+### Step 9: M8 - Evaluate The Advanced Python Engine
+
+Only evaluate the Python engine after M6 and after M7 produces an evidence-backed reason to do so.
+
+1. Compare browser and Python outputs using the same inputs, units, assumptions, thrust curves, and boundary cases.
+2. Define independent engine identity, physics assumptions, input/output schema, numerical settings, and evidence source.
+3. Decide the role: research comparator, optional high-fidelity analysis, or replacement authority. The default recommendation is optional analysis or research comparator; the browser path remains authoritative until independently justified.
+4. Complete security and privacy review covering CORS, request validation, denial-of-service limits, secrets, dependency supply chain, local sidecar permissions, and packaged binary integrity.
+5. Define hosted and desktop execution paths with explicit fallback behavior and no silent uploads.
+6. Verify packaged Windows and macOS artifacts on their respective hosts.
+
+**Output:** a written architecture decision, cross-engine comparison report, versioned API/sidecar contract, privacy and security review, explicit fallback behavior, and verified packaged artifacts. Without these, the Python engine remains research-only.
+
+### Step 10: M9 - Longer-Term Expansion, Including Automatic Parts Sourcing
+
+Automatic sourcing belongs here, after the trust-centered core is stable, in this order:
+
+1. **Catalog review tooling:** review source records, view stale or missing provenance, compare catalog values against source records, and approve or reject changes.
+2. **Sourcing in dry-run mode:** fetch from approved manufacturer or supplier URLs, store raw fetch metadata, parse candidate values, and produce a field-level diff without modifying the catalog.
+3. **Human-approved updates:** require explicit approval, preserve previous values, record reviewer, timestamp, source URL, and changed fields, and support rollback.
+4. **Controlled refreshes:** rate-limit requests, respect site terms and robots policies, handle unavailable or changed pages, and never treat a failed fetch as evidence that a part disappeared. Keep the last known value visible with its age and provenance state.
+
+Automatic sourcing must not silently overwrite catalog data or imply manufacturer endorsement, accuracy, availability, or flight suitability.
 
 ## Trust Gaps To Keep Visible
 
