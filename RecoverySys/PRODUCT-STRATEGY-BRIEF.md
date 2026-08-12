@@ -302,7 +302,7 @@ stored shape, result identity, and evidence claim has an explicit owner.
 - Reconcile the product contract, runtime identities, migrations, persistence,
   share links, JSON, briefs, flight records, and validation corpus.
 - Keep the browser JavaScript model as the sole production authority.
-- Expand executable validation beyond the current 11 review cases, including
+- Expand executable validation beyond the current 14 review cases, including
   explicit ascent, additional unit-conversion, edge-case, metamorphic, and
   representative end-to-end coverage. The corpus now includes descent
   unit-conversion, invalid-input edge, and metamorphic cases, while keeping
@@ -439,7 +439,7 @@ comparison, export, print, Recovery Brief, and Flight Log.
 | 3. Decision-first workflow | M3 | Make the Analysis tab and review flow lead with decision, impact, and next action | Critical review surfaces are semantically aligned, accessible, responsive, and actionable | Partial |
 | 4. Recovery Brief and evidence loop | M4 | Produce a current, traceable handoff artifact and preserve later observations safely | Screen, print, export, and import agree; stale artifacts cannot appear current | Partial |
 | 5. Guided first plan | M5 | Help a first-time user reach a reviewable plan without hiding assumptions or weakening expert flow | New, resume, import, invalid, stale, and insufficient paths pass desktop/mobile and keyboard checks | Partial |
-| 6. Release qualification | M6 | Release only what code, evidence, platforms, and documentation support | Clean-install checks, E2E, artifact verification, accessibility, privacy, and release docs pass | Planned |
+| 6. Release qualification | M6 | Release only what code, evidence, platforms, and documentation support | Clean-install checks, E2E, artifact verification, accessibility, privacy, and release docs pass | Partial; local gates pass, platform and external gates remain |
 
 ### Deferred tracks after the core six
 

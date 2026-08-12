@@ -83,10 +83,10 @@ fully qualified v2/v3 release.
 - The Analysis tab now has the integrated cause-to-consequence review surface and canonical semantic support, but cross-artifact parity and broader application redesign remain incomplete.
 - `GuidedReview.jsx` is connected as the first-plan entry with explicit new/resume/import/pause/start-fresh actions, live result state, direct tab navigation, and App-owned persistence/reset handling. `DetailsTab.jsx` and `MethodDetailsTab.jsx` remain snapshot/prototype work outside this integration.
 - Sensitivity coverage is incomplete; dispersion now accepts an explicit safe-integer seed for reproducible runs while retaining stochastic behavior without a seed. Broader dispersion validation and cross-unit influence ranking remain incomplete.
-- The Recovery Brief is not yet a complete on-screen artifact, and brief/checklist print actions currently share the same rendering path.
+- The versioned Recovery Brief is now available on screen, and brief/checklist print actions are separate; broader transfer/evidence-loop parity remains incomplete.
 - Flight evidence is stored locally, but candidate-evidence export and external review intake are not complete.
 - `engine/` contains a FastAPI/SciPy RK45 research implementation, but it is not wired into the app, not validated as a second production authority, and not bundled into desktop builds. See [`M8-architecture-decision-report.md`](M8-architecture-decision-report.md) for the deferred-engine decision and security evidence.
-- The integrated checkpoint is committed and pushed on `main`; the working tree is clean. CI remains pinned to Node 22, while local verification used Node 26.
+- The consolidated checkpoint is committed and pushed; the 2026-08-11 qualification increment is recorded separately. CI remains pinned to Node 22, while local verification used Node 26.
 
 ### Baseline Evidence Snapshot
 
@@ -95,12 +95,14 @@ Observed after the consolidated product work was merged:
 | Check | Result |
 | `git status` | Clean at `498c886`; `origin/main` matches |
 | `npm run validate:parts` | Passes; 225 parts |
-| `npm run validate:corpus` | Passes; 11 review cases |
-| `npm test` | 33 files and 263 tests pass locally |
+| `npm run validate:corpus` | Passes; 14 review cases |
+| `npm test` | 34 files and 281 tests pass locally |
 | `npm run lint` | Passes with zero warnings |
 | `npm run format:check` | Passes |
 | `npm run build` | Passes |
-| `npm run e2e` | Last recorded result: 32/32 on desktop and mobile Chromium |
+| `npm run e2e` | 36/36 on desktop and Pixel 5 mobile Chromium |
+
+The 2026-08-11 qualification record is [`docs/release-qualification-2026-08-11.md`](docs/release-qualification-2026-08-11.md). It records the verified M5 guided first-plan increment and M6 local gates while keeping supported-runtime, Windows, macOS, independent-evidence, and remaining artifact-parity gates open.
 
 This snapshot verifies the consolidated implementation locally. Broader
 cross-artifact, clean-install, platform, and external evidence gates remain
@@ -163,7 +165,7 @@ stronger product claims.
 
 Work:
 
-- Expand the corpus beyond the current 11 review cases with explicit atmosphere,
+- Expand the corpus beyond the current 14 review cases with explicit atmosphere,
   ascent-domain, additional unit-conversion, edge-case, metamorphic, and
   representative end-to-end coverage.
 - Add deterministic machine-readable case summaries and coverage by output domain.
@@ -288,7 +290,7 @@ current; local flight observations never upload or auto-promote.
 ### M5 - Guided First-Plan Onboarding
 
 **Priority:** P1
-**Status:** Partial; core first-plan path integrated; full qualification remains open
+**Status:** Partial; guided branch qualification increment verified; full critical-path qualification remains open
 **Goal:** help a first-time user reach a reviewable brief without weakening the
 expert workflow or hiding assumptions.
 
@@ -316,7 +318,7 @@ readiness.
 ### M6 - Release Qualification
 
 **Priority:** P0 at release boundary
-**Status:** Planned
+**Status:** Partial; local qualification gates pass; platform and external gates remain
 **Goal:** release only what the evidence and platform checks support.
 
 Release gate:
@@ -339,7 +341,7 @@ verification above:
 
 - **Independent evidence:** no accepted comparison cases, independent reviewer
   identity, trusted simulator artifact, manufacturer/test dataset, or traceable
-  real-flight observation has been supplied. The 11 current corpus cases remain
+  real-flight observation has been supplied. The 14 current corpus cases remain
   review-only.
 - **macOS qualification:** no macOS host run has verified the universal artifact;
   macOS support remains unverified.

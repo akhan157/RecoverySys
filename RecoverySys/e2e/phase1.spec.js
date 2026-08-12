@@ -45,6 +45,15 @@ async function openApp(page, options) {
   await expect(page.locator('.s-header')).toHaveCount(0)
 }
 
+async function openGuidedReview(page) {
+  await prepareStorage(page)
+  await page.goto('./')
+  await page.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await expect(
+    page.getByRole('heading', { name: /set the scope of your first plan/i })
+  ).toBeVisible()
+}
+
 async function configureRocket(page) {
   await page.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
   await page.locator('#mass').fill('2500')
@@ -97,6 +106,87 @@ test('confidence posture is visible without implying validation or approval', as
   await expect(posture).toContainText('No current simulation result is available yet')
   await expect(posture).toContainText(/safety approval.*certification/i)
   await expect(posture).not.toContainText('Supported')
+})
+
+test('guided first-plan branches preserve state, reject invalid imports, and support keyboard steps', async ({
+  guardedPage,
+}) => {
+  await openGuidedReview(guardedPage)
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeDisabled()
+
+  await guardedPage.getByRole('button', { name: /start a new plan/i }).click()
+  await expect(guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  )
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+
+  await guardedPage.getByRole('button', { name: /import a plan/i }).click()
+  await expect(guardedPage.getByText('EXPORT // SHARE_CONFIGURATION')).toBeVisible()
+  const invalidDialog = guardedPage.waitForEvent('dialog')
+  await guardedPage.locator('input[type="file"][accept=".json"]').setInputFiles({
+    name: 'invalid-guided-plan.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from('{not valid json'),
+  })
+  const dialog = await invalidDialog
+  expect(dialog.message()).toContain('Failed to parse config file')
+  await dialog.dismiss()
+
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await expect(
+    guardedPage.getByRole('heading', { name: /set the scope of your first plan/i })
+  ).toBeVisible()
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeDisabled()
+
+  await guardedPage.evaluate(() => {
+    localStorage.setItem(
+      'recoverysys-config',
+      JSON.stringify({
+        config: { main_chute: { id: 'cl-24-n' } },
+        specs: { rocket_mass_g: '2500', motor_total_impulse_ns: '640' },
+      })
+    )
+  })
+  await guardedPage.reload()
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeEnabled()
+  await guardedPage.getByRole('button', { name: /resume this plan/i }).click()
+  await expect(guardedPage.getByRole('tab', { name: 'DASHBOARD' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  )
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+
+  const resultsStep = guardedPage.getByRole('button', { name: 'RESULTS' })
+  await resultsStep.focus()
+  await guardedPage.keyboard.press('Enter')
+  await expect(guardedPage.getByRole('heading', { name: /review results by scope/i })).toBeVisible()
+  const methodStep = guardedPage.getByRole('button', { name: 'METHOD & ASSUMPTIONS' })
+  await methodStep.focus()
+  await guardedPage.keyboard.press('Enter')
+  await expect(guardedPage.getByRole('heading', { name: /method & assumptions/i })).toBeVisible()
+})
+
+test('guided results preserve insufficient evidence posture and stale currentness', async ({
+  guardedPage,
+}) => {
+  await prepareStorage(guardedPage)
+  await guardedPage.goto('./?demo=1')
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await guardedPage.getByRole('button', { name: 'RESULTS' }).click()
+  const guided = guardedPage.locator('.guided-review')
+  await expect(guided.getByText('CURRENT RESULT')).toBeVisible()
+  await expect(guided.getByText('Insufficient confidence.', { exact: true })).toBeVisible()
+  await expect(guided.getByText(/no accepted comparison or flight evidence/i)).toBeVisible()
+  await expect(guided.getByText(/safety, approval, certification/i)).toBeVisible()
+
+  await guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
+  await guardedPage.locator('#mass').fill('12000')
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await guardedPage.getByRole('button', { name: 'RESULTS' }).click()
+  await expect(guided.getByText('STALE RESULT')).toBeVisible()
+  await expect(guided.getByText(/no accepted comparison or flight evidence/i)).toBeVisible()
 })
 
 test('analysis shows deterministic sensitivity ranges and uncertainty boundary', async ({

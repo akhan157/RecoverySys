@@ -69,6 +69,8 @@ describe('GuidedReview first-plan entry', () => {
     fireEvent.click(screen.getByRole('button', { name: /next/i }))
     expect(screen.getByText('NOT RUN')).toBeInTheDocument()
     expect(screen.queryByText(/reviewed/i)).not.toBeInTheDocument()
+    expect(screen.getByText(/insufficient confidence/i)).toBeInTheDocument()
+    expect(screen.getByText(/no accepted comparison or flight evidence/i)).toBeInTheDocument()
     fireEvent.click(screen.getAllByRole('button', { name: 'OPEN' })[0])
     expect(onOpenSimulation).toHaveBeenCalledOnce()
     fireEvent.click(screen.getByRole('button', { name: /review method/i }))

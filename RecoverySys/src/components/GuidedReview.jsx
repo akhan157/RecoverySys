@@ -31,6 +31,7 @@ function resultStatus(simulation, resultFresh) {
 export default function GuidedReview({
   state = { config: {}, specs: {}, simulation: null },
   resultFresh = false,
+  recoveryBrief = null,
   onOpenDashboard = noop,
   onOpenSpecs = noop,
   onOpenSimulation = noop,
@@ -48,6 +49,10 @@ export default function GuidedReview({
   )
   const hasPlan = selectedParts.length > 0 || hasEnteredSpec
   const status = resultStatus(state.simulation, resultFresh)
+  const confidenceLabel = recoveryBrief?.confidence?.label ?? 'Insufficient confidence'
+  const evidenceNote =
+    recoveryBrief?.confidence?.evidenceNote ??
+    'No accepted comparison or flight evidence is available in the current corpus.'
   const requiredInputs = [
     { label: 'Rocket mass', value: specs.rocket_mass_g, unit: 'g' },
     { label: 'Motor total impulse', value: specs.motor_total_impulse_ns, unit: 'N·s' },
@@ -250,6 +255,13 @@ export default function GuidedReview({
                   WHY?
                 </button>
               </article>
+            </div>
+            <div className="guided-review__callout guided-review__callout--warn">
+              <span>!</span>
+              <p>
+                <strong>{confidenceLabel}.</strong> {evidenceNote} Guided results remain estimates
+                and do not establish safety, approval, certification, or launch readiness.
+              </p>
             </div>
             {showMethod && (
               <div className="guided-review__callout guided-review__callout--warn">

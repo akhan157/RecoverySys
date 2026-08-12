@@ -192,6 +192,7 @@ export default function MissionControlLayout({
               <GuidedReview
                 resultFresh={resultFresh}
                 state={state}
+                recoveryBrief={recoveryBrief}
                 onOpenDashboard={() => setActiveTab('DASHBOARD')}
                 onOpenSpecs={() => setActiveTab('SPECS')}
                 onOpenSimulation={() => setActiveTab('SIMULATION')}

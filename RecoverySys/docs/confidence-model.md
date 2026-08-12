@@ -15,9 +15,9 @@ metadata.
   evidence before considering a positive state.
 - `src/lib/evidenceCoverage.js` distinguishes review-only cases from
   `accepted-for-comparison` cases and ranks accepted evidence by level.
-- `src/components/ConfidenceStatus.jsx` and
-  `src/lib/recoveryBrief.js` currently inject an uncovered/review-only
-  coverage posture. This is deliberate: the 11 checked-in corpus cases remain
+- `src/components/ConfidenceStatus.jsx`, `src/lib/recoveryBrief.js`, and
+  `src/components/GuidedReview.jsx` inject an uncovered/review-only
+  coverage posture. This is deliberate: the 14 checked-in corpus cases remain
   review-only and are not accepted, including descent unit-conversion,
   invalid-input edge, and metamorphic coverage. Current results therefore
   remain `Insufficient confidence` even when fresh and in scope.

@@ -3,6 +3,14 @@
 All notable changes to RecoverySys are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - 2026-08-11
+
+### Added
+
+- Qualified the GuidedReview results step with the canonical insufficient-confidence and review-boundary posture.
+- Added desktop/mobile Playwright coverage for guided new, resume, invalid-import, keyboard-step, current, stale, and insufficient-evidence paths.
+- Added the M6 release qualification record with local gate results and explicit external/deferred gates.
+
 ## [1.2.0.1] - 2026-07-19
 
 ### Changed
