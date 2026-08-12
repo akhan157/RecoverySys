@@ -222,15 +222,24 @@ test('Dispersion reports fresh, no-result, and stale states', async ({ guardedPa
   await expect(guardedPage.locator('#launch-lon')).toHaveValue('-117.8083')
   await guardedPage.locator('#mass').fill('2600')
   await guardedPage.getByRole('tab', { name: 'DISPERSION' }).click()
-  await expect(guardedPage.getByRole('tabpanel').getByText(/RESULT_STALE/).first()).toBeVisible()
-
+  await expect(
+    guardedPage
+      .getByRole('tabpanel')
+      .getByText(/RESULT_STALE/)
+      .first()
+  ).toBeVisible()
 })
-test('print action invokes the browser and checklist reflects current versus stale results', async ({
+test('brief and print actions preserve current versus stale result states', async ({
   guardedPage,
 }) => {
   await openApp(guardedPage)
   await configureRocket(guardedPage)
   await simulate(guardedPage)
+  await guardedPage.getByRole('tab', { name: 'RECOVERY_BRIEF' }).click()
+  const brief = guardedPage.getByRole('tabpanel')
+  await expect(brief.getByRole('status')).toContainText('CURRENT RESULT')
+  await expect(brief.getByRole('heading', { name: 'Current key estimates' })).toBeVisible()
+
   await guardedPage.getByRole('tab', { name: 'EXPORT' }).click()
   await guardedPage.evaluate(() => {
     window.__e2ePrintCalls = 0
@@ -248,7 +257,11 @@ test('print action invokes the browser and checklist reflects current versus sta
   await guardedPage.emulateMedia({ media: 'screen' })
   await guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
   await guardedPage.locator('#mass').fill('2600')
-  await guardedPage.emulateMedia({ media: 'print' })
-  await expect(checklist).toBeVisible()
-  await expect(checklist).toContainText('RESULT_STALE')
+  await guardedPage.getByRole('tab', { name: 'RECOVERY_BRIEF' }).click()
+  const staleBrief = guardedPage.getByRole('tabpanel')
+  await expect(staleBrief.getByRole('status')).toContainText('STALE RESULT')
+  await expect(staleBrief).toContainText('RESULT_STALE')
+  await expect(
+    staleBrief.getByRole('heading', { name: 'Current key estimates' }).locator('..')
+  ).not.toContainText('Apogee')
 })

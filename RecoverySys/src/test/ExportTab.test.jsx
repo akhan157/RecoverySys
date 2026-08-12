@@ -40,7 +40,8 @@ describe('ExportTab custom-part import', () => {
     )
   })
 
-  it('shows the versioned brief handoff status and routes distinct print actions', () => {
+  it('shows the versioned brief handoff status and routes open and print actions', () => {
+    const onOpenBrief = vi.fn()
     const onPrintBrief = vi.fn()
     const onPrintChecklist = vi.fn()
     render(
@@ -49,6 +50,7 @@ describe('ExportTab custom-part import', () => {
         saveConfig={vi.fn()}
         copyShareLink={vi.fn()}
         onLoadConfig={vi.fn()}
+        onOpenBrief={onOpenBrief}
         onPrintBrief={onPrintBrief}
         onPrintChecklist={onPrintChecklist}
         recoveryBrief={{ status: 'stale', confidence: { label: 'Insufficient confidence' } }}
@@ -57,8 +59,10 @@ describe('ExportTab custom-part import', () => {
     expect(screen.getByRole('status')).toHaveTextContent(/RESULT_STALE/)
     expect(screen.getByRole('status')).toHaveTextContent(/Insufficient confidence/)
 
+    fireEvent.click(screen.getByRole('button', { name: /OPEN_RECOVERY_BRIEF/i }))
     fireEvent.click(screen.getByRole('button', { name: /PRINT_RECOVERY_BRIEF/i }))
     fireEvent.click(screen.getByRole('button', { name: /PRINT_CHECKLIST/i }))
+    expect(onOpenBrief).toHaveBeenCalledOnce()
     expect(onPrintBrief).toHaveBeenCalledOnce()
     expect(onPrintChecklist).toHaveBeenCalledOnce()
   })

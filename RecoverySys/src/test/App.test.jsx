@@ -191,13 +191,19 @@ describe('MissionControl tab semantics', () => {
     render(<App />)
 
     const analysisTab = screen.getByRole('tab', { name: 'ANALYSIS' })
+    const briefTab = screen.getByRole('tab', { name: 'RECOVERY_BRIEF' })
     expect(analysisTab).toHaveAttribute('aria-controls', 'mc-panel-analysis')
+    expect(briefTab).toHaveAttribute('aria-controls', 'mc-panel-recovery_brief')
 
     await user.click(analysisTab)
 
     const analysisPanel = screen.getByRole('tabpanel')
     expect(analysisPanel).toHaveAttribute('id', 'mc-panel-analysis')
     expect(analysisTab).toHaveAttribute('aria-controls', analysisPanel.id)
+
+    await user.click(briefTab)
+    expect(screen.getByRole('tabpanel')).toHaveAttribute('id', 'mc-panel-recovery_brief')
+    expect(screen.getByRole('heading', { name: 'Recovery Brief' })).toBeInTheDocument()
   })
   it('supports wrapping arrow navigation and Home/End with roving focus', async () => {
     const user = userEvent.setup()

@@ -26,6 +26,7 @@ export default function ExportTab({
   copyShareLink,
   onLoadConfig,
   recoveryBrief,
+  onOpenBrief = () => {},
   onPrintBrief = () => window.print(),
   onPrintChecklist = () => window.print(),
 }) {
@@ -100,9 +101,14 @@ export default function ExportTab({
               RESULT_STATUS_DETAILS['not-run'].reasonCode}{' '}
             · {recoveryBrief?.confidence?.label || 'Insufficient confidence'}
           </div>
-          <button className="mc-run-btn" onClick={onPrintBrief}>
-            PRINT_RECOVERY_BRIEF →
-          </button>
+          <div className="mc-export__brief-actions">
+            <button className="mc-run-btn" onClick={onOpenBrief}>
+              OPEN_RECOVERY_BRIEF →
+            </button>
+            <button className="mc-run-btn" onClick={onPrintBrief}>
+              PRINT_RECOVERY_BRIEF →
+            </button>
+          </div>
         </div>
         <div className="mc-export__section">
           <div className="mc-metric__label">SAVE_TO_BROWSER</div>

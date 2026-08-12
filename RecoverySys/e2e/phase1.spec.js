@@ -75,13 +75,16 @@ test('mount removes the production skeleton and preserves live tab navigation', 
     ['SIMULATION', 'FLIGHT_PROFILE // ALT_vs_TIME'],
     ['ANALYSIS', 'NO_CURRENT_RESULT'],
     ['DISPERSION', 'NO_CURRENT_RESULT'],
+    ['RECOVERY_BRIEF', 'Recovery Brief'],
     ['EXPORT', 'EXPORT // SHARE_CONFIGURATION'],
     ['FLIGHT_LOG', 'FLIGHT_LOG'],
     ['DASHBOARD', 'BAY_SCHEMATIC'],
   ]
   for (const [tab, panel] of panels) {
     await guardedPage.getByRole('tab', { name: tab }).click()
-    await expect(guardedPage.getByRole('tabpanel').getByText(panel, { exact: false }).first()).toBeVisible()
+    await expect(
+      guardedPage.getByRole('tabpanel').getByText(panel, { exact: false }).first()
+    ).toBeVisible()
   }
 })
 

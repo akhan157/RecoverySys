@@ -12,8 +12,9 @@ import ExportTab from './tabs/ExportTab.jsx'
 import CompareTab from './tabs/CompareTab.jsx'
 import FlightLogTab from './tabs/FlightLogTab.jsx'
 import AnalysisTab from './tabs/AnalysisTab.jsx'
-import PrintChecklist from './PrintChecklist.jsx'
+import RecoveryBriefTab from './tabs/RecoveryBriefTab.jsx'
 import { buildRecoveryBrief } from '../lib/recoveryBrief.js'
+import PrintChecklist from './PrintChecklist.jsx'
 import './MissionControlLayout.css'
 
 const TABS = [
@@ -25,6 +26,7 @@ const TABS = [
   { id: 'DISPERSION', label: 'DISPERSION' },
   { id: 'COMPARE', label: 'COMPARE' },
   { id: 'FLIGHT_LOG', label: 'FLIGHT_LOG' },
+  { id: 'RECOVERY_BRIEF', label: 'RECOVERY_BRIEF' },
   { id: 'EXPORT', label: 'EXPORT' },
 ]
 
@@ -262,6 +264,7 @@ export default function MissionControlLayout({
               />
             )}
             {activeTab === 'FLIGHT_LOG' && <FlightLogTab state={state} resultFresh={resultFresh} />}
+            {activeTab === 'RECOVERY_BRIEF' && <RecoveryBriefTab recoveryBrief={recoveryBrief} />}
             {activeTab === 'EXPORT' && (
               <ExportTab
                 state={state}
@@ -269,6 +272,7 @@ export default function MissionControlLayout({
                 copyShareLink={copyShareLink}
                 onLoadConfig={loadConfig}
                 recoveryBrief={recoveryBrief}
+                onOpenBrief={() => setActiveTab('RECOVERY_BRIEF')}
                 onPrintBrief={() => setPrintMode('brief')}
                 onPrintChecklist={() => setPrintMode('checklist')}
               />
