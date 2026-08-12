@@ -251,9 +251,25 @@ test('brief and print actions preserve current versus stale result states', asyn
   await expect.poll(() => guardedPage.evaluate(() => window.__e2ePrintCalls)).toBe(1)
 
   await guardedPage.emulateMedia({ media: 'print' })
-  const checklist = guardedPage.locator('.print-checklist')
+  const checklist = guardedPage.locator('.print-checklist--checklist')
   await expect(checklist).toBeVisible()
   await expect(checklist).toContainText('Apogee')
+  await expect(checklist.locator('.print-artifact--brief').first()).toBeHidden()
+  await expect(checklist.locator('.print-artifact--checklist').first()).toBeVisible()
+
+  await guardedPage.emulateMedia({ media: 'screen' })
+  await guardedPage.getByRole('button', { name: /PRINT_RECOVERY_BRIEF/ }).click()
+  await expect.poll(() => guardedPage.evaluate(() => window.__e2ePrintCalls)).toBe(2)
+  await guardedPage.emulateMedia({ media: 'print' })
+  const printedBrief = guardedPage.locator('.print-checklist--brief')
+  await expect(printedBrief).toBeVisible()
+  await expect(
+    printedBrief.getByRole('heading', { name: 'RecoverySys Recovery Brief' })
+  ).toBeVisible()
+  await expect(printedBrief).toContainText('Evidence posture')
+  await expect(printedBrief.locator('.print-artifact--brief').first()).toBeVisible()
+  await expect(printedBrief.locator('.print-artifact--checklist').first()).toBeHidden()
+
   await guardedPage.emulateMedia({ media: 'screen' })
   await guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
   await guardedPage.locator('#mass').fill('2600')

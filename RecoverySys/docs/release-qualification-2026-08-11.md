@@ -22,6 +22,7 @@ the sole production simulation authority.
 | Production build | Pass | `npm run build` |
 | Browser E2E | Pass | 36/36: Chromium desktop and Pixel 5 mobile |
 | Guided first-plan qualification | Pass | New/resume/import-invalid/stale/insufficient paths plus keyboard step activation in both E2E projects |
+| Print artifact media inspection | Pass | Chromium E2E verifies brief/checklist section separation; `PrintChecklist.brief.test.jsx` verifies stale estimate withholding |
 | Diff hygiene | Pass | `git diff --check` |
 
 The M5 increment keeps the canonical Recovery Brief confidence/evidence posture
@@ -40,9 +41,7 @@ evidence status, or approval boundaries.
 - **Independent evidence:** the corpus remains review-only. No accepted trusted
   simulator comparison, independent reviewer metadata, manufacturer/test data,
   or traceable real-flight observation is available.
-- **Broader artifact parity:** screen, print, export/import, and Flight Log parity
-  still require the remaining M4 transfer/evidence-loop review before claiming a
-  fully qualified release.
+- **Broader artifact parity:** Chromium print-media inspection now verifies distinct brief/checklist section visibility, while print contract tests verify stale estimate withholding. Full screen, export/import, share, and Flight Log parity still require the remaining M4 transfer/evidence-loop review before claiming a fully qualified release.
 
 ## Deferred tracks
 
