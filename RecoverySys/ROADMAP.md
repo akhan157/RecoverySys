@@ -75,34 +75,34 @@ fully qualified v2/v3 release.
 
 ### Not Yet Complete
 
-- Eleven review-only validation cases now exist, including scalar and curve
-  representative end-to-end plans plus descent unit-conversion, invalid-input
-  edge, and metamorphic coverage. There are no accepted comparison cases or
-  real-flight evidence cases.
+- Fourteen review-only validation cases now exist, including scalar and curve representative end-to-end plans plus descent unit-conversion, invalid-input edge, and metamorphic coverage. There are no accepted comparison cases or real-flight evidence cases.
 - Catalog provenance is still primarily manufacturer-level and unverified; per-part source review is not complete.
 - The Analysis tab now has the integrated cause-to-consequence review surface and canonical semantic support, but cross-artifact parity and broader application redesign remain incomplete.
 - `GuidedReview.jsx` is connected as the first-plan entry with explicit new/resume/import/pause/start-fresh actions, live result state, direct tab navigation, and App-owned persistence/reset handling. `DetailsTab.jsx` and `MethodDetailsTab.jsx` remain snapshot/prototype work outside this integration.
 - Sensitivity coverage is incomplete; dispersion now accepts an explicit safe-integer seed for reproducible runs while retaining stochastic behavior without a seed. Broader dispersion validation and cross-unit influence ranking remain incomplete.
-- The versioned Recovery Brief is now available on screen, and brief/checklist print actions are separate; broader transfer/evidence-loop parity remains incomplete.
+- The versioned Recovery Brief is available on screen, and separate brief/checklist print modes are implemented. Chromium print-media qualification verifies that each mode exposes only its intended artifact sections and that stale estimates remain withheld; broader screen/export/import/share and Flight Log parity remains incomplete.
 - Flight evidence is stored locally, but candidate-evidence export and external review intake are not complete.
 - `engine/` contains a FastAPI/SciPy RK45 research implementation, but it is not wired into the app, not validated as a second production authority, and not bundled into desktop builds. See [`M8-architecture-decision-report.md`](M8-architecture-decision-report.md) for the deferred-engine decision and security evidence.
-- The consolidated checkpoint is committed and pushed; the 2026-08-11 qualification increment is recorded separately. CI remains pinned to Node 22, while local verification used Node 26.
+- The 2026-08-11 qualification record documents the verified M5 guided branch and M6 local gates. Local verification uses Node 26; CI remains pinned to Node 22.
 
 ### Baseline Evidence Snapshot
 
-Observed after the consolidated product work was merged:
+Observed after the 2026-08-11 print qualification increment:
 
 | Check | Result |
-| `git status` | Clean at `498c886`; `origin/main` matches |
+| `git status` | Clean at `82dac6b`; qualification branch pushed to `origin/akhan157/recoverysys-roadmap-continue` |
 | `npm run validate:parts` | Passes; 225 parts |
 | `npm run validate:corpus` | Passes; 14 review cases |
 | `npm test` | 34 files and 281 tests pass locally |
 | `npm run lint` | Passes with zero warnings |
 | `npm run format:check` | Passes |
 | `npm run build` | Passes |
-| `npm run e2e` | 36/36 on desktop and Pixel 5 mobile Chromium |
+| `npm run e2e` | 36/36 on desktop and Pixel 5 mobile Chromium before the print qualification increment |
+| `npm test -- --run src/test/PrintChecklist.brief.test.jsx` | 3/3 pass after the print qualification increment |
+| `npm run e2e -- e2e/phase2.spec.js` | 10/10 pass across Chromium desktop and Pixel 5 after the print qualification increment |
+| `npm run check` | Passes after the print qualification increment |
 
-The 2026-08-11 qualification record is [`docs/release-qualification-2026-08-11.md`](docs/release-qualification-2026-08-11.md). It records the verified M5 guided first-plan increment and M6 local gates while keeping supported-runtime, Windows, macOS, independent-evidence, and remaining artifact-parity gates open.
+The 2026-08-11 qualification record is [`docs/release-qualification-2026-08-11.md`](docs/release-qualification-2026-08-11.md). It records the verified M5 guided first-plan increment and M6 local gates, including print artifact media inspection, while keeping supported-runtime, Windows, macOS, independent-evidence, and remaining transfer-parity gates open.
 
 This snapshot verifies the consolidated implementation locally. Broader
 cross-artifact, clean-install, platform, and external evidence gates remain
@@ -266,22 +266,24 @@ agree on finding codes, values, currentness, and unresolved review actions.
 **Priority:** P1
 **Status:** Partial
 
-**Completed increment:** Print output now scopes Simulation Results to the
-checklist artifact only; stale estimates remain withheld. M4 remains Partial
-because the on-screen brief, export/import parity, and evidence-loop gates
-remain open.
+**Completed increments:** Print output scopes Simulation Results to the checklist
+artifact only; stale estimates remain withheld; and Chromium print-media
+inspection verifies distinct Recovery Brief and Recovery Checklist artifact
+sections. M4 remains Partial because screen/export/import/share parity and the
+evidence-loop gates remain open.
++
 **Goal:** turn a current plan into one traceable handoff artifact and preserve
 later observations without promoting them automatically to evidence.
 
 Work:
 
-- Build the on-screen Recovery Brief from the same versioned view model as print.
-- Separate `Print recovery brief` from `Print checklist` instead of routing both to the same document.
+- [x] Build the on-screen Recovery Brief from the same versioned view model as print.
+- [x] Separate `Print recovery brief` from `Print checklist` instead of routing both to the same document.
 - Include identity, generated time, currentness, mission envelope, hardware, deployment sequence, key estimates, sensitivity, evidence, unresolved checks, and review boundaries.
 - Rename and label the bay list as a static planning/checklist order. It is not measured packing geometry, an assembly instruction, or flight-readiness validation.
 - Keep packing-volume screening separate from the static order.
 - Add candidate-evidence export/intake for Flight Log records with source, units, conditions, reviewer status, and immutable prediction identity.
-- Verify import/export/share migration behavior and print parity in fresh browser contexts.
+- Verify import/export/share migration behavior and print parity in fresh browser contexts; print-mode separation is qualified, while transfer parity remains open.
 
 **Exit criteria:** screen, print, export, and imported artifacts agree on values,
 identity, status, units, and unresolved checks; stale artifacts cannot appear
@@ -318,8 +320,8 @@ readiness.
 ### M6 - Release Qualification
 
 **Priority:** P0 at release boundary
-**Status:** Partial; local qualification gates pass; platform and external gates remain
-**Goal:** release only what the evidence and platform checks support.
+**Status:** Partial; local qualification gates pass, including print artifact media
+inspection; platform, transfer-parity, and external gates remain
 
 Release gate:
 
