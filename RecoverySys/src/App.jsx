@@ -412,6 +412,8 @@ export default function App() {
       {demoMode && <DemoBanner onExit={exitDemo} />}
       <MissionControlLayout
         state={state}
+        demoMode={demoMode}
+        onExitDemo={exitDemo}
         allParts={allParts}
         customParts={customParts}
         selectPart={selectPart}

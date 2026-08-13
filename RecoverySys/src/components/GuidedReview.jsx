@@ -57,18 +57,25 @@ export default function GuidedReview({
     { label: 'Rocket mass', value: specs.rocket_mass_g, unit: 'g' },
     { label: 'Motor total impulse', value: specs.motor_total_impulse_ns, unit: 'N·s' },
   ]
+  // Optional values are only "current" when they differ from the schema default;
+  // a value sitting at its documented default stays labeled as a default so
+  // defaulted inputs are never presented as user-supplied.
   const optionalInputs = [
     {
       label: 'Main deploy altitude',
-      value: hasValue(specs.main_deploy_alt_ft)
-        ? `${specs.main_deploy_alt_ft} ft · current value`
-        : '500 ft · default if blank',
+      value:
+        hasValue(specs.main_deploy_alt_ft) &&
+        String(specs.main_deploy_alt_ft) !== String(DEFAULT_SPECS.main_deploy_alt_ft)
+          ? `${specs.main_deploy_alt_ft} ft · current value`
+          : '500 ft · default if blank',
     },
     {
       label: 'Ejection G-factor',
-      value: hasValue(specs.ejection_g_factor)
-        ? `${specs.ejection_g_factor}G · current value`
-        : 'Auto by mass · default if blank',
+      value:
+        hasValue(specs.ejection_g_factor) &&
+        String(specs.ejection_g_factor) !== String(DEFAULT_SPECS.ejection_g_factor)
+          ? `${specs.ejection_g_factor}G · current value`
+          : 'Auto by mass · default if blank',
     },
   ]
 

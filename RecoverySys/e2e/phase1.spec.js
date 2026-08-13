@@ -82,7 +82,7 @@ test('mount removes the production skeleton and preserves live tab navigation', 
   const panels = [
     ['ROCKET_SPECS', 'ROCKET_SPECS'],
     ['SIMULATION', 'FLIGHT_PROFILE // ALT_vs_TIME'],
-    ['ANALYSIS', 'NO_CURRENT_RESULT'],
+    ['ANALYSIS', 'Not run'],
     ['DISPERSION', 'NO_CURRENT_RESULT'],
     ['RECOVERY_BRIEF', 'Recovery Brief'],
     ['EXPORT', 'EXPORT // SHARE_CONFIGURATION'],
@@ -187,6 +187,170 @@ test('guided results preserve insufficient evidence posture and stale currentnes
   await guardedPage.getByRole('button', { name: 'RESULTS' }).click()
   await expect(guided.getByText('STALE RESULT')).toBeVisible()
   await expect(guided.getByText(/no accepted comparison or flight evidence/i)).toBeVisible()
+})
+
+test('guided pause returns to the dashboard and preserves the plan for resume', async ({
+  guardedPage,
+}) => {
+  await openGuidedReview(guardedPage)
+  await guardedPage.evaluate(() => {
+    localStorage.setItem(
+      'recoverysys-config',
+      JSON.stringify({
+        config: { main_chute: { id: 'cl-24-n' } },
+        specs: { rocket_mass_g: '2500', motor_total_impulse_ns: '640' },
+      })
+    )
+  })
+  await guardedPage.reload()
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await guardedPage.getByRole('button', { name: 'RESULTS' }).click()
+  await guardedPage.getByRole('button', { name: /pause and return/i }).click()
+  await expect(guardedPage.getByRole('tab', { name: 'DASHBOARD' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  )
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeEnabled()
+  const guided = guardedPage.locator('.guided-review')
+  await expect(guided.getByText('2500 g')).toBeVisible()
+  await expect(guided.getByText('640 N·s')).toBeVisible()
+})
+
+test('guided start-fresh clears entered values and returns the plan to new state', async ({
+  guardedPage,
+}) => {
+  await openGuidedReview(guardedPage)
+  await guardedPage.evaluate(() => {
+    localStorage.setItem(
+      'recoverysys-config',
+      JSON.stringify({
+        config: { main_chute: { id: 'cl-24-n' } },
+        specs: { rocket_mass_g: '2500', motor_total_impulse_ns: '640' },
+      })
+    )
+  })
+  await guardedPage.reload()
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeEnabled()
+  await guardedPage.getByRole('button', { name: /start a new plan/i }).click()
+  await expect(guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  )
+  await expect(guardedPage.locator('#mass')).toHaveValue('')
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeDisabled()
+  const guided = guardedPage.locator('.guided-review')
+  await expect(guided.getByText('Not set', { exact: true })).toHaveCount(2)
+})
+
+test('guided scope page keeps required, defaulted, and current-value posture explicit', async ({
+  guardedPage,
+}) => {
+  await openGuidedReview(guardedPage)
+  const guided = guardedPage.locator('.guided-review')
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeDisabled()
+  await expect(guided.getByText('Not set', { exact: true })).toHaveCount(2)
+  await expect(guided.getByText(/500 ft · default if blank/i)).toBeVisible()
+  await expect(guided.getByText(/Auto by mass · default if blank/i)).toBeVisible()
+  await expect(guided.getByText(/No recovery hardware selected yet/i)).toBeVisible()
+
+  await guardedPage.evaluate(() => {
+    localStorage.setItem(
+      'recoverysys-config',
+      JSON.stringify({
+        config: { main_chute: { id: 'cl-24-n' } },
+        specs: {
+          rocket_mass_g: '3100',
+          motor_total_impulse_ns: '740',
+          main_deploy_alt_ft: '700',
+          ejection_g_factor: '30',
+        },
+      })
+    )
+  })
+  await guardedPage.reload()
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await expect(guided.getByText('3100 g')).toBeVisible()
+  await expect(guided.getByText('740 N·s')).toBeVisible()
+  await expect(guided.getByText(/700 ft · current value/i)).toBeVisible()
+  await expect(guided.getByText(/30G · current value/i)).toBeVisible()
+  await expect(guided.getByText('CATALOG DATA · UNVERIFIED')).toBeVisible()
+})
+
+test('keyboard users can complete the guided critical path', async ({ guardedPage }) => {
+  await openGuidedReview(guardedPage)
+
+  const next = guardedPage.getByRole('button', { name: /next/i })
+  await next.focus()
+  await guardedPage.keyboard.press('Enter')
+  await expect(
+    guardedPage.getByRole('heading', { name: /review results by scope/i })
+  ).toBeVisible()
+
+  const reviewMethod = guardedPage.getByRole('button', { name: /review method/i })
+  await reviewMethod.focus()
+  await guardedPage.keyboard.press('Enter')
+  await expect(
+    guardedPage.getByRole('heading', { name: /method & assumptions/i })
+  ).toBeVisible()
+
+  const back = guardedPage.getByRole('button', { name: /← BACK/i })
+  await back.focus()
+  await guardedPage.keyboard.press('Enter')
+  await expect(
+    guardedPage.getByRole('heading', { name: /review results by scope/i })
+  ).toBeVisible()
+
+  const pause = guardedPage.getByRole('button', { name: /pause and return/i })
+  await pause.focus()
+  await guardedPage.keyboard.press('Enter')
+  await expect(guardedPage.getByRole('tab', { name: 'DASHBOARD' })).toHaveAttribute(
+    'aria-selected',
+    'true'
+  )
+})
+
+test('demo guided start-fresh exits the demo instead of mixing sample data with a user plan', async ({
+  guardedPage,
+}) => {
+  await prepareStorage(guardedPage, { firstVisit: true })
+  await guardedPage.goto('./?demo=1')
+  await expect(guardedPage.getByRole('status')).toContainText('DEMO')
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeEnabled()
+  await guardedPage.getByRole('button', { name: /start a new plan/i }).click()
+  await expect(guardedPage.getByRole('status')).toHaveCount(0)
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeDisabled()
+  const guided = guardedPage.locator('.guided-review')
+  await expect(guided.getByText('Not set', { exact: true })).toHaveCount(2)
+})
+
+test('guided import loads a valid plan and the guided scope reflects the imported values', async ({
+  guardedPage,
+}) => {
+  await openGuidedReview(guardedPage)
+  await guardedPage.getByRole('button', { name: /import a plan/i }).click()
+  await expect(guardedPage.getByText('EXPORT // SHARE_CONFIGURATION')).toBeVisible()
+  await guardedPage.locator('input[type="file"][accept=".json"]').setInputFiles({
+    name: 'valid-guided-plan.json',
+    mimeType: 'application/json',
+    buffer: Buffer.from(
+      JSON.stringify({
+        _format: 'recoverysys-config-v1',
+        schemaVersion: 1,
+        config: { main_chute: { id: 'cl-24-n' } },
+        specs: { rocket_mass_g: '2750', motor_total_impulse_ns: '640' },
+        customMotor: null,
+      })
+    ),
+  })
+  await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeEnabled()
+  const guided = guardedPage.locator('.guided-review')
+  await expect(guided.getByText('2750 g')).toBeVisible()
+  await expect(guided.getByText('CATALOG DATA · UNVERIFIED')).toBeVisible()
 })
 
 test('analysis shows deterministic sensitivity ranges and uncertainty boundary', async ({

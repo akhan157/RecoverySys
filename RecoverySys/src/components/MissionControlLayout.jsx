@@ -32,6 +32,8 @@ const TABS = [
 
 export default function MissionControlLayout({
   state,
+  demoMode = false,
+  onExitDemo = () => {},
   allParts,
   customParts,
   selectPart,
@@ -238,6 +240,14 @@ export default function MissionControlLayout({
                 onOpenSimulation={() => setActiveTab('SIMULATION')}
                 onOpenImport={() => setActiveTab('EXPORT')}
                 onStartFresh={() => {
+                  // Demo data must never become (or be mistaken for) the user's own
+                  // plan: starting fresh inside a demo session leaves the session
+                  // the same way the banner's START_FRESH does, so no demo inputs
+                  // survive and a reload cannot reseed them over user work.
+                  if (demoMode) {
+                    onExitDemo()
+                    return
+                  }
                   clearAll()
                   setActiveTab('SPECS')
                 }}
