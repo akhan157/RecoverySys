@@ -69,6 +69,25 @@ export function buildRecoveryBrief({
     })
   }
 
+  // Stale-result closure: a brief for a non-current plan never presents a
+  // sensitivity response. Ranges computed from the current inputs would sit
+  // next to withheld key estimates and read as current conclusions, so they
+  // are replaced with an explicit hidden-until-current placeholder instead.
+  const sensitivityResponse =
+    status === 'current'
+      ? sensitivity === false
+        ? null
+        : (sensitivity ?? runSensitivity({ specs, config, customMotor }))
+      : status === 'stale'
+        ? {
+            status: 'stale',
+            reason: 'Sensitivity is hidden until the base simulation is current.',
+          }
+        : {
+            status: 'not-run',
+            reason: 'Sensitivity is unavailable until a current simulation exists.',
+          }
+
   return {
     briefVersion: RECOVERY_BRIEF_VERSION,
     generatedAt: new Date().toISOString(),
@@ -97,10 +116,7 @@ export function buildRecoveryBrief({
           landing_ke_ftlbf: usableSimulation.landing_ke_ftlbf,
         }
       : null,
-    sensitivity:
-      sensitivity === false
-        ? null
-        : (sensitivity ?? runSensitivity({ specs, config, customMotor })),
+    sensitivity: sensitivityResponse,
     unresolvedChecks,
     provenance: simulation?.provenance ?? null,
     authorization:

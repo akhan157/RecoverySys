@@ -1,5 +1,6 @@
 import { WARN_LEVELS } from '../../lib/constants.js'
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
+import { CRITERION_IDS, evaluateCriterion } from '../../lib/criteria.js'
 import { presentCriterion } from '../../lib/criterionPresentation.js'
 import FlightChart from '../FlightChart.jsx'
 import MetricCard from '../MetricCard.jsx'
@@ -13,6 +14,12 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
   const shock = usableSim?.shock_load
   const shockPresentation = presentCriterion(shock?.criterion)
   const snatch = usableSim?.main_snatch
+  // Exact boundary behavior is owned by the canonical main-descent criterion;
+  // the card never re-derives the 15/20 ft/s thresholds.
+  const descentPresentation =
+    usableSim?.main_fps != null
+      ? presentCriterion(evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, usableSim.main_fps))
+      : null
 
   return (
     <div className="mc-sim">
@@ -56,7 +63,8 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
               label="MAIN_DESCENT"
               value={usableSim?.main_fps != null ? usableSim.main_fps.toFixed(1) : '—'}
               unit="ft/s"
-              warn={usableSim?.main_fps != null && usableSim.main_fps > 15}
+              status={descentPresentation?.metricStatus}
+              statusLabel={descentPresentation?.metricLabel}
             />
             <MetricCard
               label="DESCENT_TIME"
@@ -107,9 +115,12 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
         <div className="mc-sim__compat">
           <h2 className="mc-panel-header">COMPAT_ANALYSIS</h2>
           {state.warnings.length === 0 ? (
-            <div className="mc-alert mc-alert--ok">
-              <div className="mc-alert__title">✓ ALL_SYSTEMS_NOMINAL</div>
-              <div className="mc-alert__body">No compatibility issues detected.</div>
+            <div className="mc-alert">
+              <div className="mc-alert__title">NO_COMPATIBILITY_WARNINGS_RECORDED</div>
+              <div className="mc-alert__body">
+                Absence of recorded warnings is not a clearance; review findings, evidence, and the
+                mission envelope separately.
+              </div>
             </div>
           ) : (
             state.warnings.map((w, i) => (

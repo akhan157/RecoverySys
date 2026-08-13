@@ -218,7 +218,9 @@ export default function GuidedReview({
                   <h4>Recovery sequence estimate</h4>
                   <p>
                     {state.simulation
-                      ? 'A simulation result is available for this plan.'
+                      ? resultFresh
+                        ? 'A current simulation result is available for this plan.'
+                        : 'A stored result exists but is stale; rerun the simulation before reviewing conclusions.'
                       : 'Run the simulation after required inputs and recovery hardware are supplied.'}
                   </p>
                 </div>

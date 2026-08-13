@@ -192,7 +192,10 @@ export default function PrintChecklist({
       <section className="print-artifact--checklist">
         <h2>Compatibility Warnings</h2>
         {warnings.length === 0 ? (
-          <p>All systems nominal</p>
+          <p>
+            No compatibility warnings recorded. Absence of recorded warnings is not a clearance;
+            review findings, evidence, and the mission envelope separately.
+          </p>
         ) : (
           <ul>
             {warnings.map((w, i) => (

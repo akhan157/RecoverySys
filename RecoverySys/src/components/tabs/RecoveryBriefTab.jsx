@@ -1,5 +1,10 @@
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
+import { presentCriterion } from '../../lib/criterionPresentation.js'
 import StatusChip from '../primitives/StatusChip.jsx'
+
+function crossingLabel(category, severity) {
+  return presentCriterion({ evaluated: true, category, severity }).label
+}
 
 const STATUS_LABELS = Object.freeze({
   current: 'CURRENT RESULT',
@@ -24,6 +29,7 @@ const ESTIMATES = Object.freeze([
 const SENSITIVITY_OUTPUTS = Object.freeze([
   ['apogee_ft', 'Apogee', 'ft'],
   ['drift_ft', 'Drift', 'ft'],
+  ['drogue_fps', 'Drogue descent', 'ft/s'],
   ['main_fps', 'Main descent', 'ft/s'],
   ['landing_ke_ftlbf', 'Landing energy', 'ft-lbf'],
 ])
@@ -192,6 +198,18 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
                 </div>
               ))}
             </dl>
+            {sensitivity.criterionCrossings?.length > 0 && (
+              <ul aria-label="Defensible criterion crossings">
+                {sensitivity.criterionCrossings.map((crossing, index) => (
+                  <li key={`${crossing.driverKey}-${crossing.output}-${index}`}>
+                    <strong>{crossing.driverLabel}</strong> {crossing.variantLabel}:{' '}
+                    {crossing.outputLabel} {formatNumber(crossing.baseline.value)} {crossing.unit}{' '}
+                    moves from {crossingLabel(crossing.baseline.category, crossing.baseline.severity)}{' '}
+                    to {crossingLabel(crossing.variant.category, crossing.variant.severity)}.
+                  </li>
+                ))}
+              </ul>
+            )}
             <p className="mc-brief__boundary">
               These ranges describe model response only, not probability, accuracy, or a confidence
               interval, and do not establish safety, approval, certification, or launch readiness.

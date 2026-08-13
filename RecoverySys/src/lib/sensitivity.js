@@ -7,9 +7,32 @@ import {
   SIMULATION_MODEL_VERSION,
 } from './constants.js'
 
-const SENSITIVITY_ANALYSIS_VERSION = 'sensitivity-one-at-a-time-v2'
+const SENSITIVITY_ANALYSIS_VERSION = 'sensitivity-one-at-a-time-v3'
 const RANGE_BASIS_VERSION = 'sensitivity-range-v1'
-const OUTPUT_KEYS = Object.freeze(['apogee_ft', 'drift_ft', 'main_fps', 'landing_ke_ftlbf'])
+
+// Per-output model response covers every descent/landing output the simulation
+// exposes that carries a registered decision criterion. `drogue_fps` is only
+// a real response when a drogue canopy is configured; without one the
+// simulation substitutes a constant fallback, so it is withheld rather than
+// presented as tested response.
+const OUTPUT_KEYS = Object.freeze([
+  'apogee_ft',
+  'drift_ft',
+  'drogue_fps',
+  'main_fps',
+  'landing_ke_ftlbf',
+])
+
+const OUTPUT_LABELS = Object.freeze({
+  apogee_ft: 'Apogee altitude',
+  drift_ft: 'Landing drift',
+  drogue_fps: 'Drogue descent rate',
+  main_fps: 'Main descent rate',
+  landing_ke_ftlbf: 'Landing kinetic energy',
+})
+
+const outputKeysFor = (config) =>
+  config?.drogue_chute ? OUTPUT_KEYS : OUTPUT_KEYS.filter((key) => key !== 'drogue_fps')
 
 const VARIATIONS = [
   {
@@ -50,14 +73,9 @@ function copySpecs(specs, key, value) {
   return { ...specs, [key]: String(value) }
 }
 
-function outputFor(result) {
+function outputFor(result, outputKeys) {
   if (!result) return null
-  return {
-    apogee_ft: result.apogee_ft,
-    drift_ft: result.drift_ft,
-    main_fps: result.main_fps,
-    landing_ke_ftlbf: result.landing_ke_ftlbf,
-  }
+  return Object.fromEntries(outputKeys.map((key) => [key, result[key]]))
 }
 
 function range(values) {
@@ -66,9 +84,9 @@ function range(values) {
   return { min: Math.min(...numbers), max: Math.max(...numbers) }
 }
 
-function outputDeltas(output, baselineOutput) {
+function outputDeltas(output, baselineOutput, outputKeys) {
   if (!output || !baselineOutput) return null
-  return OUTPUT_KEYS.reduce((deltas, key) => {
+  return outputKeys.reduce((deltas, key) => {
     const value = numeric(output[key])
     const baseline = numeric(baselineOutput[key])
     deltas[key] = value == null || baseline == null ? null : value - baseline
@@ -79,9 +97,23 @@ function outputDeltas(output, baselineOutput) {
 const CRITERION_BY_OUTPUT = Object.freeze({
   main_fps: CRITERION_IDS.MAIN_DESCENT_RATE,
   landing_ke_ftlbf: CRITERION_IDS.LANDING_ENERGY,
+  drogue_fps: CRITERION_IDS.DROGUE_DESCENT_RATE,
 })
 
-function criterionCrossingsFor(outputKey, baselineOutput, variants) {
+/**
+ * Report only defensible criterion crossings: a tested variant whose canonical
+ * criterion classification differs from the baseline classification, for an
+ * output that actually carries a registered decision criterion. Each crossing
+ * names the driver, output, criterion version, and both classifications so
+ * consuming surfaces never have to reinterpret raw deltas.
+ */
+function criterionCrossingsFor({
+  outputKey,
+  driverKey,
+  driverLabel,
+  baselineOutput,
+  variants,
+}) {
   const criterionId = CRITERION_BY_OUTPUT[outputKey]
   if (!criterionId) return []
   const baseline = evaluateCriterion(criterionId, baselineOutput?.[outputKey])
@@ -93,8 +125,12 @@ function criterionCrossingsFor(outputKey, baselineOutput, variants) {
     return [
       {
         output: outputKey,
+        outputLabel: OUTPUT_LABELS[outputKey] ?? outputKey,
+        unit: baseline.unit,
         criterionId,
         criterionVersion: baseline.policyVersion,
+        driverKey,
+        driverLabel,
         variantLabel: variant.label,
         baseline: {
           value: baseline.value,
@@ -141,7 +177,7 @@ function isUsableVariant(result, envelope) {
   return Boolean(result) && envelope.status !== ENVELOPE_STATUS.OUT_OF_SCOPE
 }
 
-function buildRow(definition, specs, config, customMotor, baseResult) {
+function buildRow(definition, specs, config, customMotor, baseResult, outputKeys) {
   const base = numeric(specs[definition.key])
   if (base == null || base <= 0) {
     return {
@@ -157,13 +193,13 @@ function buildRow(definition, specs, config, customMotor, baseResult) {
     }
   }
 
-  const baselineOutput = outputFor(baseResult)
+  const baselineOutput = outputFor(baseResult, outputKeys)
   const variants = definition.deltas.map((delta) => {
     const value = variantValue(base, delta, definition.key)
     const variantSpecs = copySpecs(specs, definition.key, value)
     const envelope = evaluateMissionEnvelope({ specs: variantSpecs, config, customMotor })
     const result = runSimulation({ specs: variantSpecs, config, customMotor })
-    const output = outputFor(result)
+    const output = outputFor(result, outputKeys)
     const usable = isUsableVariant(result, envelope)
     return {
       label:
@@ -179,26 +215,32 @@ function buildRow(definition, specs, config, customMotor, baseResult) {
       envelopeStatus: envelope.status,
       envelopeReasons: envelope.reasons.map(({ code, message }) => ({ code, message })),
       output,
-      deltas: outputDeltas(output, baselineOutput),
+      deltas: outputDeltas(output, baselineOutput, outputKeys),
     }
   })
 
   const usableVariants = variants.filter(({ usable }) => usable)
   const unusableVariants = variants.filter(({ usable }) => !usable)
   const outputs = usableVariants.map(({ output }) => output).filter(Boolean)
-  const ranges = OUTPUT_KEYS.reduce((result, key) => {
+  const ranges = outputKeys.reduce((result, key) => {
     result[key] = range(outputs.map((output) => output[key]))
     return result
   }, {})
-  const deltas = OUTPUT_KEYS.reduce((result, key) => {
+  const deltas = outputKeys.reduce((result, key) => {
     result[key] = range(
       usableVariants.map((variant) => variant.deltas?.[key]).filter((value) => value != null)
     )
     return result
   }, {})
 
-  const criterionCrossings = OUTPUT_KEYS.flatMap((outputKey) =>
-    criterionCrossingsFor(outputKey, baselineOutput, variants)
+  const criterionCrossings = outputKeys.flatMap((outputKey) =>
+    criterionCrossingsFor({
+      outputKey,
+      driverKey: definition.key,
+      driverLabel: definition.label,
+      baselineOutput,
+      variants,
+    })
   )
 
   return {
@@ -217,7 +259,7 @@ function buildRow(definition, specs, config, customMotor, baseResult) {
   }
 }
 
-function buildWindRow(specs, config, customMotor, baseResult) {
+function buildWindRow(specs, config, customMotor, baseResult, outputKeys) {
   const base = numeric(specs.wind_speed_mph)
   if (base == null || base <= 0) {
     return {
@@ -246,7 +288,8 @@ function buildWindRow(specs, config, customMotor, baseResult) {
     specs,
     config,
     customMotor,
-    baseResult
+    baseResult,
+    outputKeys
   )
 }
 
@@ -265,11 +308,14 @@ export function runSensitivity({ specs = {}, config = {}, customMotor = null } =
     }
   }
 
-  const baseOutput = outputFor(baseResult)
+  const outputKeys = outputKeysFor(config)
+  const baseOutput = outputFor(baseResult, outputKeys)
   const envelope = baselineEnvelope(specs, config, customMotor)
   const rows = [
-    ...VARIATIONS.map((definition) => buildRow(definition, specs, config, customMotor, baseResult)),
-    buildWindRow(specs, config, customMotor, baseResult),
+    ...VARIATIONS.map((definition) =>
+      buildRow(definition, specs, config, customMotor, baseResult, outputKeys)
+    ),
+    buildWindRow(specs, config, customMotor, baseResult, outputKeys),
   ]
 
   const criterionCrossings = rows.flatMap((row) => row.criterionCrossings ?? [])

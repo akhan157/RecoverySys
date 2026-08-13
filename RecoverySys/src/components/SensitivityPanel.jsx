@@ -1,12 +1,18 @@
 import { useMemo } from 'react'
 import { runSensitivity } from '../lib/sensitivity.js'
+import { presentCriterion } from '../lib/criterionPresentation.js'
 
 const OUTPUTS = [
   ['apogee_ft', 'Apogee', 'ft'],
   ['drift_ft', 'Drift', 'ft'],
+  ['drogue_fps', 'Drogue descent', 'ft/s'],
   ['main_fps', 'Main descent', 'ft/s'],
   ['landing_ke_ftlbf', 'Landing energy', 'ft-lbf'],
 ]
+
+function crossingLabel(category, severity) {
+  return presentCriterion({ evaluated: true, category, severity }).label
+}
 
 function format(value) {
   return value == null ? '—' : Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })
@@ -82,6 +88,21 @@ export default function SensitivityPanel({
               )
             })}
           </div>
+          {result.criterionCrossings?.length > 0 && (
+            <div className="mc-sensitivity__crossings" aria-label="Defensible criterion crossings">
+              <div className="mc-sensitivity__crossings-title">DEFENSIBLE CRITERION CROSSINGS</div>
+              <ul>
+                {result.criterionCrossings.map((crossing, index) => (
+                  <li key={`${crossing.driverKey}-${crossing.output}-${index}`}>
+                    <strong>{crossing.driverLabel}</strong> {crossing.variantLabel}:{' '}
+                    {crossing.outputLabel} {format(crossing.baseline.value)} {crossing.unit} moves
+                    from {crossingLabel(crossing.baseline.category, crossing.baseline.severity)} to{' '}
+                    {crossingLabel(crossing.variant.category, crossing.variant.severity)}.
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <details className="mc-sensitivity__details">
             <summary>TESTED INPUTS / INVALID VARIANTS</summary>
             <div className="mc-sensitivity__detail-grid">

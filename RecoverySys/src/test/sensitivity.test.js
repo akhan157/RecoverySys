@@ -28,7 +28,7 @@ describe('deterministic sensitivity analysis', () => {
     expect(result.baseline.identity).toMatchObject({
       modelId: 'browser-js-recovery',
       modelVersion: 'isa-apogee-descent-v1',
-      sensitivityVersion: 'sensitivity-one-at-a-time-v2',
+      sensitivityVersion: 'sensitivity-one-at-a-time-v3',
     })
     expect(result.scenario).toMatchObject({
       method: 'one-at-a-time',
@@ -54,6 +54,43 @@ describe('deterministic sensitivity analysis', () => {
     expect(result.method).toMatch(/model response/i)
     expect(result.method).toMatch(/not probability or confidence intervals/i)
     expect(runSensitivity({ specs, config })).toEqual(result)
+  })
+
+  it('reports per-output drogue descent response with its registered criterion crossing', () => {
+    const heavy = { ...specs, rocket_mass_g: '5500' }
+    const smallDrogue = { specs: { diameter_in: 9, cd: 1.0 } }
+    const largeMain = { specs: { diameter_in: 60, cd: 2.0 } }
+    const result = runSensitivity({
+      specs: heavy,
+      config: { main_chute: largeMain, drogue_chute: smallDrogue },
+    })
+    const mass = result.rows.find(({ key }) => key === 'rocket_mass_g')
+    expect(mass.ranges.drogue_fps.min).toBeLessThan(mass.ranges.drogue_fps.max)
+    const drogueCrossing = result.criterionCrossings.find(
+      (crossing) => crossing.output === 'drogue_fps'
+    )
+    expect(drogueCrossing).toMatchObject({
+      output: 'drogue_fps',
+      outputLabel: 'Drogue descent rate',
+      unit: 'ft/s',
+      criterionId: 'recovery.drogue-descent-rate',
+      criterionVersion: 'recovery-criteria-v1',
+      driverKey: 'rocket_mass_g',
+      driverLabel: 'Rocket mass',
+      variantLabel: '-10%',
+      baseline: { category: 'fast-shock', severity: 'warn' },
+      variant: { category: 'nominal', severity: 'none' },
+    })
+  })
+
+  it('withholds drogue response when no drogue canopy is configured', () => {
+    const result = runSensitivity({ specs, config: { main_chute: chute } })
+    const mass = result.rows.find(({ key }) => key === 'rocket_mass_g')
+    expect(mass.ranges).not.toHaveProperty('drogue_fps')
+    expect(mass.deltas).not.toHaveProperty('drogue_fps')
+    expect(result.criterionCrossings.some((crossing) => crossing.output === 'drogue_fps')).toBe(
+      false
+    )
   })
 
   it('reports unavailable inputs rather than inventing a wind range', () => {

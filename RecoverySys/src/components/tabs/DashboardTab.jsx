@@ -1,4 +1,6 @@
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
+import { CRITERION_IDS, evaluateCriterion } from '../../lib/criteria.js'
+import { presentCriterion } from '../../lib/criterionPresentation.js'
 import { CATEGORIES } from '../../data/parts.js'
 import { partSpecLine } from '../../lib/format.js'
 import PartsBrowser from '../PartsBrowser.jsx'
@@ -26,6 +28,12 @@ export default function DashboardTab({
 }) {
   const resultDetails =
     RESULT_STATUS_DETAILS[state.simulation ? (resultFresh ? 'current' : 'stale') : 'not-run']
+  // Canonical main-descent classification; the summary never re-derives the
+  // 15/20 ft/s boundaries itself.
+  const descentPresentation =
+    state.simulation?.main_fps != null
+      ? presentCriterion(evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, state.simulation.main_fps))
+      : null
   return (
     <div className="mc-dashboard">
       {/* ── Parts Catalog (left) ─────────────────────────────────────── */}
@@ -159,9 +167,7 @@ export default function DashboardTab({
                 <div className="mc-metric__sub">
                   {state.simulation.main_fps == null
                     ? 'DROGUE_ONLY'
-                    : state.simulation.main_fps > 15
-                      ? 'ABOVE_NOMINAL'
-                      : 'WITHIN_LIMITS'}
+                    : descentPresentation.label}
                 </div>
               </div>
             </>

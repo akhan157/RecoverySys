@@ -42,7 +42,35 @@ describe('recovery brief view model', () => {
     expect(brief.selectedHardware[0].name).toBe('Main')
     expect(brief.keyEstimates).toBeNull()
     expect(brief.provenance.modelVersion).toBe('test-model')
-    expect(brief.sensitivity.status).toBe('complete')
+    // Stale-result closure: a passed-in sensitivity response is never
+    // presented for a stale plan; the brief emits the hidden-until-current
+    // placeholder instead of fresh-looking ranges.
+    expect(brief.sensitivity).toEqual({
+      status: 'stale',
+      reason: 'Sensitivity is hidden until the base simulation is current.',
+    })
     expect(brief.unresolvedChecks.some(({ code }) => code === 'RESULT_STALE')).toBe(true)
+  })
+
+  it('withholds sensitivity entirely when no simulation exists', () => {
+    const brief = buildRecoveryBrief({ specs, config: {} })
+    expect(brief.status).toBe('not-run')
+    expect(brief.sensitivity).toEqual({
+      status: 'not-run',
+      reason: 'Sensitivity is unavailable until a current simulation exists.',
+    })
+  })
+
+  it('preserves an explicit sensitivity response only for a current result', () => {
+    const explicit = { status: 'complete', rows: [], method: 'explicit-contract' }
+    const current = buildRecoveryBrief({
+      specs,
+      config: { main_chute: { name: 'Main', specs: { diameter_in: 24 } } },
+      simulation: { apogee_ft: 3000, provenance: { modelVersion: 'test-model' } },
+      resultFresh: true,
+      sensitivity: explicit,
+    })
+    expect(current.status).toBe('current')
+    expect(current.sensitivity).toBe(explicit)
   })
 })
