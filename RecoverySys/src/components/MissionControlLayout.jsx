@@ -316,7 +316,9 @@ export default function MissionControlLayout({
                 onClearSnapshot={clearCompareSnapshot}
               />
             )}
-            {activeTab === 'FLIGHT_LOG' && <FlightLogTab state={state} resultFresh={resultFresh} />}
+            {activeTab === 'FLIGHT_LOG' && (
+              <FlightLogTab state={state} resultFresh={resultFresh} addToast={addToast} />
+            )}
             {activeTab === 'RECOVERY_BRIEF' && <RecoveryBriefTab recoveryBrief={recoveryBrief} />}
             {activeTab === 'EXPORT' && (
               <ExportTab

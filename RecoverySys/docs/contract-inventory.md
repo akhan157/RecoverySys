@@ -160,6 +160,14 @@ Owner: `src/lib/flightEvidence.js`, `src/components/tabs/FlightLogTab.jsx`.
   entries }`; import validates type, export version, and array shape before
   migrating each entry. Flight records are observations, never accepted
   corpus evidence (`corpusEvidence` is forced false).
+- Candidate-evidence transfer: `{ type: 'recoverysys-candidate-evidence',
+  exportVersion: 1, entries }`; every entry carries source, canonical units,
+  conditions, reviewer status (default `unreviewed`), and the immutable
+  prediction identity derived from its `simulationProvenance.inputKey`
+  snapshot. Intake re-derives the identity from carried provenance — a
+  transferred claim can never re-identify a prediction it does not contain —
+  and drops entries without a provenance snapshot. Observations never upload
+  and are never promoted to accepted corpus evidence.
 
 ## Validation corpus
 

@@ -1,5 +1,9 @@
 import { describe, it, expect } from 'vitest'
-import { encodeSharePayload as realEncode } from '../lib/shareLink.js'
+import {
+  encodeSharePayload as realEncode,
+  decodeSharePayload as decodeSharePayloadReal,
+} from '../lib/shareLink.js'
+import { decodeMigrateValidateNormalize } from '../lib/payloadBoundary.js'
 
 // Simple codec for basic roundtrip tests (no custom-part detection)
 function encodeSharePayload(payload) {
@@ -183,5 +187,55 @@ describe('share-link codec — custom part inlining', () => {
     expect(raw.config.main_chute.specs.diameter_in).toBe(54)
     // Catalog part should be { id } only (no name, no specs)
     expect(raw.config.drogue_chute).toEqual({ id: catalogPart.id })
+  })
+})
+
+// ── Migration parity (fresh-context transfer behavior) ─────────────────────────
+
+const legacyOptions = {
+  slotIds: ['main_chute'],
+  emptyConfig: { main_chute: null },
+  allParts: [],
+}
+
+describe('transfer migration parity', () => {
+  it('migrates a legacy v0 payload through the share decode path', () => {
+    // Pre-versioning wire payload: no schemaVersion, historical airframe_od_in key.
+    const legacy = {
+      config: { main_chute: null },
+      specs: { airframe_od_in: '4', rocket_mass_g: '2500' },
+    }
+    const encoded = btoa(encodeURIComponent(JSON.stringify(legacy)))
+    const decoded = decodeSharePayloadReal(encoded, legacyOptions)
+    expect(decoded.schemaVersion).toBe(1)
+    expect(decoded.specs.airframe_id_in).toBe('4')
+    expect(decoded.specs.airframe_od_in).toBeUndefined()
+    expect(decoded.specs.rocket_mass_g).toBe('2500')
+  })
+
+  it('migrates a legacy payload through the JSON import path', () => {
+    const legacy = {
+      _format: 'recoverysys-config-v1',
+      config: { main_chute: null },
+      specs: { airframe_od_in: '4' },
+    }
+    const result = decodeMigrateValidateNormalize(legacy, legacyOptions)
+    expect(result.ok).toBe(true)
+    expect(result.specs.airframe_id_in).toBe('4')
+    expect(result.specs.airframe_od_in).toBeUndefined()
+  })
+
+  it('rejects a future-version payload identically on both transfer paths', () => {
+    const future = {
+      config: { main_chute: null },
+      specs: sampleSpecs,
+      schemaVersion: 99,
+    }
+    // The share decode path collapses rejection to null (guardrail contract);
+    // the JSON boundary reports the structured future-version code.
+    expect(
+      decodeSharePayloadReal(btoa(encodeURIComponent(JSON.stringify(future))), legacyOptions)
+    ).toBeNull()
+    expect(decodeMigrateValidateNormalize(future, legacyOptions).error.code).toBe('future-version')
   })
 })

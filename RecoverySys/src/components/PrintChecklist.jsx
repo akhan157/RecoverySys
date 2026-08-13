@@ -16,6 +16,12 @@ const PACKING_ORDER = [
 
 const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label]))
 
+function formatEstimate(value) {
+  return value == null || value === '' || !Number.isFinite(Number(value))
+    ? '—'
+    : Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })
+}
+
 export default function PrintChecklist({
   specs,
   config,
@@ -32,6 +38,10 @@ export default function PrintChecklist({
     hour: '2-digit',
     minute: '2-digit',
   })
+  // The print artifact shares the brief's generated-at identity when the
+  // versioned view model is available, so screen and print agree on the
+  // handoff timestamp instead of each rendering its own clock time.
+  const generatedAt = recoveryBrief?.generatedAt ?? date
 
   const selectedParts = CATEGORIES.filter((c) => config[c.id])
   const packingSteps = PACKING_ORDER.filter((slot) => config[slot])
@@ -44,7 +54,7 @@ export default function PrintChecklist({
       <h1>
         {printMode === 'brief' ? 'RecoverySys Recovery Brief' : 'RecoverySys Recovery Checklist'}
       </h1>
-      <p className="print-subtitle">Generated {date}</p>
+      <p className="print-subtitle">Generated {generatedAt}</p>
       <section className="print-brief-status print-artifact--brief">
         <h2>Recovery brief status</h2>
         <p>
@@ -85,6 +95,13 @@ export default function PrintChecklist({
           {recoveryBrief?.provenance?.modelVersion || 'Not available'} · Assumptions:{' '}
           {recoveryBrief?.provenance?.assumptionsVersion || 'Not available'}
         </p>
+        <p>
+          Input identity:{' '}
+          {recoveryBrief?.provenance?.inputKey || 'Not available'} · Input revision:{' '}
+          {recoveryBrief?.provenance?.inputRevision ??
+            recoveryBrief?.provenance?.revision ??
+            'Not available'}
+        </p>
       </section>
       <section className="print-artifact--brief">
         <h2>Selected hardware</h2>
@@ -98,6 +115,108 @@ export default function PrintChecklist({
           </ul>
         ) : (
           <p>No hardware selected.</p>
+        )}
+      </section>
+
+      {/* ── Current key estimates (brief only; withheld when not current) ─── */}
+      <section className="print-artifact--brief">
+        <h2>Current key estimates</h2>
+        {recoveryBrief?.keyEstimates ? (
+          <table>
+            <tbody>
+              <tr>
+                <th>Apogee</th>
+                <td>{formatEstimate(recoveryBrief.keyEstimates.apogee_ft)} ft</td>
+              </tr>
+              <tr>
+                <th>Drift</th>
+                <td>{formatEstimate(recoveryBrief.keyEstimates.drift_ft)} ft</td>
+              </tr>
+              <tr>
+                <th>Drogue descent</th>
+                <td>{formatEstimate(recoveryBrief.keyEstimates.drogue_fps)} ft/s</td>
+              </tr>
+              <tr>
+                <th>Main descent</th>
+                <td>{formatEstimate(recoveryBrief.keyEstimates.main_fps)} ft/s</td>
+              </tr>
+              <tr>
+                <th>Landing energy</th>
+                <td>{formatEstimate(recoveryBrief.keyEstimates.landing_ke_ftlbf)} ft-lbf</td>
+              </tr>
+            </tbody>
+          </table>
+        ) : (
+          <p>
+            {resultDetails
+              ? `${resultDetails.reasonCode} — ${resultDetails.remediation}`
+              : 'NO_CURRENT_RESULT — no simulation estimates are available.'}
+          </p>
+        )}
+      </section>
+
+      {/* ── Sensitivity response (brief only; withheld when not current) ─── */}
+      <section className="print-artifact--brief">
+        <h2>Sensitivity response</h2>
+        {recoveryBrief?.sensitivity?.status === 'complete' ? (
+          <>
+            <p>{recoveryBrief.sensitivity.method}</p>
+            <table>
+              <tbody>
+                {[
+                  ['Apogee', 'apogee_ft', 'ft'],
+                  ['Drift', 'drift_ft', 'ft'],
+                  ['Drogue descent', 'drogue_fps', 'ft/s'],
+                  ['Main descent', 'main_fps', 'ft/s'],
+                  ['Landing energy', 'landing_ke_ftlbf', 'ft-lbf'],
+                ].map(([label, key, unit]) => {
+                  const ranges = (recoveryBrief.sensitivity.rows || [])
+                    .map((row) => row.ranges?.[key])
+                    .filter(Boolean)
+                  const min = ranges.length
+                    ? Math.min(...ranges.map((range) => Number(range.min)))
+                    : null
+                  const max = ranges.length
+                    ? Math.max(...ranges.map((range) => Number(range.max)))
+                    : null
+                  return (
+                    <tr key={key}>
+                      <th>{label}</th>
+                      <td>
+                        {Number.isFinite(min) && Number.isFinite(max)
+                          ? `${formatEstimate(min)}–${formatEstimate(max)} ${unit}`
+                          : 'Not available'}
+                      </td>
+                    </tr>
+                  )
+                })}
+              </tbody>
+            </table>
+            <p>
+              These ranges describe model response only, not probability, accuracy, or a confidence
+              interval, and do not establish safety, approval, certification, or launch readiness.
+            </p>
+          </>
+        ) : (
+          <p>
+            {recoveryBrief?.sensitivity?.reason || 'Sensitivity response is not available.'}
+          </p>
+        )}
+      </section>
+
+      {/* ── Compatibility findings (brief) ───────────────────────────────── */}
+      <section className="print-artifact--brief">
+        <h2>Compatibility findings</h2>
+        {warnings.length === 0 ? (
+          <p>No compatibility warnings recorded.</p>
+        ) : (
+          <ul>
+            {warnings.map((w, i) => (
+              <li key={i} className={w.level === WARN_LEVELS.ERROR ? 'print-warning' : ''}>
+                <strong>{CATEGORY_LABELS[w.slot] || w.slot || w.code || 'REVIEW'}:</strong> {w.message}
+              </li>
+            ))}
+          </ul>
         )}
       </section>
 
@@ -231,12 +350,12 @@ export default function PrintChecklist({
               )}
               <tr>
                 <th>Drogue Descent</th>
-                <td>{simulation.drogue_fps} fps</td>
+                <td>{simulation.drogue_fps} ft/s</td>
               </tr>
               {simulation.main_fps != null && (
                 <tr>
                   <th>Main Descent</th>
-                  <td>{simulation.main_fps} fps</td>
+                  <td>{simulation.main_fps} ft/s</td>
                 </tr>
               )}
               <tr>
@@ -347,9 +466,14 @@ export default function PrintChecklist({
         )}
       </section>
 
-      {/* ── Packing Order ─────────────────────────────────────── */}
+      {/* ── Static checklist order ────────────────────────────────────────── */}
       <section className="print-artifact--checklist">
-        <h2>Packing Order (bottom of bay to top)</h2>
+        <h2>Static packing / checklist order (bottom of bay to top)</h2>
+        <p>
+          Planning checklist order only — not measured packing geometry, an assembly instruction,
+          or flight-readiness validation. Packing-volume screening is reported separately from the
+          simulated results.
+        </p>
         {packingSteps.length === 0 ? (
           <p>No parts selected</p>
         ) : (

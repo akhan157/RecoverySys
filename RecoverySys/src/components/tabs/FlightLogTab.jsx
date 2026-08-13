@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
+import { TOAST_LEVELS } from '../../lib/constants.js'
 import Input from '../primitives/Input.jsx'
 import {
   createFlightEntry,
@@ -7,7 +8,16 @@ import {
   saveFlightLog,
   exportFlightRecords,
   importFlightRecords,
+  exportCandidateEvidence,
+  importCandidateEvidence,
 } from '../../lib/flightEvidence.js'
+
+const REVIEWER_LABELS = Object.freeze({
+  unreviewed: 'UNREVIEWED',
+  'under-review': 'UNDER_REVIEW',
+  accepted: 'ACCEPTED',
+  rejected: 'REJECTED',
+})
 
 function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
   const [form, setForm] = useState({
@@ -21,6 +31,7 @@ function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
     notes: '',
     observation_source: 'manual',
     instrumentation: '',
+    conditions: '',
     missing_data: [],
   })
 
@@ -96,7 +107,7 @@ function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
             className="section-label"
             style={{ marginBottom: 3, display: 'block' }}
           >
-            Actual Main Rate (fps)
+            Actual Main Rate (ft/s)
           </label>
           <Input
             id="flight-main-rate"
@@ -199,6 +210,22 @@ function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
             mono={false}
           />
         </div>
+        <div>
+          <label
+            htmlFor="flight-conditions"
+            className="section-label"
+            style={{ marginBottom: 3, display: 'block' }}
+          >
+            Conditions (optional)
+          </label>
+          <Input
+            id="flight-conditions"
+            placeholder="e.g. 10 mph wind, clear, 65°F"
+            value={form.conditions}
+            onChange={(e) => set('conditions', e.target.value)}
+            mono={false}
+          />
+        </div>
       </div>
       <div>
         <label
@@ -295,7 +322,7 @@ function LogEntry({ entry, onDelete }) {
               textTransform: 'uppercase',
             }}
           >
-            {entry.outcome.replace('_', ' ')}
+            {String(entry.outcome ?? '').replace('_', ' ')}
           </span>
         </div>
         <button
@@ -332,8 +359,12 @@ function LogEntry({ entry, onDelete }) {
             {entry.actual_apogee_ft && (
               <tr>
                 <td style={cellStyle}>Apogee</td>
-                <td style={cellStyle}>{pred.apogee_ft} ft</td>
-                <td style={cellStyle}>{entry.actual_apogee_ft} ft</td>
+                <td style={cellStyle}>
+                  {pred.apogee_ft} {entry.units?.apogee_ft || 'ft'}
+                </td>
+                <td style={cellStyle}>
+                  {entry.actual_apogee_ft} {entry.units?.apogee_ft || 'ft'}
+                </td>
                 <td style={{ ...cellStyle, color: 'var(--mc-amber)' }}>
                   {delta(entry.actual_apogee_ft, pred.apogee_ft)}
                 </td>
@@ -342,8 +373,12 @@ function LogEntry({ entry, onDelete }) {
             {entry.actual_main_fps && pred.main_fps && (
               <tr>
                 <td style={cellStyle}>Main Rate</td>
-                <td style={cellStyle}>{pred.main_fps} fps</td>
-                <td style={cellStyle}>{entry.actual_main_fps} fps</td>
+                <td style={cellStyle}>
+                  {pred.main_fps} {entry.units?.main_fps || 'ft/s'}
+                </td>
+                <td style={cellStyle}>
+                  {entry.actual_main_fps} {entry.units?.main_fps || 'ft/s'}
+                </td>
                 <td style={{ ...cellStyle, color: 'var(--mc-amber)' }}>
                   {delta(entry.actual_main_fps, pred.main_fps)}
                 </td>
@@ -351,6 +386,17 @@ function LogEntry({ entry, onDelete }) {
             )}
           </tbody>
         </table>
+      )}
+
+      {entry.conditions && (
+        <div style={{ fontSize: 11, color: 'var(--mc-text-dim)', lineHeight: 1.4 }}>
+          Conditions: {entry.conditions}
+        </div>
+      )}
+      {entry.reviewerStatus && entry.reviewerStatus !== 'unreviewed' && (
+        <div style={{ fontSize: 10, color: 'var(--mc-amber)', fontWeight: 600, marginTop: 4 }}>
+          REVIEW_STATUS: {REVIEWER_LABELS[entry.reviewerStatus] || entry.reviewerStatus}
+        </div>
       )}
 
       {entry.notes && (
@@ -369,7 +415,7 @@ function LogEntry({ entry, onDelete }) {
   )
 }
 
-export default function FlightLogTab({ state, resultFresh }) {
+export default function FlightLogTab({ state, resultFresh, addToast }) {
   const usableSimulation = resultFresh ? state.simulation : null
   const [entries, setEntries] = useState(loadFlightLog)
 
@@ -389,15 +435,54 @@ export default function FlightLogTab({ state, resultFresh }) {
     anchor.click()
     URL.revokeObjectURL(url)
   }
+  const downloadCandidateEvidence = () => {
+    const url = URL.createObjectURL(
+      new Blob([exportCandidateEvidence(entries)], { type: 'application/json' })
+    )
+    const anchor = document.createElement('a')
+    anchor.href = url
+    anchor.download = 'recoverysys-candidate-evidence.json'
+    anchor.click()
+    URL.revokeObjectURL(url)
+  }
   const importRecords = (event) => {
     const file = event.target.files?.[0]
     if (!file) return
     const reader = new FileReader()
     reader.onload = () => {
       try {
-        setEntries((prev) => [...importFlightRecords(reader.result), ...prev])
-      } catch {
-        /* reject invalid JSON */
+        const imported = importFlightRecords(reader.result)
+        setEntries((prev) => [...imported, ...prev])
+        addToast?.(
+          TOAST_LEVELS.OK,
+          `Imported ${imported.length} flight record${imported.length === 1 ? '' : 's'}.`
+        )
+      } catch (error) {
+        addToast?.(TOAST_LEVELS.ERROR, error.message ?? 'Invalid flight records file.')
+      }
+      event.target.value = ''
+    }
+    reader.readAsText(file)
+  }
+  const importCandidateEvidenceFile = (event) => {
+    const file = event.target.files?.[0]
+    if (!file) return
+    const reader = new FileReader()
+    reader.onload = () => {
+      try {
+        const imported = importCandidateEvidence(reader.result)
+        setEntries((prev) => [...imported, ...prev])
+        addToast?.(
+          TOAST_LEVELS.OK,
+          `Imported ${imported.length} candidate evidence record${
+            imported.length === 1 ? '' : 's'
+          }. Observations are never promoted to accepted corpus evidence.`
+        )
+      } catch (error) {
+        addToast?.(
+          TOAST_LEVELS.ERROR,
+          error.message ?? 'Invalid candidate evidence file.'
+        )
       }
       event.target.value = ''
     }
@@ -431,7 +516,7 @@ export default function FlightLogTab({ state, resultFresh }) {
           specs={state.specs}
           onSave={addEntry}
         />
-        <div style={{ display: 'flex', gap: 8, marginTop: 8 }}>
+        <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
           <button className="mc-run-btn" type="button" onClick={download}>
             EXPORT_RECORDS
           </button>
@@ -444,7 +529,31 @@ export default function FlightLogTab({ state, resultFresh }) {
               style={{ display: 'none' }}
             />
           </label>
+          <button className="mc-run-btn" type="button" onClick={downloadCandidateEvidence}>
+            EXPORT_CANDIDATE_EVIDENCE
+          </button>
+          <label className="mc-run-btn">
+            IMPORT_CANDIDATE_EVIDENCE
+            <input
+              type="file"
+              accept="application/json"
+              onChange={importCandidateEvidenceFile}
+              style={{ display: 'none' }}
+            />
+          </label>
         </div>
+        <p
+          style={{
+            fontSize: 10,
+            color: 'var(--mc-text-dim)',
+            lineHeight: 1.5,
+            marginTop: 8,
+          }}
+        >
+          Candidate evidence export carries source, units, conditions, reviewer status, and the
+          immutable prediction identity from the simulation provenance snapshot. Imported
+          observations stay local and are never promoted to accepted corpus evidence.
+        </p>
 
         {entries.length > 0 && (
           <>
