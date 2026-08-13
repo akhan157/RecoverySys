@@ -139,4 +139,49 @@ describe('validation corpus gate', () => {
       },
     ])
   })
+
+  it('emits deterministic per-case summaries with observed values and review-only posture', () => {
+    const result = validateCorpus()
+    expect(validateCorpus()).toEqual(result) // deterministic across two consecutive runs
+
+    expect(result.caseSummaries).toHaveLength(14)
+    const byId = new Map(result.caseSummaries.map((summary) => [summary.id, summary]))
+    expect([...byId.keys()].sort()).toEqual(
+      [...result.domainCoverage.flatMap((d) => d.caseIds)].sort()
+    )
+
+    for (const summary of result.caseSummaries) {
+      expect(summary).toMatchObject({
+        id: expect.any(String),
+        file: expect.stringMatching(/\.json$/),
+        domain: expect.any(String),
+        kind: expect.stringMatching(/^(analytic|trusted-simulator|real-flight|metamorphic)$/),
+        status: expect.stringMatching(
+          /^(draft|review|accepted-for-comparison|superseded|rejected)$/
+        ),
+        model: {
+          id: expect.any(String),
+          version: expect.any(String),
+          assumptionsVersion: expect.any(String),
+        },
+      })
+      expect(summary.metrics.length).toBeGreaterThan(0)
+      for (const metric of summary.metrics) {
+        expect(Number.isFinite(metric.observed), `${summary.id}/${metric.name} observed`).toBe(true)
+        expect(Number.isFinite(metric.difference), `${summary.id}/${metric.name} difference`).toBe(
+          true
+        )
+        expect(metric.tolerance).toMatchObject({
+          basis: expect.any(String),
+        })
+        // Review cases report structure and reproducibility but never gate agreement.
+        expect(metric.gatesAgreement).toBe(false)
+      }
+    }
+
+    // The corpus contains no accepted-for-comparison or real-flight cases.
+    expect(result.caseSummaries.every((s) => s.status === 'review')).toBe(true)
+    expect(result.caseSummaries.every((s) => s.kind !== 'real-flight')).toBe(true)
+    expect(result.caseSummaries.some((s) => s.kind === 'metamorphic')).toBe(true)
+  })
 })

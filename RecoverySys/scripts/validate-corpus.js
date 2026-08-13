@@ -182,6 +182,7 @@ export function validateCorpus() {
     .sort()
   const cases = files.map((file) => ({ file, testCase: readJson(path.join(CORPUS_DIR, file)) }))
   const validCases = []
+  const caseSummaries = []
   const seen = new Set()
 
   if (!modelMatches(manifest.model))
@@ -214,20 +215,41 @@ export function validateCorpus() {
       continue
     }
     const observed = evaluate(testCase.inputs)
+    const metrics = []
     for (const metric of testCase.expected.metrics) {
       const actual = observed[metric.name]
-      if (!Number.isFinite(actual)) {
+      const finite = Number.isFinite(actual)
+      const result = finite ? compare(actual, metric.value, metric.tolerance) : { difference: null, pass: false }
+      const gatesAgreement = testCase.status === 'accepted-for-comparison'
+      metrics.push({
+        name: metric.name,
+        unit: metric.unit,
+        expected: metric.value,
+        observed: finite ? actual : null,
+        difference: result.difference,
+        tolerance: metric.tolerance,
+        pass: finite && result.pass,
+        gatesAgreement,
+      })
+      if (!finite) {
         diagnostics.push(`${testCase.id}/${metric.name}: observed output is not finite`)
         continue
       }
-      const result = compare(actual, metric.value, metric.tolerance)
-      const gatesAgreement = testCase.status === 'accepted-for-comparison'
       if (!result.pass && gatesAgreement) {
         diagnostics.push(
           `${testCase.id}/${metric.name}: expected ${metric.value} ${metric.unit}, observed ${actual}, difference ${result.difference}`
         )
       }
     }
+    caseSummaries.push({
+      id: testCase.id,
+      file,
+      domain: testCase.domain,
+      kind: testCase.kind,
+      status: testCase.status,
+      model: testCase.model,
+      metrics,
+    })
   }
 
   for (const id of manifest.cases ?? [])
@@ -237,6 +259,7 @@ export function validateCorpus() {
     diagnostics,
     cases: cases.length,
     domainCoverage: reportDomainCoverage(validCases),
+    caseSummaries,
   }
 }
 

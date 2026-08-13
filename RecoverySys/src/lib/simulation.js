@@ -640,6 +640,52 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500, s
   return { scatter, ellipse, meanLat, meanLon }
 }
 
+// ── Deterministic dispersion summary ────────────────────────────────────────
+
+/**
+ * Stable scalar summary contract for a dispersion run.
+ *
+ * Reduces a (optionally seeded) Monte Carlo landing scatter to a fixed set of
+ * scalar metrics so dispersion output can be recorded, compared, and
+ * regression-checked deterministically. With a safe-integer `seed`, two runs
+ * produce byte-identical summaries; without a seed the same contract applies
+ * but the values are stochastic.
+ *
+ * Distances are measured from the landing-point centroid using the same
+ * metre-per-degree approximation as `fitConfidenceEllipse`. This is a
+ * reproducibility contract, not a confidence interval and not a real-world
+ * accuracy claim: scatter is modeled variation, not measured data.
+ */
+export function summarizeDispersionRun({ simulation, specs, iterations = 500, seed } = {}) {
+  const result = runDispersionMonteCarlo({ simulation, specs, iterations, seed })
+  if (!result || !result.ellipse) return null
+
+  const { scatter, ellipse, meanLat, meanLon } = result
+  const mPerDegLat = 111320
+  const mPerDegLon = 111320 * Math.cos((meanLat * Math.PI) / 180)
+  const distances = scatter.map((point) => {
+    const dx = (point.lon - meanLon) * mPerDegLon
+    const dy = (point.lat - meanLat) * mPerDegLat
+    return Math.hypot(dx, dy)
+  })
+  distances.sort((a, b) => a - b)
+  const p95Index = Math.min(distances.length - 1, Math.floor(0.95 * distances.length))
+
+  return {
+    seed: Number.isSafeInteger(seed) ? seed : null,
+    iterations,
+    landingPoints: distances.length,
+    meanLat,
+    meanLon,
+    meanDriftM: distances.reduce((sum, distance) => sum + distance, 0) / distances.length,
+    p95DriftM: distances[p95Index],
+    maxDriftM: distances[distances.length - 1],
+    ellipseRxM: ellipse.rx,
+    ellipseRyM: ellipse.ry,
+    ellipseAngleDeg: ellipse.angle_deg,
+  }
+}
+
 // ── Confidence ellipse ──────────────────────────────────────────────────────
 
 export function fitConfidenceEllipse(points) {

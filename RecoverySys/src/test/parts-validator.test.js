@@ -10,6 +10,15 @@ describe('parts catalog validator', () => {
     expect(validateParts()).toMatchObject({ valid: true, diagnostics: [] })
   })
 
+  it('fails validate:parts when the provenance registry is malformed', () => {
+    const result = validateParts([], [], { 'Bad Co': { title: '', status: 'approved' } })
+    expect(result.valid).toBe(false)
+    expect(result.diagnostics.join('\n')).toMatch(/Bad Co: title must be a non-empty string/)
+    expect(result.diagnostics.join('\n')).toMatch(
+      /Bad Co: status must be one of verified, unverified/
+    )
+  })
+
   it('reports missing core fields', () => {
     const part = validPart()
     delete part.name

@@ -3,7 +3,11 @@ import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import Ajv from 'ajv/dist/2020.js'
 import { PARTS, CATEGORIES } from '../src/data/parts.js'
-import { provenanceForPart } from '../src/data/catalogProvenance.js'
+import {
+  MANUFACTURER_PROVENANCE,
+  provenanceForPart,
+  validateCatalogProvenance,
+} from '../src/data/catalogProvenance.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 export const PARTS_SCHEMA = JSON.parse(fs.readFileSync(path.join(ROOT, 'parts-schema.json'), 'utf8'))
@@ -90,8 +94,20 @@ export function validateCatalog(parts, categories = CATEGORIES, schema = PARTS_S
   return { valid: diagnostics.length === 0, diagnostics }
 }
 
-export function validateParts(parts = PARTS, categories = CATEGORIES) {
-  return validateCatalog(parts, categories)
+export function validateParts(
+  parts = PARTS,
+  categories = CATEGORIES,
+  provenanceRegistry = MANUFACTURER_PROVENANCE
+) {
+  // V2-07: provenance shape is part of the catalog gate. validateCatalog stays
+  // a pure parts-shape check; provenance record shape is validated separately
+  // and its diagnostics are appended so the CLI reports both in one run.
+  const catalog = validateCatalog(parts, categories)
+  const provenance = validateCatalogProvenance(provenanceRegistry)
+  return {
+    valid: catalog.valid && provenance.valid,
+    diagnostics: [...catalog.diagnostics, ...provenance.diagnostics],
+  }
 }
 
 if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {

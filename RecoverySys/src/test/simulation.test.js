@@ -6,6 +6,7 @@ import {
   computeDrift,
   runDispersionMonteCarlo,
   runSimulation,
+  summarizeDispersionRun,
   interpolateThrust,
 } from '../lib/simulation.js'
 import { coerceSpec, parseSpec } from '../lib/schema.js'
@@ -542,6 +543,82 @@ describe('runSimulation', () => {
     expect(() => runDispersionMonteCarlo({ ...input, seed: 'not-a-seed' })).not.toThrow()
     expect(runDispersionMonteCarlo({ ...input, seed: 'not-a-seed' })).not.toBeNull()
     expect(runDispersionMonteCarlo(input)).not.toBeNull()
+  })
+})
+
+// ── seeded dispersion summary contract ───────────────────────────────────────
+
+describe('seeded dispersion summary contract', () => {
+  const base = {
+    simulation: { apogee_ft: 4000, deploy_ft: 500, drogue_fps: 70, main_fps: 15 },
+    specs: { wind_speed_mph: '10', wind_direction_deg: '0', launch_lat: '39', launch_lon: '-98' },
+  }
+
+  it('is deterministic for the same seed and input', () => {
+    const first = summarizeDispersionRun({ ...base, iterations: 100, seed: 12345 })
+    const second = summarizeDispersionRun({ ...base, iterations: 100, seed: 12345 })
+
+    expect(first).toEqual(second)
+    expect(first.seed).toBe(12345)
+    expect(first.iterations).toBe(100)
+    expect(first.landingPoints).toBeGreaterThanOrEqual(10)
+    for (const key of ['meanDriftM', 'p95DriftM', 'maxDriftM', 'ellipseRxM', 'ellipseRyM']) {
+      expect(Number.isFinite(first[key]), `${key} finite`).toBe(true)
+      expect(first[key], `${key} positive`).toBeGreaterThan(0)
+    }
+    expect(first.p95DriftM).toBeLessThanOrEqual(first.maxDriftM)
+    expect(first.meanDriftM).toBeLessThanOrEqual(first.maxDriftM)
+    expect(first.ellipseAngleDeg).toBeGreaterThanOrEqual(0)
+    expect(first.ellipseAngleDeg).toBeLessThan(360)
+  })
+
+  it('keeps the scalar contract stable across seeds while the scatter differs', () => {
+    const a = summarizeDispersionRun({ ...base, iterations: 100, seed: 111 })
+    const b = summarizeDispersionRun({ ...base, iterations: 100, seed: 222 })
+    const runA = runDispersionMonteCarlo({ ...base, iterations: 100, seed: 111 })
+    const runB = runDispersionMonteCarlo({ ...base, iterations: 100, seed: 222 })
+
+    expect(runA.scatter).not.toEqual(runB.scatter)
+    expect(Object.keys(a).sort()).toEqual(Object.keys(b).sort())
+    expect(a).not.toEqual(b)
+    // Rare near-zero-wind perturbations drop a landing point; both seeds stay
+    // within the same order of magnitude rather than an exact count.
+    expect(a.landingPoints).toBeGreaterThanOrEqual(90)
+    expect(b.landingPoints).toBeGreaterThanOrEqual(90)
+    expect(a.scatter).toBeUndefined() // raw scatter is not part of the contract
+    expect(a.ellipse).toBeUndefined()
+  })
+
+  it('reports a null seed for unseeded runs but still returns the contract shape', () => {
+    const summary = summarizeDispersionRun({ ...base, iterations: 100 })
+    expect(summary).not.toBeNull()
+    expect(summary.seed).toBeNull()
+    for (const key of [
+      'landingPoints',
+      'meanDriftM',
+      'p95DriftM',
+      'maxDriftM',
+      'ellipseRxM',
+      'ellipseRyM',
+    ]) {
+      expect(Number.isFinite(summary[key]), key).toBe(true)
+    }
+  })
+
+  it('returns null when the underlying run cannot produce a scatter', () => {
+    expect(summarizeDispersionRun({ simulation: null, specs: base.specs })).toBeNull()
+    expect(
+      summarizeDispersionRun({
+        simulation: base.simulation,
+        specs: { ...base.specs, wind_speed_mph: '0' },
+      })
+    ).toBeNull()
+    expect(
+      summarizeDispersionRun({
+        simulation: base.simulation,
+        specs: { ...base.specs, launch_lat: '' },
+      })
+    ).toBeNull()
   })
 })
 
