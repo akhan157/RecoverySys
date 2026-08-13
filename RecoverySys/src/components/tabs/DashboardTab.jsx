@@ -6,6 +6,8 @@ import { partSpecLine } from '../../lib/format.js'
 import PartsBrowser from '../PartsBrowser.jsx'
 import SuggestPanel from '../SuggestPanel.jsx'
 import ConfidenceStatus from '../ConfidenceStatus.jsx'
+import ReviewReturnBar from '../analysis/ReviewReturnBar.jsx'
+import { useReviewDestinationFocus } from '../../hooks/useReviewDestinationFocus.js'
 
 export default function DashboardTab({
   state,
@@ -25,6 +27,10 @@ export default function DashboardTab({
   deleteCustomPart,
   editCustomPart,
   confidenceProps,
+  reviewOrigin = null,
+  focusTarget = null,
+  onFocusConsumed,
+  onReturnToAnalysis,
 }) {
   const resultDetails =
     RESULT_STATUS_DETAILS[state.simulation ? (resultFresh ? 'current' : 'stale') : 'not-run']
@@ -34,8 +40,21 @@ export default function DashboardTab({
     state.simulation?.main_fps != null
       ? presentCriterion(evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, state.simulation.main_fps))
       : null
+
+  // Review actions name the affected hardware slot (config.<slot>); land focus
+  // on that slot in the bay schematic.
+  useReviewDestinationFocus({
+    focusTarget,
+    onConsumed: onFocusConsumed,
+    resolve: (target) =>
+      target.startsWith('config.')
+        ? document.querySelector(`[data-slot="${target.slice('config.'.length)}"]`)
+        : null,
+  })
+
   return (
     <div className="mc-dashboard">
+      {reviewOrigin === 'ANALYSIS' && <ReviewReturnBar onReturn={onReturnToAnalysis} />}
       {/* ── Parts Catalog (left) ─────────────────────────────────────── */}
       <div className="mc-parts-panel">
         <h2 className="mc-panel-header">PARTS_CATALOG</h2>
@@ -73,6 +92,7 @@ export default function DashboardTab({
                 className={`mc-slot ${isEmpty ? 'mc-slot--empty' : ''} ${isActive ? 'mc-slot--active' : ''}`}
                 role="button"
                 tabIndex={0}
+                data-slot={cat.id}
                 aria-pressed={isActive}
                 aria-label={`Select ${cat.code} slot${part ? `, currently ${part.name}` : ', empty'}`}
                 onClick={() => setCategory(cat.id)}

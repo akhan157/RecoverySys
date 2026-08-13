@@ -292,14 +292,27 @@ function integrateAscent(
 // Material-specific thresholds are owned by criteria.js so simulation and
 // compatibility consumers cannot drift at exact safety-factor boundaries.
 
+/**
+ * Canonical static ejection impulse load (constraint #11: F = m × G × g₀).
+ * Exported so Analysis and other review surfaces consume the same derivation
+ * as computeShockLoad instead of re-deriving the formula with local constants.
+ * Returns unrounded Newtons and pound-force so callers keep their own
+ * presentation rounding.
+ */
+export function computeStaticEjectionLoad(mass_kg, g_factor) {
+  const load_N = mass_kg * g_factor * G
+  return { load_N, load_lbs: load_N / N_PER_LBF }
+}
+
 export function computeShockLoad(cordSpecs, mass_kg, g_factor) {
   if (!cordSpecs) return null
   const { strength_lbs, length_ft, elongation_pct, material } = cordSpecs
   if (!strength_lbs || !length_ft || !elongation_pct || mass_kg <= 0 || !g_factor || g_factor <= 0)
     return null
 
-  const peak_load_N = mass_kg * g_factor * G
-  const peak_load_lbs = peak_load_N / N_PER_LBF
+  const staticLoad = computeStaticEjectionLoad(mass_kg, g_factor)
+  const peak_load_N = staticLoad.load_N
+  const peak_load_lbs = staticLoad.load_lbs
   const k_N_per_m = (strength_lbs * N_PER_LBF) / (length_ft * 0.3048 * (elongation_pct / 100))
   const strain_energy_J = (peak_load_N * peak_load_N) / (2 * k_N_per_m)
   const safety_factor = strength_lbs / peak_load_lbs

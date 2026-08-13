@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect, useRef } from 'react'
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import GuidedReview from './GuidedReview.jsx'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
@@ -55,7 +55,16 @@ export default function MissionControlLayout({
 }) {
   const [activeTab, setActiveTab] = useState('GUIDED_REVIEW')
   const [printMode, setPrintMode] = useState(null)
+  // Review-origin navigation: { origin: 'ANALYSIS' | null, target: path }
+  // set when a review action from Analysis opens a destination surface so the
+  // destination can focus the affected input and show a return path.
+  const [reviewNav, setReviewNav] = useState(null)
+  const activeTabRef = useRef(activeTab)
   const tabRefs = useRef(new Map())
+
+  useEffect(() => {
+    activeTabRef.current = activeTab
+  }, [activeTab])
 
   useEffect(() => {
     if (!printMode) return undefined
@@ -86,13 +95,44 @@ export default function MissionControlLayout({
     { specs: state.specs, config: state.config, customMotor: state.customMotor },
     state.inputRevision
   )
+  // Review actions (Analysis board rows, result strip, ConfidenceStatus links)
+  // open the owning surface, focus the affected input, and offer a return path.
+  const handleNavigate = useCallback(
+    (path) => {
+      const tab =
+        path === 'SIMULATION'
+          ? 'SIMULATION'
+          : path.startsWith('config.')
+            ? 'DASHBOARD'
+            : 'SPECS'
+      setReviewNav({
+        origin: activeTabRef.current === 'ANALYSIS' ? 'ANALYSIS' : null,
+        target: path,
+      })
+      setActiveTab(tab)
+    },
+    []
+  )
+  const handleTabSelect = useCallback((id) => {
+    if (id !== 'ANALYSIS') setReviewNav(null)
+    setActiveTab(id)
+  }, [])
+  const returnToAnalysis = useCallback(() => {
+    setReviewNav(null)
+    setActiveTab('ANALYSIS')
+    tabRefs.current.get('ANALYSIS')?.focus()
+  }, [])
+  const consumeReviewFocus = useCallback(
+    () => setReviewNav((prev) => (prev ? { ...prev, target: null } : prev)),
+    []
+  )
   const confidenceProps = {
     specs: state.specs,
     config: state.config,
     customMotor: state.customMotor,
     simulation: state.simulation,
     resultFresh,
-    onNavigate: (path) => setActiveTab(path.startsWith('config.') ? 'DASHBOARD' : 'SPECS'),
+    onNavigate: handleNavigate,
   }
   const recoveryBrief = buildRecoveryBrief({
     specs: state.specs,
@@ -114,7 +154,7 @@ export default function MissionControlLayout({
   const tabPanelId = (id) => `mc-panel-${id.toLowerCase()}`
   const focusTab = (index) => {
     const tab = TABS[index]
-    setActiveTab(tab.id)
+    handleTabSelect(tab.id)
     tabRefs.current.get(tab.id)?.focus()
   }
 
@@ -166,7 +206,7 @@ export default function MissionControlLayout({
                   aria-controls={tabPanelId(tab.id)}
                   tabIndex={isActive ? 0 : -1}
                   className={`mc-header__tab ${isActive ? 'mc-header__tab--active' : ''}`}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => handleTabSelect(tab.id)}
                   onKeyDown={(event) => handleTabKeyDown(event, index)}
                 >
                   {tab.label}
@@ -222,6 +262,10 @@ export default function MissionControlLayout({
                 deleteCustomPart={deleteCustomPart}
                 editCustomPart={editCustomPart}
                 confidenceProps={confidenceProps}
+                reviewOrigin={reviewNav?.origin ?? null}
+                focusTarget={reviewNav?.target ?? null}
+                onFocusConsumed={consumeReviewFocus}
+                onReturnToAnalysis={returnToAnalysis}
               />
             )}
             {activeTab === 'SIMULATION' && (
@@ -231,6 +275,10 @@ export default function MissionControlLayout({
                 canRun={canRun}
                 resultFresh={resultFresh}
                 confidenceProps={confidenceProps}
+                reviewOrigin={reviewNav?.origin ?? null}
+                focusTarget={reviewNav?.target ?? null}
+                onFocusConsumed={consumeReviewFocus}
+                onReturnToAnalysis={returnToAnalysis}
               />
             )}
             {activeTab === 'ANALYSIS' && (
@@ -250,6 +298,10 @@ export default function MissionControlLayout({
                 setCustomMotor={setCustomMotor}
                 clearCustomMotor={clearCustomMotor}
                 addToast={addToast}
+                reviewOrigin={reviewNav?.origin ?? null}
+                focusTarget={reviewNav?.target ?? null}
+                onFocusConsumed={consumeReviewFocus}
+                onReturnToAnalysis={returnToAnalysis}
                 onNavigate={(path) => {
                   if (path.startsWith('config.')) setCategory(path.replace('config.', ''))
                 }}

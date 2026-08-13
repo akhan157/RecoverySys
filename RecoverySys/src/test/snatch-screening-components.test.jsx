@@ -86,7 +86,10 @@ describe('analysis transparency hierarchy', () => {
     expect(screen.getByText('REVIEW FIRST')).toBeInTheDocument()
     expect(screen.getByText('RK4')).toBeInTheDocument()
     expect(screen.getByText('NO PRIORITY WARNINGS')).toBeInTheDocument()
-    expect(screen.getAllByText(/HOW THIS IS ESTIMATED/)).toHaveLength(6)
+    // M3 contract: the flight timeline and packing detail moved to their
+    // canonical owning surfaces (Simulation), so Analysis keeps four method
+    // disclosures: ejection loads, opening shock, descent rates, snatch.
+    expect(screen.getAllByText(/HOW THIS IS ESTIMATED/)).toHaveLength(4)
     expect(
       screen.queryByText(
         'A pressure pulse, bay geometry, slack, and peak dynamic load are not solved.'
@@ -115,13 +118,15 @@ describe('analysis transparency hierarchy', () => {
     expect(screen.getByText('REVIEW LOADS')).toBeInTheDocument()
   })
 
-  it('shows only the simple stale message without review architecture', () => {
+  it('shows only the simple stale strip without review architecture', () => {
     render(<AnalysisTab state={{ ...stateFor(canonicalSimulation()), resultFresh: false }} />)
-    expect(screen.getByText('RESULT_STALE')).toBeInTheDocument()
-    expect(
-      screen.getByText('Rerun the simulation before using current results.')
-    ).toBeInTheDocument()
+    // M3 contract: the result-usability strip names the stale state, states
+    // why, and offers the rerun action; the review architecture is withheld.
+    expect(screen.getAllByText('Stale').length).toBeGreaterThan(0)
+    expect(screen.getByText(/no longer matches the active inputs/i)).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Rerun simulation' })).toBeInTheDocument()
     expect(screen.queryByText('REVIEW FIRST')).not.toBeInTheDocument()
+    expect(screen.queryByText(/CAUSE → CONSEQUENCE REVIEW/)).not.toBeInTheDocument()
   })
 })
 

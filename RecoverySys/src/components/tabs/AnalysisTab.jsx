@@ -1,21 +1,18 @@
 import { useMemo, useState } from 'react'
 import { normalizeCalculationInputs } from '../../lib/schema.js'
-import { computePackingVolume } from '../../lib/compatibility.js'
 import { computeOpeningShockLoad } from '../../lib/recoveryLoad.js'
 import { buildAnalysisReviewModel } from '../../lib/analysisReview.js'
-import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
+import { computeStaticEjectionLoad } from '../../lib/simulation.js'
 
 import { runSensitivity } from '../../lib/sensitivity.js'
 import { CRITERION_IDS, evaluateCriterion, shockSafetyFactorBands } from '../../lib/criteria.js'
 import { aggregateCriterionStatus, presentCriterion } from '../../lib/criterionPresentation.js'
-import { densityAtAltitudeFt, FEET_PER_METER, isa, standardGravity } from '../../lib/atmosphere.js'
+import { densityAtAltitudeFt, FEET_PER_METER, isa } from '../../lib/atmosphere.js'
 import { statusFromWarnings } from '../../lib/statusColor.js'
 import StatusChip from '../primitives/StatusChip.jsx'
 import ConfidenceStatus from '../ConfidenceStatus.jsx'
 import SensitivityPanel from '../SensitivityPanel.jsx'
-import { CausalityRow as SharedCausalityRow, ReviewSummary } from '../analysis/index.js'
-
-const N_PER_LBF = 4.448
+import { CausalityRow as SharedCausalityRow, ResultUsabilityStrip, ReviewSummary } from '../analysis/index.js'
 
 const RESULT_LABELS = Object.freeze({
   'not-run': 'Not run',
@@ -116,18 +113,19 @@ export default function AnalysisTab({ state, confidenceProps }) {
     if (!sim) return null
 
     const { mass_g, mass_kg, g_factor, g_factor_auto } = normalizeCalculationInputs(specs)
-    const static_N = mass_kg * g_factor * standardGravity
-    const static_lbs = static_N / N_PER_LBF
+    // Canonical static ejection impulse load: consume the simulation result
+    // (computed by computeShockLoad) when the canonical model evaluated it;
+    // fall back to the same exported derivation when no shock cord is selected.
+    const staticLoad = sim.shock_load
+      ? { load_lbs: sim.shock_load.peak_load_lbs }
+      : computeStaticEjectionLoad(mass_kg, g_factor)
     const cord = config.shock_cord?.specs ?? null
     let cord_sf = null,
       cord_sf_status = null,
       cord_sf_presentation = null
-    if (cord) {
-      cord_sf = cord.strength_lbs / static_lbs
-      const criterion = evaluateCriterion(CRITERION_IDS.SHOCK_SAFETY_FACTOR, cord_sf, {
-        bands: shockSafetyFactorBands(cord.material),
-      })
-      cord_sf_presentation = presentCriterion(criterion)
+    if (cord && sim.shock_load?.safety_factor != null) {
+      cord_sf = sim.shock_load.safety_factor
+      cord_sf_presentation = presentCriterion(sim.shock_load.criterion)
       cord_sf_status = cord_sf_presentation.status
     }
 
@@ -150,22 +148,12 @@ export default function AnalysisTab({ state, confidenceProps }) {
     const rho_deploy_val = densityAtAltitudeFt(deploy_ft)
     const deployAtmosphere = isa(deploy_ft / FEET_PER_METER)
 
-    const landing_fps = sim.main_fps ?? sim.drogue_fps
-    const landing_mps = landing_fps / FEET_PER_METER
-    const landing_ke_J = 0.5 * mass_kg * landing_mps * landing_mps
-
     const ke_ftlbf = sim.landing_ke_ftlbf
     const descentCriterion = evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, sim.main_fps)
     const landingCriterion = evaluateCriterion(CRITERION_IDS.LANDING_ENERGY, ke_ftlbf)
     const descentCriterionPresentation = presentCriterion(descentCriterion)
     const landingCriterionPresentation = presentCriterion(landingCriterion)
     const ke_status = landingCriterionPresentation.status
-
-    const packing = computePackingVolume({ config, specs })
-    const packingCriterion = evaluateCriterion(
-      CRITERION_IDS.PACKING_CAPACITY_RATIO,
-      packing.fraction
-    )
 
     const drogue_phase_dist = sim.apogee_ft - deploy_ft
 
@@ -174,8 +162,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
       mass_g,
       g_factor,
       g_factor_auto,
-      static_N,
-      static_lbs,
+      staticLoad,
       cord,
       cord_sf,
       cord_sf_status,
@@ -191,15 +178,12 @@ export default function AnalysisTab({ state, confidenceProps }) {
       rho_mid,
       deploy_temperature_K: deployAtmosphere.T,
       rho_deploy_val,
-      landing_ke_J,
       descentCriterionPresentation,
       landingCriterionPresentation,
       ke_ftlbf,
       descentCriterion,
       landingCriterion,
       ke_status,
-      packing,
-      packingCriterion,
       drogue_phase_dist,
     }
   }, [sim, specs, config])
@@ -207,7 +191,6 @@ export default function AnalysisTab({ state, confidenceProps }) {
   const ap = a
   const warnings = state.warnings ?? []
   const resultStatus = state.simulation ? (state.resultFresh ? 'current' : 'stale') : 'not-run'
-  const resultDetails = RESULT_STATUS_DETAILS[resultStatus]
   const motorMethod = state.customMotor
     ? `THRUST CURVE / ${state.customMotor.designation || 'CUSTOM MOTOR'}`
     : sim?.apogee_method?.toUpperCase() || 'NOT RUN'
@@ -272,10 +255,10 @@ export default function AnalysisTab({ state, confidenceProps }) {
       <ConfidenceStatus {...confidenceProps} />
       {!sim ? (
         <div className="mc-analysis__empty">
-          <div className="mc-analysis__empty-code">{resultDetails.reasonCode}</div>
-          <div className="mc-analysis__empty-sub">
-            {resultDetails.remediation || resultDetails.nextAction}
-          </div>
+          <ResultUsabilityStrip
+            state={resultStatus}
+            onAction={(_action, destination) => confidenceProps?.onNavigate?.(destination)}
+          />
         </div>
       ) : (
         <>
@@ -350,7 +333,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
               }
               onAction={(action) => confidenceProps?.onNavigate?.(action.destination)}
             />
-            <div className="mc-analysis__priority">
+            <div className="mc-analysis__priority" role="status">
               <span>HIGHEST-PRIORITY ACTION</span>
               <strong>{reviewModel.priorityAction}</strong>
             </div>
@@ -430,9 +413,8 @@ export default function AnalysisTab({ state, confidenceProps }) {
                 />
                 <AnalRow
                   label="STATIC_EJECTION_LOAD"
-                  value={`${Math.round(ap.static_N)} N`}
-                  badge={`${Math.round(ap.static_lbs)} LBS`}
-                  note={`F = m × G_factor × g₀ = ${ap.mass_kg.toFixed(2)} kg × ${ap.g_factor} × ${standardGravity.toFixed(3)} m/s²`}
+                  value={`${Math.round(ap.staticLoad.load_lbs)} LBS`}
+                  note="F = m × G × g₀ from the canonical static impulse model; loads are screening estimates, not certification evidence."
                 />
                 {ap.cord_sf != null && (
                   <AnalRow
@@ -440,7 +422,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
                     value={`${ap.cord_sf.toFixed(1)}×`}
                     badge={ap.cord_sf_presentation?.label ?? 'NOT EVALUATED'}
                     badgeStatus={ap.cord_sf_status}
-                    note={`${ap.cord.strength_lbs} lbs rated ÷ ${Math.ceil(ap.static_lbs)} lbs required — ${ap.cord.material} criterion: ${cordFailThreshold ?? 'not evaluated'}× fail, ${cordWarnThreshold ?? 'not evaluated'}× warn`}
+                    note={`${ap.cord.strength_lbs} lbs rated ÷ ${Math.ceil(ap.staticLoad.load_lbs)} lbs required — ${ap.cord.material} criterion: ${cordFailThreshold ?? 'not evaluated'}× fail, ${cordWarnThreshold ?? 'not evaluated'}× warn`}
                   />
                 )}
               </div>
@@ -542,98 +524,13 @@ export default function AnalysisTab({ state, confidenceProps }) {
                   value={`${ap.ke_ftlbf} ft·lbf`}
                   badge={ap.landingCriterionPresentation.label}
                   badgeStatus={ap.ke_status}
-                  note={`KE = ½mv² = ${ap.landing_ke_J.toFixed(0)} J using main descent rate. Criterion: ${ap.landingCriterion?.policyVersion ?? 'not evaluated'}. Slightly conservative — actual ground speed is 3–5% lower (denser surface air).`}
+                  note={`KE = ½mv² using the canonical landing-energy model with the main descent rate. Slightly conservative — actual ground speed is 3–5% lower (denser surface air).`}
                 />
               </div>
             </section>
-            {/* ── FLIGHT TIMELINE ─────────────────────────────────────────────── */}
-            <section className="mc-analysis__section">
-              <div className="mc-panel-header">FLIGHT_TIMELINE</div>
-              <MethodDisclosure
-                method="Phase timing from descent rates"
-                inputs={`Apogee ${sim.apogee_ft?.toLocaleString?.() ?? '—'} ft · main deploy ${ap.deploy_ft.toLocaleString()} ft`}
-                defaults="One terminal rate is used for each recovery phase."
-                limitations="Transient inflation and horizontal inertia are omitted."
-              />
-              <div className="mc-analysis__body">
-                <TimelineRow
-                  marker="T+0"
-                  event="LAUNCH"
-                  note="Rail exit — no rail friction or launch-guide losses modeled"
-                />
-                {sim.burnout_t_s != null && (
-                  <TimelineRow
-                    marker={`T+${sim.burnout_t_s}s`}
-                    event="MOTOR_BURNOUT"
-                    note={`${parseFloat(specs.motor_total_impulse_ns).toLocaleString()} N·s total impulse consumed`}
-                  />
-                )}
-                <TimelineRow
-                  marker={`T+${sim.apogee_t_s}s`}
-                  event={`APOGEE @ ${sim.apogee_ft.toLocaleString()} FT`}
-                  note={`Method: ${sim.apogee_method?.toUpperCase() ?? 'RK4'} — ejection fires, drogue deploys`}
-                />
-                <TimelineRow
-                  marker={`T+${sim.apogee_t_s + sim.phase1_time_s}s`}
-                  event={`MAIN_DEPLOY @ ${ap.deploy_ft.toLocaleString()} FT`}
-                  note="Altimeter fires main — opening shock occurs here"
-                />
-                {sim.total_time_s && (
-                  <TimelineRow
-                    marker={`T+${sim.total_time_s}s`}
-                    event={`LANDING @ ${sim.drift_ft.toLocaleString()} FT DOWNWIND`}
-                    note={`Primary wind drift; use DISPERSION tab for uncertainty bounds`}
-                  />
-                )}
-              </div>
-            </section>
-
-            {/* ── PACKING VOLUME ──────────────────────────────────────────────── */}
-            {ap.packing.bay_known && (
-              <section className="mc-analysis__section mc-analysis__section--wide">
-                <div className="mc-panel-header">PACKING_VOLUME</div>
-                <MethodDisclosure
-                  method="Effective bay volume and representative component volumes"
-                  inputs={`Fill ${Math.round((ap.packing.fraction ?? 0) * 100)}%`}
-                  defaults="70% packing efficiency accounts for folds, rigging, and fabric bulk."
-                  limitations="Actual fold geometry, snag points, wiring, and closure force are not measured."
-                />
-                <div className="mc-analysis__body">
-                  <AnalRow
-                    label="STACKED_COMPONENTS"
-                    value={`${ap.packing.stacked_in3.toFixed(1)} IN³`}
-                    badge={`of ${ap.packing.effective_in3.toFixed(1)} IN³ effective`}
-                    note="Cylindrical stacking sum — each component packed height × bay cross-section area"
-                  />
-                  <PackingGauge fraction={ap.packing.fraction ?? 0} />
-                  <AnalRow
-                    label="EFFICIENCY_FACTOR"
-                    value="70%"
-                    note="Real-world packing achieves ~70% of ideal linear stacking (folds, wadding, rigging, harness bulk)"
-                  />
-                  <AnalRow
-                    label="FILL_FRACTION"
-                    value={`${Math.round((ap.packing.fraction ?? 0) * 100)}%`}
-                    badge={
-                      ap.packingCriterion?.severity === 'error'
-                        ? 'ABOVE CRITERION'
-                        : ap.packingCriterion?.severity === 'warn'
-                          ? 'TIGHT'
-                          : 'SCREENING AVAILABLE'
-                    }
-                    badgeStatus={
-                      ap.packingCriterion?.severity === 'error'
-                        ? 'fail'
-                        : ap.packingCriterion?.severity === 'warn'
-                          ? 'warn'
-                          : 'ok'
-                    }
-                    highlight={ap.packingCriterion?.severity !== 'none'}
-                    note={`Criterion: ${ap.packingCriterion?.policyVersion ?? 'not evaluated'}; exact boundary behavior is owned by the canonical packing criterion.`}
-                  />
-                </div>
-              </section>
-            )}
+            {/* ── PACKING VOLUME moved to the canonical compatibility review
+                 (SimulationTab COMPAT_ANALYSIS); Analysis keeps only the
+                 unresolved packing finding from the compatibility warnings. */}
             <section className="mc-analysis__dossier">
               <details>
                 <summary>MODEL ASSUMPTIONS &amp; LIMITS</summary>
@@ -841,38 +738,6 @@ function AnalRow({ label, value, badge, badgeStatus, note, highlight }) {
             </span>
           )}
         </span>
-      </div>
-      {note && <div className="mc-anal-row__note">{note}</div>}
-    </div>
-  )
-}
-
-function PackingGauge({ fraction }) {
-  const pct = Math.min(100, Math.round(fraction * 100))
-  const status = pct > 95 ? 'fail' : pct > 85 ? 'warn' : 'ok'
-  return (
-    <div className="mc-packing-gauge-wrap">
-      <div className="mc-packing-gauge">
-        <div
-          className={`mc-packing-gauge__fill mc-packing-gauge__fill--${status}`}
-          style={{ '--packing-pct': `${pct}%` }}
-        />
-      </div>
-      <div className="mc-packing-gauge__labels">
-        <span>0%</span>
-        <span>85% THRESHOLD</span>
-        <span>100%</span>
-      </div>
-    </div>
-  )
-}
-
-function TimelineRow({ marker, event, note }) {
-  return (
-    <div className="mc-anal-row mc-anal-row--timeline">
-      <div className="mc-anal-row__top">
-        <span className="mc-anal-row__marker">{marker}</span>
-        <span className="mc-anal-row__event">{event}</span>
       </div>
       {note && <div className="mc-anal-row__note">{note}</div>}
     </div>

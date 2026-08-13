@@ -2,11 +2,24 @@ import { WARN_LEVELS } from '../../lib/constants.js'
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import { CRITERION_IDS, evaluateCriterion } from '../../lib/criteria.js'
 import { presentCriterion } from '../../lib/criterionPresentation.js'
+import { computePackingVolume } from '../../lib/compatibility.js'
 import FlightChart from '../FlightChart.jsx'
 import MetricCard from '../MetricCard.jsx'
 import ConfidenceStatus from '../ConfidenceStatus.jsx'
+import ReviewReturnBar from '../analysis/ReviewReturnBar.jsx'
+import { useReviewDestinationFocus } from '../../hooks/useReviewDestinationFocus.js'
 
-export default function SimulationTab({ state, runSim, canRun, resultFresh, confidenceProps }) {
+export default function SimulationTab({
+  state,
+  runSim,
+  canRun,
+  resultFresh,
+  confidenceProps,
+  reviewOrigin = null,
+  focusTarget = null,
+  onFocusConsumed,
+  onReturnToAnalysis,
+}) {
   const sim = state.simulation
   const resultStatus = sim ? (resultFresh ? 'current' : 'stale') : 'not-run'
   const resultDetails = RESULT_STATUS_DETAILS[resultStatus]
@@ -21,8 +34,17 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
       ? presentCriterion(evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, usableSim.main_fps))
       : null
 
+  // Arriving from a review action (e.g. the Analysis "Rerun simulation" strip
+  // or a result-status destination) hands focus to the run control.
+  useReviewDestinationFocus({
+    focusTarget,
+    onConsumed: onFocusConsumed,
+    resolve: (target) => (target === 'SIMULATION' ? document.querySelector('.mc-run-btn') : null),
+  })
+
   return (
     <div className="mc-sim">
+      {reviewOrigin === 'ANALYSIS' && <ReviewReturnBar onReturn={onReturnToAnalysis} />}
       <ConfidenceStatus {...confidenceProps} />
       {/* ── Top: Chart + Data ────────────────────────────────────────── */}
       <div className="mc-sim__top">
@@ -41,13 +63,6 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
           <div className="mc-sim__chart-area">
             <FlightChart simulation={usableSim} />
           </div>
-          {(!sim || !resultFresh) && (
-            <div style={{ padding: '0 16px 16px', textAlign: 'center' }}>
-              <button className="mc-run-btn" onClick={runSim} disabled={!canRun}>
-                {state.simRunning ? 'RUNNING...' : 'RUN_SIMULATION →'}
-              </button>
-            </div>
-          )}
         </div>
 
         {/* Simulation Data */}
@@ -110,6 +125,19 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
 
       <MainSnatchSummary snatch={snatch} />
 
+      {(!sim || !resultFresh) && (
+        <div className="mc-sim__runbar">
+          <span>
+            {resultDetails.reasonCode} — {resultDetails.remediation}
+          </span>
+          <button className="mc-run-btn" onClick={runSim} disabled={!canRun}>
+            {state.simRunning ? 'RUNNING...' : 'RUN_SIMULATION →'}
+          </button>
+        </div>
+      )}
+
+      {usableSim && <FlightTimelinePanel sim={usableSim} specs={state.specs} />}
+
       {/* ── Bottom: Compatibility Analysis ───────────────────────────── */}
       <div className="mc-sim__bottom">
         <div className="mc-sim__compat">
@@ -135,8 +163,162 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
               </div>
             ))
           )}
+          {usableSim && <PackingVolumePanel specs={state.specs} config={state.config} />}
         </div>
       </div>
+    </div>
+  )
+}
+
+// The canonical owning surface for phase sequence detail: the complete flight
+// timeline lives with Simulation, where phase timing is the primary context.
+function FlightTimelinePanel({ sim, specs }) {
+  const deploy_ft = sim.deploy_ft || 500
+  return (
+    <section className="mc-sim__timeline" aria-label="Flight timeline">
+      <h2 className="mc-panel-header">
+        FLIGHT_TIMELINE <span className="mc-panel-header__right">PHASE_SEQUENCE</span>
+      </h2>
+      <div className="mc-sim__timeline-body">
+        <details className="mc-sim__snatch-limitations">
+          <summary>HOW THIS IS ESTIMATED — PHASE TIMING FROM DESCENT RATES</summary>
+          <p>
+            One terminal rate is used for each recovery phase; transient inflation and horizontal
+            inertia are omitted. Ejection fires at apogee and the altimeter fires the main at the
+            configured deploy altitude.
+          </p>
+        </details>
+        <div className="mc-sim__timeline-body">
+          <TimelineRow marker="T+0" event="LAUNCH" note="Rail exit — no rail friction or launch-guide losses modeled" />
+          {sim.burnout_t_s != null && (
+            <TimelineRow
+              marker={`T+${sim.burnout_t_s}s`}
+              event="MOTOR_BURNOUT"
+              note={`${parseFloat(specs.motor_total_impulse_ns).toLocaleString()} N·s total impulse consumed`}
+            />
+          )}
+          <TimelineRow
+            marker={`T+${sim.apogee_t_s}s`}
+            event={`APOGEE @ ${sim.apogee_ft.toLocaleString()} FT`}
+            note={`Method: ${sim.apogee_method?.toUpperCase() ?? 'RK4'} — ejection fires, drogue deploys`}
+          />
+          <TimelineRow
+            marker={`T+${sim.apogee_t_s + sim.phase1_time_s}s`}
+            event={`MAIN_DEPLOY @ ${deploy_ft.toLocaleString()} FT`}
+            note="Altimeter fires main — opening shock occurs here"
+          />
+          {sim.total_time_s && (
+            <TimelineRow
+              marker={`T+${sim.total_time_s}s`}
+              event={`LANDING @ ${sim.drift_ft.toLocaleString()} FT DOWNWIND`}
+              note="Primary wind drift; use DISPERSION tab for uncertainty bounds"
+            />
+          )}
+        </div>
+      </div>
+    </section>
+  )
+}
+
+// Detailed packing review moved to the canonical hardware/compatibility
+// surface; Analysis shows only the unresolved packing finding and action.
+function PackingVolumePanel({ specs, config }) {
+  const packing = computePackingVolume({ config, specs })
+  if (!packing.bay_known) return null
+  const packingCriterion = evaluateCriterion(CRITERION_IDS.PACKING_CAPACITY_RATIO, packing.fraction)
+  const fillPct = Math.round((packing.fraction ?? 0) * 100)
+  return (
+    <section className="mc-sim__packing" aria-label="Packing volume">
+      <h2 className="mc-panel-header">PACKING_VOLUME</h2>
+      <div className="mc-sim__packing-body">
+        <details className="mc-sim__snatch-limitations">
+          <summary>HOW THIS IS ESTIMATED — EFFECTIVE BAY VOLUME</summary>
+          <p>
+            70% packing efficiency accounts for folds, rigging, and fabric bulk. Actual fold
+            geometry, snag points, wiring, and closure force are not measured.
+          </p>
+        </details>
+        <AnalRow
+          label="STACKED_COMPONENTS"
+          value={`${packing.stacked_in3.toFixed(1)} IN³`}
+          badge={`of ${packing.effective_in3.toFixed(1)} IN³ effective`}
+          note="Cylindrical stacking sum — each component packed height × bay cross-section area"
+        />
+        <PackingGauge fraction={packing.fraction ?? 0} />
+        <AnalRow
+          label="FILL_FRACTION"
+          value={`${fillPct}%`}
+          badge={
+            packingCriterion?.severity === 'error'
+              ? 'ABOVE CRITERION'
+              : packingCriterion?.severity === 'warn'
+                ? 'TIGHT'
+                : 'SCREENING AVAILABLE'
+          }
+          badgeStatus={
+            packingCriterion?.severity === 'error'
+              ? 'fail'
+              : packingCriterion?.severity === 'warn'
+                ? 'warn'
+                : 'ok'
+          }
+          highlight={packingCriterion?.severity !== 'none'}
+          note={`Criterion: ${packingCriterion?.policyVersion ?? 'not evaluated'}; exact boundary behavior is owned by the canonical packing criterion.`}
+        />
+      </div>
+    </section>
+  )
+}
+
+function AnalRow({ label, value, badge, badgeStatus, note, highlight }) {
+  return (
+    <div className={`mc-anal-row${highlight ? ' mc-anal-row--highlight' : ''}`}>
+      <div className="mc-anal-row__top">
+        <span className="mc-anal-row__label">{label}</span>
+        <span className="mc-anal-row__right">
+          <span className="mc-anal-row__value">{value}</span>
+          {badge && (
+            <span
+              className={`mc-anal-row__badge${badgeStatus ? ` mc-anal-row__badge--${badgeStatus}` : ''}`}
+            >
+              {badge}
+            </span>
+          )}
+        </span>
+      </div>
+      {note && <div className="mc-anal-row__note">{note}</div>}
+    </div>
+  )
+}
+
+function PackingGauge({ fraction }) {
+  const pct = Math.min(100, Math.round(fraction * 100))
+  const status = pct > 95 ? 'fail' : pct > 85 ? 'warn' : 'ok'
+  return (
+    <div className="mc-packing-gauge-wrap">
+      <div className="mc-packing-gauge">
+        <div
+          className={`mc-packing-gauge__fill mc-packing-gauge__fill--${status}`}
+          style={{ '--packing-pct': `${pct}%` }}
+        />
+      </div>
+      <div className="mc-packing-gauge__labels">
+        <span>0%</span>
+        <span>85% THRESHOLD</span>
+        <span>100%</span>
+      </div>
+    </div>
+  )
+}
+
+function TimelineRow({ marker, event, note }) {
+  return (
+    <div className="mc-anal-row mc-anal-row--timeline">
+      <div className="mc-anal-row__top">
+        <span className="mc-anal-row__marker">{marker}</span>
+        <span className="mc-anal-row__event">{event}</span>
+      </div>
+      {note && <div className="mc-anal-row__note">{note}</div>}
     </div>
   )
 }
