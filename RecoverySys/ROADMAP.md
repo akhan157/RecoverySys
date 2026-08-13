@@ -103,16 +103,16 @@ fully qualified v2/v3 release.
 - Per-output sensitivity and seeded dispersion summaries are implemented; broader stochastic dispersion validation remains incomplete.
 - The versioned Recovery Brief, separate brief/checklist print modes, targeted JSON/share/Flight Log parity, and candidate-evidence export/intake are implemented. The full transfer matrix and independent evidence loop remain incomplete.
 - The Python `engine/` package remains research-only: it is not wired into the app, not validated as a second production authority, and not bundled into desktop builds. See [`M8-architecture-decision-report.md`](M8-architecture-decision-report.md) for the deferred-engine decision and security evidence.
-- The 2026-08-13 M6 qualification record documents focused Node 22 gates and the integrated M0-M6 checkpoint `19b72a2`. Full CI matrix execution, Windows launch/hash, macOS host verification, and independent evidence remain open.
+- The 2026-08-13 M6 qualification record documents focused Node 22 gates and the integrated M0-M6 code checkpoint `19b72a2`; this roadmap ledger is the follow-up documentation record. Full CI matrix execution, Windows launch/hash, macOS host verification, and independent evidence remain open.
 
 ### Baseline Evidence Snapshot
 
-Observed on 2026-08-13 at integrated `main` HEAD `19b72a2`. The M6
-qualification record carries the focused Node 22 evidence; the checks below
-were re-run after integration on the local Node 26 development line.
+Observed on 2026-08-13 at the integrated M0-M6 code checkpoint `19b72a2`.
+The M6 qualification record carries the focused Node 22 evidence; the checks
+below were re-run after integration on the local Node 26 development line.
 
 | Check | Result |
-| `git status` | Main changes plus the pre-existing user-owned `untitled.md`; no generated build output tracked |
+| `git status` | Tracked tree clean on `main`; pre-existing user-owned `untitled.md` remains untracked |
 | `npm ci` | Pass; 428 packages |
 | `npm run validate:parts` | Pass; 225 parts |
 | `npm run validate:corpus` | Pass; 14 review cases |
@@ -341,6 +341,7 @@ complete the critical path; guided completion never implies approval or flight
 readiness.~~
 
 ### M6 - Release Qualification
+**Priority:** P0 at release boundary
 
 **Status:** Partial; local qualification gates pass, including print artifact media
 inspection; platform, full-matrix transfer parity, and external gates remain
@@ -505,9 +506,9 @@ The following are intentionally outside the current product boundary:
 This is the dependency-ordered execution plan for the milestones. M0 through M6
 are the core release path and must be finished in order: each milestone is gated
 on the one before it. M7 through M9 are deferred tracks that start only after
-the core boundary and evidence gates pass. Completed increments are removed
-from this queue; partial milestones remain until their exit criteria and
-evidence gates are complete.
+the core boundary and evidence gates pass. Completed increments are crossed out
+in this queue; partial milestones remain until their exit criteria and evidence
+gates are complete.
 
 ```text
 M0 baseline
@@ -536,38 +537,38 @@ and M2.
 
 1. Run the full project check on the supported Node 22 runtime from a clean install.
 2. Run the complete Playwright suite from a clean install.
-3. Reconcile the v2 completion ledger with the actual code and evidence.
-4. Resolve the documentation conflict between future-facing confidence posture and implemented confidence modules.
-5. Inventory stored and transferred contracts: local storage, share links, JSON, simulation envelopes, briefs, and flight records.
-6. Decide which transparency prototype, if any, remains the product direction; archive the alternatives.
-7. Track dependency audit findings separately from feature work.
-8. Keep the roadmap, release qualification record, changelog, and version identity aligned.
+3. ~~Reconcile the v2 completion ledger with the actual code and evidence.~~
+4. ~~Resolve the documentation conflict between future-facing confidence posture and implemented confidence modules.~~
+5. ~~Inventory stored and transferred contracts: local storage, share links, JSON, simulation envelopes, briefs, and flight records.~~
+6. ~~Decide which transparency prototype, if any, remains the product direction; archive the alternatives.~~
+7. ~~Track dependency audit findings separately from feature work.~~
+8. ~~Keep the roadmap, release qualification record, changelog, and version identity aligned.~~
 
 **Output:** one reproducible baseline on the supported runtime.
 
 ### Step 2: Finish M1 - Validation, Evidence, And Catalog Provenance
 
 1. Expand the validation corpus beyond the current 14 review cases.
-2. Add deterministic machine-readable case summaries and coverage by output domain.
-3. Complete seeded dispersion coverage and make stochastic fixtures reproducible.
+2. ~~Add deterministic machine-readable case summaries and coverage by output domain.~~
+3. ~~Complete seeded dispersion coverage and make stochastic fixtures reproducible.~~ Broader stochastic fixture coverage remains incomplete.
 4. Document tolerance derivation, input equivalence, units, model identity, and scope for every case.
-5. Add per-part catalog source metadata and a deterministic provenance report.
-6. Define the source metadata and review contract that any future automated catalog sourcing must satisfy.
-7. Keep real-flight records separate from accepted validation evidence.
+5. ~~Add per-part catalog source metadata and a deterministic provenance report.~~
+6. ~~Define the source metadata and review contract that any future automated catalog sourcing must satisfy.~~
+7. ~~Keep real-flight records separate from accepted validation evidence.~~
 8. Start collecting independent evidence in parallel; it cannot be produced by code alone.
 
 **Output:** every result has a known evidence posture, and catalog data has traceable provenance.
 
 ### Step 3: Finish M2 - Canonical Result Semantics
 
-1. Centralize domain assessments with value, unit, freshness, validity, envelope, evidence, reason codes, and method/policy identity.
-2. Replace message-derived compatibility codes with authored stable finding codes.
-3. Centralize threshold criteria and exact boundary behavior.
-4. Make stale results unusable for conclusions, comparisons, briefs, and flight-log predictions.
-5. Separate invalid, unsupported, unknown, conditional, sensitivity-flagged, and insufficient-confidence states.
-6. Replace aggregate cross-unit sensitivity ranking with per-output model response and defensible criterion crossings only.
-7. Remove prohibited or overstated labels such as `SAFE`, `REVIEWED`, `PRELIMINARY CHECKS PASS`, and unsupported confidence-interval language.
-8. Define shared status and remediation contracts.
+1. ~~Centralize domain assessments with value, unit, freshness, validity, envelope, evidence, reason codes, and method/policy identity.~~
+2. ~~Replace message-derived compatibility codes with authored stable finding codes.~~
+3. ~~Centralize threshold criteria and exact boundary behavior.~~
+4. ~~Make stale results unusable for conclusions, comparisons, briefs, and flight-log predictions.~~
+5. ~~Separate invalid, unsupported, unknown, conditional, sensitivity-flagged, and insufficient-confidence states.~~
+6. ~~Replace aggregate cross-unit sensitivity ranking with per-output model response and defensible criterion crossings only.~~
+7. ~~Remove prohibited or overstated labels such as `SAFE`, `REVIEWED`, `PRELIMINARY CHECKS PASS`, and unsupported confidence-interval language.~~
+8. ~~Define shared status and remediation contracts.~~
 
 **Output:** the same input produces the same meaning on the screen, Analysis tab, Brief, print, export, import, and Flight Log.
 
@@ -575,12 +576,12 @@ and M2.
 
 M3 depends on M2. Do not expand the whole application yet.
 
-1. Add a shared plan/result strip for plan identity, completeness, currentness, and the next action.
-2. Finish review summaries, remediation links, accessible disclosures, and canonical finding rows.
-3. Finish the cause-to-consequence board: driver, affected outcome, finding, and next action.
-4. Finish tested model-response presentation with per-output ranges and assumptions.
-5. Finish progressive detail with formulas, intermediate values, provenance, evidence IDs, scenario tables, and method notes.
-6. Close keyboard, mobile, focus, contrast, reduced-motion, and no-color-only status behavior.
+1. ~~Add a shared plan/result strip for plan identity, completeness, currentness, and the next action.~~
+2. ~~Finish review summaries, remediation links, accessible disclosures, and canonical finding rows.~~
+3. ~~Finish the cause-to-consequence board: driver, affected outcome, finding, and next action.~~
+4. ~~Finish tested model-response presentation with per-output ranges and assumptions.~~
+5. ~~Finish progressive detail with formulas, intermediate values, provenance, evidence IDs, scenario tables, and method notes.~~
+6. ~~Close keyboard, mobile, focus, contrast, reduced-motion, and no-color-only status behavior.~~
 7. Keep the broader Dashboard, Compatibility, Simulation, Dispersion, Compare, Flight Log, and whole-application redesign deferred until explicit approval.
 
 **Output:** an experienced user can identify what needs review, why it matters, and what to do next from the first viewport.
@@ -588,37 +589,37 @@ M3 depends on M2. Do not expand the whole application yet.
 ### Step 5: Finish M4 - Artifact And Evidence Transfer Parity
 
 1. Make the on-screen Brief, print Brief, and Checklist agree on values, identity, status, units, and unresolved checks.
-2. Complete the static checklist-order boundary; keep packing-volume screening separate.
-3. Fix stale-result withholding across every artifact; stale artifacts cannot appear current.
+2. ~~Complete the static checklist-order boundary; keep packing-volume screening separate.~~
+3. ~~Fix stale-result withholding across every artifact; stale artifacts cannot appear current.~~
 4. Complete JSON export/import parity.
 5. Complete share-link migration parity.
 6. Complete Flight Log parity; keep observations distinct from interpretation and validation.
-7. Add candidate-evidence export and external review intake with source, units, conditions, reviewer status, and immutable prediction identity.
+7. ~~Add candidate-evidence export and external review intake with source, units, conditions, reviewer status, and immutable prediction identity.~~
 8. Verify all of this in fresh browser contexts.
 
 **Output:** a plan moves between screen, print, export, import, sharing, and Flight Log without changing meaning.
 
 ### Step 6: Finish M5 - Qualify The Guided First-Plan Flow
 
-1. Qualify new-plan, resume, import, and invalid-import flows.
-2. Qualify pause and start-fresh behavior.
-3. Qualify stale and insufficient-confidence states.
-4. Verify required, optional, defaulted, catalog, and user-supplied values are explicit.
-5. Verify demo data cannot be mistaken for a user plan.
-6. Run the complete desktop and Pixel 5 mobile critical path, including keyboard activation.
-7. Verify that guided completion never implies approval or flight readiness.
+1. ~~Qualify new-plan, resume, import, and invalid-import flows.~~
+2. ~~Qualify pause and start-fresh behavior.~~
+3. ~~Qualify stale and insufficient-confidence states.~~
+4. ~~Verify required, optional, defaulted, catalog, and user-supplied values are explicit.~~
+5. ~~Verify demo data cannot be mistaken for a user plan.~~
+6. ~~Run the complete desktop and Pixel 5 mobile critical path, including keyboard activation.~~
+7. ~~Verify that guided completion never implies approval or flight readiness.~~
 
 **Output:** a first-time user can reach a reviewable Brief without bypassing the trust boundaries.
 
 ### Step 7: Finish M6 - Release Qualification
 
 1. Run all checks from a clean Node 22 install: formatting, parts validation, corpus validation, lint, unit tests, build, and Playwright E2E.
-2. Run representative fresh, stale, invalid, out-of-envelope, conditional, sensitivity-flagged, and insufficient workflows.
+2. ~~Run representative fresh, stale, invalid, out-of-envelope, conditional, sensitivity-flagged, and insufficient workflows.~~
 3. Complete the import/export/share migration matrix, print artifact inspection, and no current/stale or unit mismatch.
-4. Verify accessibility, copy, privacy, provenance, and prohibited-claim behavior.
+4. ~~Verify accessibility, copy, privacy, provenance, and prohibited-claim behavior.~~
 5. Launch and hash the Windows portable artifact.
 6. Verify the macOS artifact on macOS before making a macOS support claim; otherwise it remains unverified.
-7. Align documentation, changelog, release notes, and version identities with the shipped artifacts.
+7. ~~Align documentation, changelog, release notes, and version identities with the shipped artifacts.~~
 
 **Output:** a release-qualified core RecoverySys version, with every remaining external limitation stated in the release documentation.
 
