@@ -218,7 +218,8 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
                 weight: 2,
                 dashArray: '6,4',
               }).bindPopup(
-                `<b>95% Confidence Ellipse</b><br>` +
+                `<b>95% Scatter Ellipse</b><br>` +
+                  `Modeled scatter, not a measured confidence interval.<br>` +
                   `Semi-major: ${Math.round(rx)}m<br>` +
                   `Semi-minor: ${Math.round(ry)}m`
               )
@@ -473,6 +474,20 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
               display: hasCoords ? 'block' : 'none',
             }}
           />
+
+          {/* Network disclosure — map tiles are fetched live from OpenStreetMap */}
+          {canShow && hasCoords && (
+            <div
+              style={{
+                padding: '2px 14px 6px',
+                fontSize: '10px',
+                color: 'var(--text-tertiary)',
+              }}
+            >
+              Map tiles load from OpenStreetMap — viewing the map sends launch coordinates to the
+              tile server.
+            </div>
+          )}
 
           {/* Legend */}
           {canShow && hasCoords && monteCarlo && (

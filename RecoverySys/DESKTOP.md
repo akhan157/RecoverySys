@@ -5,6 +5,15 @@ GitHub Release downloads. Current main produces a portable Windows ZIP and a mac
 universal CI artifact. The historical GitHub v1.2.0.0 release contains the older
 Windows installer asset; do not treat that installer as the current portable build.
 
+## Version identity
+
+The app release is `1.2.0.1` (single-sourced in `src/lib/constants.js`,
+matching `package.json` and `VERSION`). Desktop artifacts package as semver
+`1.2.0` because Tauri and Cargo require strict semver, which the four-part
+`1.2.0.1` does not satisfy; the desktop version is the semver normalization of
+the app release (first three components). The web app and the desktop shell are
+the same release; the desktop does not carry an independent feature version.
+
 The Tauri v2 foundation in `src-tauri/` packages the existing Vite SPA into a
 portable Windows executable. Frontend assets from `frontendDist` are embedded
 in the executable; no installer or registry shortcut is used.

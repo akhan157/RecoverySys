@@ -3,6 +3,34 @@
 All notable changes to RecoverySys are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased] - 2026-08-13
+
+### Added
+
+- Added the M6 release-qualification gate audit
+  (`docs/release-qualification-2026-08-13.md`): Node 22 focused-gate
+  verification, Windows/macOS CI coverage audit, transfer-parity, accessibility,
+  privacy, provenance, prohibited-claim, and version-identity reviews, with
+  external and deferred gates (independent evidence, M7, M8, M9) stated
+  explicitly.
+- Dispersion map now discloses that map tiles load from OpenStreetMap and that
+  viewing the map sends launch coordinates to the tile server.
+
+### Fixed
+
+- Landing page overclaims and stale facts: removed the unsupported "±2-3%
+  apogee accuracy" claim and the "95% confidence ellipse ... so you know the
+  landing zone before you fly" confidence-interval language (now "95% scatter
+  ellipse — modeled variation, not a measured confidence interval"); aligned
+  `SAFETY_FACTOR_PASS` / `LANDING_KE_OK` rows with the canonical
+  `WITHIN TESTED CRITERION` vocabulary; corrected the catalog count (225 parts)
+  and the stale `BUILD_20260427` marker.
+- Dispersion map scatter-ellipse popup no longer labels modeled scatter as a
+  "95% Confidence Ellipse" (now "95% Scatter Ellipse" with the modeled-variation
+  qualification).
+- Documented the desktop version-identity mapping (app release `1.2.0.1`;
+  Tauri/Cargo semver normalization `1.2.0`) in `DESKTOP.md`.
+
 ## [Unreleased] - 2026-08-11
 
 ### Added

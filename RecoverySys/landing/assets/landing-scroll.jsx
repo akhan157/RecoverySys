@@ -638,7 +638,7 @@ function LPScroll() {
           <a href="#validation">VALIDATION</a>
         </div>
         <div className="lps-nav-right">
-          <span className="lps-nav-meta">BUILD_20260427</span>
+          <span className="lps-nav-meta">BUILD_20260813</span>
           <a href="https://github.com/akhan157/RecoverySys" className="lps-btn lps-btn--ghost">GITHUB →</a>
           <a href="../?demo=1" className="lps-btn lps-btn--green">LAUNCH ▶</a>
         </div>
@@ -666,7 +666,7 @@ function LPScroll() {
             </h1>
             <p className="lps-hero-sub">
               Browser tool for L1 / L2 / L3 high-power rocketry. Configure a recovery bay
-              from a 189-part catalog, predict apogee with an RK4 engine and Mach-dependent
+              from a 225-part catalog, predict apogee with an RK4 engine and Mach-dependent
               drag, and plot landing dispersion via 500-iteration Monte Carlo. Free. No account.
               Runs entirely in your browser.
             </p>
@@ -779,7 +779,8 @@ function LPScroll() {
               4th-order Runge-Kutta ascent integration with Mach-dependent drag,
               Tsiolkovsky mass depletion, and full ISA atmosphere. Computes apogee,
               descent rates, shock load with safety factor, and landing kinetic energy.
-              Import .eng thrust curves for ±2-3% apogee accuracy.
+              Import .eng thrust curves to replace scalar-thrust assumptions for closer
+              apogee tracking.
             </p>
             <div className="lps-sim-stats">
               {[
@@ -817,8 +818,9 @@ function LPScroll() {
             <p className="lps-section-sub lps-words">
               Multi-parameter Monte Carlo perturbs wind (±30%), drag coefficient
               (±10%), mass (±2%), deploy altitude (±50ft), and motor impulse (±3%)
-              across 500 iterations. Landing scatter with 95% confidence ellipse
-              on Leaflet tiles so you know the landing zone before you fly.
+              across 500 iterations. Landing scatter summarized with a 95% scatter
+              ellipse on Leaflet tiles. Scatter is modeled variation, not a measured
+              confidence interval.
             </p>
 
             <div className="lps-disp-stats-strip">
@@ -827,7 +829,7 @@ function LPScroll() {
               <div className="lps-disp-stat-row"><span className="lps-disp-stat-k">Direction</span><span className="lps-disp-stat-v">E (76°)</span></div>
               <div className="lps-disp-stat-row"><span className="lps-disp-stat-k">Drogue</span><span className="lps-disp-stat-v lps-amber">2,354 ft / 186 s</span></div>
               <div className="lps-disp-stat-row"><span className="lps-disp-stat-k">Main</span><span className="lps-disp-stat-v lps-red">668 ft / 43 s</span></div>
-              <div className="lps-disp-stat-row"><span className="lps-disp-stat-k">95% ellipse</span><span className="lps-disp-stat-v">443 × 371 m</span></div>
+              <div className="lps-disp-stat-row"><span className="lps-disp-stat-k">95% scatter ellipse</span><span className="lps-disp-stat-v">443 × 371 m</span></div>
             </div>
           </div>
           <div className="lps-disp-chart">
@@ -918,7 +920,7 @@ function LPScroll() {
                 );
               })()}
 
-              {/* 95 / 75 / 50 — nested confidence rings */}
+              {/* 95 / 75 / 50 — nested modeled-scatter rings */}
               <g className="lps-disp-ell95" transform="translate(762 264) rotate(-8)">
                 <circle r="118" fill="url(#lpsMc95Grad)"/>
                 <circle r="118" fill="none" stroke="#e07b2d" strokeWidth="1.6" strokeDasharray="6 5" opacity="0.95"/>
@@ -929,7 +931,7 @@ function LPScroll() {
               {/* in-map confidence legend — top-right */}
               <g transform="translate(820 30)" fontFamily="JetBrains Mono" fontSize="9" letterSpacing="0.04em">
                 <rect x="-10" y="-14" width="160" height="64" fill="#0a0a0a" stroke="#2a2a2a" opacity="0.92"/>
-                <text x="0" y="0" fill="#888">CONFIDENCE</text>
+                <text x="0" y="0" fill="#888">MODELED_SCATTER</text>
                 <g transform="translate(0 14)">
                   <line x1="0" x2="14" y1="0" y2="0" stroke="#e07b2d" strokeWidth="1.6" strokeDasharray="6 5"/>
                   <text x="20" y="3" fill="#cfcfcf">95% · 443×371m</text>
@@ -1021,8 +1023,8 @@ function LPScroll() {
           </div>
           <div className="lps-val-rows">
             {[
-              { lvl: 'ok', t: '✓ LANDING_KE_OK', b: 'Landing KE 42 ft-lbf — within 75 ft-lbf NAR/TRA guideline.' },
-              { lvl: 'ok', t: '✓ SAFETY_FACTOR_PASS', b: 'Shock cord SF 4.2× — passes nylon threshold of 4.0×.' },
+              { lvl: 'ok', t: '✓ LANDING_KE_WITHIN_GUIDELINE', b: 'Landing KE 42 ft-lbf — within the 75 ft-lbf NAR/TRA guideline.' },
+              { lvl: 'ok', t: '✓ SHOCK_CORD_WITHIN_CRITERION', b: 'Shock cord SF 4.2× — above the nylon 4.0× threshold.' },
               { lvl: 'warn', t: '▲ OPENING_SHOCK', b: 'Main chute opening shock ~320 lbs at 62 fps approaching cord limit (500 lbs).' },
               { lvl: 'warn', t: '▲ DUAL_DEPLOY_NO_DBAG', b: 'No deployment bag — main opens uncontrolled at drogue speed.' },
               { lvl: 'crit', t: '■ SNATCH_FORCE', b: 'Kevlar 3% elongation amplifies snatch 5.8× — dynamic load 1290 lbs exceeds 1500 lbs rating.' },
@@ -1067,7 +1069,7 @@ function LPScroll() {
         </div>
         <div className="lps-footer-bot">
           <span>© 2026 RECOVERYSYS · MIT</span>
-          <span>BUILD_20260427</span>
+          <span>BUILD_20260813</span>
           <span>NODE 7A3F-22 · NOMINAL</span>
         </div>
       </footer>
