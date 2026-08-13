@@ -28,12 +28,16 @@ Last updated: 2026-07-17 — v1.2.0.0 release cleanup
 
 ## v2 — Parts Catalog
 
-### TODO: Parts catalog update tooling
+### Shipped: Parts catalog validation
+The JSON schema (`parts-schema.json`) and validator (`scripts/validate-parts.js`)
+described below now exist and run in `npm run check` via `validate:parts`.
+
+### TODO: Parts catalog form-based editor
 **What:** A lightweight way to update `src/data/parts.js` when manufacturers publish new specs or products.
-**Why:** The v1 parts catalog is a hand-maintained static JS array. When Featherweight releases firmware that changes voltage range, or Fruity Chutes repackages their 36" chute, the catalog goes stale. Currently requires a developer to hand-edit the JS object.
+**Why:** The v1 parts catalog is a hand-maintained static JS array. When Featherweight releases firmware that changes voltage range, or Fruity Chutes repackages their 36" chute, the catalog goes stale. Schema validation exists; non-developer domain experts still cannot edit the catalog without hand-editing JS.
 **Pros:** Non-developer domain expert can validate spec changes; reduces time-to-accuracy; catches schema drift early.
 **Cons:** Another tool to maintain.
-**Context:** The simplest approach is a JSON schema (`parts-schema.json`) + a validator script (`scripts/validate-parts.js`) that CI can run. A future enhancement could be a form-based editor that writes valid entries to `parts.js`. No backend needed — the catalog is client-side static data.
+**Context:** The JSON schema + `scripts/validate-parts.js` gate catalog validity in CI. A future enhancement is a form-based editor that writes valid entries to `parts.js`. No backend needed — the catalog is client-side static data.
 **Effort:** S → with CC+gstack: S
 **Priority:** P3
 **Depends on:** None

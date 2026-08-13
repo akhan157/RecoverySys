@@ -215,12 +215,12 @@ Every consuming surface must use the same result identity, freshness, units, rea
 ### Partial and actively planned
 
 - Cross-artifact semantic parity across screen, print, export, comparison, and Flight Log.
-- Full on-screen Recovery Brief and distinct brief versus checklist print artifacts.
-- Seeded dispersion and broader sensitivity coverage.
+- Remaining Recovery Brief parity: the on-screen brief and distinct brief/checklist print artifacts are implemented; full export/import/share and Flight Log parity is not yet complete.
+- Broader sensitivity coverage and stochastic dispersion fixture coverage (seeded reproducible dispersion is implemented).
 - Per-part provenance review and accepted evidence indexing.
 - Candidate flight-evidence export and external review intake.
 - Full desktop/mobile workflow and accessibility qualification.
-- Clean-install verification on the supported CI runtime.
+- CI clean-install verification on the supported Node 22 runtime (verified locally on Node 22 and Node 26 on 2026-08-13; branch CI run pending).
 
 ### Deferred
 

@@ -2,8 +2,11 @@
 
 ## Current continuation point
 
-- Current consolidated commit: `498c886` (`merge reviewed sensitivity integrity child snapshot`).
+- Current consolidated commit: `11f5c9f` (`docs: update roadmap with progress map and execution order`).
 - Current branch: `main`, committed and pushed to `origin/main`.
+- M0 baseline reconciliation work (contract inventory, runtime decision,
+  prototype decision, ledger reconciliation) is implemented on the
+  `recoverysys-m0-baseline` child branch and must be reviewed before merge.
 - All ten child snapshots were committed, reviewed, merged with explicit parent-preserving resolutions, and their worktrees were removed after approval.
 - The current source of truth is [`../PRODUCT-STRATEGY-BRIEF.md`](../PRODUCT-STRATEGY-BRIEF.md) and [`../ROADMAP.md`](../ROADMAP.md).
 - Do not merge raw backup branches or resurrect removed child worktrees without a new review.
@@ -47,9 +50,11 @@ Existing GitHub session branches already preserve portable/macOS, calculation-co
 | Trust/hardening branches | Baseline already contains integrated successors. Do not cherry-pick old whole commits; add only a focused tested fix when baseline audit proves a missing behavior. |
 | Windows/macOS portable work | Baseline contains current packaging scripts/config. Do not stage local ZIPs, `.ignore`, or generated schema noise. Verify platform builds separately. |
 | Branding, README, hygiene, GitHub refresh | Baseline already includes their meaningful content. Keep only docs that match verified behavior. |
-| Transparency candidates | `GuidedReview.jsx` is now wired as the first-plan entry; `MethodDetailsTab.jsx` and `DetailsTab.jsx` remain separate snapshot/prototype surfaces outside the current main tab set. |
+| Transparency candidates | **Decision (M0, 2026-08-13): keep `GuidedReview.jsx`; archive `DetailsTab.jsx` and `MethodDetailsTab.jsx`.** `GuidedReview.jsx` is wired as the first-plan entry and covered by M5 qualification; the other two files are unimported snapshot/prototype surfaces outside the main tab set. History is preserved in the `backup/recoverysys-transparency-*-raw-20260728` branches. Do not merge the archive branches; removal of the dead files from the tree (if pursued) is a separate reviewed change. |
 | Confidence and evidence | Current code has conservative confidence/stale evaluators, but the product is wired to E0 review-only corpus coverage. Preserve `Insufficient confidence` until accepted applicable evidence exists. |
 | Flight evidence | Current local flight records preserve prediction identity and remain observations; never treat them as accepted corpus evidence without external review. |
+| Supported runtime (M0, 2026-08-13) | Node 22 (`v22.23.2`, CI line) and Node 26 (`v26.4.0`, local line) both pass `npm run check` identically (34 files, 281 tests, validators, lint, build) from a clean install. `package.json` engines (`^20.19.0 || ^22.13.0 || >=24.0.0`) already covers both; keep Node 22 as the supported CI runtime and Node 26 for local verification. Known cosmetic difference: `src/test/setup.js` touches Node's experimental `localStorage` getter — Node 22 throws (caught → in-memory store), Node 26 emits an `ExperimentalWarning` and falls back via `?? createMemoryStorage()`; no behavioral difference. |
+| Dependency audit (M0, 2026-08-13) | `npm audit` reports 5 high + 1 moderate findings, all transitive dev-dependencies (`brace-expansion`, `fast-uri`, `js-yaml`, `nanoid`, `postcss`, `undici`). No automated upgrade applied inside feature work; findings tracked here, separate from feature work, consistent with the 2026-07-28 baseline record. |
 
 ## Other-device workflow
 

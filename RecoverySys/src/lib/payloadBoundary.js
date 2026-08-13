@@ -4,12 +4,24 @@ import { runMigrations, isPayloadFromFuture } from './migrations.js'
 // Payloads can arrive from URLs, files, or browser storage. Keep the limits
 // deliberately finite so decoding never becomes an unbounded allocation.
 export const PAYLOAD_LIMITS = Object.freeze({
-  encodedChars: 400_000,
   jsonBytes: 300_000,
   customPartsJsonBytes: 300_000,
   customParts: 200,
   customNameChars: 200,
   motorCurvePoints: 10_000,
+})
+
+// Share-link pre-decode guardrails shared with src/lib/shareLink.js. The
+// authoritative size gate is PAYLOAD_LIMITS.jsonBytes, enforced after decode;
+// these bounds only cap the decoding work done before that gate runs. They
+// must stay above the worst-case encoding of a legal payload so a payload at
+// the jsonBytes limit is never rejected by a pre-check: every non-ASCII UTF-8
+// byte is percent-escaped (×3) then base64-expanded (×4/3), so 300_000 bytes
+// encode to at most 1_200_000 characters. decodedChars bounds the decoded JSON
+// string in UTF-16 units; a legal payload decodes to at most 300_000 units.
+export const SHARE_LINK_LIMITS = Object.freeze({
+  encodedChars: 1_200_000,
+  decodedChars: 512 * 1024,
 })
 
 const textEncoder = typeof TextEncoder !== 'undefined' ? new TextEncoder() : null
@@ -183,7 +195,7 @@ export function decodeMigrateValidateNormalize(input, options = {}) {
 }
 
 export function decodeShareEncoded(encoded, options = {}) {
-  if (typeof encoded !== 'string' || encoded.length > PAYLOAD_LIMITS.encodedChars)
+  if (typeof encoded !== 'string' || encoded.length > SHARE_LINK_LIMITS.encodedChars)
     return failure('oversized', 'Share payload exceeds the supported size limit')
   try {
     return decodeMigrateValidateNormalize(
