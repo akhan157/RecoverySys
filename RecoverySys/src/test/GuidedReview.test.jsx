@@ -128,9 +128,7 @@ describe('GuidedReview first-plan entry', () => {
     const next = screen.getByRole('button', { name: /next/i })
     next.focus()
     await user.keyboard('{Enter}')
-    expect(
-      screen.getByRole('heading', { name: /review results by scope/i })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /review results by scope/i })).toBeInTheDocument()
 
     const reviewMethod = screen.getByRole('button', { name: /review method/i })
     reviewMethod.focus()
@@ -140,9 +138,7 @@ describe('GuidedReview first-plan entry', () => {
     const back = screen.getByRole('button', { name: /← BACK/i })
     back.focus()
     await user.keyboard('{Enter}')
-    expect(
-      screen.getByRole('heading', { name: /review results by scope/i })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: /review results by scope/i })).toBeInTheDocument()
 
     const pause = screen.getByRole('button', { name: /pause and return/i })
     pause.focus()

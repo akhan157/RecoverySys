@@ -32,7 +32,10 @@ describe('FlightLogTab candidate-evidence UI', () => {
       target: { files: [file] },
     })
     await waitFor(() =>
-      expect(addToast).toHaveBeenCalledWith('error', expect.stringMatching(/Invalid candidate evidence/))
+      expect(addToast).toHaveBeenCalledWith(
+        'error',
+        expect.stringMatching(/Invalid candidate evidence/)
+      )
     )
   })
 

@@ -479,10 +479,7 @@ export default function FlightLogTab({ state, resultFresh, addToast }) {
           }. Observations are never promoted to accepted corpus evidence.`
         )
       } catch (error) {
-        addToast?.(
-          TOAST_LEVELS.ERROR,
-          error.message ?? 'Invalid candidate evidence file.'
-        )
+        addToast?.(TOAST_LEVELS.ERROR, error.message ?? 'Invalid candidate evidence file.')
       }
       event.target.value = ''
     }

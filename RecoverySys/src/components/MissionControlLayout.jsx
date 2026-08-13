@@ -99,22 +99,15 @@ export default function MissionControlLayout({
   )
   // Review actions (Analysis board rows, result strip, ConfidenceStatus links)
   // open the owning surface, focus the affected input, and offer a return path.
-  const handleNavigate = useCallback(
-    (path) => {
-      const tab =
-        path === 'SIMULATION'
-          ? 'SIMULATION'
-          : path.startsWith('config.')
-            ? 'DASHBOARD'
-            : 'SPECS'
-      setReviewNav({
-        origin: activeTabRef.current === 'ANALYSIS' ? 'ANALYSIS' : null,
-        target: path,
-      })
-      setActiveTab(tab)
-    },
-    []
-  )
+  const handleNavigate = useCallback((path) => {
+    const tab =
+      path === 'SIMULATION' ? 'SIMULATION' : path.startsWith('config.') ? 'DASHBOARD' : 'SPECS'
+    setReviewNav({
+      origin: activeTabRef.current === 'ANALYSIS' ? 'ANALYSIS' : null,
+      target: path,
+    })
+    setActiveTab(tab)
+  }, [])
   const handleTabSelect = useCallback((id) => {
     if (id !== 'ANALYSIS') setReviewNav(null)
     setActiveTab(id)

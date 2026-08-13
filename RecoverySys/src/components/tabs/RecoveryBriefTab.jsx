@@ -204,8 +204,9 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
                   <li key={`${crossing.driverKey}-${crossing.output}-${index}`}>
                     <strong>{crossing.driverLabel}</strong> {crossing.variantLabel}:{' '}
                     {crossing.outputLabel} {formatNumber(crossing.baseline.value)} {crossing.unit}{' '}
-                    moves from {crossingLabel(crossing.baseline.category, crossing.baseline.severity)}{' '}
-                    to {crossingLabel(crossing.variant.category, crossing.variant.severity)}.
+                    moves from{' '}
+                    {crossingLabel(crossing.baseline.category, crossing.baseline.severity)} to{' '}
+                    {crossingLabel(crossing.variant.category, crossing.variant.severity)}.
                   </li>
                 ))}
               </ul>

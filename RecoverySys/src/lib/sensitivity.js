@@ -107,13 +107,7 @@ const CRITERION_BY_OUTPUT = Object.freeze({
  * names the driver, output, criterion version, and both classifications so
  * consuming surfaces never have to reinterpret raw deltas.
  */
-function criterionCrossingsFor({
-  outputKey,
-  driverKey,
-  driverLabel,
-  baselineOutput,
-  variants,
-}) {
+function criterionCrossingsFor({ outputKey, driverKey, driverLabel, baselineOutput, variants }) {
   const criterionId = CRITERION_BY_OUTPUT[outputKey]
   if (!criterionId) return []
   const baseline = evaluateCriterion(criterionId, baselineOutput?.[outputKey])

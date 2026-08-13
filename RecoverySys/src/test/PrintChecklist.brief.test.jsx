@@ -94,7 +94,9 @@ describe('PrintChecklist recovery brief', () => {
         config={{}}
         simulation={null}
         resultFresh
-        warnings={[{ code: 'FIT_WARNING', slot: 'main_chute', level: 'warn', message: 'Review fit.' }]}
+        warnings={[
+          { code: 'FIT_WARNING', slot: 'main_chute', level: 'warn', message: 'Review fit.' },
+        ]}
         recoveryBrief={{
           status: 'current',
           briefVersion: 'recovery-brief-v1',

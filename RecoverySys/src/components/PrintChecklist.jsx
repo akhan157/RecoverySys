@@ -96,8 +96,7 @@ export default function PrintChecklist({
           {recoveryBrief?.provenance?.assumptionsVersion || 'Not available'}
         </p>
         <p>
-          Input identity:{' '}
-          {recoveryBrief?.provenance?.inputKey || 'Not available'} · Input revision:{' '}
+          Input identity: {recoveryBrief?.provenance?.inputKey || 'Not available'} · Input revision:{' '}
           {recoveryBrief?.provenance?.inputRevision ??
             recoveryBrief?.provenance?.revision ??
             'Not available'}
@@ -198,9 +197,7 @@ export default function PrintChecklist({
             </p>
           </>
         ) : (
-          <p>
-            {recoveryBrief?.sensitivity?.reason || 'Sensitivity response is not available.'}
-          </p>
+          <p>{recoveryBrief?.sensitivity?.reason || 'Sensitivity response is not available.'}</p>
         )}
       </section>
 
@@ -213,7 +210,8 @@ export default function PrintChecklist({
           <ul>
             {warnings.map((w, i) => (
               <li key={i} className={w.level === WARN_LEVELS.ERROR ? 'print-warning' : ''}>
-                <strong>{CATEGORY_LABELS[w.slot] || w.slot || w.code || 'REVIEW'}:</strong> {w.message}
+                <strong>{CATEGORY_LABELS[w.slot] || w.slot || w.code || 'REVIEW'}:</strong>{' '}
+                {w.message}
               </li>
             ))}
           </ul>
@@ -470,8 +468,8 @@ export default function PrintChecklist({
       <section className="print-artifact--checklist">
         <h2>Static packing / checklist order (bottom of bay to top)</h2>
         <p>
-          Planning checklist order only — not measured packing geometry, an assembly instruction,
-          or flight-readiness validation. Packing-volume screening is reported separately from the
+          Planning checklist order only — not measured packing geometry, an assembly instruction, or
+          flight-readiness validation. Packing-volume screening is reported separately from the
           simulated results.
         </p>
         {packingSteps.length === 0 ? (

@@ -52,9 +52,7 @@ describe('M2 stale-result and status-language closure', () => {
     expect(screen.queryByText('✓ ALL_SYSTEMS_NOMINAL')).not.toBeInTheDocument()
     expect(screen.queryByText(/No compatibility issues detected/i)).not.toBeInTheDocument()
     expect(screen.getByText('NO_COMPATIBILITY_WARNINGS_RECORDED')).toBeInTheDocument()
-    expect(
-      screen.getByText(/Absence of recorded warnings is not a clearance/i)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Absence of recorded warnings is not a clearance/i)).toBeInTheDocument()
   })
 
   it('never renders a checklist-pass conclusion from an empty warning list in PrintChecklist', () => {
@@ -68,9 +66,7 @@ describe('M2 stale-result and status-language closure', () => {
       />
     )
     expect(screen.queryByText('All systems nominal')).not.toBeInTheDocument()
-    expect(
-      screen.getByText(/Absence of recorded warnings is not a clearance/i)
-    ).toBeInTheDocument()
+    expect(screen.getByText(/Absence of recorded warnings is not a clearance/i)).toBeInTheDocument()
   })
 
   it('classifies main descent in the dashboard summary at exact canonical boundaries', () => {

@@ -1,6 +1,6 @@
 # RecoverySys Product Roadmap
 
-**Roadmap revision:** 2026-08-12
+**Roadmap revision:** 2026-08-13
 **Current branch:** `main`
 **Current release:** `1.2.0.1`
 
@@ -65,13 +65,13 @@ full exit criteria and evidence gates pass.
 
 | Milestone | Status | Verified progress | Main remaining gate |
 | --- | --- | --- | --- |
-| M0 | Partial | Local formatting, lint, tests, build, and validation gates | Supported Node 22 run, ledger reconciliation, and contract inventory |
-| M1 | Partial | 14 review cases and seeded dispersion support | Broader corpus, provenance, and independent evidence |
-| M2 | Partial | Canonical contracts and Analysis semantic slice | Stale-result closure and cross-artifact parity |
-| M3 | Partial | Cause-to-consequence Analysis surface | Full Analysis UX/accessibility closure; broader UI remains deferred |
-| M4 | Partial | On-screen Brief and separate Brief/Checklist print artifacts | Evidence transfer and import/export/share/Flight Log parity |
-| M5 | Partial | GuidedReview entry, guided state paths, and qualification coverage | Full supported-runtime critical-path qualification |
-| M6 | Partial | Local qualification gates and print-media inspection | Node 22, Windows, macOS, transfer, and external-evidence gates |
+| M0 | Partial | ~~Formatting/lint restoration, clean-install checks, ledger reconciliation, contract inventory, transparency decision, and dependency audit~~ | Full supported-runtime matrix and clean working tree |
+| M1 | Partial | ~~Deterministic corpus summaries, seeded dispersion summary, catalog provenance shape/report, and source contract~~ | Broader corpus, per-part review, and independent evidence |
+| M2 | Partial | ~~Canonical assessments, authored findings, threshold policy, stale-result withholding, per-output sensitivity, and prohibited-label cleanup~~ | Full cross-artifact semantic parity |
+| M3 | Partial | ~~Cause-to-consequence Analysis surface, canonical model responses, Simulation ownership, keyboard/mobile/focus/contrast/reduced-motion closure~~ | Broader application redesign remains deferred |
+| M4 | Partial | ~~On-screen Brief, separate Brief/Checklist print artifacts, stale withholding, static checklist boundary, and candidate-evidence transfer contract~~ | Full transfer matrix and independent evidence loop |
+| M5 | Partial | ~~Guided new/resume/import/invalid/pause/start-fresh/stale/insufficient paths, explicit input posture, demo separation, and desktop/mobile keyboard qualification~~ | No additional code-reachable M5 gate; release evidence remains bounded |
+| M6 | Partial | ~~Node 22 focused clean-install gates, representative workflows, targeted transfer/print/accessibility/copy/privacy/provenance review, and release documentation~~ | Full CI matrix, Windows launch/hash, macOS host run, and independent evidence |
 | M7 | Deferred | No promoted model changes | Evidence-backed model decision |
 | M8 | Deferred research | Python research engine exists but remains disconnected | M6, M7, comparison, security, privacy, and packaging gates |
 | M9 | Deferred | No committed expansion work | Future product decision after trust-centered workflow stabilizes |
@@ -98,38 +98,39 @@ fully qualified v2/v3 release.
 
 - Fourteen review-only validation cases now exist, including scalar and curve representative end-to-end plans plus descent unit-conversion, invalid-input edge, and metamorphic coverage. There are no accepted comparison cases or real-flight evidence cases.
 - Catalog provenance is still primarily manufacturer-level and unverified; per-part source review is not complete.
-- The Analysis tab has the integrated cause-to-consequence review surface and canonical semantic support, but stale-result closure, cross-artifact parity, and broader application redesign remain incomplete.
+- The Analysis tab now has the integrated cause-to-consequence review surface, canonical semantic support, stale-result closure, and responsive/accessibility behavior. Broader application redesign remains deferred.
 - `DetailsTab.jsx` and `MethodDetailsTab.jsx` remain snapshot/prototype work outside the GuidedReview integration.
-- Sensitivity coverage is incomplete; dispersion accepts an explicit safe-integer seed for reproducible runs while retaining stochastic behavior without a seed. Broader dispersion validation and cross-unit influence ranking remain incomplete.
-- The versioned Recovery Brief is available on screen, and separate brief/checklist print modes are implemented. Chromium print-media qualification verifies that each mode exposes only its intended artifact sections and that stale estimates remain withheld; broader screen/export/import/share and Flight Log parity remains incomplete.
-- Flight evidence is stored locally, but candidate-evidence export and external review intake are not complete.
-- `engine/` contains a FastAPI/SciPy RK45 research implementation, but it is not wired into the app, not validated as a second production authority, and not bundled into desktop builds. See [`M8-architecture-decision-report.md`](M8-architecture-decision-report.md) for the deferred-engine decision and security evidence.
-- The 2026-08-11 qualification record documents the verified M5 guided branch and M6 local gates. Local verification uses Node 26; CI remains pinned to Node 22. The current branch is `c863eff` on `main`; supported-runtime, platform, transfer-parity, and external-evidence gates remain open.
+- Per-output sensitivity and seeded dispersion summaries are implemented; broader stochastic dispersion validation remains incomplete.
+- The versioned Recovery Brief, separate brief/checklist print modes, targeted JSON/share/Flight Log parity, and candidate-evidence export/intake are implemented. The full transfer matrix and independent evidence loop remain incomplete.
+- The Python `engine/` package remains research-only: it is not wired into the app, not validated as a second production authority, and not bundled into desktop builds. See [`M8-architecture-decision-report.md`](M8-architecture-decision-report.md) for the deferred-engine decision and security evidence.
+- The 2026-08-13 M6 qualification record documents focused Node 22 gates and the integrated M0-M6 checkpoint `19b72a2`. Full CI matrix execution, Windows launch/hash, macOS host verification, and independent evidence remain open.
 
 ### Baseline Evidence Snapshot
 
-Observed on 2026-08-12 at current `main` HEAD `c863eff`. Items marked as
-qualification-record evidence were verified on 2026-08-11; the unit-test and
-production-build rows were re-run locally on 2026-08-12.
+Observed on 2026-08-13 at integrated `main` HEAD `19b72a2`. The M6
+qualification record carries the focused Node 22 evidence; the checks below
+were re-run after integration on the local Node 26 development line.
 
 | Check | Result |
-| `git status` | Clean at `c863eff` on `main`, tracking `origin/main` |
-| `npm run validate:parts` | Qualification record: passes; 225 parts |
-| `npm run validate:corpus` | Qualification record: passes; 14 review cases |
-| `npm test` | Passes; 34 files and 281 tests |
-| `npm run lint` | Qualification record: passes with zero warnings |
-| `npm run format:check` | Qualification record: passes |
-| `npm run build` | Passes |
-| `npm run e2e` | Qualification record: 36/36 on desktop and Pixel 5 mobile Chromium |
-| `npm test -- --run src/test/PrintChecklist.brief.test.jsx` | Qualification record: 3/3 pass after print qualification |
-| `npm run e2e -- e2e/phase2.spec.js` | Qualification record: 10/10 across Chromium desktop and Pixel 5 |
-| `npm run check` | Qualification record: passes after print qualification |
+| `git status` | Main changes plus the pre-existing user-owned `untitled.md`; no generated build output tracked |
+| `npm ci` | Pass; 428 packages |
+| `npm run validate:parts` | Pass; 225 parts |
+| `npm run validate:corpus` | Pass; 14 review cases |
+| `npm run report:catalog-provenance` | Pass; 225 parts, 9 groups, 0 missing records |
+| `npm test` | Pass; 38 files and 333 tests |
+| `npm run lint` | Pass; zero warnings |
+| `npm run format:check` | Pass |
+| `npm run build` | Pass; 116 modules |
+| `npm run e2e` | Pass; 58/58 on desktop Chromium and Pixel 5 mobile Chromium |
+| `git diff --check` | Pass |
 
-The 2026-08-11 qualification record is [`docs/release-qualification-2026-08-11.md`](docs/release-qualification-2026-08-11.md). It records the verified M5 guided first-plan increment and M6 local gates, including print artifact media inspection, while keeping supported-runtime, Windows, macOS, independent, and remaining transfer-parity gates open.
+The current qualification record is [`docs/release-qualification-2026-08-13.md`](docs/release-qualification-2026-08-13.md).
+It records focused Node 22 gates, code-reachable M0-M6 fixes, and the
+remaining Windows, macOS, full-matrix, transfer-parity, and external-evidence
+limitations.
 
-This snapshot verifies the consolidated implementation locally. Broader
-cross-artifact, clean-install, platform, and external evidence gates remain
-open.
+This snapshot verifies the consolidated implementation locally. Full CI
+matrix, platform, broader transfer, and external evidence gates remain open.
 
 ## Delivery Sequence
 
@@ -165,14 +166,14 @@ behavior.
 
 Work:
 
-- Restore formatting and lint checks for the current branch.
-- Re-run the supported CI matrix, including the existing Playwright suite, from a clean install.
-- Decide whether Node 26 is supported locally or whether the test harness should explicitly use the CI-supported Node 22 line.
-- Reconcile the v2 completion ledger with actual implementation and evidence.
-- Resolve the documentation conflict between future-facing confidence posture and implemented confidence modules.
-- Inventory stored and transferred contracts: local storage, share links, JSON, simulation envelopes, briefs, and flight records.
-- Choose one transparency direction for integration. Keep the other snapshot branches as archives; do not merge all three prototypes.
-- Track dependency audit findings separately from feature work.
+- ~~Restore formatting and lint checks for the current branch.~~
+- Run the supported CI matrix, including the existing Playwright suite, from a clean install; focused Node 22 gates pass, while the full matrix remains a CI release gate.
+- ~~Decide whether Node 26 is supported locally or whether the test harness should explicitly use the CI-supported Node 22 line.~~
+- ~~Reconcile the v2 completion ledger with actual implementation and evidence.~~
+- ~~Resolve the documentation conflict between future-facing confidence posture and implemented confidence modules.~~
+- ~~Inventory stored and transferred contracts: local storage, share links, JSON, simulation envelopes, briefs, and flight records.~~
+- ~~Choose one transparency direction for integration. Keep the other snapshot branches as archives; do not merge all three prototypes.~~
+- ~~Track dependency audit findings separately from feature work.~~
 
 **Exit criteria:** `npm ci`, `npm run check`, `npm run e2e`, and `git diff --check`
 pass on the supported CI runtime; the roadmap ledger and detailed plans agree
@@ -192,13 +193,13 @@ Work:
 - Expand the corpus beyond the current 14 review cases with explicit atmosphere,
   ascent-domain, additional unit-conversion, edge-case, metamorphic, and
   representative end-to-end coverage.
-- Add deterministic machine-readable case summaries and coverage by output domain.
-- Seed dispersion runs and make stochastic fixtures reproducible; explicit seeded dispersion fixtures now exist, while broader stochastic fixture coverage remains incomplete.
+- ~~Add deterministic machine-readable case summaries and coverage by output domain.~~
+- ~~Seed dispersion runs and make stochastic fixtures reproducible.~~ Broader stochastic fixture coverage remains incomplete.
 - Document tolerance derivation, input equivalence, units, model identity, and scope for every case.
 - Promote cases to `accepted-for-comparison` only after independent review metadata exists.
-- Add per-part catalog source metadata and a deterministic provenance report.
-- Define the source metadata and review contract that any future automated catalog sourcing must satisfy.
-- Keep real-flight records separate from accepted validation evidence.
+- ~~Add per-part catalog source metadata and a deterministic provenance report.~~
+- ~~Define the source metadata and review contract that any future automated catalog sourcing must satisfy.~~
+- ~~Keep real-flight records separate from accepted validation evidence.~~
 
 **Exit criteria:** every production output has at least invariant coverage;
 important domains have reviewed analytic or simulator comparisons; no UI text
@@ -218,13 +219,13 @@ thing across calculation, UI, print, export, and flight records.
 
 Work:
 
-- Centralize domain assessments with value, unit, freshness, validity, envelope, evidence, reason codes, and method/policy identity.
-- Replace message-derived compatibility codes with authored stable finding codes.
-- Centralize threshold criteria and exact boundary behavior.
-- Make stale results unusable for conclusions, comparisons, briefs, and flight-log predictions; resolve the current stale-brief behavior.
-- Separate invalid, unsupported, unknown, conditional, sensitivity-flagged, and insufficient-confidence states.
-- Replace aggregate cross-unit sensitivity ranking with per-output model response and defensible criterion crossings only.
-- Remove prohibited or overstated labels such as `SAFE`, `REVIEWED`, `PRELIMINARY CHECKS PASS`, and unsupported confidence-interval language.
+- ~~Centralize domain assessments with value, unit, freshness, validity, envelope, evidence, reason codes, and method/policy identity.~~
+- ~~Replace message-derived compatibility codes with authored stable finding codes.~~
+- ~~Centralize threshold criteria and exact boundary behavior.~~
+- ~~Make stale results unusable for conclusions, comparisons, briefs, and flight-log predictions; resolve the current stale-brief behavior.~~
+- ~~Separate invalid, unsupported, unknown, conditional, sensitivity-flagged, and insufficient-confidence states.~~
+- ~~Replace aggregate cross-unit sensitivity ranking with per-output model response and defensible criterion crossings only.~~
+- ~~Remove prohibited or overstated labels such as `SAFE`, `REVIEWED`, `PRELIMINARY CHECKS PASS`, and unsupported confidence-interval language.~~
 
 **Exit criteria:** screen-independent tests prove semantic parity at exact
 boundaries; no surface invents its own physics or status classification; stale
@@ -246,14 +247,14 @@ than a cosmetic refresh.
 
 Primary work, in the order defined by [`docs/ui-redesign-plan.md`](docs/ui-redesign-plan.md):
 
-- Add a shared plan/result strip for plan identity, completeness, currentness, and the next action.
-- Add reusable result status, review links, review summaries, accessible disclosures, and canonical finding rows.
+- ~~Add a shared plan/result strip for plan identity, completeness, currentness, and the next action.~~
+- ~~Add reusable result status, review links, review summaries, accessible disclosures, and canonical finding rows.~~
 - Rebuild compatibility review around errors, warnings, remediation, affected inputs, and source classification.
-- Restore Flight Profile as the dominant Simulation visual with explicit responsive sizing.
-- Rebuild Analysis as a cause-to-consequence board: driver -> affected outcome -> finding -> next action. This replaces the current equal-weight dossier layout; it is not an incremental card or copy polish pass.
-- Apply current/stale semantics consistently to Dispersion and Compare.
-- Keep Flight Log observations distinct from interpretation and validation.
-- Complete keyboard, mobile, focus, contrast, reduced-motion, and no-color-only status behavior.
+- ~~Restore Flight Profile as the dominant Simulation visual with explicit responsive sizing.~~
+- ~~Rebuild Analysis as a cause-to-consequence board: driver -> affected outcome -> finding -> next action. This replaces the current equal-weight dossier layout; it is not an incremental card or copy polish pass.~~
+- ~~Apply current/stale semantics consistently to Dispersion and Compare.~~
+- ~~Keep Flight Log observations distinct from interpretation and validation.~~
+- ~~Complete keyboard, mobile, focus, contrast, reduced-motion, and no-color-only status behavior.~~
 
 #### Analysis Tab Rebuild
 
@@ -263,17 +264,17 @@ matters, and what should be checked next?**
 
 Implement it in this order:
 
-1. **Semantic foundation:** consume the canonical assessments, criteria, finding codes, freshness, evidence, and sensitivity view models from M2. Analysis must not define its own physics constants, thresholds, or status meanings.
-2. **Result usability strip:** show `Not run`, `Stale`, or `Current`, the reason, model identity, and the correct action to run, rerun, or review a specific input.
-3. **Review summary:** show errors, warnings, not-evaluated domains, and only defensible decision-criterion crossings. Never infer a positive state from an empty warning list.
-4. **Causality board:** show driver, affected recovery outcome, finding or unknown state, and a direct action such as `Review main deployment altitude` or `Review shock-cord rating`.
-5. **Tested model response:** show per-output ranges and assumptions without cross-unit influence scores, probability language, or confidence-interval claims.
-6. **Progressive detail:** keep formulas, intermediate values, provenance, evidence IDs, scenario tables, and method notes available behind accessible disclosures.
-7. **Responsive/accessibility closure:** preserve the same order on mobile, keep primary content out of horizontal tables, maintain 44px targets, focus destinations, live status text, and reduced-motion behavior.
+1. ~~**Semantic foundation:** consume the canonical assessments, criteria, finding codes, freshness, evidence, and sensitivity view models from M2. Analysis must not define its own physics constants, thresholds, or status meanings.~~
+2. ~~**Result usability strip:** show `Not run`, `Stale`, or `Current`, the reason, model identity, and the correct action to run, rerun, or review a specific input.~~
+3. ~~**Review summary:** show errors, warnings, not-evaluated domains, and only defensible decision-criterion crossings. Never infer a positive state from an empty warning list.~~
+4. ~~**Causality board:** show driver, affected recovery outcome, finding or unknown state, and a direct action such as `Review main deployment altitude` or `Review shock-cord rating`.~~
+5. ~~**Tested model response:** show per-output ranges and assumptions without cross-unit influence scores, probability language, or confidence-interval claims.~~
+6. ~~**Progressive detail:** keep formulas, intermediate values, provenance, evidence IDs, scenario tables, and method notes available behind accessible disclosures.~~
+7. ~~**Responsive/accessibility closure:** preserve the same order on mobile, keep primary content out of horizontal tables, maintain 44px targets, focus destinations, live status text, and reduced-motion behavior.~~
 
-Move the complete flight timeline to Simulation and detailed packing review to
+~~Move the complete flight timeline to Simulation and detailed packing review to
 the canonical compatibility surface. Remove or replace unsupported labels such
-as `SAFE`, `REVIEWED`, `PRELIMINARY CHECKS PASS`, and ambiguous `BLOCKED` states.
+as `SAFE`, `REVIEWED`, `PRELIMINARY CHECKS PASS`, and ambiguous `BLOCKED` states.~~
 
 The detailed implementation contract is [`docs/analysis-tab-redesign-plan.md`](docs/analysis-tab-redesign-plan.md). The Analysis rebuild is gated on M2
 semantic contracts and gates M4 artifact parity; it should be implemented before
@@ -291,24 +292,20 @@ agree on finding codes, values, currentness, and unresolved review actions.
 **Priority:** P1
 **Status:** Partial
 
-**Completed increments:** Print output scopes Simulation Results to the checklist
-artifact only; stale estimates remain withheld; and Chromium print-media
-inspection verifies distinct Recovery Brief and Recovery Checklist artifact
-sections. M4 remains Partial because screen/export/import/share parity and the
-evidence-loop gates remain open.
+**Completed increments:** ~~Print output scopes Simulation Results to the checklist artifact only; stale estimates remain withheld; Chromium print-media inspection verifies distinct Recovery Brief and Recovery Checklist artifact sections; the on-screen Brief and print Brief share the versioned view model; static checklist order is labeled separately from packing screening; and candidate-evidence export/intake preserves source, units, conditions, reviewer status, and immutable prediction identity.~~ M4 remains Partial because the full transfer matrix and independent evidence loop remain open.
 
 **Goal:** turn a current plan into one traceable handoff artifact and preserve
 later observations without promoting them automatically to evidence.
 
 Work:
 
-- [x] Build the on-screen Recovery Brief from the same versioned view model as print.
-- [x] Separate `Print recovery brief` from `Print checklist` instead of routing both to the same document.
-- Include identity, generated time, currentness, mission envelope, hardware, deployment sequence, key estimates, sensitivity, evidence, unresolved checks, and review boundaries.
-- Rename and label the bay list as a static planning/checklist order. It is not measured packing geometry, an assembly instruction, or flight-readiness validation.
-- Keep packing-volume screening separate from the static order.
-- Add candidate-evidence export/intake for Flight Log records with source, units, conditions, reviewer status, and immutable prediction identity.
-- Verify import/export/share migration behavior and print parity in fresh browser contexts; print-mode separation is qualified, while transfer parity remains open.
+- [x] ~~Build the on-screen Recovery Brief from the same versioned view model as print.~~
+- [x] ~~Separate `Print recovery brief` from `Print checklist` instead of routing both to the same document.~~
+- ~~Include identity, generated time, currentness, mission envelope, hardware, deployment sequence, key estimates, sensitivity, evidence, unresolved checks, and review boundaries.~~
+- ~~Rename and label the bay list as a static planning/checklist order. It is not measured packing geometry, an assembly instruction, or flight-readiness validation.~~
+- ~~Keep packing-volume screening separate from the static order.~~
+- ~~Add candidate-evidence export/intake for Flight Log records with source, units, conditions, reviewer status, and immutable prediction identity.~~
+- Verify import/export/share migration behavior and print parity in fresh browser contexts; targeted fresh-context parity passes, while the full transfer matrix remains open.
 
 **Exit criteria:** screen, print, export, and imported artifacts agree on values,
 identity, status, units, and unresolved checks; stale artifacts cannot appear
@@ -317,7 +314,8 @@ current; local flight observations never upload or auto-promote.
 ### M5 - Guided First-Plan Onboarding
 
 **Priority:** P1
-**Status:** Partial; guided branch qualification increment verified; full critical-path qualification remains open
+
+**Status:** Partial; ~~guided new/resume/import/invalid/pause/start-fresh/stale/insufficient paths, explicit input posture, demo separation, and desktop/mobile keyboard qualification are verified~~; release evidence remains bounded
 **Goal:** help a first-time user reach a reviewable brief without weakening the
 expert workflow or hiding assumptions.
 
@@ -332,31 +330,35 @@ Flow:
 
 Requirements:
 
-- Users can pause, resume, import, start fresh, or skip optional information without data loss.
-- Required, optional, defaulted, catalog, and user-supplied values are explicit.
-- Existing direct-navigation tabs remain available for experienced users.
-- Demo data is never confused with the user's own plan.
+- ~~Users can pause, resume, import, start fresh, or skip optional information without data loss.~~
+- ~~Required, optional, defaulted, catalog, and user-supplied values are explicit.~~
+- ~~Existing direct-navigation tabs remain available for experienced users.~~
+- ~~Demo data is never confused with the user's own plan.~~
 
-**Exit criteria:** deterministic desktop and mobile flows cover new, resume,
+**Exit criteria:** ~~deterministic desktop and mobile flows cover new, resume,
 import, invalid, stale, and insufficient-confidence paths; keyboard users can
 complete the critical path; guided completion never implies approval or flight
-readiness.
+readiness.~~
 
 ### M6 - Release Qualification
 
-**Priority:** P0 at release boundary
 **Status:** Partial; local qualification gates pass, including print artifact media
-inspection; platform, transfer-parity, and external gates remain
+inspection; platform, full-matrix transfer parity, and external gates remain
+
+**Completed increments:** ~~Representative fresh, stale, invalid, out-of-envelope,
+conditional, sensitivity-flagged, and insufficient workflows; targeted
+accessibility, copy, privacy, provenance, and prohibited-claim review; and
+documentation/changelog/version-identity alignment.~~
 
 Release gate:
 
-- Clean-install formatting, parts validation, corpus validation, lint, unit tests, build, and Playwright E2E.
-- Representative fresh, stale, invalid, out-of-envelope, conditional, sensitivity-flagged, and insufficient workflows.
-- Full import/export/share migration matrix, print artifact inspection, and no current/stale or unit mismatch.
+- Clean-install formatting, parts validation, corpus validation, lint, unit tests, build, and Playwright E2E; focused Node 22 gates pass, while the full matrix remains a CI release gate.
+- ~~Representative fresh, stale, invalid, out-of-envelope, conditional, sensitivity-flagged, and insufficient workflows.~~
+- Full import/export/share migration matrix, print artifact inspection, and no current/stale or unit mismatch; targeted fresh-context transfer and print parity pass, while the full matrix remains open.
 - Windows portable artifact launches and its hash is recorded.
 - macOS artifact is verified on macOS before a macOS support claim; otherwise it remains unverified.
-- Accessibility, copy, privacy, provenance, and prohibited-claim review are complete.
-- Documentation, changelog, release notes, and version identities match the shipped artifacts.
+- ~~Accessibility, copy, privacy, provenance, and prohibited-claim review are complete.~~
+- ~~Documentation, changelog, release notes, and version identities match the shipped artifacts.~~
 
 **Exit criteria:** all required gates pass from a clean install and every
 remaining external limitation is stated in the release documentation.
@@ -370,12 +372,11 @@ verification above:
   identity, trusted simulator artifact, manufacturer/test dataset, or traceable
   real-flight observation has been supplied. The 14 current corpus cases remain
   review-only.
-- **macOS qualification:** no macOS host run has verified the universal artifact;
-  macOS support remains unverified.
-- **Windows release artifact:** the historical portable build is documented, but
-  the integrated checkpoint still requires a fresh Windows launch and hash check.
-- **Supported-runtime release run:** local checks used Node 26 with a file-backed
-  `localStorage`; a clean-install Node 22 CI-equivalent run remains a release gate.
+- **Windows release artifact:** CI builds and asserts archive contents, but the
+  integrated checkpoint still requires a fresh Windows launch and hash check.
+- **Supported-runtime full matrix:** focused Node 22 gates pass; the complete
+  clean-install `npm run check` plus full `npm run e2e` matrix remains a CI
+  release gate.
 
 
 ### M7 - Evidence-Led Model Decisions

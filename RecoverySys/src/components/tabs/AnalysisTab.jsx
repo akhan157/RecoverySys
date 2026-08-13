@@ -12,7 +12,11 @@ import { statusFromWarnings } from '../../lib/statusColor.js'
 import StatusChip from '../primitives/StatusChip.jsx'
 import ConfidenceStatus from '../ConfidenceStatus.jsx'
 import SensitivityPanel from '../SensitivityPanel.jsx'
-import { CausalityRow as SharedCausalityRow, ResultUsabilityStrip, ReviewSummary } from '../analysis/index.js'
+import {
+  CausalityRow as SharedCausalityRow,
+  ResultUsabilityStrip,
+  ReviewSummary,
+} from '../analysis/index.js'
 
 const RESULT_LABELS = Object.freeze({
   'not-run': 'Not run',

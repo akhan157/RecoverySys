@@ -38,7 +38,9 @@ export default function DashboardTab({
   // 15/20 ft/s boundaries itself.
   const descentPresentation =
     state.simulation?.main_fps != null
-      ? presentCriterion(evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, state.simulation.main_fps))
+      ? presentCriterion(
+          evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, state.simulation.main_fps)
+        )
       : null
 
   // Review actions name the affected hardware slot (config.<slot>); land focus
@@ -185,9 +187,7 @@ export default function DashboardTab({
                   <span className="mc-metric__unit">FT/S</span>
                 </div>
                 <div className="mc-metric__sub">
-                  {state.simulation.main_fps == null
-                    ? 'DROGUE_ONLY'
-                    : descentPresentation.label}
+                  {state.simulation.main_fps == null ? 'DROGUE_ONLY' : descentPresentation.label}
                 </div>
               </div>
             </>

@@ -189,7 +189,11 @@ function FlightTimelinePanel({ sim, specs }) {
           </p>
         </details>
         <div className="mc-sim__timeline-body">
-          <TimelineRow marker="T+0" event="LAUNCH" note="Rail exit — no rail friction or launch-guide losses modeled" />
+          <TimelineRow
+            marker="T+0"
+            event="LAUNCH"
+            note="Rail exit — no rail friction or launch-guide losses modeled"
+          />
           {sim.burnout_t_s != null && (
             <TimelineRow
               marker={`T+${sim.burnout_t_s}s`}

@@ -144,12 +144,7 @@ describe('M3 Analysis usability closure', () => {
   it('renders canonical causality rows with text status labels and keyboard selection', async () => {
     const user = userEvent.setup()
     const onNavigate = vi.fn()
-    render(
-      <AnalysisTab
-        state={baseState()}
-        confidenceProps={confidenceProps(onNavigate)}
-      />
-    )
+    render(<AnalysisTab state={baseState()} confidenceProps={confidenceProps(onNavigate)} />)
 
     const rowButton = screen.getByRole('button', {
       name: /Review main_chute affecting Main descent and landing impact/,
@@ -269,9 +264,7 @@ describe('M3 Analysis usability closure', () => {
 
     expect(document.activeElement?.getAttribute('data-slot')).toBe('main_chute')
     expect(dashboardConsumed).toHaveBeenCalledTimes(1)
-    expect(
-      screen.getByRole('button', { name: 'Return to Analysis' })
-    ).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Return to Analysis' })).toBeInTheDocument()
   })
 
   it('clears the focus request when no destination element matches', () => {
