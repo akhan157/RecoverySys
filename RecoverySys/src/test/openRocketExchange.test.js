@@ -10,6 +10,87 @@ function fixture(name) {
   return readFileSync(`${fixtureRoot}/${name}`)
 }
 
+// Build a minimal ZIP by hand so a member can declare a compression method
+// without carrying valid deflate data. fflate's unzipSync never checks CRC, so
+// a zero CRC is fine; only the member layout and central-directory sizes matter.
+function u16(v) {
+  return [v & 255, (v >> 8) & 255]
+}
+function u32(v) {
+  return [v & 255, (v >> 8) & 255, (v >> 16) & 255, (v >> 24) & 255]
+}
+function localHeader(name, method, compSize, uncompSize) {
+  const nameBytes = strToU8(name)
+  return new Uint8Array([
+    ...strToU8('PK\x03\x04'),
+    ...u16(20), // version needed
+    ...u16(0), // flags
+    ...u16(method),
+    ...u16(0), // mod time
+    ...u16(0), // mod date
+    ...u32(0), // crc (not validated)
+    ...u32(compSize),
+    ...u32(uncompSize),
+    ...u16(nameBytes.length),
+    ...u16(0), // extra
+    ...nameBytes,
+  ])
+}
+function centralEntry(name, method, compSize, uncompSize, localOffset) {
+  const nameBytes = strToU8(name)
+  return new Uint8Array([
+    ...strToU8('PK\x01\x02'),
+    ...u16(20), // version made by
+    ...u16(20), // version needed
+    ...u16(0), // flags
+    ...u16(method),
+    ...u16(0), // mod time
+    ...u16(0), // mod date
+    ...u32(0), // crc
+    ...u32(compSize),
+    ...u32(uncompSize),
+    ...u16(nameBytes.length),
+    ...u16(0), // extra
+    ...u16(0), // comment
+    ...u16(0), // disk start
+    ...u16(0), // internal attrs
+    ...u32(0), // external attrs
+    ...u32(localOffset),
+    ...nameBytes,
+  ])
+}
+function eocd(entryCount, centralSize, centralOffset) {
+  return new Uint8Array([
+    ...strToU8('PK\x05\x06'),
+    ...u16(0), // disk
+    ...u16(0), // cd disk
+    ...u16(entryCount),
+    ...u16(entryCount),
+    ...u32(centralSize),
+    ...u32(centralOffset),
+    ...u16(0), // comment
+  ])
+}
+function craftZip(members) {
+  const localParts = []
+  const centralParts = []
+  let offset = 0
+  for (const member of members) {
+    const local = localHeader(member.name, member.method, member.data.length, member.uncompSize)
+    localParts.push(local, member.data)
+    centralParts.push(
+      centralEntry(member.name, member.method, member.data.length, member.uncompSize, offset)
+    )
+    offset += local.length + member.data.length
+  }
+  const centralSize = centralParts.reduce((sum, part) => sum + part.length, 0)
+  return new Uint8Array([
+    ...localParts.reduce((all, part) => [...all, ...part], []),
+    ...centralParts.reduce((all, part) => [...all, ...part], []),
+    ...eocd(members.length, centralSize, offset),
+  ])
+}
+
 describe('OpenRocket exchange parser', () => {
   it('extracts source identity, stages, and geometry candidates from a 1.10 archive', () => {
     const exchange = parseOpenRocketArchive(fixture('simple-model-1.10.ork'), {
@@ -67,6 +148,38 @@ describe('OpenRocket exchange parser', () => {
     expect(exchange.externalResults.every((result) => result.status === 'external-reference')).toBe(
       true
     )
+  })
+
+  it('reports embedded thrustcurve names without decompressing their content', () => {
+    // Real 1.11 fixture carries one thrustcurve member; the envelope names it
+    // and the warning counts it, proving the metadata-only path surfaces it.
+    const exchange = parseOpenRocketArchive(fixture('simulation-extensions-1.11.ork'))
+    expect(exchange.omitted.embeddedCurveMembers).toHaveLength(1)
+    expect(exchange.omitted.embeddedCurveMembers[0]).toMatch(/^thrustcurves\/.+\.rse$/)
+    const warning = exchange.warnings.find((w) => w.code === 'EMBEDDED_CURVE_NOT_IMPORTED')
+    expect(warning?.level).toBe('info')
+    expect(warning?.message).toContain('1 embedded motor curve')
+
+    // Hostile archive: the thrustcurve member declares deflate compression but
+    // carries invalid deflate bytes. If the parser inflated discarded content
+    // it would fail; skipping decompression means the parse still succeeds.
+    const garbageCurve = strToU8('this is not valid deflate data \x00\xff\xfe')
+    const archive = craftZip([
+      {
+        name: 'rocket.ork',
+        method: 0,
+        uncompSize: 0,
+        data: strToU8(
+          '<openrocket version="1.10"><rocket><name>Nested</name>' +
+            '<subcomponents><stage number="1"><name>Stage 1</name></stage></subcomponents>' +
+            '</rocket></openrocket>'
+        ),
+      },
+      { name: 'thrustcurves/bad.rse', method: 8, uncompSize: 8, data: garbageCurve },
+    ])
+    const hostile = parseOpenRocketArchive(archive, { sourceFilename: 'hostile.ork' })
+    expect(hostile.omitted.embeddedCurveMembers).toEqual(['thrustcurves/bad.rse'])
+    expect(hostile.warnings.some((w) => w.code === 'EMBEDDED_CURVE_NOT_IMPORTED')).toBe(true)
   })
 
   it('retains multi-stage source context without flattening stages', () => {

@@ -457,6 +457,13 @@ function parseExternalResults(root, configIds) {
 function archiveEntries(bytes) {
   let memberCount = 0
   let declaredUncompressedBytes = 0
+  // Thrustcurve members are metadata-only. Collect their names from the ZIP
+  // central directory without decompressing the content. A hostile archive can
+  // lie about the declared originalSize (it is not a trustworthy expansion
+  // bound), so decompressing a member we immediately discard would let a zip
+  // bomb expand unbounded in memory. Only rocket.ork is ever decompressed, and
+  // it is hard-capped by xmlBytes after extraction.
+  const thrustcurveNames = []
   let entries
   try {
     entries = unzipSync(bytes, {
@@ -478,7 +485,9 @@ function archiveEntries(bytes) {
           )
         }
 
-        return file.name === 'rocket.ork' || file.name.startsWith('thrustcurves/')
+        if (file.name === 'rocket.ork') return true
+        if (file.name.startsWith('thrustcurves/')) thrustcurveNames.push(file.name)
+        return false
       },
     })
   } catch (error) {
@@ -496,7 +505,7 @@ function archiveEntries(bytes) {
     )
   }
 
-  return { entries, memberCount }
+  return { entries, memberCount, thrustcurveNames }
 }
 
 export function parseOpenRocketArchive(input, { sourceFilename = '' } = {}) {
@@ -508,7 +517,7 @@ export function parseOpenRocketArchive(input, { sourceFilename = '' } = {}) {
     )
   }
 
-  const { entries, memberCount } = archiveEntries(bytes)
+  const { entries, memberCount, thrustcurveNames } = archiveEntries(bytes)
   const root = decodeXml(entries['rocket.ork'])
   const version = root.getAttribute('version') || null
   if (!OPENROCKET_SUPPORTED_VERSIONS.includes(version)) {
@@ -528,7 +537,7 @@ export function parseOpenRocketArchive(input, { sourceFilename = '' } = {}) {
   const { candidates: tubeCandidates } = parseTubeCandidates(root)
   const motorContext = parseMotorContext(root)
   const external = parseExternalResults(root, configIds)
-  const curveMembers = Object.keys(entries).filter((name) => name.startsWith('thrustcurves/'))
+  const curveMembers = thrustcurveNames
   const warnings = []
 
   if (external.results.length === 0) {
