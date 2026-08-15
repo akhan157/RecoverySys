@@ -335,3 +335,32 @@ describe('App — imported state freshness', () => {
     expect(nextState.inputRevision).toBe(5)
   })
 })
+describe('App — OpenRocket snapshot freshness', () => {
+  it('applies accepted imported values while preserving the prior simulation as stale', () => {
+    const previousState = {
+      specs: { rocket_mass_g: '2500', airframe_id_in: '3.9' },
+      simulation: { apogee_ft: 2200 },
+      warnings: [{ slot: 'main_chute', message: 'Old warning' }],
+      openRocketImport: { source: { sourceFilename: 'rocket.ork' } },
+      importedSource: null,
+      inputRevision: 7,
+    }
+
+    const nextState = reducer(previousState, {
+      type: 'ACCEPT_OPENROCKET_SNAPSHOT',
+      specs: { rocket_mass_g: '3125', bay_length_in: '18' },
+      source: { sourceFilename: 'rocket.ork', formatVersion: '1.10' },
+    })
+
+    expect(nextState.specs).toEqual({
+      rocket_mass_g: '3125',
+      airframe_id_in: '3.9',
+      bay_length_in: '18',
+    })
+    expect(nextState.simulation).toBe(previousState.simulation)
+    expect(nextState.warnings).toEqual([])
+    expect(nextState.openRocketImport).toBeNull()
+    expect(nextState.importedSource).toMatchObject({ formatVersion: '1.10' })
+    expect(nextState.inputRevision).toBe(8)
+  })
+})

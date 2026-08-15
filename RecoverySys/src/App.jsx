@@ -25,6 +25,7 @@ import {
 import { getDefaultSpecs } from './lib/schema.js'
 import { buildResultEnvelope } from './lib/resultIntegrity.js'
 import { captureSimulationProvenance } from './lib/simulationIdentity.js'
+import { parseOpenRocketArchive, sha256Hex } from './lib/openRocketExchange.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 import DemoBanner from './components/DemoBanner.jsx'
@@ -122,6 +123,8 @@ function buildInitialState() {
     saveState: SAVE_STATES.IDLE,
     shareState: SHARE_STATES.IDLE,
     compareSnapshot: null,
+    openRocketImport: null,
+    importedSource: null,
   }
 }
 
@@ -169,6 +172,17 @@ function reducer(state, action) {
       return { ...state, simRunning: true }
     case 'SET_SIM':
       return { ...state, simulation: action.simulation, simRunning: false }
+    case 'SET_OPENROCKET_IMPORT':
+      return { ...state, openRocketImport: action.exchange }
+    case 'ACCEPT_OPENROCKET_SNAPSHOT':
+      return {
+        ...state,
+        specs: { ...state.specs, ...action.specs },
+        warnings: [],
+        openRocketImport: null,
+        importedSource: action.source,
+        inputRevision: state.inputRevision + 1,
+      }
     case 'ADD_TOAST':
       return { ...state, toasts: [...state.toasts, { ...action.toast, id: action.id }] }
     case 'REMOVE_TOAST':
@@ -198,6 +212,8 @@ function reducer(state, action) {
         config: action.config,
         specs: action.specs,
         customMotor: action.customMotor ?? null,
+        openRocketImport: null,
+        importedSource: null,
         simulation: null,
         // Imported state replaces the inputs immediately; clear the previous
         // compatibility result before the debounced watcher evaluates them.
@@ -206,13 +222,14 @@ function reducer(state, action) {
       }
 
     // Demo "Start Fresh" — wipe slots, reset specs to defaults, clear sim.
-    // Custom parts and toasts are preserved.
     case 'CLEAR_ALL':
       return {
         ...state,
         config: { ...EMPTY_CONFIG },
         specs: { ...DEFAULT_SPECS },
         customMotor: null,
+        openRocketImport: null,
+        importedSource: null,
         simulation: null,
         warnings: [],
       }
@@ -315,6 +332,83 @@ export default function App() {
   const addToast = useCallback((level, message) => {
     dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
   }, [])
+  const importOpenRocket = useCallback(
+    async (file) => {
+      try {
+        const bytes = await file.arrayBuffer()
+        const exchange = parseOpenRocketArchive(bytes, { sourceFilename: file.name })
+        exchange.source.sourceHash = await sha256Hex(bytes)
+        dispatch({ type: 'SET_OPENROCKET_IMPORT', exchange })
+        setImportSession(true)
+        return { ok: true }
+      } catch (error) {
+        addToast(
+          TOAST_LEVELS.ERROR,
+          `OpenRocket import failed — ${error.message || 'unsupported archive'}`
+        )
+        return { ok: false, error }
+      }
+    },
+    [addToast]
+  )
+
+  const acceptOpenRocketSnapshot = useCallback(
+    ({ configurationId, stagePath, airframeCandidateId, bayCandidateId, massCandidateId }) => {
+      const exchange = state.openRocketImport
+      if (!exchange) return { ok: false, error: 'No OpenRocket import is awaiting review.' }
+      const configuration = exchange.project.configurations.find(
+        (candidate) => candidate.id === configurationId
+      )
+      const stage = exchange.project.stages.find((candidate) => candidate.sourcePath === stagePath)
+      const candidates = new Map(
+        exchange.vehicleCandidates.map((candidate) => [candidate.id, candidate])
+      )
+      const airframe = candidates.get(airframeCandidateId)
+      const bay = candidates.get(bayCandidateId)
+      const mass = exchange.massCandidates.find((candidate) => candidate.id === massCandidateId)
+      const sameStage = (candidate) => candidate?.tube?.stage?.sourcePath === stagePath
+      const specs = {}
+
+      if (!configuration || !stage || !sameStage(airframe) || !sameStage(bay)) {
+        return {
+          ok: false,
+          error: 'Choose one supported configuration, stage, and same-stage geometry pair.',
+        }
+      }
+      if (airframe.targetField !== 'airframe_id_in' || bay.targetField !== 'bay_length_in') {
+        return { ok: false, error: 'Choose valid airframe diameter and bay-length candidates.' }
+      }
+      specs.airframe_id_in = String(airframe.normalizedValue)
+      specs.bay_length_in = String(bay.normalizedValue)
+
+      if (massCandidateId) {
+        if (!mass || mass.simulation.configId !== configurationId) {
+          return {
+            ok: false,
+            error: 'The selected mass does not belong to the selected configuration.',
+          }
+        }
+        specs.rocket_mass_g = String(mass.normalizedValue)
+      }
+
+      dispatch({
+        type: 'ACCEPT_OPENROCKET_SNAPSHOT',
+        specs,
+        source: {
+          ...exchange.source,
+          selectedConfiguration: configuration,
+          selectedStage: stage,
+          acceptedAt: new Date().toISOString(),
+        },
+      })
+      addToast(
+        TOAST_LEVELS.OK,
+        'OpenRocket snapshot accepted — run a fresh simulation before using estimates.'
+      )
+      return { ok: true }
+    },
+    [state.openRocketImport, addToast]
+  )
 
   const runSim = useCallback(() => {
     dispatch({ type: 'START_SIM' })
@@ -429,6 +523,8 @@ export default function App() {
         setCustomMotor={setCustomMotor}
         clearCustomMotor={clearCustomMotor}
         loadConfig={loadConfig}
+        onImportOpenRocket={importOpenRocket}
+        onAcceptOpenRocket={acceptOpenRocketSnapshot}
         clearAll={clearAll}
         addToast={addToast}
         saveCompareSnapshot={saveCompareSnapshot}

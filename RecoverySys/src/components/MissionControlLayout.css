@@ -225,9 +225,27 @@
 
 .mc button:focus-visible,
 .mc a:focus-visible,
-.mc input:focus-visible {
+.mc input:focus-visible,
+.mc select:focus-visible {
   outline: 2px solid var(--mc-green);
   outline-offset: 2px;
+}
+
+.mc select {
+  min-height: 28px;
+  padding: 5px 7px;
+  border: 1px solid var(--mc-border-card);
+  border-radius: 2px;
+  background-color: var(--mc-bg-panel);
+  color: var(--mc-text);
+  color-scheme: dark;
+  font: inherit;
+  line-height: 1.2;
+}
+
+.mc select option {
+  background-color: var(--mc-bg-panel);
+  color: var(--mc-text);
 }
 
 /* ── Body ─────────────────────────────────────────────────────────────── */

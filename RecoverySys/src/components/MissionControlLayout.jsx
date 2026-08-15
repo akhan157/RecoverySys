@@ -49,8 +49,10 @@ export default function MissionControlLayout({
   setCustomMotor,
   clearCustomMotor,
   loadConfig,
-  clearAll,
+  onImportOpenRocket,
+  onAcceptOpenRocket,
   addToast,
+  clearAll,
   saveCompareSnapshot,
   clearCompareSnapshot,
   /* darkMode/setDarkMode removed: MC layout is dark-only */
@@ -329,6 +331,8 @@ export default function MissionControlLayout({
                 saveConfig={saveConfig}
                 copyShareLink={copyShareLink}
                 onLoadConfig={loadConfig}
+                onImportOpenRocket={onImportOpenRocket}
+                onAcceptOpenRocket={onAcceptOpenRocket}
                 recoveryBrief={recoveryBrief}
                 onOpenBrief={() => setActiveTab('RECOVERY_BRIEF')}
                 onPrintBrief={() => setPrintMode('brief')}

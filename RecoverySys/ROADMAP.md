@@ -477,6 +477,8 @@ Potential work, subject to a future product decision:
 - Non-developer catalog update/review tooling.
 - Broader validated component and motor data workflows.
 - Additional recovery tradeoff and scenario tools.
+- Multi-stage exchange and RecoverySys snapshot workflows after the
+  single-stage adapter has verified semantics and evidence.
 - Automatic sourcing and pulling of parts data from manufacturer or approved supplier sites, with explicit source URLs, fetch dates, version history, field-level change review, rate-limit compliance, and human approval before catalog updates.
 - More complete offline and platform distribution experience.
 

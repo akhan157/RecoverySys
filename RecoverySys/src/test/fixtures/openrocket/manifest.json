@@ -1,0 +1,50 @@
+{
+  "sourceRepository": "https://github.com/openrocket/openrocket",
+  "sourceRef": "unstable",
+  "sourceRevision": "3da92366ffcef62a9868f82e19f97da3f2099d0e",
+  "fixtures": [
+    {
+      "file": "simple-model-1.10.ork",
+      "source": "core/src/main/resources/datafiles/examples/A simple model rocket.ork",
+      "version": "1.10",
+      "sha256": "53369c1707ca2f7959c0a2df2ef5af5d508806c7d0d3010026843905de18f4ae",
+      "traits": ["single-stage", "automatic-radius", "recovery-components"]
+    },
+    {
+      "file": "simulation-extensions-1.10.ork",
+      "source": "core/src/main/resources/datafiles/examples/Simulation extensions.ork",
+      "version": "1.10",
+      "sha256": "ed66db65f26f21ff722640e5ff3930d80109fbed662bd0f0ec3d60aa32f6bb8b",
+      "traits": ["single-stage", "saved-simulations", "events", "typed-flight-data"]
+    },
+    {
+      "file": "simulation-extensions-1.11.ork",
+      "source": "simulation-extensions-1.10.ork",
+      "version": "1.11",
+      "sha256": "b74ad879152c776287e0e1bfd2bf37cab12fec427d541ab2683e77f93c3c9ba4",
+      "generatedBy": "OpenRocket unstable saver at 3da92366ffcef62a9868f82e19f97da3f2099d0e",
+      "traits": ["single-stage", "saved-simulations", "events", "typed-flight-data"]
+    },
+    {
+      "file": "three-stage-1.10.ork",
+      "source": "core/src/main/resources/datafiles/examples/Three stage low power rocket.ork",
+      "version": "1.10",
+      "sha256": "01658f55a89cfa3722b0b7c499b4f25c6562bfdfe885fe7a2511f8a4c5abca9a",
+      "traits": ["three-stage", "multiple-motor-configurations", "saved-simulations"]
+    },
+    {
+      "file": "deployable-payload-1.10.ork",
+      "source": "core/src/main/resources/datafiles/examples/Deployable payload.ork",
+      "version": "1.10",
+      "sha256": "1fa8005a9f9ac17570f07f605c388305d0e804de81a2f5a79a5e97adf2151e41",
+      "traits": ["two-stage", "deployable-payload", "recovery-components", "saved-simulations"]
+    },
+    {
+      "file": "clustered-motors-1.10.ork",
+      "source": "core/src/main/resources/datafiles/examples/Clustered motors.ork",
+      "version": "1.10",
+      "sha256": "676c83198308d0d44efbc280a97275b07783225aaaeab29c58100a8686af5a46",
+      "traits": ["single-stage", "clustered-motors", "saved-simulations"]
+    }
+  ]
+}
