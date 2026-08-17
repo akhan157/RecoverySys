@@ -55,13 +55,73 @@
       "version": "1.10",
       "sha256": "645e3da9e70f34be90833c62d7934b0ba1338ae4c67e5f2d3012d29773aab658",
       "traits": ["single-stage", "real-world-user-file", "saved-simulations"]
+    },
+    {
+      "file": "deltanx-1.4.ork",
+      "source": "DeltanX.ork",
+      "sourceRepository": "https://github.com/jrauser/rockets",
+      "sourceRef": "master",
+      "sourceBlob": "b9cbe6851ba6126b2c435dc8a40da6ce6da2466a",
+      "version": "1.4",
+      "sha256": "4e63ecb1f2c9188ec331498ae97138d30414ae6cd5b81b863cd550669f86c5b0",
+      "traits": ["single-stage", "real-world-user-file"]
+    },
+    {
+      "file": "mini-cobra-2stage-1.5.ork",
+      "source": "mini cobra 2stg.ork",
+      "sourceRepository": "https://github.com/jrauser/rockets",
+      "sourceRef": "master",
+      "sourceBlob": "160534635b9735e23e76da03a918a8862966c14a",
+      "version": "1.5",
+      "sha256": "8d3a8f8696653db77e5b38a0145cedf0ce5a0a153c085e461ab9c8145226ea36",
+      "traits": ["two-stage", "real-world-user-file"]
+    },
+    {
+      "file": "hypernova-1.6.ork",
+      "source": "Hypernova.ork",
+      "sourceRepository": "https://github.com/jrauser/rockets",
+      "sourceRef": "master",
+      "sourceBlob": "6bd83ec3946bbf73dbbfb991faccf9f0af484b10",
+      "version": "1.6",
+      "sha256": "23b9dfd455615ef8760cdbebc4b50beb83259a4f0b416602b893835a89d02649",
+      "traits": ["two-stage", "automatic-radius", "real-world-user-file"]
+    },
+    {
+      "file": "x15-tube-1.7.ork",
+      "source": "x-15 tube.ork",
+      "sourceRepository": "https://github.com/jrauser/rockets",
+      "sourceRef": "master",
+      "sourceBlob": "a1cfc27ac1b1bfb5e36a296d89a32a3d9ffdf072",
+      "version": "1.7",
+      "sha256": "5e7f7da8bcbdecd774b17873fa1c892d23527d07eeac8c29375ced279270b334",
+      "traits": ["single-stage", "real-world-user-file"]
+    },
+    {
+      "file": "beanboozler-1.8.ork",
+      "source": "beanboozler/2023_07_06_3in_beanstack_frr.ork",
+      "sourceRepository": "https://github.com/mcm001/model_rockets",
+      "sourceRef": "main",
+      "sourceBlob": "61188ef103cde1bdce631c778291176a1898bbce",
+      "version": "1.8",
+      "sha256": "2c26fca827766f6cc2498233aac3490aee7390c6dad0012235b27104c094fe62",
+      "traits": ["two-stage", "saved-simulations", "real-world-user-file"]
+    },
+    {
+      "file": "baptism-1.9.ork",
+      "source": "rockets/baptism/baptism.ork",
+      "sourceRepository": "https://github.com/broskicodes/elrocket",
+      "sourceRef": "main",
+      "sourceBlob": "997b335345188fd3ac74a289134a99eec2132e4b",
+      "version": "1.9",
+      "sha256": "8701bd29a84629df2451f28ef3beff4d1a97eda6eea07b580a084edb42701232",
+      "traits": ["single-stage", "real-world-user-file"]
     }
   ],
   "realWorldSurvey": {
     "date": "2026-08-17",
     "method": "GitHub repository + git-tree search for .ork archives across 8 public rocketry repos",
     "filesScanned": 29,
-    "supportedVersionFiles": 1,
+    "supportedVersionFiles": 7,
     "unsupportedVersionBreakdown": {
       "1.4": 11,
       "1.5": 2,
@@ -71,6 +131,6 @@
       "1.9": 4
     },
     "invalidArchives": 1,
-    "note": "Public .ork files skew heavily to OpenRocket versions 1.4-1.9. The first adapter supports only 1.10/1.11, so most real-world files are rejected by version gate. This is evidence for a version-support decision, not a parser gap: broadening support is excluded from the first-adapter scope pending fixture review."
+    "note": "The survey found 27 public .ork files in versions 1.4-1.9 and one supported 1.10 file among 29 scanned archives. Support now covers OpenRocket 1.4-1.11 and is fixture-reviewed with one provenance-recorded real-world fixture for each newly supported version; saved results remain external references and no usable bay volume is inferred."
   }
 }

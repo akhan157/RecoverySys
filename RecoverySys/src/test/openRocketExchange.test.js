@@ -9,6 +9,14 @@ const fixtureRoot = resolve(cwd(), 'src/test/fixtures/openrocket')
 function fixture(name) {
   return readFileSync(`${fixtureRoot}/${name}`)
 }
+const REAL_WORLD_VERSION_FIXTURES = [
+  ['1.4', 'deltanx-1.4.ork'],
+  ['1.5', 'mini-cobra-2stage-1.5.ork'],
+  ['1.6', 'hypernova-1.6.ork'],
+  ['1.7', 'x15-tube-1.7.ork'],
+  ['1.8', 'beanboozler-1.8.ork'],
+  ['1.9', 'baptism-1.9.ork'],
+]
 
 // Build a minimal ZIP by hand so a member can declare a compression method
 // without carrying valid deflate data. fflate's unzipSync never checks CRC, so
@@ -120,6 +128,45 @@ describe('OpenRocket exchange parser', () => {
         .every((candidate) => candidate.tube.stage.sourcePath === stagePath)
     ).toBe(true)
   })
+
+  it('emits a low-confidence airframe candidate for a bare auto radius', () => {
+    const archive = zipSync({
+      'rocket.ork': strToU8(
+        '<openrocket version="1.6"><rocket><name>Bare auto</name>' +
+          '<subcomponents><stage number="1"><name>Stage 1</name>' +
+          '<subcomponents><bodytube><id>tube-1</id><name>Tube</name>' +
+          '<radius>auto</radius><thickness>0.001</thickness><length>0.2</length>' +
+          '</bodytube></subcomponents></stage></subcomponents>' +
+          '</rocket></openrocket>'
+      ),
+    })
+    const exchange = parseOpenRocketArchive(archive)
+    const candidate = exchange.vehicleCandidates.find(
+      (item) => item.targetField === 'airframe_id_in'
+    )
+
+    expect(candidate).toMatchObject({
+      targetField: 'airframe_id_in',
+      status: 'needs-confirmation',
+      confidence: 'low',
+      normalizedValue: null,
+      tube: { radiusMode: 'auto' },
+    })
+  })
+
+  it.each(REAL_WORLD_VERSION_FIXTURES)(
+    'parses the real-world %s fixture with geometry candidates',
+    (version, filename) => {
+      const exchange = parseOpenRocketArchive(fixture(filename), {
+        sourceFilename: filename,
+      })
+
+      expect(exchange.source.formatVersion).toBe(version)
+      expect(
+        exchange.vehicleCandidates.some((candidate) => candidate.targetField === 'airframe_id_in')
+      ).toBe(true)
+    }
+  )
 
   it('keeps saved results as external references and exposes pre-launch mass candidates', () => {
     const exchange = parseOpenRocketArchive(fixture('simulation-extensions-1.10.ork'))
