@@ -45,6 +45,32 @@
       "version": "1.10",
       "sha256": "676c83198308d0d44efbc280a97275b07783225aaaeab29c58100a8686af5a46",
       "traits": ["single-stage", "clustered-motors", "saved-simulations"]
+    },
+    {
+      "file": "bryant-test-rocket-1.10.ork",
+      "source": "Bryant Test Rocket.ork",
+      "sourceRepository": "https://github.com/Brystar48/Openrocket-projects",
+      "sourceRef": "main",
+      "sourceBlob": "476c6ffce5d5a4f3c6af39392d5769f212dfa2a8",
+      "version": "1.10",
+      "sha256": "645e3da9e70f34be90833c62d7934b0ba1338ae4c67e5f2d3012d29773aab658",
+      "traits": ["single-stage", "real-world-user-file", "saved-simulations"]
     }
-  ]
+  ],
+  "realWorldSurvey": {
+    "date": "2026-08-17",
+    "method": "GitHub repository + git-tree search for .ork archives across 8 public rocketry repos",
+    "filesScanned": 29,
+    "supportedVersionFiles": 1,
+    "unsupportedVersionBreakdown": {
+      "1.4": 11,
+      "1.5": 2,
+      "1.6": 5,
+      "1.7": 1,
+      "1.8": 4,
+      "1.9": 4
+    },
+    "invalidArchives": 1,
+    "note": "Public .ork files skew heavily to OpenRocket versions 1.4-1.9. The first adapter supports only 1.10/1.11, so most real-world files are rejected by version gate. This is evidence for a version-support decision, not a parser gap: broadening support is excluded from the first-adapter scope pending fixture review."
+  }
 }

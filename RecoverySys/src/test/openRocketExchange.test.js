@@ -190,6 +190,20 @@ describe('OpenRocket exchange parser', () => {
     expect(exchange.vehicleCandidates.length).toBeGreaterThan(0)
   })
 
+  it('parses a real-world user .ork file within the supported version range', () => {
+    const exchange = parseOpenRocketArchive(fixture('bryant-test-rocket-1.10.ork'), {
+      sourceFilename: 'Bryant Test Rocket.ork',
+    })
+
+    expect(exchange.source.formatVersion).toBe('1.10')
+    expect(exchange.project.stages).toHaveLength(1)
+    expect(exchange.vehicleCandidates.length).toBeGreaterThan(0)
+    expect(
+      exchange.vehicleCandidates.some((candidate) => candidate.targetField === 'airframe_id_in')
+    ).toBe(true)
+    expect(exchange.externalResults.length).toBeGreaterThan(0)
+  })
+
   it('rejects unsupported versions, unsafe XML, and malformed archives', () => {
     const base = '<openrocket version="1.12"><rocket><name>Test</name></rocket></openrocket>'
     const unsupported = zipSync({ 'rocket.ork': strToU8(base) })
