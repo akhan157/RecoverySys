@@ -443,6 +443,18 @@ describe('checkCompatibility', () => {
     })
     expect(warnings.some((w) => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
   })
+  it('assigns distinct stable codes to multiple findings from one slot', () => {
+    const cord = {
+      name: 'Short weak cord',
+      specs: { material: 'nylon', strength_lbs: 75, length_ft: 2, elongation_pct: 10 },
+    }
+    const warnings = checkCompatibility({
+      config: { main_chute: validMain, drogue_chute: validDrogue, shock_cord: cord },
+      specs: { ...baseSpecs, rocket_mass_g: '2500' },
+    }).filter((warning) => warning.slot === 'shock_cord')
+    expect(warnings.length).toBeGreaterThan(1)
+    expect(new Set(warnings.map((warning) => warning.code)).size).toBe(warnings.length)
+  })
 })
 
 describe('slotStatus', () => {

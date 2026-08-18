@@ -750,26 +750,26 @@ function rule_noMainChute(ctx) {
 // fired an error on the same slot) — see the (ctx, warningsSoFar) signature
 // in the orchestrator below.
 const RULES = [
-  rule_deployAltSanity,
-  rule_mainDescentRate,
-  rule_landingKE,
-  rule_drogueDescentRate,
-  rule_openingShock,
-  rule_shockCordStrength,
-  rule_mainSnatchAvailability,
-  rule_chuteCordMaterialMismatch,
-  rule_chuteProtector,
-  rule_quickLinksEjectionLoad,
-  rule_quickLinksVsCord, // reads warningsSoFar
-  rule_quickLinkOpeningSize,
-  rule_chuteDeviceAltitudeBounds,
-  rule_deploymentBagFit,
-  rule_swivelEjectionLoad,
-  rule_packedDiameterFit,
-  rule_bayVolumeStacked,
-  rule_singleDeploy,
-  rule_dualDeployNoBag,
-  rule_noMainChute,
+  ['deploy-altitude-sanity', rule_deployAltSanity],
+  ['main-descent-rate', rule_mainDescentRate],
+  ['landing-energy', rule_landingKE],
+  ['drogue-descent-rate', rule_drogueDescentRate],
+  ['opening-shock', rule_openingShock],
+  ['shock-cord-strength', rule_shockCordStrength],
+  ['main-snatch-availability', rule_mainSnatchAvailability],
+  ['chute-cord-material-mismatch', rule_chuteCordMaterialMismatch],
+  ['chute-protector-fit', rule_chuteProtector],
+  ['quick-links-ejection-load', rule_quickLinksEjectionLoad],
+  ['quick-links-vs-cord', rule_quickLinksVsCord],
+  ['quick-link-opening-size', rule_quickLinkOpeningSize],
+  ['chute-device-altitude-bounds', rule_chuteDeviceAltitudeBounds],
+  ['deployment-bag-fit', rule_deploymentBagFit],
+  ['swivel-ejection-load', rule_swivelEjectionLoad],
+  ['packed-diameter-fit', rule_packedDiameterFit],
+  ['bay-volume-stacked', rule_bayVolumeStacked],
+  ['single-deploy', rule_singleDeploy],
+  ['dual-deploy-without-bag', rule_dualDeployNoBag],
+  ['main-chute-required', rule_noMainChute],
 ]
 
 /**
@@ -813,12 +813,23 @@ export function computePackingVolume({ config, specs }) {
 export function checkCompatibility({ config, specs }) {
   const ctx = buildContext({ config, specs })
   const warnings = []
-  for (const rule of RULES) {
+  for (const [ruleId, evaluate] of RULES) {
     // Rules that read warnings emitted by earlier rules use a 2-arg signature.
-    const out = rule.length === 2 ? rule(ctx, warnings) : rule(ctx)
-    if (out.length > 0) warnings.push(...out)
+    const out = evaluate.length === 2 ? evaluate(ctx, warnings) : evaluate(ctx)
+    if (out.length > 0) {
+      warnings.push(...out.map((warning, index) => ({ ...warning, ruleId, ruleIndex: index + 1 })))
+    }
   }
-  return warnings.map(normalizeWarning)
+  return warnings.map((warning) => {
+    const finding = normalizeWarning(warning)
+    return finding.code.endsWith('.unclassified')
+      ? {
+          ...finding,
+          code: `compatibility.${finding.slot}.${warning.ruleId}-${warning.ruleIndex}`,
+          warningCode: `compatibility.${finding.slot}.${warning.ruleId}-${warning.ruleIndex}`,
+        }
+      : finding
+  })
 }
 
 /**

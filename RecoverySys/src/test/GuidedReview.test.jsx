@@ -111,6 +111,16 @@ describe('GuidedReview first-plan entry', () => {
     expect(screen.getByText(/700 ft · current value/i)).toBeInTheDocument()
     expect(screen.getByText(/30G · current value/i)).toBeInTheDocument()
   })
+  it('does not present stale drift as a current landing estimate', () => {
+    render(
+      <GuidedReview state={{ ...state, simulation: { drift_ft: 1234 } }} resultFresh={false} />
+    )
+    fireEvent.click(screen.getByRole('button', { name: /next/i }))
+    expect(
+      screen.getByText(/landing drift is unavailable until a current simulation exists/i)
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/estimated drift: 1234 ft/i)).not.toBeInTheDocument()
+  })
 
   it('pause returns to the dashboard without losing the entered plan', () => {
     const onOpenDashboard = vi.fn()

@@ -130,8 +130,7 @@ const evaluators = Object.freeze({
         inputs.transformed.chuteSpecs,
         inputs.transformed.mass_kg,
         inputs.transformed.altitude_ft
-      ) /
-      computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
+      ) / computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
   }),
   'terminal-descent-altitude-ft-unit-conversion': (inputs) => ({
     descent_rate_fps: computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft),
@@ -145,8 +144,7 @@ const evaluators = Object.freeze({
         inputs.transformed.chuteSpecs,
         inputs.transformed.mass_kg,
         inputs.transformed.altitude_ft
-      ) /
-      computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
+      ) / computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
   }),
   'static-ejection-load-nylon-screening': (inputs) => {
     const result = computeShockLoad(inputs.cordSpecs, inputs.mass_kg, inputs.g_factor)
@@ -219,7 +217,9 @@ export function validateCorpus() {
     for (const metric of testCase.expected.metrics) {
       const actual = observed[metric.name]
       const finite = Number.isFinite(actual)
-      const result = finite ? compare(actual, metric.value, metric.tolerance) : { difference: null, pass: false }
+      const result = finite
+        ? compare(actual, metric.value, metric.tolerance)
+        : { difference: null, pass: false }
       const gatesAgreement = testCase.status === 'accepted-for-comparison'
       metrics.push({
         name: metric.name,
@@ -270,8 +270,6 @@ if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.me
     console.log(
       `validation corpus valid (${result.cases} cases; review cases do not gate agreement)`
     )
-  else {
-    console.error(result.diagnostics.join('\n'))
-    process.exitCode = 1
-  }
+  else console.error(result.diagnostics.join('\n'))
+  if (!result.valid) process.exitCode = 1
 }
