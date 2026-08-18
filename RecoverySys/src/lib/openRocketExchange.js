@@ -2,7 +2,16 @@
 
 import { unzipSync } from 'fflate'
 
-export const OPENROCKET_SUPPORTED_VERSIONS = Object.freeze(['1.10', '1.11'])
+export const OPENROCKET_SUPPORTED_VERSIONS = Object.freeze([
+  '1.4',
+  '1.5',
+  '1.6',
+  '1.7',
+  '1.8',
+  '1.9',
+  '1.10',
+  '1.11',
+])
 
 export const OPENROCKET_IMPORT_LIMITS = Object.freeze({
   archiveBytes: 25 * 1024 * 1024,
@@ -100,6 +109,9 @@ function decodeXml(bytes) {
 
 function parseRadius(raw) {
   const value = raw.trim()
+  if (/^auto$/i.test(value)) {
+    return { mode: 'auto', meters: null }
+  }
   const autoMatch = /^auto\s+(.+)$/i.exec(value)
   if (autoMatch) {
     return { mode: 'auto', meters: numberOf(autoMatch[1]) }
@@ -209,7 +221,7 @@ function parseTubeCandidates(root) {
             ? 'A filled component has no wall-thickness subtraction for inner diameter.'
             : 'OpenRocket does not identify the intended recovery bay.'
 
-      if (innerDiameterIn != null) {
+      if (innerDiameterIn != null || radius.mode === 'auto') {
         candidates.push({
           id: `${groupId}:airframe_id_in`,
           groupId,
@@ -263,7 +275,7 @@ function parseTubeCandidates(root) {
         })
       }
 
-      if (innerDiameterIn == null && lengthIn == null) {
+      if (innerDiameterIn == null && lengthIn == null && radius.mode !== 'auto') {
         candidates.push({
           id: `${groupId}:unavailable`,
           groupId,

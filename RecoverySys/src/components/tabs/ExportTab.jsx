@@ -68,11 +68,16 @@ export default function ExportTab({
         candidate.tube?.stage?.sourcePath === snapshotSelection.stagePath &&
         candidate.status === 'needs-confirmation'
     ) ?? []
+  const isUsableGeometryCandidate = (candidate) =>
+    typeof candidate.normalizedValue === 'number' &&
+    Number.isFinite(candidate.normalizedValue) &&
+    candidate.normalizedValue > 0
   const airframeCandidates = selectedStageCandidates.filter(
-    (candidate) => candidate.targetField === 'airframe_id_in'
+    (candidate) =>
+      candidate.targetField === 'airframe_id_in' && isUsableGeometryCandidate(candidate)
   )
   const bayCandidates = selectedStageCandidates.filter(
-    (candidate) => candidate.targetField === 'bay_length_in'
+    (candidate) => candidate.targetField === 'bay_length_in' && isUsableGeometryCandidate(candidate)
   )
   const massCandidates =
     exchange?.massCandidates.filter(
@@ -81,10 +86,13 @@ export default function ExportTab({
         candidate.simulation.configId === snapshotSelection.configurationId
     ) ?? []
 
-  const candidateLabel = (candidate) =>
-    `${candidate.tube?.componentName || candidate.kind} · ${candidate.normalizedValue.toFixed(2)} ${
-      candidate.normalizedUnit
-    }`
+  const candidateLabel = (candidate) => {
+    const label = candidate.tube?.componentName || candidate.kind
+    if (candidate.normalizedValue == null) {
+      return `${label} · value unavailable (${candidate.confidence} confidence)`
+    }
+    return `${label} · ${candidate.normalizedValue.toFixed(2)} ${candidate.normalizedUnit}`
+  }
 
   const handleImport = (e) => {
     const file = e.target.files?.[0]

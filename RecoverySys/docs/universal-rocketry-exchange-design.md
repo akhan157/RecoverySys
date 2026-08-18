@@ -338,7 +338,7 @@ bay, overwrite a plan, or claim that an external result is a RecoverySys result.
 
 - local `.ork` file selection and archive-member inspection;
 - format/version detection;
-- first-release OpenRocket file versions `1.10` and `1.11`;
+- OpenRocket file versions `1.4` through `1.11`, fixture-reviewed against real-world archives;
 - rocket name and source identity;
 - selected configuration and stage candidates;
 - conditional saved pre-launch-mass candidates with inclusion context;
@@ -363,7 +363,7 @@ bay, overwrite a plan, or claim that an external result is a RecoverySys result.
 - importing full typed flight-data branches or datapoints;
 - flattening a multi-stage project into one RecoverySys snapshot;
 - batch import;
-- importing OpenRocket versions outside `1.10` and `1.11` before fixture review;
+- importing OpenRocket versions outside `1.4` through `1.11` before fixture review;
 
 OpenRocket component names may be retained as source context, but catalog-part
 selection remains a RecoverySys/user decision unless a mapping is unambiguous
@@ -427,11 +427,10 @@ shows repeated value.
 The first experiment should be evaluated against real inputs, not only synthetic
 fixtures:
 
-The checked-in implementation baseline currently contains six provenance-
-recorded fixtures: five upstream `1.10` examples and one `1.11` archive produced
-by the pinned OpenRocket unstable saver. This is enough to begin parser
-development, but it does not satisfy the real-input or observed-workflow
-release gates above.
+The checked-in implementation baseline contains provenance-recorded fixtures for
+OpenRocket versions `1.4` through `1.11`, including one real-world user archive
+for each newly supported `1.4`–`1.9` version. This broadens parser coverage, but
+does not satisfy the real-input or observed-workflow release gates above.
 
 - 25–40 real `.ork` files covering single-stage snapshots, multi-stage source
   context, mass overrides, multiple motor configurations, and unusual component
@@ -465,7 +464,8 @@ is.
 
 ## Open Questions
 
-1. Which OpenRocket versions and `.ork` variants should the first adapter support?
+1. Which OpenRocket `.ork` variants within the supported `1.4`–`1.11` range
+   require additional fixture coverage?
 2. How does a real `.ork` represent selected stages, motor configurations, mass
    overrides, and recovery components in the versions users actually have?
 3. Which mass semantic can RecoverySys safely consume automatically, if any?

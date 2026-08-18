@@ -9,10 +9,15 @@
     geometry/mass selection, stale-result handling, imported-source provenance,
     six provenance-recorded fixtures, parser/UI/reducer tests, exchange design doc,
     and the select-contrast CSS fix.
+  - Current fixture-reviewed scope: OpenRocket file versions `1.4` through `1.11`,
+    with one real-world provenance-recorded fixture for each newly supported
+    `1.4`–`1.9` version; saved results remain external references.
   - `a5b07cc` — hardening: thrustcurve members enumerated by name, never
     decompressed (closes the zip-bomb gap found in post-push review).
+
+
 - Verified on this machine:
-  - Parser suite 6/6 · import/stale 14/14 · transfer-parity 45/45.
+  - Parser suite 14/14 · import/stale 14/14 · transfer-parity 45/45.
   - Full `npm run check` + production build + `git diff --check` green.
   - Browser workflow: preview → select → accept → `RESULT_STALE` + `IMPORTED_SOURCE`.
   - All fixture SHA-256 values match the manifest.
@@ -36,6 +41,9 @@ Goal (from `docs/universal-rocketry-exchange-design.md` success criteria):
 
 Sourcing approach (parser coverage now, observed workflows still external):
 
+- Parser coverage now includes real-world fixtures for each newly supported
+  version `1.4`–`1.9`; observed-user-workflow and independent-review evidence
+  remain external gates.
 - Pull real `.ork` files from public rocketry GitHub repos with pinned commit
   SHA-256 provenance. This grows parser coverage toward the target but does NOT
   substitute for observed-user-workflow and independent-review evidence.
