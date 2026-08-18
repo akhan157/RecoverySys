@@ -68,11 +68,16 @@ export default function ExportTab({
         candidate.tube?.stage?.sourcePath === snapshotSelection.stagePath &&
         candidate.status === 'needs-confirmation'
     ) ?? []
+  const isUsableGeometryCandidate = (candidate) =>
+    typeof candidate.normalizedValue === 'number' &&
+    Number.isFinite(candidate.normalizedValue) &&
+    candidate.normalizedValue > 0
   const airframeCandidates = selectedStageCandidates.filter(
-    (candidate) => candidate.targetField === 'airframe_id_in'
+    (candidate) =>
+      candidate.targetField === 'airframe_id_in' && isUsableGeometryCandidate(candidate)
   )
   const bayCandidates = selectedStageCandidates.filter(
-    (candidate) => candidate.targetField === 'bay_length_in'
+    (candidate) => candidate.targetField === 'bay_length_in' && isUsableGeometryCandidate(candidate)
   )
   const massCandidates =
     exchange?.massCandidates.filter(

@@ -378,9 +378,18 @@ export default function App() {
       if (airframe.targetField !== 'airframe_id_in' || bay.targetField !== 'bay_length_in') {
         return { ok: false, error: 'Choose valid airframe diameter and bay-length candidates.' }
       }
+      const isUsableGeometryValue = (candidate) =>
+        typeof candidate.normalizedValue === 'number' &&
+        Number.isFinite(candidate.normalizedValue) &&
+        candidate.normalizedValue > 0
+      if (!isUsableGeometryValue(airframe) || !isUsableGeometryValue(bay)) {
+        return {
+          ok: false,
+          error: 'Choose geometry candidates with usable numeric values.',
+        }
+      }
       specs.airframe_id_in = String(airframe.normalizedValue)
       specs.bay_length_in = String(bay.normalizedValue)
-
       if (massCandidateId) {
         if (!mass || mass.simulation.configId !== configurationId) {
           return {

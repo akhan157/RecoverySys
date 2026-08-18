@@ -99,6 +99,18 @@ describe('ExportTab OpenRocket snapshot review', () => {
           },
         },
         {
+          id: 'auto-tube-id',
+          targetField: 'airframe_id_in',
+          normalizedValue: null,
+          normalizedUnit: 'in',
+          confidence: 'low',
+          status: 'needs-confirmation',
+          tube: {
+            componentName: 'Automatic tube',
+            stage: { sourcePath: '/openrocket/rocket/stage[1]' },
+          },
+        },
+        {
           id: 'tube-length',
           targetField: 'bay_length_in',
           normalizedValue: 18,
@@ -131,6 +143,7 @@ describe('ExportTab OpenRocket snapshot review', () => {
       />
     )
 
+    expect(screen.queryByRole('option', { name: /value unavailable/i })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: /ACCEPT_VEHICLE_SNAPSHOT/i })).toBeDisabled()
     fireEvent.change(screen.getByLabelText('CONFIGURATION'), { target: { value: 'cfg-1' } })
     fireEvent.change(screen.getByLabelText('STAGE'), {
