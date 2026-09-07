@@ -137,6 +137,8 @@ export default function MissionControlLayout({
         onExit={() => handleToggleUiMode('flightline')}
         uiMode={uiMode}
         onToggleUiMode={handleToggleUiMode}
+        saveConfig={saveConfig}
+        copyShareLink={copyShareLink}
       />
     )
   }
