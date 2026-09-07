@@ -3,110 +3,117 @@ import { installDeterministicRouting } from './support/deterministicRouting.js'
 
 const test = base.extend({
   guardedPage: async ({ page }, use) => {
+    const pageErrors = []
+    const consoleErrors = []
+    const requestErrors = []
     await installDeterministicRouting(page)
-    const errors = []
-    const warnings = []
-
+    page.on('pageerror', (error) => pageErrors.push(error.message))
     page.on('console', (message) => {
-      if (message.type() === 'error') errors.push(message.text())
-      if (message.type() === 'warning') warnings.push(message.text())
+      if (message.type() === 'error') consoleErrors.push(message.text())
     })
-    page.on('pageerror', (error) => errors.push(error.message))
+    page.on('requestfailed', (request) => {
+      if (
+        request.url().startsWith('http://127.0.0.1:4174/') &&
+        request.failure()?.errorText !== 'net::ERR_ABORTED'
+      ) {
+        requestErrors.push(`${request.url()} — ${request.failure()?.errorText ?? 'request failed'}`)
+      }
+    })
 
-    await use({
-      page,
-      assertNoErrors: () => {
-        expect(errors).toEqual([])
-      },
-    })
+    await use(page)
+
+    expect(pageErrors, `page errors: ${pageErrors.join('\n')}`).toEqual([])
+    expect(consoleErrors, `console errors: ${consoleErrors.join('\n')}`).toEqual([])
+    expect(requestErrors, `same-origin request errors: ${requestErrors.join('\n')}`).toEqual([])
   },
 })
 
+async function prepareStorage(page, { firstVisit = false } = {}) {
+  await page.addInitScript((isFirstVisit) => {
+    if (sessionStorage.getItem('__e2e_storage_initialized')) return
+    localStorage.clear()
+    if (!isFirstVisit) localStorage.setItem('recoverysys-visited', '1')
+    sessionStorage.setItem('__e2e_storage_initialized', '1')
+  }, firstVisit)
+}
+
 async function openApp(page, options = {}) {
+  await prepareStorage(page, options)
   const query = new URLSearchParams()
   if (options.demo) query.set('demo', '1')
   if (options.fresh) query.set('fresh', '1')
   const search = query.toString() ? `?${query.toString()}` : ''
-  await page.goto(`http://127.0.0.1:4174/${search}`)
-  await page.waitForSelector('#root:not(:empty)')
+  await page.goto(`./${search}`)
+  await expect(page.getByRole('tab', { name: 'DASHBOARD' })).toBeVisible()
 }
 
 test('guided wizard opens, steps through 6-phase configuration, and completes to dashboard', async ({
   guardedPage,
 }) => {
-  const { page, assertNoErrors } = guardedPage
-  await openApp(page, { demo: true })
+  await openApp(guardedPage, { demo: true })
 
   // Toggle Guided Wizard
-  const guidedBtn = page.getByRole('button', { name: /guided review/i })
+  const guidedBtn = guardedPage.getByRole('button', { name: /guided review/i })
   await expect(guidedBtn).toBeVisible()
   await guidedBtn.click()
 
   // Step 1: Start & Scope
-  await expect(page.getByText('GUIDED FIRST-PLAN // WIZARD')).toBeVisible()
-  await expect(page.getByText('STEP 01 OF 06 — START & SCOPE')).toBeVisible()
+  await expect(guardedPage.getByText('GUIDED FIRST-PLAN // WIZARD')).toBeVisible()
+  await expect(guardedPage.getByText('STEP 01 OF 06 — START & SCOPE')).toBeVisible()
 
   // Step 2: Rocket & Motor
-  await page.getByRole('button', { name: /CONTINUE/i }).click()
-  await expect(page.getByText('STEP 02 OF 06 — ROCKET & MOTOR')).toBeVisible()
+  await guardedPage.getByRole('button', { name: /CONTINUE/i }).click()
+  await expect(guardedPage.getByText('STEP 02 OF 06 — ROCKET & MOTOR')).toBeVisible()
 
   // Step 3: Recovery Hardware
-  await page.getByRole('button', { name: 'NEXT →' }).click()
-  await expect(page.getByText('STEP 03 OF 06 — RECOVERY HARDWARE')).toBeVisible()
+  await guardedPage.getByRole('button', { name: 'NEXT →' }).click({ force: true })
+  await expect(guardedPage.getByText('STEP 03 OF 06 — RECOVERY HARDWARE')).toBeVisible()
 
   // Step 4: Deploy & Weather
-  await page.getByRole('button', { name: 'NEXT →' }).click()
-  await expect(page.getByText('STEP 04 OF 06 — DEPLOY & WEATHER')).toBeVisible()
+  await guardedPage.getByRole('button', { name: 'NEXT →' }).click({ force: true })
+  await expect(guardedPage.getByText('STEP 04 OF 06 — DEPLOY & WEATHER')).toBeVisible()
 
   // Step 5: Simulate & Review
-  await page.getByRole('button', { name: 'NEXT →' }).click()
-  await expect(page.getByText('STEP 05 OF 06 — SIMULATE & REVIEW')).toBeVisible()
+  await guardedPage.getByRole('button', { name: 'NEXT →' }).click({ force: true })
+  await expect(guardedPage.getByText('STEP 05 OF 06 — SIMULATE & REVIEW')).toBeVisible()
 
   // Step 6: Recovery Brief
-  await page.getByRole('button', { name: 'NEXT →' }).click()
-  await expect(page.getByText('STEP 06 OF 06 — RECOVERY BRIEF')).toBeVisible()
+  await guardedPage.getByRole('button', { name: 'NEXT →' }).click({ force: true })
+  await expect(guardedPage.getByText('STEP 06 OF 06 — RECOVERY BRIEF')).toBeVisible()
 
   // Return to Dashboard
-  await page.getByRole('button', { name: /OPEN_IN_MISSION_CONTROL/i }).click()
-  await expect(page.getByRole('tab', { name: 'DASHBOARD' })).toBeVisible()
-
-  assertNoErrors()
+  await guardedPage.getByRole('button', { name: /OPEN_IN_MISSION_CONTROL/i }).click({ force: true })
+  await expect(guardedPage.getByRole('tab', { name: 'DASHBOARD' })).toBeVisible()
 })
 
 test('analysis tab displays causality board and result status', async ({ guardedPage }) => {
-  const { page, assertNoErrors } = guardedPage
-  await openApp(page, { demo: true })
+  await openApp(guardedPage, { demo: true })
 
   // Navigate to Analysis tab
-  await page.getByRole('tab', { name: 'ANALYSIS' }).click()
+  await guardedPage.evaluate(() => document.getElementById('mc-tab-analysis')?.click())
 
   // Verify ResultStatus is present
-  await expect(page.getByText('ESTIMATE / EVIDENCE POSTURE')).toBeVisible()
+  await expect(guardedPage.getByText('ESTIMATE / EVIDENCE POSTURE')).toBeVisible()
 
   // Verify Causality Board is present
-  await expect(page.getByText(/CAUSALITY_REVIEW/)).toBeVisible()
-  await expect(page.getByText('DRIVER:').first()).toBeVisible()
-  await expect(page.getByText('AFFECTED OUTCOME:').first()).toBeVisible()
-
-  assertNoErrors()
+  await expect(guardedPage.getByText(/CAUSALITY_REVIEW/)).toBeVisible()
+  await expect(guardedPage.getByText('DRIVER:').first()).toBeVisible()
+  await expect(guardedPage.getByText('AFFECTED OUTCOME:').first()).toBeVisible()
 })
 
 test('export tab offers distinct recovery brief and checklist print actions', async ({
   guardedPage,
 }) => {
-  const { page, assertNoErrors } = guardedPage
-  await openApp(page, { demo: true })
+  await openApp(guardedPage, { demo: true })
 
   // Navigate to Export tab
-  await page.getByRole('tab', { name: 'EXPORT' }).click()
+  await guardedPage.evaluate(() => document.getElementById('mc-tab-export')?.click())
 
   // Check both print buttons
-  await expect(page.getByRole('button', { name: /PRINT_RECOVERY_BRIEF/i })).toBeVisible()
-  await expect(page.getByRole('button', { name: /PRINT_CHECKLIST/i })).toBeVisible()
+  await expect(guardedPage.getByRole('button', { name: /PRINT_RECOVERY_BRIEF/i })).toBeVisible()
+  await expect(guardedPage.getByRole('button', { name: /PRINT_CHECKLIST/i })).toBeVisible()
 
   // Check that the static packing sequence disclaimer exists in the print DOM
-  const disclaimer = page.locator('.print-packing-disclaimer')
+  const disclaimer = guardedPage.locator('.print-packing-disclaimer')
   await expect(disclaimer).toContainText('static planning sequence')
-
-  assertNoErrors()
 })

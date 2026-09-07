@@ -1442,6 +1442,16 @@
     font-size: 10px;
     letter-spacing: 0.06em;
   }
+  .mc-ui-mode-toggle,
+  .mc-status-strip {
+    display: none !important;
+  }
+  .mc-header__guided-btn {
+    padding: 4px 6px;
+    font-size: 8px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
 
   .mc-bay-grid {
     grid-template-columns: 1fr;

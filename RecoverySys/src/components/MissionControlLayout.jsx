@@ -14,6 +14,7 @@ import AnalysisTab from './tabs/AnalysisTab.jsx'
 import PrintChecklist from './PrintChecklist.jsx'
 import GuidedPlanWizard from './GuidedPlanWizard.jsx'
 import StatusStrip from './StatusStrip.jsx'
+import RecoveryAtlas from './atlas/RecoveryAtlas.jsx'
 import { buildRecoveryBrief } from '../lib/recoveryBrief.js'
 import './MissionControlLayout.css'
 
@@ -55,9 +56,11 @@ export default function MissionControlLayout({
   const [showGuided, setShowGuided] = useState(false)
   const [uiMode, setUiMode] = useState(() => {
     try {
-      return localStorage.getItem('recoverysys-ui-mode') || 'next-gen'
+      const saved = localStorage.getItem('recoverysys-ui-mode')
+      if (saved === 'classic' || saved === 'atlas' || saved === 'flightline') return saved
+      return 'flightline'
     } catch {
-      return 'next-gen'
+      return 'flightline'
     }
   })
 
@@ -120,6 +123,24 @@ export default function MissionControlLayout({
   const tabBtnId = (id) => `mc-tab-${id.toLowerCase()}`
   const tabPanelId = (id) => `mc-panel-${id.toLowerCase()}`
 
+  if (uiMode === 'atlas') {
+    return (
+      <RecoveryAtlas
+        state={state}
+        allParts={allParts}
+        onSetSpec={setSpec}
+        selectPart={selectPart}
+        removePart={removePart}
+        runSim={runSim}
+        canRun={canRun}
+        resultFresh={resultFresh}
+        onExit={() => handleToggleUiMode('flightline')}
+        uiMode={uiMode}
+        onToggleUiMode={handleToggleUiMode}
+      />
+    )
+  }
+
   return (
     <>
       <div className="mc">
@@ -157,14 +178,22 @@ export default function MissionControlLayout({
               </button>
               <button
                 type="button"
-                className={`mc-ui-mode-btn ${uiMode === 'next-gen' ? 'mc-ui-mode-btn--active' : ''}`}
-                onClick={() => handleToggleUiMode('next-gen')}
-                aria-pressed={uiMode === 'next-gen'}
+                className={`mc-ui-mode-btn ${uiMode === 'flightline' ? 'mc-ui-mode-btn--active' : ''}`}
+                onClick={() => handleToggleUiMode('flightline')}
+                aria-pressed={uiMode === 'flightline'}
               >
-                NEXT-GEN
+                FLIGHTLINE
+              </button>
+              <button
+                type="button"
+                className={`mc-ui-mode-btn ${uiMode === 'atlas' ? 'mc-ui-mode-btn--active' : ''}`}
+                onClick={() => handleToggleUiMode('atlas')}
+                aria-pressed={uiMode === 'atlas'}
+              >
+                ATLAS
               </button>
             </div>
-            {uiMode === 'next-gen' && (
+            {uiMode === 'flightline' && (
               <button
                 type="button"
                 className={`mc-header__guided-btn ${showGuided ? 'mc-header__guided-btn--active' : ''}`}
@@ -178,7 +207,7 @@ export default function MissionControlLayout({
         </header>
 
         {/* ── Persistent Telemetry & Status Strip ───────────────────────── */}
-        {uiMode === 'next-gen' && (
+        {uiMode === 'flightline' && (
           <StatusStrip
             simulation={state.simulation}
             resultFresh={resultFresh}
@@ -190,7 +219,6 @@ export default function MissionControlLayout({
             onNavigate={setActiveTab}
           />
         )}
-
         {/* ── Body ────────────────────────────────────────────────────────── */}
         <div className="mc-body">
           <main
