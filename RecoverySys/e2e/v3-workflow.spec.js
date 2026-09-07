@@ -51,19 +51,19 @@ test('guided wizard opens, steps through 6-phase configuration, and completes to
   await expect(page.getByText('STEP 02 OF 06 — ROCKET & MOTOR')).toBeVisible()
 
   // Step 3: Recovery Hardware
-  await page.getByRole('button', { name: /^NEXT/i }).click()
+  await page.getByRole('button', { name: 'NEXT →' }).click()
   await expect(page.getByText('STEP 03 OF 06 — RECOVERY HARDWARE')).toBeVisible()
 
   // Step 4: Deploy & Weather
-  await page.getByRole('button', { name: /^NEXT/i }).click()
+  await page.getByRole('button', { name: 'NEXT →' }).click()
   await expect(page.getByText('STEP 04 OF 06 — DEPLOY & WEATHER')).toBeVisible()
 
   // Step 5: Simulate & Review
-  await page.getByRole('button', { name: /^NEXT/i }).click()
+  await page.getByRole('button', { name: 'NEXT →' }).click()
   await expect(page.getByText('STEP 05 OF 06 — SIMULATE & REVIEW')).toBeVisible()
 
   // Step 6: Recovery Brief
-  await page.getByRole('button', { name: /^NEXT/i }).click()
+  await page.getByRole('button', { name: 'NEXT →' }).click()
   await expect(page.getByText('STEP 06 OF 06 — RECOVERY BRIEF')).toBeVisible()
 
   // Return to Dashboard

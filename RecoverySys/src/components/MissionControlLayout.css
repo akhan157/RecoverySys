@@ -1930,6 +1930,36 @@
   font-size: 22px;
 }
 
+/* ── Header UI Mode Switcher (Classic vs Next-Gen) ───────────────────────── */
+.mc-ui-mode-toggle {
+  display: flex;
+  align-items: center;
+  border: 1px solid var(--mc-border-card);
+  border-radius: 3px;
+  overflow: hidden;
+  margin-right: 8px;
+  background: rgba(0, 0, 0, 0.2);
+}
+.mc-ui-mode-btn {
+  padding: 3px 8px;
+  border: none;
+  background: transparent;
+  color: var(--mc-text-dim);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.mc-ui-mode-btn:hover {
+  color: var(--mc-white);
+}
+.mc-ui-mode-btn--active {
+  background: var(--mc-accent-tint, rgba(255, 170, 0, 0.18));
+  color: var(--mc-amber, #ffaa00);
+}
 /* ── Header Guided Review Toggle ─────────────────────────────────────────── */
 .mc-header__guided-btn {
   padding: 4px 10px;

@@ -53,6 +53,20 @@ export default function MissionControlLayout({
   const [activeTab, setActiveTab] = useState('DASHBOARD')
   const [printMode, setPrintMode] = useState('brief')
   const [showGuided, setShowGuided] = useState(false)
+  const [uiMode, setUiMode] = useState(() => {
+    try {
+      return localStorage.getItem('recoverysys-ui-mode') || 'next-gen'
+    } catch {
+      return 'next-gen'
+    }
+  })
+
+  const handleToggleUiMode = (mode) => {
+    setUiMode(mode)
+    try {
+      localStorage.setItem('recoverysys-ui-mode', mode)
+    } catch {}
+  }
 
   const handlePrintBrief = () => {
     setPrintMode('brief')
@@ -132,28 +146,50 @@ export default function MissionControlLayout({
             })}
           </nav>
           <div className="mc-header__right">
-            <button
-              type="button"
-              className={`mc-header__guided-btn ${showGuided ? 'mc-header__guided-btn--active' : ''}`}
-              onClick={() => setShowGuided(!showGuided)}
-              aria-label={showGuided ? 'Exit guided review' : 'Guided review'}
-            >
-              {showGuided ? '✕ EXIT_GUIDE' : '★ GUIDED_REVIEW'}
-            </button>
+            <div className="mc-ui-mode-toggle" role="group" aria-label="UI Mode Selection">
+              <button
+                type="button"
+                className={`mc-ui-mode-btn ${uiMode === 'classic' ? 'mc-ui-mode-btn--active' : ''}`}
+                onClick={() => handleToggleUiMode('classic')}
+                aria-pressed={uiMode === 'classic'}
+              >
+                CLASSIC
+              </button>
+              <button
+                type="button"
+                className={`mc-ui-mode-btn ${uiMode === 'next-gen' ? 'mc-ui-mode-btn--active' : ''}`}
+                onClick={() => handleToggleUiMode('next-gen')}
+                aria-pressed={uiMode === 'next-gen'}
+              >
+                NEXT-GEN
+              </button>
+            </div>
+            {uiMode === 'next-gen' && (
+              <button
+                type="button"
+                className={`mc-header__guided-btn ${showGuided ? 'mc-header__guided-btn--active' : ''}`}
+                onClick={() => setShowGuided(!showGuided)}
+                aria-label={showGuided ? 'Exit guided review' : 'Guided review'}
+              >
+                {showGuided ? '✕ EXIT_GUIDE' : '★ GUIDED_REVIEW'}
+              </button>
+            )}
           </div>
         </header>
 
         {/* ── Persistent Telemetry & Status Strip ───────────────────────── */}
-        <StatusStrip
-          simulation={state.simulation}
-          resultFresh={resultFresh}
-          hasErrors={hasErrors}
-          hasWarnings={hasWarnings}
-          warnings={state.warnings}
-          filledSlots={filledSlots}
-          packingVolume={packingVolume}
-          onNavigate={setActiveTab}
-        />
+        {uiMode === 'next-gen' && (
+          <StatusStrip
+            simulation={state.simulation}
+            resultFresh={resultFresh}
+            hasErrors={hasErrors}
+            hasWarnings={hasWarnings}
+            warnings={state.warnings}
+            filledSlots={filledSlots}
+            packingVolume={packingVolume}
+            onNavigate={setActiveTab}
+          />
+        )}
 
         {/* ── Body ────────────────────────────────────────────────────────── */}
         <div className="mc-body">
