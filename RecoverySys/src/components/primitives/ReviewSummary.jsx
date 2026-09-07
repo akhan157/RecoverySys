@@ -6,11 +6,7 @@ export default function ReviewSummary({
   className = '',
 }) {
   return (
-    <div
-      className={`mc-review-summary ${className}`.trim()}
-      role="status"
-      aria-label="Review summary"
-    >
+    <div className={`mc-review-summary ${className}`.trim()} aria-label="Review summary">
       <div className="mc-review-summary__counts">
         <span
           className={`mc-review-summary__badge ${

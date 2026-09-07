@@ -13,6 +13,7 @@ import FlightLogTab from './tabs/FlightLogTab.jsx'
 import AnalysisTab from './tabs/AnalysisTab.jsx'
 import PrintChecklist from './PrintChecklist.jsx'
 import GuidedPlanWizard from './GuidedPlanWizard.jsx'
+import StatusStrip from './StatusStrip.jsx'
 import { buildRecoveryBrief } from '../lib/recoveryBrief.js'
 import './MissionControlLayout.css'
 
@@ -141,6 +142,18 @@ export default function MissionControlLayout({
             </button>
           </div>
         </header>
+
+        {/* ── Persistent Telemetry & Status Strip ───────────────────────── */}
+        <StatusStrip
+          simulation={state.simulation}
+          resultFresh={resultFresh}
+          hasErrors={hasErrors}
+          hasWarnings={hasWarnings}
+          warnings={state.warnings}
+          filledSlots={filledSlots}
+          packingVolume={packingVolume}
+          onNavigate={setActiveTab}
+        />
 
         {/* ── Body ────────────────────────────────────────────────────────── */}
         <div className="mc-body">

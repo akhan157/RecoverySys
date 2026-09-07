@@ -522,6 +522,41 @@
   }
 }
 
+/* ── Next-Gen HUD Instrument Overlays ─────────────────────────────────── */
+.hud-scan {
+  position: relative;
+  overflow: hidden;
+}
+.hud-scan::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(255, 255, 255, 0.025) 0 1px,
+    transparent 1px 3px
+  );
+  mix-blend-mode: overlay;
+  z-index: 2;
+}
+.hud-vignette {
+  position: relative;
+}
+.hud-vignette::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 90% at 50% 40%, transparent 60%, rgba(0, 0, 0, 0.45) 100%);
+  z-index: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .hud-scan::after {
+    display: none;
+  }
+}
+
 .mc-sensitivity {
   margin: 0;
 }
