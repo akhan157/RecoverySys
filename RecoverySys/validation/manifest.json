@@ -12,7 +12,9 @@
     "isa-density-5000m",
     "terminal-descent-36in-main-sea-level",
     "layered-wind-linear-interpolation-drift",
-    "static-ejection-load-nylon-screening"
+    "static-ejection-load-nylon-screening",
+    "terminal-descent-high-altitude-density",
+    "metamorphic-mass-scaling-descent"
   ],
   "scopeLimitations": [
     "These initial analytic cases are in review; no benchmark is accepted-for-comparison or flight validated.",

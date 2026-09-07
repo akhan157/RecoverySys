@@ -47,28 +47,36 @@ export default function WarningBox({ warnings, onNavigate }) {
         {header}
       </div>
       <div style={{ display: 'flex', flexDirection: 'column', gap: '6px' }}>
-        {warnings.map((w, i) => (
-          <div
-            key={i}
-            style={{
-              display: 'flex',
-              gap: '6px',
-              fontSize: '11px',
-              color: 'var(--text-secondary)',
-              alignItems: 'flex-start',
-            }}
-          >
-            <span
+        {[...warnings]
+          .sort((a, b) => {
+            const aErr = a.level === WARN_LEVELS.ERROR
+            const bErr = b.level === WARN_LEVELS.ERROR
+            if (aErr && !bErr) return -1
+            if (!aErr && bErr) return 1
+            return 0
+          })
+          .map((w, i) => (
+            <div
+              key={i}
               style={{
-                color: w.level === WARN_LEVELS.ERROR ? 'var(--error-fg)' : 'var(--warn-fg)',
-                flexShrink: 0,
+                display: 'flex',
+                gap: '6px',
+                fontSize: '11px',
+                color: 'var(--text-secondary)',
+                alignItems: 'flex-start',
               }}
             >
-              {w.level === WARN_LEVELS.ERROR ? '✕' : '⚠'}
-            </span>
-            <span>{w.message}</span>
-          </div>
-        ))}
+              <span
+                style={{
+                  color: w.level === WARN_LEVELS.ERROR ? 'var(--error-fg)' : 'var(--warn-fg)',
+                  flexShrink: 0,
+                }}
+              >
+                {w.level === WARN_LEVELS.ERROR ? '✕' : '⚠'}
+              </span>
+              <span>{w.message}</span>
+            </div>
+          ))}
       </div>
     </div>
   )

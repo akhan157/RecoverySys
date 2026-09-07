@@ -2,7 +2,7 @@ import { WARN_LEVELS } from '../../lib/constants.js'
 import FlightChart from '../FlightChart.jsx'
 import MetricCard from '../MetricCard.jsx'
 import ConfidenceStatus from '../ConfidenceStatus.jsx'
-
+import ReviewSummary from '../primitives/ReviewSummary.jsx'
 export default function SimulationTab({ state, runSim, canRun, resultFresh, confidenceProps }) {
   const sim = state.simulation
   const usableSim = resultFresh ? sim : null
@@ -11,7 +11,7 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
 
   return (
     <div className="mc-sim">
-      <ConfidenceStatus {...confidenceProps} />
+      <ConfidenceStatus {...confidenceProps} onRerun={runSim} compact />
       {/* ── Top: Chart + Data ────────────────────────────────────────── */}
       <div className="mc-sim__top">
         {/* Flight Chart */}
@@ -109,27 +109,28 @@ export default function SimulationTab({ state, runSim, canRun, resultFresh, conf
 
       <MainSnatchSummary snatch={snatch} />
 
-      {/* ── Bottom: Compatibility Analysis ───────────────────────────── */}
+      {/* ── Bottom: Compatibility Summary ───────────────────────────── */}
       <div className="mc-sim__bottom">
         <div className="mc-sim__compat">
-          <h2 className="mc-panel-header">COMPAT_ANALYSIS</h2>
+          <h2 className="mc-panel-header">COMPAT_REVIEW_SUMMARY</h2>
           {state.warnings.length === 0 ? (
             <div className="mc-alert mc-alert--ok">
               <div className="mc-alert__title">✓ ALL_SYSTEMS_NOMINAL</div>
               <div className="mc-alert__body">No compatibility issues detected.</div>
             </div>
           ) : (
-            state.warnings.map((w, i) => (
-              <div
-                key={i}
-                className={`mc-alert ${w.level === WARN_LEVELS.ERROR ? 'mc-alert--critical' : 'mc-alert--warn'}`}
-              >
-                <div className="mc-alert__title">
-                  ⚠ {w.level === WARN_LEVELS.ERROR ? 'CRITICAL_ALERT' : 'NOMINAL_VARIANCE'}
-                </div>
-                <div className="mc-alert__body">{w.message}</div>
-              </div>
-            ))
+            <div style={{ padding: '8px 12px' }}>
+              <ReviewSummary
+                errorsCount={state.warnings.filter((w) => w.level === WARN_LEVELS.ERROR).length}
+                warningsCount={state.warnings.filter((w) => w.level === WARN_LEVELS.WARN).length}
+                highestPriorityAction={{
+                  label: state.warnings.some((w) => w.level === WARN_LEVELS.ERROR)
+                    ? 'Review Critical Compatibility Errors'
+                    : 'Review Compatibility Warnings',
+                  onClick: () => confidenceProps?.onNavigate && confidenceProps.onNavigate('SPECS'),
+                }}
+              />
+            </div>
           )}
         </div>
       </div>

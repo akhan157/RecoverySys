@@ -1,0 +1,41 @@
+{
+  "id": "metamorphic-mass-scaling-descent",
+  "kind": "metamorphic",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "chuteSpecs": { "diameter_in": 36, "cd": 1.5 },
+    "mass1_kg": 2.5,
+    "mass2_kg": 5.0,
+    "altitude_ft": 0
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "velocity_ratio",
+        "value": 1.414213562,
+        "unit": "ratio",
+        "tolerance": { "absolute": 0.00001, "basis": "analyst-derived" },
+        "notes": "Metamorphic relation: vt(2*m) / vt(m) must equal sqrt(2)."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www.grc.nasa.gov/www/k-12/airplane/termv.html",
+    "title": "NASA Glenn terminal velocity equation invariance",
+    "accessed": "2026-09-07",
+    "citation": "Terminal velocity scales with square root of mass.",
+    "derivation": "vt = sqrt(2*m*g / (rho*Cd*A)) -> vt(2m)/vt(m) = sqrt(2m/m) = sqrt(2)."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "Browser JavaScript recovery estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "metamorphic",
+    "decisionRule": "Ratio of descent velocity under doubled mass equals sqrt(2) within tolerance."
+  },
+  "notes": "Metamorphic invariance verification across mass scaling."
+}

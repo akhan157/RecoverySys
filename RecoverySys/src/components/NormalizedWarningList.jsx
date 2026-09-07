@@ -22,66 +22,76 @@ export default function NormalizedWarningList({ warnings = [], onNavigate }) {
           posture.
         </span>
       </div>
-      {warnings.map((warning, index) => {
-        const code = warning.code || warning.warningCode || `${warning.slot}-${index}`
-        const isError = warning.level === WARN_LEVELS.ERROR
-        const isAcknowledged = acknowledged.has(code)
-        return (
-          <article
-            key={code}
-            className={`mc-warning-item mc-warning-item--${isError ? 'error' : 'warn'}`}
-          >
-            <div className="mc-warning-item__head">
-              <span className="mc-warning-item__severity">{isError ? 'ERROR' : 'WARNING'}</span>
-              <strong>{warning.message}</strong>
-            </div>
-            <dl className="mc-warning-item__meta">
-              <div>
-                <dt>AFFECTED_AREA</dt>
-                <dd>{pathsLabel(warning) || warning.slot || 'Configuration'}</dd>
+      {[...warnings]
+        .sort((a, b) => {
+          const aErr = a.level === WARN_LEVELS.ERROR
+          const bErr = b.level === WARN_LEVELS.ERROR
+          if (aErr && !bErr) return -1
+          if (!aErr && bErr) return 1
+          return 0
+        })
+        .map((warning, index) => {
+          const code = warning.code || warning.warningCode || `${warning.slot}-${index}`
+          const isError = warning.level === WARN_LEVELS.ERROR
+          const isAcknowledged = acknowledged.has(code)
+          return (
+            <article
+              key={code}
+              className={`mc-warning-item mc-warning-item--${isError ? 'error' : 'warn'}`}
+            >
+              <div className="mc-warning-item__head">
+                <span className="mc-warning-item__severity">{isError ? 'ERROR' : 'WARNING'}</span>
+                <strong>{warning.message}</strong>
               </div>
-              <div>
-                <dt>EVIDENCE</dt>
-                <dd>
-                  {warning.evidenceClassification ||
-                    warning.evidence?.classification ||
-                    'Derived calculation'}
-                </dd>
-              </div>
-              <div>
-                <dt>SOURCE</dt>
-                <dd>
-                  {warning.sourceClassification ||
-                    warning.source?.classification ||
-                    'Compatibility rule'}
-                </dd>
-              </div>
-            </dl>
-            <p className="mc-warning-item__remediation">
-              <strong>REVIEW:</strong>{' '}
-              {warning.remediation || 'Review the affected input and address this warning.'}
-            </p>
-            <div className="mc-warning-item__actions">
-              {onNavigate && (warning.affectedInputPaths || warning.inputPaths)?.[0] && (
-                <button
-                  type="button"
-                  onClick={() => onNavigate((warning.affectedInputPaths || warning.inputPaths)[0])}
-                >
-                  REVIEW_AFFECTED_AREA
-                </button>
-              )}
-              <button type="button" onClick={() => acknowledge(code)} disabled={isAcknowledged}>
-                {isAcknowledged ? 'REVIEW_RECORDED' : 'ACKNOWLEDGE_REVIEW'}
-              </button>
-            </div>
-            {isAcknowledged && (
-              <p className="mc-warning-item__ack">
-                Warning remains active; evidence posture unchanged.
+              <dl className="mc-warning-item__meta">
+                <div>
+                  <dt>AFFECTED_AREA</dt>
+                  <dd>{pathsLabel(warning) || warning.slot || 'Configuration'}</dd>
+                </div>
+                <div>
+                  <dt>EVIDENCE</dt>
+                  <dd>
+                    {warning.evidenceClassification ||
+                      warning.evidence?.classification ||
+                      'Derived calculation'}
+                  </dd>
+                </div>
+                <div>
+                  <dt>SOURCE</dt>
+                  <dd>
+                    {warning.sourceClassification ||
+                      warning.source?.classification ||
+                      'Compatibility rule'}
+                  </dd>
+                </div>
+              </dl>
+              <p className="mc-warning-item__remediation">
+                <strong>REVIEW:</strong>{' '}
+                {warning.remediation || 'Review the affected input and address this warning.'}
               </p>
-            )}
-          </article>
-        )
-      })}
+              <div className="mc-warning-item__actions">
+                {onNavigate && (warning.affectedInputPaths || warning.inputPaths)?.[0] && (
+                  <button
+                    type="button"
+                    onClick={() =>
+                      onNavigate((warning.affectedInputPaths || warning.inputPaths)[0])
+                    }
+                  >
+                    REVIEW_AFFECTED_AREA
+                  </button>
+                )}
+                <button type="button" onClick={() => acknowledge(code)} disabled={isAcknowledged}>
+                  {isAcknowledged ? 'REVIEW_RECORDED' : 'ACKNOWLEDGE_REVIEW'}
+                </button>
+              </div>
+              {isAcknowledged && (
+                <p className="mc-warning-item__ack">
+                  Warning remains active; evidence posture unchanged.
+                </p>
+              )}
+            </article>
+          )
+        })}
     </section>
   )
 }

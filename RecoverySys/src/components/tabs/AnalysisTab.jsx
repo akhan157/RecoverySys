@@ -5,7 +5,8 @@ import { statusFromWarnings } from '../../lib/statusColor.js'
 import StatusChip from '../primitives/StatusChip.jsx'
 import ConfidenceStatus from '../ConfidenceStatus.jsx'
 import SensitivityPanel from '../SensitivityPanel.jsx'
-
+import ReviewLink from '../primitives/ReviewLink.jsx'
+import { buildAnalysisReview } from '../../lib/analysisReview.js'
 const G = 9.80665
 const N_PER_LBF = 4.448
 const FT_PER_M = 3.28084
@@ -145,6 +146,24 @@ export default function AnalysisTab({ state, confidenceProps }) {
         ? 'warn'
         : 'ok'
 
+  const review = useMemo(() => {
+    return buildAnalysisReview({
+      specs: state.specs,
+      config: state.config,
+      customMotor: state.customMotor,
+      simulation: state.simulation,
+      resultFresh: state.resultFresh,
+      warnings: state.warnings,
+    })
+  }, [
+    state.specs,
+    state.config,
+    state.customMotor,
+    state.simulation,
+    state.resultFresh,
+    state.warnings,
+  ])
+
   return (
     <div className="mc-analysis">
       <ConfidenceStatus {...confidenceProps} />
@@ -191,6 +210,53 @@ export default function AnalysisTab({ state, confidenceProps }) {
               />
             </div>
           </section>
+          {/* ── Causality Board: Cause-to-Outcome Review Chain ─────────────── */}
+          {review && review.causalityRows.length > 0 && (
+            <section
+              className="mc-analysis__causality mc-analysis__section--wide"
+              aria-label="Causality review board"
+            >
+              <div className="mc-panel-header">
+                CAUSALITY_REVIEW // INPUT_DRIVER → RECOVERY_OUTCOME
+              </div>
+              <div className="mc-analysis__causality-grid">
+                {review.causalityRows.map((row) => (
+                  <div
+                    key={row.id}
+                    className={`mc-causality-row mc-causality-row--${row.severity}`}
+                  >
+                    <div className="mc-causality-row__driver">
+                      <span className="mc-causality-row__label">DRIVER:</span>
+                      <strong>{row.driver}</strong>
+                    </div>
+                    <div className="mc-causality-row__arrow">→</div>
+                    <div className="mc-causality-row__outcome">
+                      <span className="mc-causality-row__label">AFFECTED OUTCOME:</span>
+                      <span>{row.affectedOutcome}</span>
+                    </div>
+                    <div className="mc-causality-row__arrow">→</div>
+                    <div className="mc-causality-row__finding">
+                      <span className="mc-causality-row__label">FINDING:</span>
+                      <span
+                        className={`mc-causality-row__finding-text mc-causality-row__finding-text--${row.severity}`}
+                      >
+                        {row.finding}
+                      </span>
+                    </div>
+                    <div className="mc-causality-row__action">
+                      <ReviewLink
+                        target={row.actionTarget}
+                        onNavigate={confidenceProps?.onNavigate}
+                        className="mc-causality-row__action-btn"
+                      >
+                        {row.actionLabel} →
+                      </ReviewLink>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </section>
+          )}
           {/* ── EJECTION LOADS ──────────────────────────────────────────────── */}
           <section className="mc-analysis__section">
             <div className="mc-panel-header">EJECTION_LOADS</div>

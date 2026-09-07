@@ -23,6 +23,7 @@ export default function PrintChecklist({
   resultFresh,
   warnings = [],
   recoveryBrief,
+  mode = 'brief',
 }) {
   const date = new Date().toLocaleDateString('en-US', {
     year: 'numeric',
@@ -338,7 +339,14 @@ export default function PrintChecklist({
 
       {/* ── Packing Order ─────────────────────────────────────── */}
       <section>
-        <h2>Packing Order (bottom of bay to top)</h2>
+        <h2>Static Recovery-Bay Checklist Order (bottom of bay to top)</h2>
+        <p
+          className="print-packing-disclaimer"
+          style={{ fontSize: '9pt', color: '#555', fontStyle: 'italic', margin: '4px 0 8px' }}
+        >
+          This is a static planning sequence, not a measured packing layout, geometry validation,
+          assembly instruction, or flight-readiness assessment.
+        </p>
         {packingSteps.length === 0 ? (
           <p>No parts selected</p>
         ) : (
@@ -355,6 +363,39 @@ export default function PrintChecklist({
           </ol>
         )}
       </section>
+
+      {/* ── Field Pre-Flight Inspection Checklist (shown in checklist mode) ── */}
+      {mode === 'checklist' && (
+        <section style={{ marginTop: 16 }}>
+          <h2>Field Pre-Flight Verification</h2>
+          <ul style={{ listStyle: 'none', paddingLeft: 0 }}>
+            <li className="print-check-item" style={{ marginBottom: 4 }}>
+              <span style={{ fontFamily: 'monospace' }}>[ ]</span>{' '}
+              <strong>Airframe & Motor:</strong> Motor casing retained, nozzle clear, shear pins
+              checked
+            </li>
+            <li className="print-check-item" style={{ marginBottom: 4 }}>
+              <span style={{ fontFamily: 'monospace' }}>[ ]</span>{' '}
+              <strong>Altimeter & Charges:</strong> Ejection charges wired, altimeter armed &
+              continuous tone confirmed
+            </li>
+            <li className="print-check-item" style={{ marginBottom: 4 }}>
+              <span style={{ fontFamily: 'monospace' }}>[ ]</span>{' '}
+              <strong>Harness & Quick Links:</strong> Quick links tightened wrench-tight, swivel
+              spins freely, no line twists
+            </li>
+            <li className="print-check-item" style={{ marginBottom: 4 }}>
+              <span style={{ fontFamily: 'monospace' }}>[ ]</span>{' '}
+              <strong>Parachute Fold & Blanket:</strong> Nomex wrap covers all exposed canopy,
+              smooth slide into bay verified
+            </li>
+            <li className="print-check-item" style={{ marginBottom: 4 }}>
+              <span style={{ fontFamily: 'monospace' }}>[ ]</span> <strong>Range & Weather:</strong>{' '}
+              Launch rail elevation & angle aligned with prevailing wind; landing area clear
+            </li>
+          </ul>
+        </section>
+      )}
 
       <footer
         style={{

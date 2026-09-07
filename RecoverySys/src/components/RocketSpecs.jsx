@@ -19,8 +19,6 @@ export default function RocketSpecs({
   onToast,
 }) {
   const gAuto = autoGFactor(specs.rocket_mass_g)
-  // Use !== '' (not truthy check) so the string '0' is treated as user-entered,
-  // not silently replaced with gAuto (which would suppress the "Below 12G" NAR warning).
   const gDisplay =
     specs.ejection_g_factor != null && specs.ejection_g_factor !== ''
       ? parseFloat(specs.ejection_g_factor)
@@ -37,7 +35,10 @@ export default function RocketSpecs({
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
-      <div className="section-label">Rocket Specs — optional, improves sim accuracy</div>
+      <div className="section-label">Rocket Specs — Vehicle & Recovery Configuration</div>
+
+      {/* ── Vehicle & Motor ────────────────────────────────────────── */}
+      <SectionLabel>VEHICLE & MOTOR</SectionLabel>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         <SpecInput
           id="mass"
@@ -79,6 +80,20 @@ export default function RocketSpecs({
           help="Motor burn duration in seconds — from motor data. Enables accurate apogee prediction."
         />
         <SpecInput
+          id="cd"
+          label="Drag Coeff (Cd)"
+          value={specs.drag_cd}
+          unit=""
+          placeholder="0.50"
+          onChange={(v) => onSetSpec('drag_cd', v)}
+          help="Subsonic drag coefficient — typically 0.4-0.6 for HPR rockets. Sim adjusts for transonic effects automatically."
+        />
+      </div>
+
+      {/* ── Recovery Bay & Deployment ────────────────────────────────── */}
+      <SectionLabel style={{ marginTop: '6px' }}>RECOVERY BAY & DEPLOYMENT</SectionLabel>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <SpecInput
           id="airframe-id"
           label="Airframe ID"
           value={specs.airframe_id_in}
@@ -105,175 +120,6 @@ export default function RocketSpecs({
           onChange={(v) => onSetSpec('bay_obstruction_vol_in3', v)}
           help="Volume of avionics sleds, hardpoints, or wiring inside the bay that reduce packing space"
         />
-
-        {/* Bay volume readout — computed from ID + length; always shown when both are filled */}
-        {bayVolume != null && (
-          <div
-            style={{
-              gridColumn: '1 / -1',
-              display: 'flex',
-              gap: '16px',
-              alignItems: 'center',
-              padding: '6px 10px',
-              background: 'var(--bg-right)',
-              border: '1px solid var(--border-subtle)',
-              borderRadius: 'var(--radius)',
-              fontSize: '11px',
-              color: 'var(--text-tertiary)',
-            }}
-          >
-            <span>
-              Bay{' '}
-              <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
-                {bayVolume.toFixed(1)} in³
-              </strong>
-            </span>
-            {obstruction_vol > 0 && (
-              <>
-                <span style={{ color: 'var(--border-default)' }}>–</span>
-                <span>
-                  Obstructions{' '}
-                  <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
-                    {obstruction_vol.toFixed(1)} in³
-                  </strong>
-                </span>
-                <span style={{ color: 'var(--border-default)' }}>=</span>
-                <span>
-                  Usable{' '}
-                  <strong style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>
-                    {usableVolume.toFixed(1)} in³
-                  </strong>
-                </span>
-              </>
-            )}
-          </div>
-        )}
-
-        <SpecInput
-          id="cd"
-          label="Drag Coeff (Cd)"
-          value={specs.drag_cd}
-          unit=""
-          placeholder="0.50"
-          onChange={(v) => onSetSpec('drag_cd', v)}
-          help="Subsonic drag coefficient — typically 0.4-0.6 for HPR rockets. Sim adjusts for transonic effects automatically."
-        />
-
-        {/* ── Wind Profile (multi-layer) ──────────────────────────────── */}
-        <div style={{ gridColumn: '1 / -1', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-          <SectionLabel style={{ marginTop: '4px' }}>WIND PROFILE</SectionLabel>
-
-          {/* Surface layer */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            <SpecInput
-              id="wind"
-              label="Surface Speed"
-              value={specs.wind_speed_mph}
-              unit="mph"
-              placeholder="e.g. 10"
-              onChange={(v) => onSetSpec('wind_speed_mph', v)}
-              help="Surface wind speed in mph"
-            />
-            <SpecInput
-              id="wind-dir"
-              label="Surface Dir"
-              value={specs.wind_direction_deg}
-              unit="°"
-              placeholder="0=N 90=E"
-              onChange={(v) => onSetSpec('wind_direction_deg', v)}
-              help="Direction wind blows FROM — 0=N, 90=E, 180=S, 270=W (meteorological convention)"
-            />
-            <SpecInput
-              id="wind-surface-alt"
-              label="Surface Alt"
-              value={specs.wind_surface_alt_ft}
-              unit="ft"
-              placeholder="0"
-              onChange={(v) => onSetSpec('wind_surface_alt_ft', v)}
-            />
-          </div>
-
-          {/* Mid-altitude layer */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            <SpecInput
-              id="wind-mid"
-              label="Mid Speed"
-              value={specs.wind_mid_speed_mph}
-              unit="mph"
-              placeholder="e.g. 15"
-              onChange={(v) => onSetSpec('wind_mid_speed_mph', v)}
-            />
-            <SpecInput
-              id="wind-mid-dir"
-              label="Mid Dir"
-              value={specs.wind_mid_direction_deg}
-              unit="°"
-              placeholder="0=N"
-              onChange={(v) => onSetSpec('wind_mid_direction_deg', v)}
-            />
-            <SpecInput
-              id="wind-mid-alt"
-              label="Mid Alt"
-              value={specs.wind_mid_alt_ft}
-              unit="ft"
-              placeholder="e.g. 5000"
-              onChange={(v) => onSetSpec('wind_mid_alt_ft', v)}
-            />
-          </div>
-
-          {/* Aloft layer */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
-            <SpecInput
-              id="wind-aloft"
-              label="Aloft Speed"
-              value={specs.wind_aloft_speed_mph}
-              unit="mph"
-              placeholder="e.g. 30"
-              onChange={(v) => onSetSpec('wind_aloft_speed_mph', v)}
-            />
-            <SpecInput
-              id="wind-aloft-dir"
-              label="Aloft Dir"
-              value={specs.wind_aloft_direction_deg}
-              unit="°"
-              placeholder="0=N"
-              onChange={(v) => onSetSpec('wind_aloft_direction_deg', v)}
-            />
-            <SpecInput
-              id="wind-aloft-alt"
-              label="Aloft Alt"
-              value={specs.wind_aloft_alt_ft}
-              unit="ft"
-              placeholder="e.g. 15000"
-              onChange={(v) => onSetSpec('wind_aloft_alt_ft', v)}
-            />
-          </div>
-
-          <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
-            Enter surface wind only for basic drift. Add mid/aloft layers for wind shear modeling.
-            Direction = where wind blows FROM (meteorological). Monte Carlo runs 500 iterations with
-            ±30% speed, ±15° direction variance.
-          </div>
-        </div>
-
-        <SpecInput
-          id="launch-lat"
-          label="Launch Lat"
-          value={specs.launch_lat}
-          unit=""
-          placeholder="e.g. 42.3601"
-          onChange={(v) => onSetSpec('launch_lat', v)}
-          help="Launch site latitude in decimal degrees — enables drift map and Monte Carlo dispersion"
-        />
-        <SpecInput
-          id="launch-lon"
-          label="Launch Lon"
-          value={specs.launch_lon}
-          unit=""
-          placeholder="e.g. -71.0589"
-          onChange={(v) => onSetSpec('launch_lon', v)}
-          help="Launch site longitude in decimal degrees"
-        />
         <SpecInput
           id="deploy"
           label="Main Deploy Alt"
@@ -297,6 +143,169 @@ export default function RocketSpecs({
           help="Peak G-force at ejection — leave blank for auto (20G L1/L2, 30G L3). BP charges: 20-30G. CO2/Tender Descender: 8-12G."
         />
       </div>
+
+      {/* Bay volume readout — computed from ID + length; always shown when both are filled */}
+      {bayVolume != null && (
+        <div
+          style={{
+            display: 'flex',
+            gap: '16px',
+            alignItems: 'center',
+            padding: '6px 10px',
+            background: 'var(--bg-right)',
+            border: '1px solid var(--border-subtle)',
+            borderRadius: 'var(--radius)',
+            fontSize: '11px',
+            color: 'var(--text-tertiary)',
+          }}
+        >
+          <span>
+            Bay{' '}
+            <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+              {bayVolume.toFixed(1)} in³
+            </strong>
+          </span>
+          {obstruction_vol > 0 && (
+            <>
+              <span style={{ color: 'var(--border-default)' }}>–</span>
+              <span>
+                Obstructions{' '}
+                <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                  {obstruction_vol.toFixed(1)} in³
+                </strong>
+              </span>
+              <span style={{ color: 'var(--border-default)' }}>=</span>
+              <span>
+                Usable{' '}
+                <strong style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>
+                  {usableVolume.toFixed(1)} in³
+                </strong>
+              </span>
+            </>
+          )}
+        </div>
+      )}
+
+      {/* ── Wind Profile (multi-layer) ──────────────────────────────── */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <SectionLabel style={{ marginTop: '6px' }}>WIND PROFILE (MULTI-LAYER)</SectionLabel>
+
+        {/* Surface layer */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+          <SpecInput
+            id="wind"
+            label="Surface Speed"
+            value={specs.wind_speed_mph}
+            unit="mph"
+            placeholder="e.g. 10"
+            onChange={(v) => onSetSpec('wind_speed_mph', v)}
+            help="Surface wind speed in mph"
+          />
+          <SpecInput
+            id="wind-dir"
+            label="Surface Dir"
+            value={specs.wind_direction_deg}
+            unit="°"
+            placeholder="0=N 90=E"
+            onChange={(v) => onSetSpec('wind_direction_deg', v)}
+            help="Direction wind blows FROM — 0=N, 90=E, 180=S, 270=W (meteorological convention)"
+          />
+          <SpecInput
+            id="wind-surface-alt"
+            label="Surface Alt"
+            value={specs.wind_surface_alt_ft}
+            unit="ft"
+            placeholder="0"
+            onChange={(v) => onSetSpec('wind_surface_alt_ft', v)}
+          />
+        </div>
+
+        {/* Mid-altitude layer */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+          <SpecInput
+            id="wind-mid"
+            label="Mid Speed"
+            value={specs.wind_mid_speed_mph}
+            unit="mph"
+            placeholder="e.g. 15"
+            onChange={(v) => onSetSpec('wind_mid_speed_mph', v)}
+          />
+          <SpecInput
+            id="wind-mid-dir"
+            label="Mid Dir"
+            value={specs.wind_mid_direction_deg}
+            unit="°"
+            placeholder="0=N"
+            onChange={(v) => onSetSpec('wind_mid_direction_deg', v)}
+          />
+          <SpecInput
+            id="wind-mid-alt"
+            label="Mid Alt"
+            value={specs.wind_mid_alt_ft}
+            unit="ft"
+            placeholder="e.g. 5000"
+            onChange={(v) => onSetSpec('wind_mid_alt_ft', v)}
+          />
+        </div>
+
+        {/* Aloft layer */}
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '8px' }}>
+          <SpecInput
+            id="wind-aloft"
+            label="Aloft Speed"
+            value={specs.wind_aloft_speed_mph}
+            unit="mph"
+            placeholder="e.g. 30"
+            onChange={(v) => onSetSpec('wind_aloft_speed_mph', v)}
+          />
+          <SpecInput
+            id="wind-aloft-dir"
+            label="Aloft Dir"
+            value={specs.wind_aloft_direction_deg}
+            unit="°"
+            placeholder="0=N"
+            onChange={(v) => onSetSpec('wind_aloft_direction_deg', v)}
+          />
+          <SpecInput
+            id="wind-aloft-alt"
+            label="Aloft Alt"
+            value={specs.wind_aloft_alt_ft}
+            unit="ft"
+            placeholder="e.g. 15000"
+            onChange={(v) => onSetSpec('wind_aloft_alt_ft', v)}
+          />
+        </div>
+
+        <div style={{ fontSize: '10px', color: 'var(--text-tertiary)', lineHeight: 1.3 }}>
+          Enter surface wind only for basic drift. Add mid/aloft layers for wind shear modeling.
+          Direction = where wind blows FROM (meteorological). Monte Carlo runs 500 iterations with
+          ±30% speed, ±15° direction variance.
+        </div>
+      </div>
+
+      {/* ── Launch Site Location ────────────────────────────────────── */}
+      <SectionLabel style={{ marginTop: '6px' }}>LAUNCH SITE LOCATION</SectionLabel>
+      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
+        <SpecInput
+          id="launch-lat"
+          label="Launch Lat"
+          value={specs.launch_lat}
+          unit=""
+          placeholder="e.g. 42.3601"
+          onChange={(v) => onSetSpec('launch_lat', v)}
+          help="Launch site latitude in decimal degrees — enables drift map and Monte Carlo dispersion"
+        />
+        <SpecInput
+          id="launch-lon"
+          label="Launch Lon"
+          value={specs.launch_lon}
+          unit=""
+          placeholder="e.g. -71.0589"
+          onChange={(v) => onSetSpec('launch_lon', v)}
+          help="Launch site longitude in decimal degrees"
+        />
+      </div>
+
       <p style={{ fontSize: '11px', color: 'var(--text-tertiary)', lineHeight: 1.4 }}>
         {specs.burn_time_s
           ? `Apogee via powered+coast integration with ISA atmosphere (±10–15%). Cd ${specs.drag_cd || '0.50'}, Isp 195s.`

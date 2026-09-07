@@ -12,6 +12,7 @@ import CompareTab from './tabs/CompareTab.jsx'
 import FlightLogTab from './tabs/FlightLogTab.jsx'
 import AnalysisTab from './tabs/AnalysisTab.jsx'
 import PrintChecklist from './PrintChecklist.jsx'
+import GuidedPlanWizard from './GuidedPlanWizard.jsx'
 import { buildRecoveryBrief } from '../lib/recoveryBrief.js'
 import './MissionControlLayout.css'
 
@@ -49,7 +50,17 @@ export default function MissionControlLayout({
   /* darkMode/setDarkMode removed: MC layout is dark-only */
 }) {
   const [activeTab, setActiveTab] = useState('DASHBOARD')
+  const [printMode, setPrintMode] = useState('brief')
+  const [showGuided, setShowGuided] = useState(false)
 
+  const handlePrintBrief = () => {
+    setPrintMode('brief')
+    setTimeout(() => window.print(), 20)
+  }
+  const handlePrintChecklist = () => {
+    setPrintMode('checklist')
+    setTimeout(() => window.print(), 20)
+  }
   const filledSlots = useMemo(
     () => CATEGORIES.filter((c) => state.config[c.id] != null).length,
     [state.config]
@@ -120,7 +131,14 @@ export default function MissionControlLayout({
             })}
           </nav>
           <div className="mc-header__right">
-            {/* Theme toggle hidden: MC layout is dark-only by design */}
+            <button
+              type="button"
+              className={`mc-header__guided-btn ${showGuided ? 'mc-header__guided-btn--active' : ''}`}
+              onClick={() => setShowGuided(!showGuided)}
+              aria-label={showGuided ? 'Exit guided review' : 'Guided review'}
+            >
+              {showGuided ? '✕ EXIT_GUIDE' : '★ GUIDED_REVIEW'}
+            </button>
           </div>
         </header>
 
@@ -133,76 +151,114 @@ export default function MissionControlLayout({
             aria-labelledby={tabBtnId(activeTab)}
             tabIndex={0}
           >
-            {activeTab === 'DASHBOARD' && (
-              <DashboardTab
+            {showGuided ? (
+              <GuidedPlanWizard
                 state={state}
                 allParts={allParts}
-                customParts={customParts}
-                filledSlots={filledSlots}
-                packingVolume={packingVolume}
-                hasWarnings={hasWarnings}
-                hasErrors={hasErrors}
-                canRun={canRun}
-                resultFresh={resultFresh}
+                onSetSpec={setSpec}
                 selectPart={selectPart}
                 removePart={removePart}
-                setCategory={setCategory}
-                runSim={runSim}
-                addCustomPart={addCustomPart}
-                deleteCustomPart={deleteCustomPart}
-                editCustomPart={editCustomPart}
-                confidenceProps={confidenceProps}
-              />
-            )}
-            {activeTab === 'SIMULATION' && (
-              <SimulationTab
-                state={state}
                 runSim={runSim}
                 canRun={canRun}
                 resultFresh={resultFresh}
                 confidenceProps={confidenceProps}
-              />
-            )}
-            {activeTab === 'ANALYSIS' && (
-              <AnalysisTab state={{ ...state, resultFresh }} confidenceProps={confidenceProps} />
-            )}
-            {activeTab === 'DISPERSION' && (
-              <DispersionTab state={state} resultFresh={resultFresh} />
-            )}
-            {activeTab === 'SPECS' && (
-              <SpecsTab
-                state={state}
-                setSpec={setSpec}
-                removePart={removePart}
-                setCategory={setCategory}
-                saveConfig={saveConfig}
-                copyShareLink={copyShareLink}
-                setCustomMotor={setCustomMotor}
-                clearCustomMotor={clearCustomMotor}
-                addToast={addToast}
-                onNavigate={(path) => {
-                  if (path.startsWith('config.')) setCategory(path.replace('config.', ''))
+                onExit={() => setShowGuided(false)}
+                onLoadDemo={() => {
+                  if (typeof window !== 'undefined') {
+                    const url = new URL(window.location.href)
+                    url.searchParams.set('demo', '1')
+                    window.location.href = url.toString()
+                  }
+                }}
+                onStartFresh={() => {
+                  if (typeof window !== 'undefined') {
+                    const url = new URL(window.location.href)
+                    url.searchParams.set('fresh', '1')
+                    window.location.href = url.toString()
+                  }
                 }}
               />
-            )}
-            {activeTab === 'COMPARE' && (
-              <CompareTab
-                state={state}
-                resultFresh={resultFresh}
-                snapshot={state.compareSnapshot}
-                onSaveSnapshot={saveCompareSnapshot}
-                onClearSnapshot={clearCompareSnapshot}
-              />
-            )}
-            {activeTab === 'FLIGHT_LOG' && <FlightLogTab state={state} resultFresh={resultFresh} />}
-            {activeTab === 'EXPORT' && (
-              <ExportTab
-                state={state}
-                saveConfig={saveConfig}
-                copyShareLink={copyShareLink}
-                onLoadConfig={loadConfig}
-                recoveryBrief={recoveryBrief}
-              />
+            ) : (
+              <>
+                {activeTab === 'DASHBOARD' && (
+                  <DashboardTab
+                    state={state}
+                    allParts={allParts}
+                    customParts={customParts}
+                    filledSlots={filledSlots}
+                    packingVolume={packingVolume}
+                    hasWarnings={hasWarnings}
+                    hasErrors={hasErrors}
+                    canRun={canRun}
+                    resultFresh={resultFresh}
+                    selectPart={selectPart}
+                    removePart={removePart}
+                    setCategory={setCategory}
+                    runSim={runSim}
+                    addCustomPart={addCustomPart}
+                    deleteCustomPart={deleteCustomPart}
+                    editCustomPart={editCustomPart}
+                    confidenceProps={confidenceProps}
+                  />
+                )}
+                {activeTab === 'SIMULATION' && (
+                  <SimulationTab
+                    state={state}
+                    runSim={runSim}
+                    canRun={canRun}
+                    resultFresh={resultFresh}
+                    confidenceProps={confidenceProps}
+                  />
+                )}
+                {activeTab === 'ANALYSIS' && (
+                  <AnalysisTab
+                    state={{ ...state, resultFresh }}
+                    confidenceProps={confidenceProps}
+                  />
+                )}
+                {activeTab === 'DISPERSION' && (
+                  <DispersionTab state={state} resultFresh={resultFresh} />
+                )}
+                {activeTab === 'SPECS' && (
+                  <SpecsTab
+                    state={state}
+                    setSpec={setSpec}
+                    removePart={removePart}
+                    setCategory={setCategory}
+                    saveConfig={saveConfig}
+                    copyShareLink={copyShareLink}
+                    setCustomMotor={setCustomMotor}
+                    clearCustomMotor={clearCustomMotor}
+                    addToast={addToast}
+                    onNavigate={(path) => {
+                      if (path.startsWith('config.')) setCategory(path.replace('config.', ''))
+                    }}
+                  />
+                )}
+                {activeTab === 'COMPARE' && (
+                  <CompareTab
+                    state={state}
+                    resultFresh={resultFresh}
+                    snapshot={state.compareSnapshot}
+                    onSaveSnapshot={saveCompareSnapshot}
+                    onClearSnapshot={clearCompareSnapshot}
+                  />
+                )}
+                {activeTab === 'FLIGHT_LOG' && (
+                  <FlightLogTab state={state} resultFresh={resultFresh} />
+                )}
+                {activeTab === 'EXPORT' && (
+                  <ExportTab
+                    state={state}
+                    saveConfig={saveConfig}
+                    copyShareLink={copyShareLink}
+                    onLoadConfig={loadConfig}
+                    recoveryBrief={recoveryBrief}
+                    onPrintBrief={handlePrintBrief}
+                    onPrintChecklist={handlePrintChecklist}
+                  />
+                )}
+              </>
             )}
           </main>
         </div>
@@ -214,6 +270,7 @@ export default function MissionControlLayout({
         resultFresh={resultFresh}
         warnings={state.warnings}
         recoveryBrief={recoveryBrief}
+        mode={printMode}
       />
     </>
   )

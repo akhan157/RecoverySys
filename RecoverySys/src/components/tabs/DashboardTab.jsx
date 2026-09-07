@@ -3,7 +3,8 @@ import { partSpecLine } from '../../lib/format.js'
 import PartsBrowser from '../PartsBrowser.jsx'
 import SuggestPanel from '../SuggestPanel.jsx'
 import ConfidenceStatus from '../ConfidenceStatus.jsx'
-
+import ReviewSummary from '../primitives/ReviewSummary.jsx'
+import { WARN_LEVELS } from '../../lib/constants.js'
 export default function DashboardTab({
   state,
   allParts,
@@ -108,8 +109,7 @@ export default function DashboardTab({
       <div className="mc-config-summary">
         <h2 className="mc-panel-header">CONFIG_SUMMARY</h2>
         <div className="mc-summary">
-          <ConfidenceStatus {...confidenceProps} compact />
-          {/* Packing Volume — how much bay space the selected components consume */}
+          <ConfidenceStatus {...confidenceProps} onRerun={runSim} compact />
           <div className="mc-metric">
             <div className="mc-metric__label">PACKING_VOLUME</div>
             {packingVolume.bay_known ? (
@@ -193,6 +193,16 @@ export default function DashboardTab({
             <div className="mc-validation">✓ VALIDATION_PASSED</div>
           )}
 
+          {(hasErrors || hasWarnings) && (
+            <ReviewSummary
+              errorsCount={state.warnings.filter((w) => w.level === WARN_LEVELS.ERROR).length}
+              warningsCount={state.warnings.filter((w) => w.level === WARN_LEVELS.WARN).length}
+              highestPriorityAction={{
+                label: hasErrors ? 'Review Compatibility Errors' : 'Review Compatibility Warnings',
+                onClick: () => confidenceProps?.onNavigate && confidenceProps.onNavigate('SPECS'),
+              }}
+            />
+          )}
           {/* Run Sim */}
           <button className="mc-run-btn" onClick={runSim} disabled={!canRun}>
             {state.simRunning ? 'RUNNING_SIMULATION...' : 'RUN_SIMULATION →'}

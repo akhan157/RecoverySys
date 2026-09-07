@@ -1,0 +1,40 @@
+{
+  "id": "terminal-descent-high-altitude-density",
+  "kind": "analytic",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "chuteSpecs": { "diameter_in": 36, "cd": 1.5 },
+    "mass_kg": 2.5,
+    "altitude_ft": 10000
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "descent_rate_fps",
+        "value": 24.337201814,
+        "unit": "ft/s",
+        "tolerance": { "absolute": 0.00001, "basis": "analyst-derived" },
+        "notes": "Steady terminal descent for a 36-inch parachute at 10,000 ft altitude accounting for ISA density reduction."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www.grc.nasa.gov/www/k-12/airplane/termv.html",
+    "title": "NASA Glenn terminal velocity reference with ISA atmosphere",
+    "accessed": "2026-09-07",
+    "citation": "Terminal-velocity drag equation with ISA troposphere density.",
+    "derivation": "Evaluate sqrt(2*m*g/(rho(10000ft)*Cd*A)) using ISA density rho=0.9048 kg/m3."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "description": "Browser JavaScript recovery estimator.",
+    "assumptionsVersion": "recovery-assumptions-v1"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Observed terminal descent rate at 10,000 ft differs from the analytic reference by no more than the stated absolute tolerance."
+  },
+  "notes": "Analytic comparison for altitude-dependent density correction."
+}

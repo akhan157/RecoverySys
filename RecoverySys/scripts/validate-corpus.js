@@ -45,6 +45,16 @@ const evaluators = Object.freeze({
         }
       : {}
   },
+  'terminal-descent-high-altitude-density': (inputs) => ({
+    descent_rate_fps: computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft),
+  }),
+  'metamorphic-mass-scaling-descent': (inputs) => {
+    const v1 = computeDescentRate(inputs.chuteSpecs, inputs.mass1_kg, inputs.altitude_ft)
+    const v2 = computeDescentRate(inputs.chuteSpecs, inputs.mass2_kg, inputs.altitude_ft)
+    return {
+      velocity_ratio: v2 / v1,
+    }
+  },
 })
 
 function modelMatches(model) {
