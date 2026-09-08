@@ -611,19 +611,28 @@ function rule_swivelEjectionLoad(ctx) {
 }
 
 function rule_packedDiameterFit(ctx) {
-  const { config, airframe_id } = ctx
-  if (airframe_id <= 0) return []
+  const { config, airframe_id, specs } = ctx
+  const drogue_airframe_id =
+    parseSpec('drogue_airframe_id_in', specs?.drogue_airframe_id_in) ?? airframe_id
   const out = []
-  for (const [slot, item] of [
-    ['main_chute', config.main_chute],
-    ['drogue_chute', config.drogue_chute],
-  ]) {
-    const pd = item?.specs.packed_diam_in
+  if (airframe_id > 0 && config.main_chute) {
+    const pd = config.main_chute.specs?.packed_diam_in
     if (pd && pd > airframe_id) {
       out.push(
         err(
-          slot,
-          `${item.name} packed diameter ${pd}" exceeds airframe ID ${airframe_id}" — won't fit in tube`
+          'main_chute',
+          `${config.main_chute.name} packed diameter ${pd}" exceeds airframe ID ${airframe_id}" — won't fit in tube`
+        )
+      )
+    }
+  }
+  if (drogue_airframe_id > 0 && config.drogue_chute) {
+    const pd = config.drogue_chute.specs?.packed_diam_in
+    if (pd && pd > drogue_airframe_id) {
+      out.push(
+        err(
+          'drogue_chute',
+          `${config.drogue_chute.name} packed diameter ${pd}" exceeds drogue compartment ID ${drogue_airframe_id}" — won't fit in tube`
         )
       )
     }
@@ -632,16 +641,76 @@ function rule_packedDiameterFit(ctx) {
 }
 
 function rule_bayVolumeStacked(ctx) {
-  const { config, bay_volume, bay_cross_area, usable_volume, obstruction_vol } = ctx
+  const { config, bay_volume, bay_cross_area, usable_volume, obstruction_vol, specs } = ctx
+  const drogue_bay_length = parseSpec('drogue_bay_length_in', specs?.drogue_bay_length_in) ?? 0
+
+  if (drogue_bay_length > 0) {
+    // Dual-bay evaluation
+    const p = computePackingVolume({ config, specs })
+    const out = []
+    if (
+      (p.main_bay?.fraction != null && p.main_bay.fraction > 1.0) ||
+      (p.main_bay?.effective_in3 === 0 &&
+        p.main_bay?.stacked_in3 > 0 &&
+        p.main_bay?.bay_length > 0 &&
+        p.main_bay?.airframe_id > 0)
+    ) {
+      out.push(
+        err(
+          'bay_volume',
+          `Forward main bay packed components ~${p.main_bay.stacked_in3.toFixed(0)} in³ exceed ~${p.main_bay.effective_in3.toFixed(0)} in³ effective capacity (${Math.round(PACKING_EFFICIENCY * 100)}% packing efficiency) — won't close`
+        )
+      )
+    } else if (p.main_bay?.fraction != null && p.main_bay.fraction > PACKING_TIGHT_RATIO) {
+      const pct = Math.round(p.main_bay.fraction * 100)
+      out.push(
+        warn(
+          'bay_volume',
+          `Forward main bay is ${pct}% of effective capacity (~${p.main_bay.stacked_in3.toFixed(0)} in³ of ~${p.main_bay.effective_in3.toFixed(0)} in³) — very tight`
+        )
+      )
+    }
+
+    if (
+      (p.drogue_bay?.fraction != null && p.drogue_bay.fraction > 1.0) ||
+      (p.drogue_bay?.effective_in3 === 0 &&
+        p.drogue_bay?.stacked_in3 > 0 &&
+        p.drogue_bay?.bay_length > 0 &&
+        p.drogue_bay?.airframe_id > 0)
+    ) {
+      out.push(
+        err(
+          'bay_volume',
+          `Aft drogue bay packed components ~${p.drogue_bay.stacked_in3.toFixed(0)} in³ exceed ~${p.drogue_bay.effective_in3.toFixed(0)} in³ effective capacity (${Math.round(PACKING_EFFICIENCY * 100)}% packing efficiency) — won't close`
+        )
+      )
+    } else if (p.drogue_bay?.fraction != null && p.drogue_bay.fraction > PACKING_TIGHT_RATIO) {
+      const pct = Math.round(p.drogue_bay.fraction * 100)
+      out.push(
+        warn(
+          'bay_volume',
+          `Aft drogue bay is ${pct}% of effective capacity (~${p.drogue_bay.stacked_in3.toFixed(0)} in³ of ~${p.drogue_bay.effective_in3.toFixed(0)} in³) — very tight`
+        )
+      )
+    }
+    return out
+  }
+
   if (bay_volume <= 0) return []
   const effective_usable = usable_volume * PACKING_EFFICIENCY
   const chuteVol = (s) => (s?.packed_length_in ? bay_cross_area * s.packed_length_in : 0)
   let stacked_vol = chuteVol(config.main_chute?.specs) + chuteVol(config.drogue_chute?.specs)
-  for (const slot of ['chute_protector', 'deployment_bag', 'swivel', 'shock_cord']) {
+  for (const slot of [
+    'chute_protector',
+    'deployment_bag',
+    'swivel',
+    'shock_cord',
+    'quick_links',
+    'chute_device',
+  ]) {
     const h = config[slot]?.specs.packed_height_in
     if (h) stacked_vol += bay_cross_area * h
   }
-  if (stacked_vol <= 0) return []
   const obstrNote =
     obstruction_vol > 0 ? ` (${obstruction_vol.toFixed(1)} in³ obstructions subtracted)` : ''
   if (stacked_vol > effective_usable) {
@@ -740,30 +809,154 @@ const RULES = [
  * Returns stacked component volume vs effective bay capacity (after 70% packing efficiency).
  * Used by Config Summary gauge.
  */
-export function computePackingVolume({ config, specs }) {
-  const airframe_id = parseSpec('airframe_id_in', specs.airframe_id_in) ?? 0
-  const bay_length = parseSpec('bay_length_in', specs.bay_length_in) ?? 0
+export function computePackingVolume({ config, specs = {} }) {
+  const airframe_id = parseSpec('airframe_id_in', specs?.airframe_id_in) ?? 0
+  const bay_length = parseSpec('bay_length_in', specs?.bay_length_in) ?? 0
   const bay_cross_area = airframe_id > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) : 0
   const bay_volume = bay_cross_area > 0 && bay_length > 0 ? bay_cross_area * bay_length : 0
   const obstruction = Math.max(
     0,
-    parseSpec('bay_obstruction_vol_in3', specs.bay_obstruction_vol_in3) ?? 0
+    parseSpec('bay_obstruction_vol_in3', specs?.bay_obstruction_vol_in3) ?? 0
   )
+  const coupler_shoulder = parseSpec('coupler_shoulder_in', specs?.coupler_shoulder_in) ?? 0
+  const drogue_bay_length = parseSpec('drogue_bay_length_in', specs?.drogue_bay_length_in) ?? 0
+  const drogue_airframe_id =
+    parseSpec('drogue_airframe_id_in', specs?.drogue_airframe_id_in) ?? airframe_id
+  const drogue_cross_area =
+    drogue_airframe_id > 0 ? Math.PI * Math.pow(drogue_airframe_id / 2, 2) : 0
+
+  const is_dual_bay = drogue_bay_length > 0
+
+  if (is_dual_bay) {
+    // ── Dual-Compartment Mode ───────────────────────────────────────────────
+    const main_usable_length = Math.max(0, bay_length - coupler_shoulder)
+    const main_bay_vol = bay_cross_area * main_usable_length
+    const main_usable_vol = Math.max(0, main_bay_vol - obstruction)
+    const main_effective = main_usable_vol * PACKING_EFFICIENCY
+
+    const mainChuteVol = config.main_chute?.specs?.packed_length_in
+      ? bay_cross_area * config.main_chute.specs.packed_length_in
+      : 0
+    let main_stacked = mainChuteVol
+    let main_stack_len = config.main_chute?.specs?.packed_length_in ?? 0
+    for (const slot of ['deployment_bag', 'chute_protector', 'shock_cord', 'chute_device']) {
+      const h = config[slot]?.specs?.packed_height_in
+      if (h) {
+        main_stacked += bay_cross_area * h
+        main_stack_len += h
+      }
+    }
+
+    const main_max_diam = Math.max(
+      config.main_chute?.specs?.packed_diam_in ?? 0,
+      config.deployment_bag?.specs?.packed_diam_in ?? 0
+    )
+    const main_radial_ratio =
+      airframe_id > 0 && main_max_diam > 0 ? main_max_diam / airframe_id : null
+
+    const drogue_usable_length = Math.max(0, drogue_bay_length - coupler_shoulder)
+    const drogue_bay_vol = drogue_cross_area * drogue_usable_length
+    const drogue_effective = drogue_bay_vol * PACKING_EFFICIENCY
+
+    const drogueChuteVol = config.drogue_chute?.specs?.packed_length_in
+      ? drogue_cross_area * config.drogue_chute.specs.packed_length_in
+      : 0
+    let drogue_stacked = drogueChuteVol
+    let drogue_stack_len = config.drogue_chute?.specs?.packed_length_in ?? 0
+    for (const slot of ['swivel', 'quick_links']) {
+      const h = config[slot]?.specs?.packed_height_in
+      if (h) {
+        drogue_stacked += drogue_cross_area * h
+        drogue_stack_len += h
+      }
+    }
+
+    const drogue_max_diam = config.drogue_chute?.specs?.packed_diam_in ?? 0
+    const drogue_radial_ratio =
+      drogue_airframe_id > 0 && drogue_max_diam > 0 ? drogue_max_diam / drogue_airframe_id : null
+
+    const total_stacked = main_stacked + drogue_stacked
+    const total_effective = main_effective + drogue_effective
+
+    return {
+      is_dual_bay: true,
+      stacked_in3: total_stacked,
+      effective_in3: total_effective,
+      bay_known: bay_volume > 0 || drogue_bay_vol > 0,
+      fraction:
+        main_effective > 0 || drogue_effective > 0
+          ? Math.max(
+              main_effective > 0 ? main_stacked / main_effective : 0,
+              drogue_effective > 0 ? drogue_stacked / drogue_effective : 0
+            )
+          : null,
+      aggregate_fraction: total_effective > 0 ? total_stacked / total_effective : null,
+      main_bay: {
+        airframe_id,
+        bay_length,
+        usable_length: main_usable_length,
+        stacked_in3: main_stacked,
+        effective_in3: main_effective,
+        stack_length_in: main_stack_len,
+        radial_ratio: main_radial_ratio,
+        fraction: main_effective > 0 ? main_stacked / main_effective : null,
+        jamming_risk: main_radial_ratio != null && main_radial_ratio >= 0.9,
+      },
+      drogue_bay: {
+        airframe_id: drogue_airframe_id,
+        bay_length: drogue_bay_length,
+        usable_length: drogue_usable_length,
+        stacked_in3: drogue_stacked,
+        effective_in3: drogue_effective,
+        stack_length_in: drogue_stack_len,
+        radial_ratio: drogue_radial_ratio,
+        fraction: drogue_effective > 0 ? drogue_stacked / drogue_effective : null,
+        jamming_risk: drogue_radial_ratio != null && drogue_radial_ratio >= 0.9,
+      },
+    }
+  }
+
+  // ── Single-Bay Mode (Classic / Default) ──────────────────────────────────
   const usable = bay_volume > 0 ? Math.max(0, bay_volume - obstruction) : 0
   const effective = usable * PACKING_EFFICIENCY
 
   const chuteVol = (s) => (s?.packed_length_in ? bay_cross_area * s.packed_length_in : 0)
   let stacked = chuteVol(config.main_chute?.specs) + chuteVol(config.drogue_chute?.specs)
-  for (const slot of ['chute_protector', 'deployment_bag', 'swivel', 'shock_cord']) {
-    const h = config[slot]?.specs.packed_height_in
-    if (h) stacked += bay_cross_area * h
+  let stack_len =
+    (config.main_chute?.specs?.packed_length_in ?? 0) +
+    (config.drogue_chute?.specs?.packed_length_in ?? 0)
+  for (const slot of [
+    'chute_protector',
+    'deployment_bag',
+    'swivel',
+    'shock_cord',
+    'quick_links',
+    'chute_device',
+  ]) {
+    const h = config[slot]?.specs?.packed_height_in
+    if (h) {
+      stacked += bay_cross_area * h
+      stack_len += h
+    }
   }
 
+  const max_diam = Math.max(
+    config.main_chute?.specs?.packed_diam_in ?? 0,
+    config.drogue_chute?.specs?.packed_diam_in ?? 0,
+    config.deployment_bag?.specs?.packed_diam_in ?? 0
+  )
+  const radial_ratio = airframe_id > 0 && max_diam > 0 ? max_diam / airframe_id : null
+
   return {
+    is_dual_bay: false,
     stacked_in3: stacked,
     effective_in3: effective,
     bay_known: bay_volume > 0,
     fraction: effective > 0 ? stacked / effective : null,
+    stack_length_in: stack_len,
+    bay_length_in: bay_length,
+    radial_ratio,
+    jamming_risk: radial_ratio != null && radial_ratio >= 0.9,
   }
 }
 

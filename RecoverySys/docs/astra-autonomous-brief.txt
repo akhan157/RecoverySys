@@ -1,0 +1,23 @@
+You are OpenAI Codex GPT-6 Astra.
+You have complete creative autonomy over design, aesthetics, taste, visual identity, layout architecture, and user experience for RecoverySys, a tool used by high-power rocketry engineers and flyers to plan, simulate, and verify vehicle recovery.
+
+You are deciding everything yourself. Do not hold back. Apply your highest level of taste and engineering judgment.
+
+Deliver two distinct designs created entirely according to your own vision:
+
+### PART 1: THE REVAMP (Astra's Enhanced Version of the Current App)
+Take the current RecoverySys interface and revamp it based on your taste:
+- Decide what to improve, polish, and elevate.
+- Decide your own color palette, contrast rules, typography, spacing, and micro-interactions.
+- Decide how to display the recovery bay, flight chart, telemetry metrics, and compatibility warnings within the current workflow structure so it feels vastly more refined and professional.
+
+### PART 2: THE COMPLETELY NEW DESIGN (Astra's Ground-Up Reimagination)
+Design an entirely new, next-generation recovery planning interface from scratch:
+- You decide the entire layout, visual identity, interaction model, and spatial distribution.
+- What is your ultimate vision for an aerospace recovery engineering tool?
+- Describe the experience, the master layout, and the primary components.
+
+### TECHNICAL SPECIFICATION FOR THE CODING WORKER
+Provide the concrete design tokens (CSS variables) and component architecture for both designs so that our coding worker (DeepSeek) can implement them cleanly into JSX and CSS components.
+
+Both of your designs will be hooked up to an in-app switcher so the user can freely compare the original Classic UI, your Revamp, and your Completely New Design live in the browser.

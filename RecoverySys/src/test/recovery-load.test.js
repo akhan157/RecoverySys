@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import {
   computeDrogueDeploymentVelocity,
   computeMainSnatchLoad,
+  computeEjectionCharge,
   MAIN_SNATCH_MODEL,
 } from '../lib/recoveryLoad.js'
 
@@ -93,5 +94,59 @@ describe('linear elastic main snatch model', () => {
     expect(velocity).toBeGreaterThan(0)
     expect(velocity).not.toBe(Math.round(velocity))
     expect(computeDrogueDeploymentVelocity(drogue.specs, 2, 5000)).not.toBe(velocity)
+  })
+})
+
+describe('black powder ejection charge model', () => {
+  it('computes standard 15 PSI friction-fit charge correctly with verified FFFFg gas law constant', () => {
+    // 4" tube (ID 3.9"), 18" bay -> Vol ≈ 215 in³, 15 psi
+    // Nakka/Info-Central gas law: R=22.16 ft·lbf/(lbm·R), T=3307R -> RT = 1938.74 in·lbf/g
+    // Expected charge ≈ (15 * 215) / 1938.74 ≈ 1.66g
+    const vol = Math.PI * Math.pow(3.9 / 2, 2) * 18
+    const charge = computeEjectionCharge({
+      compartment_vol_in3: vol,
+      airframe_id_in: 3.9,
+    })
+
+    expect(charge).not.toBeNull()
+    expect(charge.target_psi).toBe(15)
+    expect(charge.charge_grams).toBeCloseTo(1.66, 1)
+    expect(charge.charge_grams_backup).toBeGreaterThan(charge.charge_grams)
+    expect(charge.separation_force_lbf).toBeCloseTo(15 * Math.PI * Math.pow(3.9 / 2, 2), 0)
+    expect(charge.insufficient_force).toBe(false)
+  })
+
+  it('calculates required separation pressure from shear pins', () => {
+    // 3 pins 2-56 -> force = (3*30 + 15)*1.5 = 157.5 lbf -> 157.5 / 11.95 ≈ 13.2 psi
+    const vol = 200
+    const charge = computeEjectionCharge({
+      compartment_vol_in3: vol,
+      airframe_id_in: 3.9,
+      shear_pins_count: 3,
+      pin_type: '2-56',
+    })
+
+    expect(charge.pins_count).toBe(3)
+    expect(charge.target_psi).toBeGreaterThanOrEqual(12)
+    expect(charge.charge_grams).toBeGreaterThan(0)
+  })
+
+  it('returns null on invalid or zero volume/diameter', () => {
+    expect(computeEjectionCharge({ compartment_vol_in3: 0, airframe_id_in: 4 })).toBeNull()
+    expect(computeEjectionCharge({ compartment_vol_in3: 100, airframe_id_in: null })).toBeNull()
+  })
+
+  it('flags overpressure and insufficient separation force when required PSI exceeds safe limit', () => {
+    // 2" airframe (ID 2.0") with 4 pins #2-56 -> area = 3.14 in²
+    // Force = (4*30 + 15)*1.5 = 202.5 lbf -> Required PSI = 202.5 / 3.14 ≈ 64.5 PSI (> 35 PSI limit)
+    const charge = computeEjectionCharge({
+      compartment_vol_in3: 50,
+      airframe_id_in: 2.0,
+      shear_pins_count: 4,
+      pin_type: '2-56',
+    })
+    expect(charge.insufficient_force).toBe(true)
+    expect(charge.overpressure_risk).toBe(true)
+    expect(charge.warning).toContain('exceeds 35 PSI airframe safety limit')
   })
 })

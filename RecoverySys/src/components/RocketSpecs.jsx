@@ -2,7 +2,7 @@ import SpecInput from './specs/SpecInput.jsx'
 import MotorSearch from './specs/MotorSearch.jsx'
 import CustomMotorImport from './specs/CustomMotorImport.jsx'
 import SectionLabel from './primitives/SectionLabel.jsx'
-
+import { computeEjectionCharge } from '../lib/recoveryLoad.js'
 // Auto G-factor: 20G for L1/L2 (<10 kg), 30G for L3 (≥10 kg). Matches NAR/TRA guidelines.
 function autoGFactor(mass_g) {
   const mass_kg = parseFloat(mass_g)
@@ -25,14 +25,37 @@ export default function RocketSpecs({
       : gAuto
   const gIsLow = gDisplay < 12 // below NAR minimum
 
-  // Bay volume — computed from airframe ID + bay length; obstructions subtracted for usable
+  // Bay volume & ejection charges
   const airframe_id = parseFloat(specs.airframe_id_in)
   const bay_length = parseFloat(specs.bay_length_in)
   const obstruction_vol = parseFloat(specs.bay_obstruction_vol_in3) || 0
-  const bayVolume =
-    airframe_id > 0 && bay_length > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) * bay_length : null
-  const usableVolume = bayVolume != null ? Math.max(0, bayVolume - obstruction_vol) : null
+  const coupler_shoulder = parseFloat(specs.coupler_shoulder_in) || 0
+  const main_usable_length = Math.max(0, bay_length - coupler_shoulder)
+  const bayArea = airframe_id > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) : 0
+  const bayVolume = bayArea > 0 && bay_length > 0 ? bayArea * bay_length : null
+  const usableVolume =
+    bayArea > 0 && main_usable_length > 0
+      ? Math.max(0, bayArea * main_usable_length - obstruction_vol)
+      : null
 
+  const mainCharge = computeEjectionCharge({
+    compartment_vol_in3: usableVolume,
+    airframe_id_in: airframe_id,
+    shear_pins_count: specs.shear_pins_main,
+  })
+
+  const drogue_bay_length = parseFloat(specs.drogue_bay_length_in) || 0
+  const drogue_id = parseFloat(specs.drogue_airframe_id_in) || airframe_id
+  const drogue_area = drogue_id > 0 ? Math.PI * Math.pow(drogue_id / 2, 2) : 0
+  const drogue_usable_len = Math.max(0, drogue_bay_length - coupler_shoulder)
+  const drogue_vol =
+    drogue_area > 0 && drogue_usable_len > 0 ? drogue_area * drogue_usable_len : null
+
+  const drogueCharge = computeEjectionCharge({
+    compartment_vol_in3: drogue_vol,
+    airframe_id_in: drogue_id,
+    shear_pins_count: specs.shear_pins_drogue,
+  })
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
       <div className="section-label">Rocket Specs — Vehicle & Recovery Configuration</div>
@@ -91,25 +114,25 @@ export default function RocketSpecs({
       </div>
 
       {/* ── Recovery Bay & Deployment ────────────────────────────────── */}
-      <SectionLabel style={{ marginTop: '6px' }}>RECOVERY BAY & DEPLOYMENT</SectionLabel>
+      <SectionLabel style={{ marginTop: '6px' }}>RECOVERY COMPARTMENTS & DEPLOYMENT</SectionLabel>
       <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px' }}>
         <SpecInput
           id="airframe-id"
-          label="Airframe ID"
+          label="Main Airframe ID"
           value={specs.airframe_id_in}
           unit="in"
           placeholder="e.g. 3.9"
           onChange={(v) => onSetSpec('airframe_id_in', v)}
-          help="Inner diameter of the airframe tube at the recovery bay (e.g. 3.9 for a 4-inch tube)"
+          help="Inner diameter of the forward main recovery bay tube"
         />
         <SpecInput
           id="bay-length"
-          label="Recovery Bay Length"
+          label="Main Bay Length"
           value={specs.bay_length_in}
           unit="in"
           placeholder="e.g. 18"
           onChange={(v) => onSetSpec('bay_length_in', v)}
-          help="Axial length of the recovery bay section — used for packing volume checks"
+          help="Axial length of the forward main recovery bay tube"
         />
         <SpecInput
           id="bay-obstruction"
@@ -119,6 +142,51 @@ export default function RocketSpecs({
           placeholder="0"
           onChange={(v) => onSetSpec('bay_obstruction_vol_in3', v)}
           help="Volume of avionics sleds, hardpoints, or wiring inside the bay that reduce packing space"
+        />
+        <SpecInput
+          id="shear-pins-main"
+          label="Main Shear Pins"
+          value={specs.shear_pins_main}
+          unit="pins"
+          placeholder="0 (friction fit)"
+          onChange={(v) => onSetSpec('shear_pins_main', v)}
+          help="Number of 2-56 or 4-40 nylon shear pins retaining the nosecone joint"
+        />
+        <SpecInput
+          id="coupler-shoulder"
+          label="Coupler Shoulder Inset"
+          value={specs.coupler_shoulder_in}
+          unit="in"
+          placeholder="0"
+          onChange={(v) => onSetSpec('coupler_shoulder_in', v)}
+          help="Axial depth that the avionics coupler shoulder slides into the tube"
+        />
+        <SpecInput
+          id="drogue-bay-length"
+          label="Drogue Bay Length (optional)"
+          value={specs.drogue_bay_length_in}
+          unit="in"
+          placeholder="Leave blank if single bay"
+          onChange={(v) => onSetSpec('drogue_bay_length_in', v)}
+          help="Length of separate aft drogue compartment for dual-bay rockets"
+        />
+        <SpecInput
+          id="drogue-airframe-id"
+          label="Drogue Airframe ID"
+          value={specs.drogue_airframe_id_in}
+          unit="in"
+          placeholder="Defaults to Main ID"
+          onChange={(v) => onSetSpec('drogue_airframe_id_in', v)}
+          help="Inner diameter of the aft drogue compartment (blank = same as Main)"
+        />
+        <SpecInput
+          id="shear-pins-drogue"
+          label="Drogue Shear Pins"
+          value={specs.shear_pins_drogue}
+          unit="pins"
+          placeholder="0"
+          onChange={(v) => onSetSpec('shear_pins_drogue', v)}
+          help="Number of nylon shear pins retaining the booster/drogue separation joint"
         />
         <SpecInput
           id="deploy"
@@ -144,14 +212,14 @@ export default function RocketSpecs({
         />
       </div>
 
-      {/* Bay volume readout — computed from ID + length; always shown when both are filled */}
-      {bayVolume != null && (
+      {/* Compartment volume & ejection charge readout */}
+      {(bayVolume != null || drogue_vol != null) && (
         <div
           style={{
             display: 'flex',
-            gap: '16px',
-            alignItems: 'center',
-            padding: '6px 10px',
+            flexDirection: 'column',
+            gap: '8px',
+            padding: '10px 12px',
             background: 'var(--bg-right)',
             border: '1px solid var(--border-subtle)',
             borderRadius: 'var(--radius)',
@@ -159,29 +227,72 @@ export default function RocketSpecs({
             color: 'var(--text-tertiary)',
           }}
         >
-          <span>
-            Bay{' '}
-            <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
-              {bayVolume.toFixed(1)} in³
-            </strong>
-          </span>
-          {obstruction_vol > 0 && (
-            <>
-              <span style={{ color: 'var(--border-default)' }}>–</span>
+          {bayVolume != null && (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '8px',
+              }}
+            >
               <span>
-                Obstructions{' '}
-                <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
-                  {obstruction_vol.toFixed(1)} in³
-                </strong>
-              </span>
-              <span style={{ color: 'var(--border-default)' }}>=</span>
-              <span>
-                Usable{' '}
+                Main Bay Usable:{' '}
                 <strong style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>
-                  {usableVolume.toFixed(1)} in³
+                  {usableVolume?.toFixed(1) || '—'} in³
                 </strong>
               </span>
-            </>
+              {mainCharge && (
+                <span>
+                  Main Ejection Charge:{' '}
+                  <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                    {mainCharge.charge_grams}g FFFFg
+                  </strong>{' '}
+                  ({mainCharge.target_psi} PSI · {mainCharge.separation_force_lbf} lbf)
+                </span>
+              )}
+            </div>
+          )}
+          {drogue_vol != null && (
+            <div
+              style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '8px',
+                borderTop: '1px solid var(--border-subtle)',
+                paddingTop: '6px',
+              }}
+            >
+              <span>
+                Drogue Bay Usable:{' '}
+                <strong style={{ color: 'var(--accent)', fontFamily: 'monospace' }}>
+                  {drogue_vol.toFixed(1)} in³
+                </strong>
+              </span>
+              {drogueCharge && (
+                <span>
+                  Drogue Ejection Charge:{' '}
+                  <strong style={{ color: 'var(--text-primary)', fontFamily: 'monospace' }}>
+                    {drogueCharge.charge_grams}g FFFFg
+                  </strong>{' '}
+                  ({drogueCharge.target_psi} PSI · {drogueCharge.separation_force_lbf} lbf)
+                </span>
+              )}
+            </div>
+          )}
+          {(mainCharge?.warning || drogueCharge?.warning) && (
+            <div
+              style={{
+                color: 'var(--accent-red, #ff5555)',
+                fontSize: '11px',
+                borderTop: '1px solid var(--border-subtle)',
+                paddingTop: '6px',
+              }}
+            >
+              {mainCharge?.warning && <div>⚠ Main: {mainCharge.warning}</div>}
+              {drogueCharge?.warning && <div>⚠ Drogue: {drogueCharge.warning}</div>}
+            </div>
           )}
         </div>
       )}

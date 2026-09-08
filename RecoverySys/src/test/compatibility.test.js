@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest'
-import { checkCompatibility, slotStatus } from '../lib/compatibility.js'
+import { checkCompatibility, slotStatus, computePackingVolume } from '../lib/compatibility.js'
 import { normalizeCalculationInputs } from '../lib/schema.js'
 import { computeMainSnatchLoad, computeDrogueDeploymentVelocity } from '../lib/recoveryLoad.js'
 
@@ -442,6 +442,85 @@ describe('checkCompatibility', () => {
       specs: { ...baseSpecs, bay_length_in: '4' },
     })
     expect(warnings.some((w) => w.slot === 'bay_volume' && w.level === 'error')).toBe(true)
+  })
+
+  it('computes independent dual-bay packing and detects forward or aft overflow', () => {
+    const dualSpecs = {
+      ...baseSpecs,
+      bay_length_in: '10',
+      drogue_bay_length_in: '8',
+      coupler_shoulder_in: '2',
+    }
+    const p = computePackingVolume({
+      config: { main_chute: validMain, drogue_chute: validDrogue },
+      specs: dualSpecs,
+    })
+
+    expect(p.is_dual_bay).toBe(true)
+    expect(p.main_bay.usable_length).toBe(8)
+    expect(p.drogue_bay.usable_length).toBe(6)
+    expect(p.main_bay.fraction).toBeLessThan(1.0)
+    expect(p.drogue_bay.fraction).toBeLessThan(1.0)
+
+    // Test aft bay overflow: huge drogue in tiny aft bay
+    const hugeDrogue = {
+      name: 'Huge Drogue',
+      specs: { diameter_in: 18, cd: 1.5, packed_diam_in: 3, packed_length_in: 10 },
+    }
+    const warnings = checkCompatibility({
+      config: { main_chute: validMain, drogue_chute: hugeDrogue },
+      specs: dualSpecs,
+    })
+    expect(
+      warnings.some(
+        (w) =>
+          w.slot === 'bay_volume' && w.level === 'error' && w.message.includes('Aft drogue bay')
+      )
+    ).toBe(true)
+  })
+
+  it('validates drogue packed diameter against drogue compartment inner diameter', () => {
+    const dualSpecs = {
+      ...baseSpecs,
+      airframe_id_in: '4.0',
+      drogue_airframe_id_in: '2.5',
+      drogue_bay_length_in: '12',
+    }
+    // Drogue packed diam = 3.0", fits in 4.0" main tube, but exceeds 2.5" drogue tube
+    const wideDrogue = {
+      name: 'Wide Drogue',
+      specs: { diameter_in: 18, cd: 1.5, packed_diam_in: 3.0, packed_length_in: 4 },
+    }
+    const warnings = checkCompatibility({
+      config: { main_chute: validMain, drogue_chute: wideDrogue },
+      specs: dualSpecs,
+    })
+    expect(
+      warnings.some(
+        (w) =>
+          w.slot === 'drogue_chute' &&
+          w.level === 'error' &&
+          w.message.includes('exceeds drogue compartment ID 2.5"')
+      )
+    ).toBe(true)
+  })
+
+  it('propagates worst-case compartment fraction so spare volume does not mask overflow', () => {
+    const dualSpecs = {
+      ...baseSpecs,
+      bay_length_in: '6', // small main bay -> will overflow
+      drogue_bay_length_in: '30', // huge drogue bay
+      coupler_shoulder_in: '2',
+    }
+    const p = computePackingVolume({
+      config: { main_chute: validMain, drogue_chute: validDrogue },
+      specs: dualSpecs,
+    })
+    // Main usable length = 4", chute packed length = 4", protector/cord pushes it over
+    expect(p.main_bay.fraction).toBeGreaterThan(1.0)
+    // Overall fraction must reflect the overflow (> 1.0)
+    expect(p.fraction).toBeGreaterThan(1.0)
+    expect(p.fraction).toBe(p.main_bay.fraction)
   })
 })
 

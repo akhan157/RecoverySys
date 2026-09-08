@@ -86,3 +86,79 @@ export function computeMainSnatchLoad({
     ],
   }
 }
+
+/**
+ * Black powder ejection charge sizing based on ideal gas law and compartment volume.
+ * Formula: m_bp = (P_target * V_compartment) / (R_bp * T_bp)
+ *
+ * Combustion constants for FFFFg black powder (Nakka / Info-Central rocketry standard):
+ *   R = 22.16 ft·lbf / (lbm·°R)
+ *   T = 3307 °R (~1560 °C)
+ *   R * T = 73,283.12 ft·lbf / lbm
+ *   In rocketry units (in·lbf / gram):
+ *   (73,283.12 * 12 in/ft) / (453.59237 g/lbm) = 1938.74 in·lbf / gram.
+ *
+ * Pin Shear Strengths:
+ *   #2-56 nylon screw: ~30 lbf shear per pin
+ *   #4-40 nylon screw: ~55 lbf shear per pin
+ *
+ * Ground testing with an altimeter / test blast is ALWAYS required before flight.
+ */
+export const C_BP_IN_LBF_PER_GRAM = 1938.74
+export const MAX_SAFE_SEPARATION_PSI = 35.0
+export const MIN_NOMINAL_SEPARATION_PSI = 12.0
+
+export function computeEjectionCharge({
+  compartment_vol_in3,
+  airframe_id_in,
+  shear_pins_count = 0,
+  pin_type = '2-56',
+  target_psi_override = null,
+} = {}) {
+  const vol = finitePositive(compartment_vol_in3)
+  const id = finitePositive(airframe_id_in)
+  if (!vol || !id) return null
+
+  const area_in2 = Math.PI * Math.pow(id / 2, 2)
+  const pins = Math.max(0, parseInt(shear_pins_count, 10) || 0)
+  const shearPerPin = pin_type === '4-40' ? 55 : 30 // lbf
+
+  let target_psi = 15.0
+  let overpressure_risk = false
+  let insufficient_force = false
+
+  const override = finitePositive(target_psi_override)
+  if (override) {
+    target_psi = override
+  } else if (pins > 0) {
+    // 15 lbf baseline friction + 50% margin over pin shear force
+    const required_force_lbf = (pins * shearPerPin + 15) * 1.5
+    const required_psi = required_force_lbf / area_in2
+    if (required_psi > MAX_SAFE_SEPARATION_PSI) {
+      overpressure_risk = true
+      insufficient_force = true
+      target_psi = required_psi // Report actual needed PSI rather than silently failing to separate
+    } else {
+      target_psi = Math.max(MIN_NOMINAL_SEPARATION_PSI, required_psi)
+    }
+  }
+
+  const charge_grams = (target_psi * vol) / C_BP_IN_LBF_PER_GRAM
+
+  return {
+    compartment_vol_in3: vol,
+    airframe_id_in: id,
+    cross_section_area_in2: Math.round(area_in2 * 100) / 100,
+    target_psi: Math.round(target_psi * 10) / 10,
+    charge_grams: Math.round(charge_grams * 100) / 100,
+    charge_grams_backup: Math.round(charge_grams * 1.25 * 100) / 100,
+    pins_count: pins,
+    pin_type,
+    separation_force_lbf: Math.round(target_psi * area_in2),
+    overpressure_risk,
+    insufficient_force,
+    warning: insufficient_force
+      ? `Required separation pressure (${target_psi.toFixed(0)} PSI) exceeds ${MAX_SAFE_SEPARATION_PSI} PSI airframe safety limit. Reduce shear pin count.`
+      : null,
+  }
+}
