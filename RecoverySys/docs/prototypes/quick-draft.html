@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>RecoverySys · Quick draft prototype</title>
+    <link rel="stylesheet" href="quick-draft.css" />
+  </head>
+  <body>
+    <!-- Isolated interaction prototype using production catalog and calculation functions. Existing neutral technical visual language, no replacement brand. Main-chute-only scope; no flight simulation or approval. -->
+    <header>
+      <div><strong>RecoverySys</strong><span class="prototype">Interaction prototype</span></div>
+      <a href="../quick-draft-storyboard.html">Design walkthrough</a>
+    </header>
+    <main>
+      <div class="heading">
+        <div>
+          <h1>Try a recovery setup.</h1>
+          <p>Pick a main chute. Add what you know. Swap without starting over.</p>
+        </div>
+        <div class="save">
+          <span id="save-state">Local prototype draft</span
+          ><button id="export">Export draft</button>
+        </div>
+      </div>
+      <div class="scope">
+        One main chute and one recovery group. Real catalog, existing estimate models. No deployment
+        sequence, full-system fit or flight approval. Prototype storage is separate from the app.
+      </div>
+      <div class="workspace">
+        <section class="catalog" aria-labelledby="catalog-title">
+          <div class="catalog-top">
+            <h2 id="catalog-title">Main parachutes</h2>
+            <label for="search">Search catalog</label
+            ><input id="search" type="search" placeholder="Name, manufacturer or size" />
+            <div class="filter">
+              <label for="sort">Order</label
+              ><select id="sort">
+                <option value="catalog">Catalog order</option>
+                <option value="size">Canopy diameter</option>
+                <option value="rate">Closest to target rate</option>
+              </select>
+            </div>
+            <p id="count" class="muted"></p>
+            <p id="sort-note" class="muted"></p>
+          </div>
+          <div id="parts" class="parts"></div>
+        </section>
+        <section class="draft" aria-labelledby="draft-title">
+          <div class="section-head">
+            <h2 id="draft-title">Your draft</h2>
+            <button id="undo" disabled>Undo swap</button>
+          </div>
+          <div id="selection" class="selection"></div>
+          <h3>Recovery group</h3>
+          <label for="mass">Mass excluding this main chute <span>kg</span></label
+          ><input
+            id="mass"
+            type="number"
+            min="0"
+            step="any"
+            inputmode="decimal"
+            placeholder="Enter known or estimated mass"
+            aria-describedby="mass-help"
+          />
+          <p id="mass-help" class="muted">
+            Include the rocket and all other descending hardware. The selected chute's catalog mass
+            is added once. Motor burnout and other mass changes are your responsibility.
+          </p>
+          <div class="two">
+            <div>
+              <label for="origin">Mass source</label
+              ><select id="origin">
+                <option value="estimated">Estimated</option>
+                <option value="measured">Measured</option>
+                <option value="unknown">Unknown source</option>
+              </select>
+            </div>
+            <div>
+              <label for="target">Optional target <span>ft/s</span></label
+              ><input id="target" type="number" min="0" step="any" placeholder="No target set" />
+            </div>
+          </div>
+          <h3>Check available space</h3>
+          <p class="muted">
+            Usable space allocated to this chute only. This does not evaluate the rest of the
+            recovery system.
+          </p>
+          <div class="two">
+            <div>
+              <label for="diameter">Inner diameter <span>in</span></label
+              ><input id="diameter" type="number" min="0" step="any" placeholder="Unknown" />
+            </div>
+            <div>
+              <label for="length">Available length <span>in</span></label
+              ><input id="length" type="number" min="0" step="any" placeholder="Unknown" />
+            </div>
+          </div>
+          <details>
+            <summary>Model assumptions and limitations</summary>
+            <p>
+              Descent uses the app's terminal-rate function at sea-level standard density. Catalog
+              canopy diameter and Cd are used as supplied; they are not independently verified.
+            </p>
+            <p>
+              Packing uses the app's single-bay stacked-length model with 70% effective volume and
+              radial screening. No obstructions are assumed within the usable space you enter.
+              Shape, compression, extraction, retention and deployment are not validated.
+            </p>
+            <p>
+              These estimates are for exploring a main-chute choice, not a complete flight plan.
+            </p>
+          </details>
+        </section>
+        <aside class="feedback" aria-labelledby="feedback-title">
+          <h2 id="feedback-title">As you change parts</h2>
+          <p class="muted">Quick estimates update from the current draft.</p>
+          <div id="results"></div>
+          <button id="capture" class="primary" disabled>Keep estimate for comparison</button>
+          <div id="comparison"></div>
+        </aside>
+      </div>
+      <p id="announcement" class="sr-only" role="status" aria-live="polite"></p>
+      <footer>
+        Catalog source: OpenRocket component database, CC BY-SA 3.0, as included in RecoverySys.
+        Catalog data remains unverified. No prototype data is uploaded.
+      </footer>
+    </main>
+    <script type="module" src="quick-draft.js"></script>
+  </body>
+</html>

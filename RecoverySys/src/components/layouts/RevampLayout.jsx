@@ -11,9 +11,11 @@ import CompareTab from '../tabs/CompareTab.jsx'
 import FlightLogTab from '../tabs/FlightLogTab.jsx'
 import AnalysisTab from '../tabs/AnalysisTab.jsx'
 import PrintChecklist from '../PrintChecklist.jsx'
+import QuickDraftTab from '../tabs/QuickDraftTab.jsx'
 import '../MissionControlLayout.css'
 
 const TABS = [
+  { id: 'DRAFT', label: 'DRAFT' },
   { id: 'DASHBOARD', label: 'DASHBOARD' },
   { id: 'SPECS', label: 'ROCKET_SPECS' },
   { id: 'SIMULATION', label: 'SIMULATION' },
@@ -54,7 +56,7 @@ export default function RevampLayout({
   recoveryBrief,
   onSwitchMode,
 }) {
-  const [activeTab, setActiveTab] = useState('DASHBOARD')
+  const [activeTab, setActiveTab] = useState('DRAFT')
   const [showGuided, setShowGuided] = useState(false)
   const [printMode, setPrintMode] = useState('checklist')
 
@@ -176,6 +178,16 @@ export default function RevampLayout({
               />
             ) : (
               <>
+                {activeTab === 'DRAFT' && (
+                  <QuickDraftTab
+                    state={state}
+                    allParts={allParts}
+                    selectPart={selectPart}
+                    removePart={removePart}
+                    setSpec={setSpec}
+                    resultFresh={resultFresh}
+                  />
+                )}
                 {activeTab === 'DASHBOARD' && (
                   <DashboardTab
                     state={state}

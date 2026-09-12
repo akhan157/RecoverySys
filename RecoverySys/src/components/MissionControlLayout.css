@@ -1265,6 +1265,37 @@
   background: transparent !important;
 }
 
+/* ── Quick-draft catalog header: stack search + order, full-width controls ── */
+.mc-draft-catalog > input,
+.mc-draft-catalog > label {
+  display: block;
+  margin: 0 12px 8px;
+}
+.mc-draft-catalog > label {
+  font-weight: 600;
+  color: var(--mc-text-dim);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+.mc-draft-catalog > input,
+.mc-draft-catalog > label > select {
+  width: 100%;
+  box-sizing: border-box;
+  background: var(--input-bg);
+  color: var(--text-primary);
+  border: 1px solid var(--mc-border);
+  padding: 6px 8px;
+  font-size: 12px;
+}
+.mc-draft-catalog > label > select {
+  margin-top: 4px;
+}
+.mc-draft-catalog > p {
+  margin: 0 12px 8px;
+  font-size: 11px;
+  color: var(--mc-text-dim);
+}
+
 /* Force PartsBrowser content to respect panel width */
 .mc-parts-panel * {
   max-width: 100%;
