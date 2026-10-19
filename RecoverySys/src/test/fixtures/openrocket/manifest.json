@@ -8,14 +8,23 @@
       "source": "core/src/main/resources/datafiles/examples/A simple model rocket.ork",
       "version": "1.10",
       "sha256": "53369c1707ca2f7959c0a2df2ef5af5d508806c7d0d3010026843905de18f4ae",
-      "traits": ["single-stage", "automatic-radius", "recovery-components"]
+      "traits": [
+        "single-stage",
+        "automatic-radius",
+        "recovery-components"
+      ]
     },
     {
       "file": "simulation-extensions-1.10.ork",
       "source": "core/src/main/resources/datafiles/examples/Simulation extensions.ork",
       "version": "1.10",
       "sha256": "ed66db65f26f21ff722640e5ff3930d80109fbed662bd0f0ec3d60aa32f6bb8b",
-      "traits": ["single-stage", "saved-simulations", "events", "typed-flight-data"]
+      "traits": [
+        "single-stage",
+        "saved-simulations",
+        "events",
+        "typed-flight-data"
+      ]
     },
     {
       "file": "simulation-extensions-1.11.ork",
@@ -23,28 +32,46 @@
       "version": "1.11",
       "sha256": "b74ad879152c776287e0e1bfd2bf37cab12fec427d541ab2683e77f93c3c9ba4",
       "generatedBy": "OpenRocket unstable saver at 3da92366ffcef62a9868f82e19f97da3f2099d0e",
-      "traits": ["single-stage", "saved-simulations", "events", "typed-flight-data"]
+      "traits": [
+        "single-stage",
+        "saved-simulations",
+        "events",
+        "typed-flight-data"
+      ]
     },
     {
       "file": "three-stage-1.10.ork",
       "source": "core/src/main/resources/datafiles/examples/Three stage low power rocket.ork",
       "version": "1.10",
       "sha256": "01658f55a89cfa3722b0b7c499b4f25c6562bfdfe885fe7a2511f8a4c5abca9a",
-      "traits": ["three-stage", "multiple-motor-configurations", "saved-simulations"]
+      "traits": [
+        "three-stage",
+        "multiple-motor-configurations",
+        "saved-simulations"
+      ]
     },
     {
       "file": "deployable-payload-1.10.ork",
       "source": "core/src/main/resources/datafiles/examples/Deployable payload.ork",
       "version": "1.10",
       "sha256": "1fa8005a9f9ac17570f07f605c388305d0e804de81a2f5a79a5e97adf2151e41",
-      "traits": ["two-stage", "deployable-payload", "recovery-components", "saved-simulations"]
+      "traits": [
+        "two-stage",
+        "deployable-payload",
+        "recovery-components",
+        "saved-simulations"
+      ]
     },
     {
       "file": "clustered-motors-1.10.ork",
       "source": "core/src/main/resources/datafiles/examples/Clustered motors.ork",
       "version": "1.10",
       "sha256": "676c83198308d0d44efbc280a97275b07783225aaaeab29c58100a8686af5a46",
-      "traits": ["single-stage", "clustered-motors", "saved-simulations"]
+      "traits": [
+        "single-stage",
+        "clustered-motors",
+        "saved-simulations"
+      ]
     },
     {
       "file": "bryant-test-rocket-1.10.ork",
@@ -54,7 +81,394 @@
       "sourceBlob": "476c6ffce5d5a4f3c6af39392d5769f212dfa2a8",
       "version": "1.10",
       "sha256": "645e3da9e70f34be90833c62d7934b0ba1338ae4c67e5f2d3012d29773aab658",
-      "traits": ["single-stage", "real-world-user-file", "saved-simulations"]
+      "traits": [
+        "single-stage",
+        "real-world-user-file",
+        "saved-simulations"
+      ]
+    },
+    {
+      "file": "legacy-example-1.4.ork",
+      "source": "core/resources/datafiles/examples/A simple model rocket.ork",
+      "sourceRepository": "https://github.com/openrocket/openrocket",
+      "sourceRef": "release-12.03",
+      "sourceRevision": "d1f83aba39008b2eb8e6bc01f2191b7929a4080e",
+      "version": "1.4",
+      "sha256": "97767ebd7f9db71ade0f21806cfe67ff55df48a1179397c8ee8de69d3f5f9e04",
+      "traits": [
+        "legacy-format",
+        "xml",
+        "upstream-example"
+      ]
+    },
+    {
+      "file": "legacy-example-1.6.ork",
+      "source": "core/resources/datafiles/examples/A simple model rocket.ork",
+      "sourceRepository": "https://github.com/openrocket/openrocket",
+      "sourceRef": "release-13.05",
+      "sourceRevision": "6b00c0a1e1a3fa2af4b9cbd4b3c5b08622efecad",
+      "version": "1.6",
+      "sha256": "1730385211fd4bd30b3e11bec0a13a31761c382f938fc00074e35c8460d501e7",
+      "traits": [
+        "legacy-format",
+        "zip",
+        "upstream-example"
+      ]
+    },
+    {
+      "file": "legacy-example-1.7.ork",
+      "source": "swing/resources/datafiles/examples/Simulation extensions and scripting.ork",
+      "sourceRepository": "https://github.com/openrocket/openrocket",
+      "sourceRef": "release-15.03",
+      "sourceRevision": "f3440bac6846fd60da5dcac76e772f0539541e69",
+      "version": "1.7",
+      "sha256": "b2d05a79569b60418e64a3653fffeb035e2c405e4d2df42597d7ed5e7eae9c36",
+      "traits": [
+        "legacy-format",
+        "zip",
+        "upstream-example"
+      ]
+    },
+    {
+      "file": "legacy-example-1.8.ork",
+      "source": "swing/resources/datafiles/examples/A simple model rocket.ork",
+      "sourceRepository": "https://github.com/openrocket/openrocket",
+      "sourceRef": "release-22.02",
+      "sourceRevision": "4d6916bb47fbfff74f599bb6de7085929404120f",
+      "version": "1.8",
+      "sha256": "1ef4b3a54f62b0432fb06e9943c6b7230585e0b860fe490b6614240f5f17b15e",
+      "traits": [
+        "legacy-format",
+        "zip",
+        "upstream-example"
+      ]
+    },
+    {
+      "file": "legacy-example-1.9.ork",
+      "source": "swing/resources/datafiles/examples/3D Printable Nose Cone and Fins.ork",
+      "sourceRepository": "https://github.com/openrocket/openrocket",
+      "sourceRef": "release-23.09",
+      "sourceRevision": "6c89a3c60118226e562e19625d8fd439854b1246",
+      "version": "1.9",
+      "sha256": "ad9fbfebf7b50e40351dd07ed9d43e2d81fb1b64c49029c957149e7cc07231fc",
+      "traits": [
+        "legacy-format",
+        "zip",
+        "upstream-example"
+      ]
+    },
+    {
+      "file": "legacy-example-1.5.ork",
+      "source": "core/resources/datafiles/examples/Preset Usage.ork",
+      "sourceRepository": "https://github.com/openrocket/openrocket",
+      "sourceRef": "release-12.09",
+      "sourceRevision": "cf68f13590322e12984a164a75fc4060b8b87a92",
+      "version": "1.5",
+      "sha256": "510539d7ede719fe8aa29da8d1d9f9b60f8259a2947ecee27122a9dce8cc4612",
+      "traits": [
+        "legacy-format",
+        "upstream-example"
+      ]
+    },
+    {
+      "file": "corpus-real-01.ork",
+      "source": "data/green_eggs_openrocket_design.ork",
+      "sourceRepository": "https://github.com/boulaetans/numericalrocketry",
+      "sourceRevision": "136ab67cdce735584cd7a72533d190a8972436e5",
+      "license": "MIT",
+      "sha256": "dced9aa022b275fef6e8856f6d0f9263ba01042af8014fdba8fa1b97e7dd1e8d",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-02.ork",
+      "source": "examples/simple_ork/simple.ork",
+      "sourceRepository": "https://github.com/heibench/orlab",
+      "sourceRevision": "646bad2db282c1d94f464202d9df603814ff8f34",
+      "license": "GPL-2.0",
+      "sha256": "f5f4de21acd2279895dfb7376c3353fd4e643b85adbcd034808b1af48f439c21",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-03.ork",
+      "source": "artifacts/autoevo/best-legal-booster-branch.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "923076029d29ac1d5fecd01e1d909c6b60e38448c2c9c6369b4487bfd8cdc086",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-04.ork",
+      "source": "artifacts/autoevo/phase5a/booster-29p8645-candidate.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "cab776c8a6ef6082190d5dab3069066326ccafef0714b764685ea553f6b79dfe",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-05.ork",
+      "source": "designs/osifog_level3/2stagehighpower.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "7c32c573eb4eb481a6ee551c52eb6d5760977d20f63fa9efe7e67c8029c0a092",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-06.ork",
+      "source": "designs/osifog_level3/best_candidate.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "eacb428905f793a0aba0101f519bc5549af945e8c91e31860e7b02b18ddc7fff",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-07.ork",
+      "source": "designs/osifog_level3/clusterexample.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "e98d148fc4e45f23bfc4f8f2bdd75a2f26158220ccfd8afa6aebb333303d5ac3",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-08.ork",
+      "source": "designs/osifog_level3/falcon_best.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "08de0f1da0d068a181262699bb419638752231950db09d62dcf0b6a16abb5b05",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-09.ork",
+      "source": "designs/osifog_level3/falcon_v1.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "380957d2f893c802d90960bc8f878b63dd853cb84bc9225be4ead1a753366598",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-10.ork",
+      "source": "designs/osifog_level3/octaweb_ballast_validation_candidate.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "91728e57fabf9ebb03d6b0b7f6c85fe753f979a9128ee48d93be2d98f33fc5e3",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-11.ork",
+      "source": "designs/osifog_level3/octaweb_experiment/octaweb_demo.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "0231e08220d048cd80d06570d38cb2009cb25987046be48f9e064ac384a68f8d",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-12.ork",
+      "source": "designs/osifog_level3/octaweb_experiment/podset_best_candidate.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "dfab8535c4e25968d6159e2d5a47b1e39e43f280536dc414e4ed7fd5c78fcd63",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-13.ork",
+      "source": "designs/osifog_level3/octaweb_experiment/podset_full_test.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "ec6d05e3e141869bead32cc11dd3e65fcec6107913c1df4d8a8d07f06a8bfcc1",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-14.ork",
+      "source": "designs/osifog_level3/octaweb_experiment/podset_ga_optimized.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "666d7173cc1c5684eee272ff8821126f3bd0d5cb49894745bf1c973f5073cc6e",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-15.ork",
+      "source": "designs/osifog_level3/octaweb_experiment/podset_official_ga.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "dc80241dc4044924371852d6e21fd03528e5772e084e03119f1edcb2c3a0288e",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-17.ork",
+      "source": "designs/osifog_level3/octaweb_validation_candidate.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "edbe2417b782f777e00bcb38c21d24610c2aa431ad2713cd72f5a1b7b08c1000",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-18.ork",
+      "source": "designs/osifog_level3/octaweb_wiring_test_elite0.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "b447ad51504fe6d288c7acb0717a8b0e01abdfc1b4fd19ceebf728a494fc64b3",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-19.ork",
+      "source": "designs/osifog_level3/octawebexample-with parachute.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "f35ab7842409d08557725574488bb8f6cf11aa071414d19b9698aeb8a0904587",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-20.ork",
+      "source": "designs/osifog_level3/osifog_850k_falcon.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "9c8e99fd362bf9db96d40e006e671e7b6591b0eb803cd3cdb695c74d9fcc49f0",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.10"
+    },
+    {
+      "file": "corpus-real-21.ork",
+      "source": "designs/osifog_level3/osifog_campaign_v1/organic_G000_I000.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "27655e4d179c5c29c2e3f157a2df548ea8d3eb846ca70753f165301bd3f9f633",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-22.ork",
+      "source": "designs/osifog_level3/osifog_campaign_v1/organic_G000_I001.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "2da04b616690c1d9fdcd13c34088efb72c3a50f7c72343d37a8c37881d2a1b7b",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-23.ork",
+      "source": "designs/osifog_level3/osifog_campaign_v1/organic_G000_I002.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "4ae4fd05be982bdf038be2d4861c32c07f0cc27b15659831039c8528c72ce9a6",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-24.ork",
+      "source": "designs/osifog_level3/osifog_campaign_v1/organic_G000_I003.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "8a480b499e9edce7147ac47ca89646b0ae3f9f7dbd864558720d26cff1b62c44",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-25.ork",
+      "source": "designs/osifog_level3/osifog_campaign_v1/organic_G000_I004.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "d2d6e2db86318d76accb1596fc41878b99dc80afe632332967a926b5accf3d19",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
+    },
+    {
+      "file": "corpus-real-26.ork",
+      "source": "designs/osifog_level3/osifog_campaign_v1/organic_G000_I005.ork",
+      "sourceRepository": "https://github.com/L2-ootm/l2-rocket-platform",
+      "sourceRevision": "9d3e79646d11cc8d7a98a8795e5e4d18e1271d7e",
+      "license": "GPL-3.0",
+      "sha256": "e709d40a09da4c0b2b540cfb0f339b9945e46d109a972cc57d8eac69b3cc40f8",
+      "traits": [
+        "real-world-user-file"
+      ],
+      "version": "1.6"
     }
   ],
   "realWorldSurvey": {
@@ -72,5 +486,17 @@
     },
     "invalidArchives": 1,
     "note": "Public .ork files skew heavily to OpenRocket versions 1.4-1.9. The first adapter supports only 1.10/1.11, so most real-world files are rejected by version gate. This is evidence for a version-support decision, not a parser gap: broadening support is excluded from the first-adapter scope pending fixture review."
+  },
+  "expandedCorpus": {
+    "date": "2026-10-18",
+    "candidates": 30,
+    "accepted": 25,
+    "rejected": [
+      {
+        "file": "designs/osifog_level3/octaweb_experiment/podset_probe.ork",
+        "error": "no useful reviewed geometry/config"
+      }
+    ],
+    "note": "Public design files qualify parser coverage only. Many share a design lineage; this is not 25 independent rockets or observed workflows."
   }
 }

@@ -7,12 +7,11 @@ Windows installer asset; do not treat that installer as the current portable bui
 
 ## Version identity
 
-The app release is `1.2.0.1` (single-sourced in `src/lib/constants.js`,
-matching `package.json` and `VERSION`). Desktop artifacts package as semver
-`1.2.0` because Tauri and Cargo require strict semver, which the four-part
-`1.2.0.1` does not satisfy; the desktop version is the semver normalization of
-the app release (first three components). The web app and the desktop shell are
-the same release; the desktop does not carry an independent feature version.
+The current candidate is `1.3.0-rc.1` in the application constants, npm package,
+Tauri configuration and Cargo package. Web and desktop share this identity.
+Earlier four-part versions required desktop normalization; this candidate uses
+strict semver consistently. See `docs/release-qualification-2026-10-19.md` for
+actual build and launch evidence and remaining manual qualification.
 
 The Tauri v2 foundation in `src-tauri/` packages the existing Vite SPA into a
 portable Windows executable. Frontend assets from `frontendDist` are embedded

@@ -1,9 +1,9 @@
 # Catalog sourcing contract
 
-**Status:** M1 provenance contract (definition). No automated sourcing is
-implemented; this document defines the metadata shape and review rules that
-any future automated catalog sourcing must satisfy before it may update
-`src/data/parts.js`.
+**Status:** Engineering provenance contract plus read-only review tooling.
+`npm run catalog:review -- source-records.json` emits field-level engineering
+diffs without modifying `src/data/parts.js`. Commercial price/stock refreshes
+are implemented separately; see `supplier-refresh.md`.
 
 **Owners:** `src/data/catalogProvenance.js` (registry and shape validator),
 `scripts/validate-parts.js` (gate), `scripts/report-catalog-provenance.js`
@@ -51,10 +51,11 @@ bad record is actionable without a catalog-wide search.
   re-dated; stale `accessed`/`reviewedAt` dates are a reason to downgrade back
   to `unverified`.
 
-## Rules for automated sourcing (future work)
+## Rules for automated engineering sourcing
 
-Automated sourcing is deferred until this contract and the M6 privacy,
-security, and release gates are satisfied. When it is built, it must:
+Automatic engineering writes remain deferred until the M6 privacy, security,
+and release gates are satisfied. The current engineering tool only reports
+diffs. Any later write path must:
 
 1. **Stage as catalog review tooling first:** review source records, view
    stale or missing provenance, and compare catalog values against source

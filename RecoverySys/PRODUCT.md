@@ -35,7 +35,8 @@ RecoverySys combines recovery-hardware configuration, explicit model and evidenc
 - The model provides bounded recovery-planning estimates and explicitly limited screening calculations, not complete vehicle dynamics or universal physical validation.
 - Catalog provenance, validation-corpus evidence, model assumptions, application schema, and simulation identity are versioned independently.
 - Catalog data remains unverified until supported by per-part source review. User-created parts remain user-supplied.
-- Recovery-bay order is a static planning/checklist sequence, not geometric packing validation or an assembly instruction.
+- Recovery-bay order remains a planning/checklist sequence. The 2D/3D size-view experiment is deferred and absent from V1; it did not establish a useful assembly-planning workflow. Physical occupied space and fit remain unknown.
+- Timestamped supplier price/stock snapshots support budgeting. Unknown and stale prices stay visible; commercial refreshes do not change engineering inputs or simulation authority.
 - The application remains local-first with no required account, backend, or automatic evidence upload.
 - Existing persistence, share links, configuration transfer, print, and flight-record contracts require migration when their durable shapes change.
 

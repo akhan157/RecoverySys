@@ -482,7 +482,7 @@ test('JSON import rejects invalid input without changing the app', async ({ guar
   await openApp(guardedPage)
   await guardedPage.getByRole('tab', { name: 'EXPORT' }).click()
   const dialogPromise = guardedPage.waitForEvent('dialog')
-  await guardedPage.locator('input[type="file"]').setInputFiles({
+  await guardedPage.locator('input[type="file"][accept=".json"]').setInputFiles({
     name: 'invalid.json',
     mimeType: 'application/json',
     buffer: Buffer.from('{not valid json'),

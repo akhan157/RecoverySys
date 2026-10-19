@@ -1,3 +1,4 @@
+import SupplierPanel from '../SupplierPanel.jsx'
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import { CRITERION_IDS, evaluateCriterion } from '../../lib/criteria.js'
 import { presentCriterion } from '../../lib/criterionPresentation.js'
@@ -81,7 +82,7 @@ export default function DashboardTab({
       <div className="mc-schematic">
         <h2 className="mc-panel-header">
           BAY_SCHEMATIC
-          <span className="mc-panel-header__right">LAYER: 01_INTERNAL &nbsp; SCALE: 1:10</span>
+          <span className="mc-panel-header__right">PLANNING VIEW</span>
         </h2>
         <div className="mc-bay-grid">
           {CATEGORIES.map((cat) => {
@@ -142,28 +143,25 @@ export default function DashboardTab({
         <h2 className="mc-panel-header">CONFIG_SUMMARY</h2>
         <div className="mc-summary">
           <ConfidenceStatus {...confidenceProps} compact />
-          {/* Packing Volume — how much bay space the selected components consume */}
+          <SupplierPanel config={state.config} />
           <div className="mc-metric">
-            <div className="mc-metric__label">PACKING_VOLUME</div>
-            {packingVolume.bay_known ? (
-              <>
-                <div className="mc-metric__value">
-                  {packingVolume.stacked_in3.toFixed(1)}
-                  <span className="mc-metric__unit">IN³</span>
-                </div>
-                <div className="mc-progress">
-                  <div
-                    className="mc-progress__fill"
-                    style={{ width: `${Math.min(100, (packingVolume.fraction ?? 0) * 100)}%` }}
-                  />
-                </div>
-                <div className="mc-progress__labels">
-                  <span>0 IN³</span>
-                  <span>MAX {packingVolume.effective_in3.toFixed(1)} IN³</span>
-                </div>
-              </>
-            ) : (
-              <div className="mc-metric__sub">ENTER_BAY_SPECS_TO_CALCULATE</div>
+            <div className="mc-metric__label">PACKING_SCREEN</div>
+            <div className="mc-metric__sub">
+              Actual occupied space and remaining capacity are unknown. Folding, wrapping, voids and
+              rigid hardware require a physical packing trial.
+            </div>
+            {packingVolume.bay_known && (
+              <details>
+                <summary>Nominal-height screening index</summary>
+                <p className="mc-metric__sub">
+                  {packingVolume.fraction == null
+                    ? 'Unavailable'
+                    : `${Math.round(packingVolume.fraction * 100)}%`}{' '}
+                  of an assumed threshold. This model uses nominal heights and a fixed 70%
+                  allowance; it does not measure fill percentage or determine whether the bay will
+                  close.
+                </p>
+              </details>
             )}
           </div>
 

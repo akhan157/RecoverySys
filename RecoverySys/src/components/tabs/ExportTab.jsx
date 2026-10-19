@@ -253,7 +253,7 @@ export default function ExportTab({
           <input
             ref={openRocketFileRef}
             type="file"
-            accept=".ork,application/zip"
+            accept=".ork,.ork.gz,application/zip,application/gzip,application/xml,text/xml"
             style={{ display: 'none' }}
             onChange={handleOpenRocketImport}
           />
@@ -304,6 +304,7 @@ export default function ExportTab({
               <label style={{ fontSize: 10 }}>
                 CONFIGURATION
                 <select
+                  aria-label="CONFIGURATION"
                   value={snapshotSelection.configurationId}
                   onChange={(event) =>
                     setSnapshotSelection((previous) => ({
@@ -327,6 +328,7 @@ export default function ExportTab({
               <label style={{ fontSize: 10 }}>
                 STAGE
                 <select
+                  aria-label="STAGE"
                   value={snapshotSelection.stagePath}
                   onChange={(event) =>
                     setSnapshotSelection((previous) => ({
@@ -350,6 +352,7 @@ export default function ExportTab({
               <label style={{ fontSize: 10 }}>
                 AIRFRAME_ID_CANDIDATE
                 <select
+                  aria-label="AIRFRAME_ID_CANDIDATE"
                   value={snapshotSelection.airframeCandidateId}
                   onChange={(event) =>
                     setSnapshotSelection((previous) => ({
@@ -371,6 +374,7 @@ export default function ExportTab({
               <label style={{ fontSize: 10 }}>
                 BAY_LENGTH_CANDIDATE
                 <select
+                  aria-label="BAY_LENGTH_CANDIDATE"
                   value={snapshotSelection.bayCandidateId}
                   onChange={(event) =>
                     setSnapshotSelection((previous) => ({
@@ -392,6 +396,7 @@ export default function ExportTab({
               <label style={{ fontSize: 10 }}>
                 PRE_LAUNCH_MASS (OPTIONAL)
                 <select
+                  aria-label="PRE_LAUNCH_MASS (OPTIONAL)"
                   value={snapshotSelection.massCandidateId}
                   onChange={(event) =>
                     setSnapshotSelection((previous) => ({

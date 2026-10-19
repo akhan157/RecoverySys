@@ -1,0 +1,487 @@
+{
+  "catalogEntries": 225,
+  "distinctCatalogIds": 205,
+  "mappedIds": 103,
+  "offeredIds": 103,
+  "manufacturers": [
+    {
+      "manufacturer": "Front Range Rocket Recovery",
+      "distinctIds": 16,
+      "mapped": 0,
+      "offered": 0,
+      "unmapped": [
+        {
+          "id": "fr3-12-24",
+          "name": "24\" Elliptical 12-gore"
+        },
+        {
+          "id": "fr3-12-30",
+          "name": "30\" Elliptical 12-gore"
+        },
+        {
+          "id": "fr3-12-36",
+          "name": "36\" Elliptical 12-gore"
+        },
+        {
+          "id": "fr3-16-36",
+          "name": "36\" Elliptical 16-gore"
+        },
+        {
+          "id": "fr3-12-42",
+          "name": "42\" Elliptical 12-gore"
+        },
+        {
+          "id": "fr3-16-42",
+          "name": "42\" Elliptical 16-gore"
+        },
+        {
+          "id": "fr3-12-48",
+          "name": "48\" Elliptical 12-gore"
+        },
+        {
+          "id": "fr3-12-60",
+          "name": "48\" Elliptical 12-gore"
+        },
+        {
+          "id": "fr3-16-48",
+          "name": "48\" Elliptical 16-gore"
+        },
+        {
+          "id": "fr3-16-60",
+          "name": "60\" Elliptical 16-gore"
+        },
+        {
+          "id": "fr3-16-72",
+          "name": "72\" Elliptical 16-gore"
+        },
+        {
+          "id": "fr3-16-84",
+          "name": "84\" Elliptical 16-gore"
+        },
+        {
+          "id": "fr3-16-96",
+          "name": "96\" Elliptical 16-gore"
+        },
+        {
+          "id": "fr3-12-12",
+          "name": "12\" Elliptical 12-gore"
+        },
+        {
+          "id": "fr3-12-15",
+          "name": "15\" Elliptical 12-gore"
+        },
+        {
+          "id": "fr3-12-18",
+          "name": "18\" Elliptical 12-gore"
+        }
+      ]
+    },
+    {
+      "manufacturer": "Fruity Chutes",
+      "distinctIds": 41,
+      "mapped": 31,
+      "offered": 31,
+      "unmapped": [
+        {
+          "id": "ifc-036-s",
+          "name": "36\" Iris Ultra Compact (Spectra)"
+        },
+        {
+          "id": "ifc-036-sr",
+          "name": "36\" Iris Ultra Compact (Spectra)"
+        },
+        {
+          "id": "ifc-042-sl",
+          "name": "42\" Iris Ultralight"
+        },
+        {
+          "id": "cfc-072-n",
+          "name": "72\" Classic Elliptical (Nylon)"
+        },
+        {
+          "id": "cfc-084-n",
+          "name": "84\" Classic Elliptical (Nylon)"
+        },
+        {
+          "id": "cfc-096-n",
+          "name": "96\" Classic Elliptical (Nylon)"
+        },
+        {
+          "id": "cfc-120-n",
+          "name": "120\" Classic Elliptical (Nylon)"
+        },
+        {
+          "id": "fc-dbag-9",
+          "name": "Iris Ultra Deploy Bag 9\""
+        },
+        {
+          "id": "fc-dbag-12",
+          "name": "Iris Ultra Deploy Bag 12\""
+        },
+        {
+          "id": "fc-dbag-18",
+          "name": "Iris Ultra Deploy Bag 18\""
+        }
+      ]
+    },
+    {
+      "manufacturer": "Generic",
+      "distinctIds": 25,
+      "mapped": 0,
+      "offered": 0,
+      "unmapped": [
+        {
+          "id": "sc-tub-half-15",
+          "name": "1/2\" Tubular Nylon 15ft"
+        },
+        {
+          "id": "sc-tub-1-10",
+          "name": "1\" Tubular Nylon 10ft"
+        },
+        {
+          "id": "sc-kev-qtr-15",
+          "name": "1/4\" Kevlar 15ft"
+        },
+        {
+          "id": "sc-kev-qtr-20",
+          "name": "1/4\" Kevlar 20ft"
+        },
+        {
+          "id": "sc-tub-1-20",
+          "name": "1\" Tubular Nylon 20ft"
+        },
+        {
+          "id": "sc-tub-15-15",
+          "name": "1.5\" Tubular Nylon 15ft"
+        },
+        {
+          "id": "sc-tub-15-25",
+          "name": "1.5\" Tubular Nylon 25ft"
+        },
+        {
+          "id": "sc-tub-2-15",
+          "name": "2\" Tubular Nylon 15ft"
+        },
+        {
+          "id": "sc-kev-half-20",
+          "name": "1/2\" Kevlar 20ft"
+        },
+        {
+          "id": "sc-kev-half-30",
+          "name": "1/2\" Kevlar 30ft"
+        },
+        {
+          "id": "sc-kev-3qtr-15",
+          "name": "3/4\" Kevlar 15ft"
+        },
+        {
+          "id": "dbag-9",
+          "name": "Deployment Bag 9\""
+        },
+        {
+          "id": "dbag-12",
+          "name": "Deployment Bag 12\""
+        },
+        {
+          "id": "dbag-15",
+          "name": "Deployment Bag 15\""
+        },
+        {
+          "id": "dbag-18",
+          "name": "Deployment Bag 18\""
+        },
+        {
+          "id": "ql-316-zinc",
+          "name": "3/16\" Zinc Quick Links (×2)"
+        },
+        {
+          "id": "ql-14-zinc",
+          "name": "1/4\" Zinc Quick Links (×2)"
+        },
+        {
+          "id": "ql-316-ss",
+          "name": "3/16\" Stainless Quick Links (×2)"
+        },
+        {
+          "id": "ql-38-zinc",
+          "name": "3/8\" Zinc Quick Links (×2)"
+        },
+        {
+          "id": "sw-snap-38",
+          "name": "3/8\" Snap Swivel"
+        },
+        {
+          "id": "sw-bb-half",
+          "name": "1/2\" Ball Bearing Swivel"
+        },
+        {
+          "id": "sw-bb-3qtr",
+          "name": "3/4\" Ball Bearing Swivel"
+        },
+        {
+          "id": "sw-ss-half",
+          "name": "1/2\" Stainless Ball Bearing Swivel"
+        },
+        {
+          "id": "sw-ss-3qtr",
+          "name": "3/4\" Stainless Ball Bearing Swivel"
+        },
+        {
+          "id": "sw-ss-1",
+          "name": "1\" Stainless Ball Bearing Swivel"
+        }
+      ]
+    },
+    {
+      "manufacturer": "Jolly Logic",
+      "distinctIds": 3,
+      "mapped": 3,
+      "offered": 3,
+      "unmapped": []
+    },
+    {
+      "manufacturer": "Perfectflite",
+      "distinctIds": 1,
+      "mapped": 0,
+      "offered": 0,
+      "unmapped": [
+        {
+          "id": "pf-firefly",
+          "name": "FireFly Altimeter"
+        }
+      ]
+    },
+    {
+      "manufacturer": "Rocketman",
+      "distinctIds": 62,
+      "mapped": 31,
+      "offered": 31,
+      "unmapped": [
+        {
+          "id": "pa-02",
+          "name": "24\" Classic Nylon"
+        },
+        {
+          "id": "tc-24",
+          "name": "24\" Thin Compact"
+        },
+        {
+          "id": "lp-024",
+          "name": "24\" High Performance CD 2.2"
+        },
+        {
+          "id": "ls-02",
+          "name": "24\" Ultra-Light Parabolic"
+        },
+        {
+          "id": "tc-30",
+          "name": "30\" Thin Compact"
+        },
+        {
+          "id": "pa-03",
+          "name": "36\" Classic Nylon"
+        },
+        {
+          "id": "lp-036",
+          "name": "36\" High Performance CD 2.2"
+        },
+        {
+          "id": "ls-03",
+          "name": "36\" Ultra-Light Parabolic"
+        },
+        {
+          "id": "pa-04",
+          "name": "48\" Classic Nylon"
+        },
+        {
+          "id": "lp-048",
+          "name": "48\" High Performance CD 2.2"
+        },
+        {
+          "id": "ls-04",
+          "name": "48\" Ultra-Light Parabolic"
+        },
+        {
+          "id": "pa-05",
+          "name": "60\" Classic Nylon"
+        },
+        {
+          "id": "lp-060",
+          "name": "60\" High Performance CD 2.2"
+        },
+        {
+          "id": "ls-05",
+          "name": "60\" Ultra-Light Parabolic"
+        },
+        {
+          "id": "pa-06",
+          "name": "72\" Classic Nylon"
+        },
+        {
+          "id": "lp-072",
+          "name": "72\" High Performance CD 2.2"
+        },
+        {
+          "id": "ls-06",
+          "name": "72\" Ultra-Light Parabolic"
+        },
+        {
+          "id": "pa-07",
+          "name": "84\" Classic Nylon"
+        },
+        {
+          "id": "lp-084",
+          "name": "84\" High Performance CD 2.2"
+        },
+        {
+          "id": "ls-07",
+          "name": "84\" Ultra-Light Parabolic"
+        },
+        {
+          "id": "pa-08",
+          "name": "96\" Classic Nylon"
+        },
+        {
+          "id": "lp-096",
+          "name": "96\" High Performance CD 2.2"
+        },
+        {
+          "id": "ls-08",
+          "name": "96\" Ultra-Light Parabolic"
+        },
+        {
+          "id": "pa-09",
+          "name": "108\" Classic Nylon"
+        },
+        {
+          "id": "ls-09",
+          "name": "108\" Ultra-Light Parabolic"
+        },
+        {
+          "id": "pa-10",
+          "name": "120\" Classic Nylon"
+        },
+        {
+          "id": "lp-120",
+          "name": "120\" High Performance CD 2.2"
+        },
+        {
+          "id": "ls-10",
+          "name": "120\" Ultra-Light Parabolic"
+        },
+        {
+          "id": "tc-12",
+          "name": "12\" Thin Compact"
+        },
+        {
+          "id": "tc-15",
+          "name": "15\" Thin Compact"
+        },
+        {
+          "id": "tc-18",
+          "name": "18\" Thin Compact"
+        }
+      ]
+    },
+    {
+      "manufacturer": "Spherachutes",
+      "distinctIds": 42,
+      "mapped": 38,
+      "offered": 38,
+      "unmapped": [
+        {
+          "id": "ad-24-lg",
+          "name": "24\" Autodisc"
+        },
+        {
+          "id": "ad-30-xl",
+          "name": "30\" Autodisc"
+        },
+        {
+          "id": "ad-12-sm",
+          "name": "12\" Autodisc"
+        },
+        {
+          "id": "ad-18-md",
+          "name": "18\" Autodisc"
+        }
+      ]
+    },
+    {
+      "manufacturer": "Top Flight Recovery",
+      "distinctIds": 4,
+      "mapped": 0,
+      "offered": 0,
+      "unmapped": [
+        {
+          "id": "tfr-nomex-9",
+          "name": "Nomex 9\""
+        },
+        {
+          "id": "tfr-nomex-12",
+          "name": "Nomex 12\""
+        },
+        {
+          "id": "tfr-nomex-18",
+          "name": "Nomex 18\""
+        },
+        {
+          "id": "tfr-nomex-24",
+          "name": "Nomex 24\""
+        }
+      ]
+    },
+    {
+      "manufacturer": "b2 Rocketry Company",
+      "distinctIds": 11,
+      "mapped": 0,
+      "offered": 0,
+      "unmapped": [
+        {
+          "id": "cl-24-n",
+          "name": "24\" Compact Light"
+        },
+        {
+          "id": "crt-024-d",
+          "name": "24\" Competition"
+        },
+        {
+          "id": "cl-28",
+          "name": "28\" Compact Light"
+        },
+        {
+          "id": "cl-32-n",
+          "name": "32\" Compact Light"
+        },
+        {
+          "id": "cl-36",
+          "name": "36\" Compact Light"
+        },
+        {
+          "id": "cl-44",
+          "name": "44\" Compact Light"
+        },
+        {
+          "id": "cl-52",
+          "name": "52\" Compact Light"
+        },
+        {
+          "id": "cl-60",
+          "name": "60\" Compact Light"
+        },
+        {
+          "id": "crt-080-l",
+          "name": "80\" Competition"
+        },
+        {
+          "id": "crt-100-xl",
+          "name": "100\" Competition"
+        },
+        {
+          "id": "crt-120-xxl",
+          "name": "120\" Competition"
+        }
+      ]
+    }
+  ]
+}

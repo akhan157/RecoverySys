@@ -1,5 +1,5 @@
 import { normalizePayload, isValidCustomPart, SHARE_LINK_LIMITS } from './payloadBoundary.js'
-import { SCHEMA_VERSION } from './schema.js'
+import { makeConfigPayload } from './payloadBoundary.js'
 
 export const SHARE_PARAM = 'c'
 
@@ -10,18 +10,8 @@ export const SHARE_PARAM = 'c'
 const MAX_SHARE_ENCODED_CHARS = SHARE_LINK_LIMITS.encodedChars
 const MAX_SHARE_DECODED_CHARS = SHARE_LINK_LIMITS.decodedChars
 
-export function encodeSharePayload({ config, specs, customMotor }) {
-  const configIds = Object.fromEntries(
-    Object.entries(config).map(([cat, part]) => [
-      cat,
-      part ? (part.id?.startsWith('custom-') ? part : { id: part.id }) : null,
-    ])
-  )
-  return btoa(
-    encodeURIComponent(
-      JSON.stringify({ schemaVersion: SCHEMA_VERSION, config: configIds, specs, customMotor })
-    )
-  )
+export function encodeSharePayload(state) {
+  return btoa(encodeURIComponent(JSON.stringify(makeConfigPayload(state))))
 }
 
 export function buildShareUrl(encoded) {

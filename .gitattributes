@@ -6,3 +6,7 @@
 *.md text eol=lf
 *.yml text eol=lf
 *.yaml text eol=lf
+
+# Preserve pinned upstream fixtures and license bytes, including original whitespace.
+RecoverySys/src/test/fixtures/openrocket/*.ork -whitespace
+RecoverySys/src/test/fixtures/openrocket/licenses/* -whitespace

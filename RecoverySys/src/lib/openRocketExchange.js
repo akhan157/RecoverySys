@@ -1,8 +1,17 @@
 /* global DOMParser, TextDecoder */
 
-import { unzipSync } from 'fflate'
+import { unzipSync, gunzipSync } from 'fflate'
 
-export const OPENROCKET_SUPPORTED_VERSIONS = Object.freeze(['1.10', '1.11'])
+export const OPENROCKET_SUPPORTED_VERSIONS = Object.freeze([
+  '1.4',
+  '1.5',
+  '1.6',
+  '1.7',
+  '1.8',
+  '1.9',
+  '1.10',
+  '1.11',
+])
 
 export const OPENROCKET_IMPORT_LIMITS = Object.freeze({
   archiveBytes: 25 * 1024 * 1024,
@@ -101,6 +110,7 @@ function decodeXml(bytes) {
 function parseRadius(raw) {
   const value = raw.trim()
   const autoMatch = /^auto\s+(.+)$/i.exec(value)
+  if (value.toLowerCase() === 'auto') return { mode: 'auto', meters: null }
   if (autoMatch) {
     return { mode: 'auto', meters: numberOf(autoMatch[1]) }
   }
@@ -187,6 +197,29 @@ function parseTubeCandidates(root) {
       const rawRadius = textOf(node, 'radius')
       const rawThickness = textOf(node, 'thickness')
       const radius = parseRadius(rawRadius)
+      if (radius.mode === 'auto' && radius.meters == null) {
+        // Legacy files omit the resolved automatic radius. Only use directly
+        // adjacent, explicit external-component radii when they agree.
+        const siblings = Array.from(node.parentElement?.children || []).filter((child) =>
+          ['nosecone', 'bodytube', 'transition'].includes(child.tagName)
+        )
+        const index = siblings.indexOf(node)
+        const adjacentRadius = (component, end) => {
+          if (!component) return null
+          const raw = textOf(
+            component,
+            component.tagName === 'bodytube' ? 'radius' : `${end}radius`
+          )
+          const parsed = parseRadius(raw)
+          return parsed.mode === 'explicit' && parsed.meters > 0 ? parsed.meters : null
+        }
+        const values = [
+          adjacentRadius(siblings[index - 1], 'aft'),
+          adjacentRadius(siblings[index + 1], 'fore'),
+        ].filter((value) => value != null)
+        if (values.length && values.every((value) => Math.abs(value - values[0]) < 1e-9))
+          radius.meters = values[0]
+      }
       const thickness = parseThickness(rawThickness)
       const lengthMeters = numberOf(textOf(node, 'length'))
       const innerDiameterMeters =
@@ -455,6 +488,31 @@ function parseExternalResults(root, configIds) {
 }
 
 function archiveEntries(bytes) {
+  // Historical .ork files may be plain XML or gzip, not a ZIP container.
+  if (bytes[0] === 0x1f && bytes[1] === 0x8b) {
+    let xml
+    try {
+      // Fixed output buffer prevents allocation from an untrusted gzip ISIZE.
+      xml = gunzipSync(bytes, { out: new Uint8Array(OPENROCKET_IMPORT_LIMITS.xmlBytes + 1) })
+    } catch {
+      throw importError(
+        'INVALID_ARCHIVE',
+        'The selected file is not a readable OpenRocket gzip archive.'
+      )
+    }
+    if (xml.length > OPENROCKET_IMPORT_LIMITS.xmlBytes)
+      throw importError('XML_TOO_LARGE', 'OpenRocket XML exceeds the supported size limit.')
+    return { entries: { 'rocket.ork': xml }, memberCount: 1, thrustcurveNames: [] }
+  }
+  const prefix = new TextDecoder()
+    .decode(bytes.subarray(0, 256))
+    .replace(/^\uFEFF/, '')
+    .trimStart()
+  if (prefix.startsWith('<?xml') || prefix.startsWith('<openrocket')) {
+    if (bytes.length > OPENROCKET_IMPORT_LIMITS.xmlBytes)
+      throw importError('XML_TOO_LARGE', 'OpenRocket XML exceeds the supported size limit.')
+    return { entries: { 'rocket.ork': bytes }, memberCount: 1, thrustcurveNames: [] }
+  }
   let memberCount = 0
   let declaredUncompressedBytes = 0
   // Thrustcurve members are metadata-only. Collect their names from the ZIP
@@ -485,7 +543,11 @@ function archiveEntries(bytes) {
           )
         }
 
-        if (file.name === 'rocket.ork') return true
+        if (file.name === 'rocket.ork') {
+          if (originalSize > OPENROCKET_IMPORT_LIMITS.xmlBytes)
+            throw importError('XML_TOO_LARGE', 'OpenRocket XML exceeds the supported size limit.')
+          return true
+        }
         if (file.name.startsWith('thrustcurves/')) thrustcurveNames.push(file.name)
         return false
       },
@@ -539,6 +601,20 @@ export function parseOpenRocketArchive(input, { sourceFilename = '' } = {}) {
   const external = parseExternalResults(root, configIds)
   const curveMembers = thrustcurveNames
   const warnings = []
+  if (Number(version.slice(2)) < 10)
+    warnings.push({
+      code: 'LEGACY_FORMAT',
+      level: 'info',
+      message:
+        'Legacy OpenRocket snapshot: review automatic geometry and stage/configuration selections. Saved results remain external references.',
+    })
+  if (tubeCandidates.some((candidate) => candidate.tube.radiusMode === 'auto'))
+    warnings.push({
+      code: 'AUTOMATIC_GEOMETRY',
+      level: 'info',
+      message:
+        'Automatic tube radii are nominal values from the file or adjacent explicit components; confirm dimensions before accepting.',
+    })
 
   if (external.results.length === 0) {
     warnings.push({

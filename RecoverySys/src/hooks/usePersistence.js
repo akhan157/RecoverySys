@@ -24,6 +24,7 @@ export default function usePersistence({
   config,
   specs,
   customMotor,
+  importedSource,
   delayMs = 300,
   disabled = false,
 }) {
@@ -38,8 +39,8 @@ export default function usePersistence({
     if (disabled) return
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      saveConfigToStorage({ config, specs, customMotor })
+      saveConfigToStorage({ config, specs, customMotor, importedSource })
     }, delayMs)
     return () => clearTimeout(debounceRef.current)
-  }, [config, specs, customMotor, delayMs, disabled])
+  }, [config, specs, customMotor, importedSource, delayMs, disabled])
 }

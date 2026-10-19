@@ -3,7 +3,18 @@
 All notable changes to RecoverySys are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
-## [Unreleased] - 2026-08-13
+## [1.3.0-rc.1] - 2026-10-19
+
+- Extend bounded OpenRocket import to formats 1.4–1.9 and preserve accepted source identity through save, JSON and share links.
+- Expand import regression coverage to 38 provenance-recorded fixtures; related designs are not independent user evidence.
+- Add explicit supplier price/stock snapshots and incomplete-budget reporting, covering 103 matched IDs across three manufacturers.
+- Add commercial refresh, coverage reporting and read-only engineering review proposals.
+- Correct packing-screen wording to distinguish nominal heuristics from physical fit.
+- Defer the reviewed 2D/3D experiment; archive it outside production source.
+- Patch compatible development dependencies and move to the patched Vitest 4 line; production audit has zero advisories. Tailwind 3 development-tool findings remain documented.
+- Align application and desktop candidate versions at 1.3.0-rc.1. Platform qualification, independent physics review and observed user trials remain open.
+
+## [Unreleased historical work] - 2026-08-13
 
 ### Added
 

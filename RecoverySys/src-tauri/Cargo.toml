@@ -1,6 +1,6 @@
 [package]
 name = "recoverysys"
-version = "1.2.0"
+version = "1.3.0-rc.1"
 description = "Recovery bay configuration tool for high-power rocketry"
 authors = ["RecoverySys"]
 edition = "2021"

@@ -1,0 +1,41 @@
+name: Refresh supplier commercial snapshots
+on:
+  schedule:
+    - cron: '17 */12 * * *'
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: supplier-commercial-snapshots
+  cancel-in-progress: false
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Refresh commercial data only
+        id: refresh
+        working-directory: RecoverySys
+        run: node scripts/refresh-suppliers.mjs --write > supplier-refresh-report.json
+        continue-on-error: true
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: supplier-refresh-report
+          path: RecoverySys/supplier-refresh-report.json
+      - name: Publish snapshot to repository
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          test -f RecoverySys/public/supplier-prices.json || exit 0
+          git add RecoverySys/public/supplier-prices.json
+          if ! git diff --cached --quiet; then
+            git commit -m 'data: refresh supplier price and stock snapshot'
+            git push
+          fi
+      - name: Report partial refresh failure
+        if: steps.refresh.outcome == 'failure'
+        run: exit 1

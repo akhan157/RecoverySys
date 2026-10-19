@@ -1,0 +1,723 @@
+[
+  {
+    "partId": "cfc-024-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/24-elliptical-parachute-2-2lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.9,
+      "packed_length_in": 4.3,
+      "weight_g": 62
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "3b2071d2e0edf3710025584b4970efab93a93dccb4f0510bc1f4e62a1aea15d7",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-024-n",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/24-elliptical-parachute-2-2lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.9,
+      "packed_length_in": 4.3,
+      "weight_g": 62
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "3b2071d2e0edf3710025584b4970efab93a93dccb4f0510bc1f4e62a1aea15d7",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-024-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/24-compact-elliptical-parachute-2-1lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.6,
+      "packed_length_in": 4.4,
+      "weight_g": 45
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "1cc7c9e40fe67a794e6ed756f99eed90ac3b7f2bf50b5d2bdda8d43f8443dc4a",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-024-s",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/24-compact-elliptical-parachute-2-1lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.6,
+      "packed_length_in": 4.4,
+      "weight_g": 45
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "1cc7c9e40fe67a794e6ed756f99eed90ac3b7f2bf50b5d2bdda8d43f8443dc4a",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-030-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/30-elliptical-parachute-3-3lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 3,
+      "weight_g": 87.9
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "9423bc02c3b134cbcf1b2273f9f2a65aabf34277d29d4ce097c704f1b072af1a",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-030-n",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/30-elliptical-parachute-3-3lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 3,
+      "weight_g": 87.9
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "9423bc02c3b134cbcf1b2273f9f2a65aabf34277d29d4ce097c704f1b072af1a",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-030-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/30-compact-elliptical-parachute-3-3lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.9,
+      "packed_length_in": 4.1,
+      "weight_g": 59
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "b192470c2cb06ece627e4466b90c49d5c1035edd3edd8461d75e4827354381f5",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-030-s",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/30-compact-elliptical-parachute-3-3lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.9,
+      "packed_length_in": 4.1,
+      "weight_g": 59
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "b192470c2cb06ece627e4466b90c49d5c1035edd3edd8461d75e4827354381f5",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-030-sl",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.5,
+      "packed_length_in": 4.2,
+      "weight_g": 38,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "864c25b3197a5152cb6bc8318596d34748992c0ecfe40333afd3982cab3e0d63",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-030-sl",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.5,
+      "packed_length_in": 4.2,
+      "weight_g": 38,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "864c25b3197a5152cb6bc8318596d34748992c0ecfe40333afd3982cab3e0d63",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-030-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-30-compact-parachute-5lb-20fps-2-26lb-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.9,
+      "packed_length_in": 3.7,
+      "weight_g": 53.4,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "8cca76c746a9d26fdc76275aaede26064debd84118a4b54e5d7527faf8ba7d79",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-030-s",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-30-compact-parachute-5lb-20fps-2-26lb-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.9,
+      "packed_length_in": 3.7,
+      "weight_g": 53.4,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "8cca76c746a9d26fdc76275aaede26064debd84118a4b54e5d7527faf8ba7d79",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-036-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/36-elliptical-parachute-4-8lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 4,
+      "weight_g": 127.5728540625
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "29a5fe65d1fca30b739c00d4c0f4af6577f65b5c2c02bf109d64502c6d14ab83",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-036-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/36-compact-elliptical-parachute-4-8lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 3.4,
+      "weight_g": 92
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "dc253e228df2bc52492efb376a8b980c0fa8515a688f4306c6ca69b54f7ad54a",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-036-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-36-standard-parachute-7lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 5.2,
+      "weight_g": 141.747615625,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "8cfcd4f266002612475986841bc3dd29a438b003b8b509ff36b0f232498f6b5f",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-036-sl",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-36-ultra-light-parachute-4lbs-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.8,
+      "packed_length_in": 3.6,
+      "weight_g": 49,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "50d369bc3cdea11a55fd48d33c168e5cd04a83094e4dbabc685078e1bb0c85c9",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-042-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/42-elliptical-parachute-6-5lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 6,
+      "weight_g": 161.5922818125
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "c478def9adb53bd2fc4ece27f5d1d6f457b252816c9b95eee02c77b7b0d53e5b",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-048-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/48-elliptical-parachute-8-6lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 7,
+      "weight_g": 206.9515188125
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "9a25de85ef0b02a6969e1f8f3c3a26b15986a8ae3d0064b812998b3e82ee195b",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-048-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-48-standard-parachute-12-5lbs-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 7.8,
+      "weight_g": 212.6214234375,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "288a36e5df3dfd775fbd4c52a80614de83580b2d3a933e65cc254a49f485a06f",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-048-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-48-compact-parachute-12-5lbs-20fps-7lbs-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 4.9,
+      "weight_g": 121.9029494375,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "febebe1a78e5466df6dece7bf984471add1b892f7c8c32833e49fd8e0e36e0af",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-060-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/60-elliptical-parachute-13lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 4,
+      "packed_length_in": 5.3,
+      "weight_g": 283.49523125
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "f5c29dba5729edf102fe1470be79d50c0f217d4411a067f795cc9756a54299c6",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-060-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-60-standard-parachute-19lbs-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 3.9,
+      "packed_length_in": 5.1,
+      "weight_g": 309.0098020625,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "0406b5128e52c8b1a77ef27bd1d5f2962abcd9a0d8b106856af80de9734d572d",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-060-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-60-compact-parachute-19lbs-20fps-12lbs-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 3.9,
+      "packed_length_in": 3.2,
+      "weight_g": 192.77675725,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "edda607dacdd99cb5f77d2ed8b529becee12c57786f1af6b18e6d123f26f9b53",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-072-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-72-standard-parachute-28lbs-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 3.9,
+      "packed_length_in": 6.2,
+      "weight_g": 379.88360987500005,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "896a5e2ed53f9a51ab62755446ed3d30db9c5d18839bd3206ee37380e5e0ba23",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-072-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-72-compact-parachute-28lbs-20fps-15lbs-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 3.9,
+      "packed_length_in": 4.1,
+      "weight_g": 249.47580350000004,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "4cb53a2aa22c78e5cfe76782a2f3d121163e4e7cd6ca07d752a77bae947137a3",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-084-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-84-standard-parachute-39lbs-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 3.9,
+      "packed_length_in": 8.8,
+      "weight_g": 538.640939375,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "85d76573d8afc4e6d36d1b6b4ddd2dd60fdc974c0d4b8b4be30c9ca385aee2af",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-084-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-84-compact-parachute-39lbs-20fps-22lbs-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 3.9,
+      "packed_length_in": 6.2,
+      "weight_g": 379.88360987500005,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "7e7f22fc474e75d94396e505c9cb9b1544eb5eb6c8f9add63fb44089983e8315",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-096-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-96-standard-parachute-50lbs-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 4.9,
+      "packed_length_in": 7.4,
+      "weight_g": 708.738078125,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "c161fc53a64f3f5a1bc1a5d1efe0996d70b8f4dd222468034ad0285d4a5ac29e",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-096-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-compact-parachute-96inch-50lbs-20fps-28lbs-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 4.9,
+      "packed_length_in": 4.8,
+      "weight_g": 462.0972269375,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "c6481224d4c72482a488aa3958c15d02420f27d0e24437b16102cfe6d1f2d258",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-120-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-120-standard-parachute-79lbs-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 4.9,
+      "packed_length_in": 10.6,
+      "weight_g": 1020.5828325,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "03e3242fb2811111de4b28a345069c4d8e10d312b5bd7b945d3f18587a0517e4",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "ifc-120-s",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-ultra-120-compact-parachute-79lbs-20fps-44lbs-15fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 4.9,
+      "packed_length_in": 6.8,
+      "weight_g": 623.6895087500001,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "packingAssumptions": "Manufacturer packed dimensions assume a specified packing density; traditional folding may occupy a different volume.",
+    "sourceSha256": "8366d2f5da4d4a7fe39020da4d654e56326d1d724c3a04f92b7eb4a29777041c",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-012-n",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/12-elliptical-parachute-0-5lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.9,
+      "packed_length_in": 2.6,
+      "weight_g": 37
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "67cd94aac4f8a6436e60da1f4a447634aac74a01dd38f2298b1547e245f29451",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-012-s",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/12-compact-elliptical-parachute-0-5lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.6,
+      "packed_length_in": 2.4,
+      "weight_g": 24.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "fff2a709c0dd120d10e2af8400049cd5745d916d5196b82c44d687f47d98062a",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-015-n",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/15-elliptical-parachute-0-8lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.9,
+      "packed_length_in": 2.9,
+      "weight_g": 43
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "c924c06cf4301c06f4e6f93afbd369adff0079280fd0b659a2588fa9b86ae03b",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-015-s",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/15-compact-elliptical-parachute-0-8lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.6,
+      "packed_length_in": 3.2,
+      "weight_g": 28
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "1025617cbc37c67d752eda5e681693267d2fc018240c9c1a80fcd92eb6bbf18c",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-018-n",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/18-elliptical-parachute-1-2-lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.9,
+      "packed_length_in": 3.5,
+      "weight_g": 60
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "329c0dd6329006d3e7d25c2335a338a0e943b78d2770e5b2fd3f3497533ff3ee",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  },
+  {
+    "partId": "cfc-018-s",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/18-compact-elliptical-parachute-1-2lb-20fps",
+    "accessed": "2026-10-19",
+    "specs": {
+      "packed_diam_in": 1.6,
+      "packed_length_in": 3.2,
+      "weight_g": 33
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g"
+    },
+    "packingAssumptions": "Manufacturer nominal packed dimensions; physical folding and fit are not verified.",
+    "sourceSha256": "72f794d61f61737ff07fc578029131233a6161b1c298cd7995e2f093d7f18afb",
+    "parserVersion": "fruity-explicit-fields-v1",
+    "status": "requires-human-review"
+  }
+]

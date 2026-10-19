@@ -166,3 +166,38 @@ describe('payload boundary', () => {
     expect(loadCustomParts()).toEqual([])
   })
 })
+
+describe('imported source transfer', () => {
+  const importedSource = {
+    sourceFilename: 'test.ork',
+    sourceHash: 'a'.repeat(64),
+    formatVersion: '1.10',
+    acceptedAt: '2026-10-19T01:00:00.000Z',
+    selectedConfiguration: { id: 'flight-1', candidates: ['discard'] },
+    selectedStage: { name: 'Sustainer', sourcePath: '/rocket/stage[1]' },
+    externalResults: { apogee: 1234 },
+  }
+  it('preserves identity across JSON, storage and share links without external results', async () => {
+    const { encodeSharePayload, decodeSharePayload } = await import('../lib/shareLink.js')
+    const state = { ...valid, importedSource }
+    const json = decodeMigrateValidateNormalize(encodeJsonPayload(state), options)
+    expect(json.importedSource.sourceHash).toBe(importedSource.sourceHash)
+    expect(json.importedSource.selectedConfiguration).toEqual({ id: 'flight-1' })
+    expect(json.importedSource.externalResults).toBeUndefined()
+    expect(saveConfigToStorage(state)).toBe(true)
+    expect(loadSaved().importedSource).toEqual(json.importedSource)
+    expect(decodeSharePayload(encodeSharePayload(state), options).importedSource).toEqual(
+      json.importedSource
+    )
+    expect(json.simulation).toBeUndefined()
+  })
+  it('loads old plans and discards malformed optional source metadata', () => {
+    expect(decodeMigrateValidateNormalize(valid, options).importedSource).toBeNull()
+    const result = decodeMigrateValidateNormalize(
+      { ...valid, importedSource: { sourceFilename: 'x'.repeat(1025) } },
+      options
+    )
+    expect(result.ok).toBe(true)
+    expect(result.importedSource).toBeNull()
+  })
+})
