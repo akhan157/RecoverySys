@@ -331,7 +331,13 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
       setError('Name is required')
       return
     }
-    const specs = {}
+    // Preserve extra measurements from the deferred visualization experiment
+    // without exposing its unfinished data-entry fields in the main workflow.
+    const specs = Object.fromEntries(
+      Object.entries(editingPart?.specs ?? {}).filter(
+        ([key]) => !schema.some((field) => field.key === key)
+      )
+    )
     for (const f of schema) {
       if (f.type === 'select') {
         if (f.required && !form[f.key]) {

@@ -163,6 +163,40 @@ function normalizeConfig(rawConfig, { allParts = [], slotIds = [], emptyConfig =
   return { config, catalogMissing, customMissing, inlinedCustomParts }
 }
 
+// Source metadata is descriptive only; it never restores simulation authority.
+export function normalizeImportedSource(source) {
+  if (source == null) return null
+  if (typeof source !== 'object' || Array.isArray(source)) return null
+  const result = {}
+  for (const key of [
+    'sourceFilename',
+    'sourceHash',
+    'sourceTool',
+    'sourceToolVersion',
+    'formatVersion',
+    'importedAt',
+    'acceptedAt',
+  ]) {
+    if (source[key] == null) continue
+    if (typeof source[key] !== 'string' || source[key].length > 1024) return null
+    result[key] = source[key]
+  }
+  for (const [key, fields] of [
+    ['selectedConfiguration', ['id']],
+    ['selectedStage', ['id', 'name', 'sourcePath']],
+  ]) {
+    if (source[key] == null) continue
+    if (typeof source[key] !== 'object' || Array.isArray(source[key])) return null
+    result[key] = {}
+    for (const field of fields) {
+      if (source[key][field] == null) continue
+      if (typeof source[key][field] !== 'string' || source[key][field].length > 1024) return null
+      result[key][field] = source[key][field]
+    }
+  }
+  return Object.keys(result).length ? result : null
+}
+
 /** The sole payload boundary: decode, migrate, validate, and normalize. */
 export function decodeMigrateValidateNormalize(input, options = {}) {
   const raw = decodeInput(input)
@@ -190,6 +224,7 @@ export function decodeMigrateValidateNormalize(input, options = {}) {
     config: normalizedConfig.config,
     specs,
     customMotor,
+    importedSource: normalizeImportedSource(migrated.importedSource),
     ...normalizedConfig,
   }
 }
@@ -207,7 +242,7 @@ export function decodeShareEncoded(encoded, options = {}) {
   }
 }
 
-export function makeConfigPayload({ config, specs, customMotor }) {
+export function makeConfigPayload({ config, specs, customMotor, importedSource }) {
   const compactConfig = Object.fromEntries(
     Object.entries(config ?? {}).map(([category, part]) => {
       if (!part) return [category, null]
@@ -222,6 +257,7 @@ export function makeConfigPayload({ config, specs, customMotor }) {
     config: compactConfig,
     specs,
     customMotor: customMotor ?? null,
+    importedSource: normalizeImportedSource(importedSource),
   }
 }
 

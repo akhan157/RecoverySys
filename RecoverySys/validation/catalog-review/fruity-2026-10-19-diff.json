@@ -1,0 +1,355 @@
+{
+  "mode": "dry-run",
+  "changes": [
+    {
+      "partId": "cfc-030-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 88,
+      "proposed": 87.9,
+      "url": "https://shop.fruitychutes.com/products/30-elliptical-parachute-3-3lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-030-n",
+      "category": "drogue_chute",
+      "field": "weight_g",
+      "old": 88,
+      "proposed": 87.9,
+      "url": "https://shop.fruitychutes.com/products/30-elliptical-parachute-3-3lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-030-s",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 60,
+      "proposed": 59,
+      "url": "https://shop.fruitychutes.com/products/30-compact-elliptical-parachute-3-3lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-030-s",
+      "category": "drogue_chute",
+      "field": "weight_g",
+      "old": 60,
+      "proposed": 59,
+      "url": "https://shop.fruitychutes.com/products/30-compact-elliptical-parachute-3-3lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "main_chute",
+      "field": "packed_diam_in",
+      "old": 1.9,
+      "proposed": 1.5,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "main_chute",
+      "field": "packed_length_in",
+      "old": 3.2,
+      "proposed": 4.2,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 45,
+      "proposed": 38,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "drogue_chute",
+      "field": "packed_diam_in",
+      "old": 1.9,
+      "proposed": 1.5,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "drogue_chute",
+      "field": "packed_length_in",
+      "old": 3.2,
+      "proposed": 4.2,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "drogue_chute",
+      "field": "weight_g",
+      "old": 45,
+      "proposed": 38,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-s",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 53,
+      "proposed": 53.4,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-30-compact-parachute-5lb-20fps-2-26lb-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-s",
+      "category": "drogue_chute",
+      "field": "weight_g",
+      "old": 53,
+      "proposed": 53.4,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-30-compact-parachute-5lb-20fps-2-26lb-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-036-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 128,
+      "proposed": 127.5728540625,
+      "url": "https://shop.fruitychutes.com/products/36-elliptical-parachute-4-8lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-036-s",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 94,
+      "proposed": 92,
+      "url": "https://shop.fruitychutes.com/products/36-compact-elliptical-parachute-4-8lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-036-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 142,
+      "proposed": 141.747615625,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-36-standard-parachute-7lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-036-sl",
+      "category": "main_chute",
+      "field": "packed_diam_in",
+      "old": 1.9,
+      "proposed": 1.8,
+      "url": "https://shop.fruitychutes.com/products/iris-36-ultra-light-parachute-4lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-036-sl",
+      "category": "main_chute",
+      "field": "packed_length_in",
+      "old": 4.2,
+      "proposed": 3.6,
+      "url": "https://shop.fruitychutes.com/products/iris-36-ultra-light-parachute-4lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-036-sl",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 60,
+      "proposed": 49,
+      "url": "https://shop.fruitychutes.com/products/iris-36-ultra-light-parachute-4lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-042-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 162,
+      "proposed": 161.5922818125,
+      "url": "https://shop.fruitychutes.com/products/42-elliptical-parachute-6-5lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-048-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 207,
+      "proposed": 206.9515188125,
+      "url": "https://shop.fruitychutes.com/products/48-elliptical-parachute-8-6lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-048-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 213,
+      "proposed": 212.6214234375,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-48-standard-parachute-12-5lbs-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-048-s",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 122,
+      "proposed": 121.9029494375,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-48-compact-parachute-12-5lbs-20fps-7lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-060-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 283,
+      "proposed": 283.49523125,
+      "url": "https://shop.fruitychutes.com/products/60-elliptical-parachute-13lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-060-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 309,
+      "proposed": 309.0098020625,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-60-standard-parachute-19lbs-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-060-s",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 193,
+      "proposed": 192.77675725,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-60-compact-parachute-19lbs-20fps-12lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-072-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 380,
+      "proposed": 379.88360987500005,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-72-standard-parachute-28lbs-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-072-s",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 249,
+      "proposed": 249.47580350000004,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-72-compact-parachute-28lbs-20fps-15lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-084-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 539,
+      "proposed": 538.640939375,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-84-standard-parachute-39lbs-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-084-s",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 380,
+      "proposed": 379.88360987500005,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-84-compact-parachute-39lbs-20fps-22lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-096-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 709,
+      "proposed": 708.738078125,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-96-standard-parachute-50lbs-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-096-s",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 46,
+      "proposed": 462.0972269375,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-compact-parachute-96inch-50lbs-20fps-28lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-120-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 1021,
+      "proposed": 1020.5828325,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-120-standard-parachute-79lbs-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-120-s",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 624,
+      "proposed": 623.6895087500001,
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-120-compact-parachute-79lbs-20fps-44lbs-15fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-012-s",
+      "category": "drogue_chute",
+      "field": "weight_g",
+      "old": 24,
+      "proposed": 24.2,
+      "url": "https://shop.fruitychutes.com/products/12-compact-elliptical-parachute-0-5lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-018-n",
+      "category": "drogue_chute",
+      "field": "weight_g",
+      "old": 48,
+      "proposed": 60,
+      "url": "https://shop.fruitychutes.com/products/18-elliptical-parachute-1-2-lb-20fps",
+      "accessed": "2026-10-19",
+      "status": "requires-human-review"
+    }
+  ]
+}

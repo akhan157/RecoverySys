@@ -54,6 +54,7 @@ export default function useShareLinkLoader({
         config: decoded.config,
         specs: decoded.specs,
         customMotor: decoded.customMotor,
+        importedSource: decoded.importedSource,
       })
     }
 

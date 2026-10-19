@@ -75,8 +75,10 @@ export function compatibilityFindingCode(slot, rule = 'unclassified') {
   if (lower.includes('minimum altitude is')) return family('chute-device-min-altitude')
   if (lower.includes('may be too small for')) return family('deployment-bag-diameter')
   if (lower.startsWith('main chute packed length')) return family('deployment-bag-length')
-  if (lower.startsWith('packed components')) return family('packing-capacity-exceeded')
-  if (lower.startsWith('bay is')) return family('packing-capacity-tight')
+  if (lower.startsWith('packed components') || lower.startsWith('nominal-height screening value'))
+    return family('packing-capacity-exceeded')
+  if (lower.startsWith('bay is') || lower.startsWith('nominal-height screening index'))
+    return family('packing-capacity-tight')
   if (lower.startsWith('dual-deploy without')) return family('dual-deploy-without-deployment-bag')
   return stableFallbackCode({ domain: 'compatibility', slot, rule: 'unclassified' })
 }

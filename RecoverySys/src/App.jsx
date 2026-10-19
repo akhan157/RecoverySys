@@ -124,7 +124,7 @@ function buildInitialState() {
     shareState: SHARE_STATES.IDLE,
     compareSnapshot: null,
     openRocketImport: null,
-    importedSource: null,
+    importedSource: saved?.importedSource ?? null,
   }
 }
 
@@ -213,7 +213,7 @@ function reducer(state, action) {
         specs: action.specs,
         customMotor: action.customMotor ?? null,
         openRocketImport: null,
-        importedSource: null,
+        importedSource: action.importedSource ?? null,
         simulation: null,
         // Imported state replaces the inputs immediately; clear the previous
         // compatibility result before the debounced watcher evaluates them.
@@ -298,6 +298,7 @@ export default function App() {
     config: state.config,
     specs: state.specs,
     customMotor: state.customMotor,
+    importedSource: state.importedSource,
     disabled: demoMode || importSession,
   })
 
@@ -315,10 +316,10 @@ export default function App() {
   const saveCompareSnapshot = useCallback(() => dispatch({ type: 'SAVE_COMPARE_SNAPSHOT' }), [])
   const clearCompareSnapshot = useCallback(() => dispatch({ type: 'CLEAR_COMPARE_SNAPSHOT' }), [])
   const loadConfig = useCallback(
-    ({ config, specs, customMotor, inlinedCustomParts }) => {
+    ({ config, specs, customMotor, importedSource, inlinedCustomParts }) => {
       const mergeResult = mergeCustomParts(inlinedCustomParts)
       if (!mergeResult.ok) return mergeResult
-      dispatch({ type: 'LOAD_SHARE', config, specs, customMotor })
+      dispatch({ type: 'LOAD_SHARE', config, specs, customMotor, importedSource })
       setImportSession(true)
       return mergeResult
     },
@@ -434,6 +435,7 @@ export default function App() {
       config: state.config,
       specs: state.specs,
       customMotor: state.customMotor,
+      importedSource: state.importedSource,
     })
     if (ok) {
       setImportSession(false)
@@ -449,7 +451,7 @@ export default function App() {
       dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE })
       addToast(TOAST_LEVELS.ERROR, 'Save failed — storage full')
     }
-  }, [state.config, state.specs, state.customMotor, safeTimeout, addToast])
+  }, [state.config, state.specs, state.customMotor, state.importedSource, safeTimeout, addToast])
 
   const copyShareLink = useCallback(() => {
     try {
@@ -457,6 +459,7 @@ export default function App() {
         config: state.config,
         specs: state.specs,
         customMotor: state.customMotor,
+        importedSource: state.importedSource,
       })
       const url = buildShareUrl(encoded)
       // Only show "Copied!" after the write actually succeeds.
@@ -476,7 +479,7 @@ export default function App() {
       // Synchronous failure — clipboard API unavailable
       addToast(TOAST_LEVELS.ERROR, 'Copy failed — try again')
     }
-  }, [state.config, state.specs, state.customMotor, safeTimeout, addToast])
+  }, [state.config, state.specs, state.customMotor, state.importedSource, safeTimeout, addToast])
 
   const removeToast = useCallback((id) => dispatch({ type: 'REMOVE_TOAST', id }), [])
 

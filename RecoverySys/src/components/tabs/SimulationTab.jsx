@@ -232,31 +232,31 @@ function PackingVolumePanel({ specs, config }) {
   const packingCriterion = evaluateCriterion(CRITERION_IDS.PACKING_CAPACITY_RATIO, packing.fraction)
   const fillPct = Math.round((packing.fraction ?? 0) * 100)
   return (
-    <section className="mc-sim__packing" aria-label="Packing volume">
-      <h2 className="mc-panel-header">PACKING_VOLUME</h2>
+    <section className="mc-sim__packing" aria-label="Packing screening">
+      <h2 className="mc-panel-header">PACKING_SCREEN</h2>
       <div className="mc-sim__packing-body">
         <details className="mc-sim__snatch-limitations">
-          <summary>HOW THIS IS ESTIMATED — EFFECTIVE BAY VOLUME</summary>
+          <summary>SCREENING ASSUMPTIONS</summary>
           <p>
-            70% packing efficiency accounts for folds, rigging, and fabric bulk. Actual fold
-            geometry, snag points, wiring, and closure force are not measured.
+            The 70% allowance is a fixed screening assumption, not measured packing efficiency.
+            Folding, nesting, rigid shapes, voids, wiring and closure force are not solved. Actual
+            occupied space is unknown; confirm the complete assembly in a physical packing trial.
           </p>
         </details>
         <AnalRow
-          label="STACKED_COMPONENTS"
+          label="NOMINAL_HEIGHT_MODEL"
           value={`${packing.stacked_in3.toFixed(1)} IN³`}
-          badge={`of ${packing.effective_in3.toFixed(1)} IN³ effective`}
-          note="Cylindrical stacking sum — each component packed height × bay cross-section area"
+          badge={`of ${packing.effective_in3.toFixed(1)} IN³ model threshold`}
+          note="Nominal-height screen: packed height × bay cross-section area; not actual occupied volume"
         />
-        <PackingGauge fraction={packing.fraction ?? 0} />
         <AnalRow
-          label="FILL_FRACTION"
+          label="SCREENING_INDEX"
           value={`${fillPct}%`}
           badge={
             packingCriterion?.severity === 'error'
               ? 'ABOVE CRITERION'
               : packingCriterion?.severity === 'warn'
-                ? 'TIGHT'
+                ? 'NEAR THRESHOLD'
                 : 'SCREENING AVAILABLE'
           }
           badgeStatus={
@@ -291,26 +291,6 @@ function AnalRow({ label, value, badge, badgeStatus, note, highlight }) {
         </span>
       </div>
       {note && <div className="mc-anal-row__note">{note}</div>}
-    </div>
-  )
-}
-
-function PackingGauge({ fraction }) {
-  const pct = Math.min(100, Math.round(fraction * 100))
-  const status = pct > 95 ? 'fail' : pct > 85 ? 'warn' : 'ok'
-  return (
-    <div className="mc-packing-gauge-wrap">
-      <div className="mc-packing-gauge">
-        <div
-          className={`mc-packing-gauge__fill mc-packing-gauge__fill--${status}`}
-          style={{ '--packing-pct': `${pct}%` }}
-        />
-      </div>
-      <div className="mc-packing-gauge__labels">
-        <span>0%</span>
-        <span>85% THRESHOLD</span>
-        <span>100%</span>
-      </div>
     </div>
   )
 }

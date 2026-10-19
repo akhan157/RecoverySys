@@ -1,0 +1,830 @@
+{
+  "version": 1,
+  "note": "Commercial identity mappings only. Spherachutes names refer to nominal fabric size; physical diameter and engineering values are not updated. No sewn loop option selected.",
+  "mappings": [
+    {
+      "partId": "hx-024",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195913932894",
+      "variantTitle": "24 in."
+    },
+    {
+      "partId": "el-024",
+      "supplier": "rocketman",
+      "handle": "rocketman-elliptical-parachutes-1",
+      "productTitle": "Rocketman Elliptical Parachutes",
+      "variantId": "42177654030430",
+      "variantTitle": "24 in."
+    },
+    {
+      "partId": "px-02",
+      "supplier": "rocketman",
+      "handle": "ballistic-mach-ii-parachutes",
+      "productTitle": "Ballistic Mach II Drogue Parachutes",
+      "variantId": "42190381482078",
+      "variantTitle": "2 ft."
+    },
+    {
+      "partId": "hx-030",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195913965662",
+      "variantTitle": "30 in."
+    },
+    {
+      "partId": "hx-036",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195913998430",
+      "variantTitle": "36 in."
+    },
+    {
+      "partId": "el-036",
+      "supplier": "rocketman",
+      "handle": "rocketman-elliptical-parachutes-1",
+      "productTitle": "Rocketman Elliptical Parachutes",
+      "variantId": "42177654063198",
+      "variantTitle": "36 in."
+    },
+    {
+      "partId": "px-03",
+      "supplier": "rocketman",
+      "handle": "ballistic-mach-ii-parachutes",
+      "productTitle": "Ballistic Mach II Drogue Parachutes",
+      "variantId": "42190381514846",
+      "variantTitle": "3 ft."
+    },
+    {
+      "partId": "hx-042",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195914031198",
+      "variantTitle": "42 in."
+    },
+    {
+      "partId": "hx-048",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195914063966",
+      "variantTitle": "48 in."
+    },
+    {
+      "partId": "el-048",
+      "supplier": "rocketman",
+      "handle": "rocketman-elliptical-parachutes-1",
+      "productTitle": "Rocketman Elliptical Parachutes",
+      "variantId": "42177654095966",
+      "variantTitle": "48 in."
+    },
+    {
+      "partId": "px-04",
+      "supplier": "rocketman",
+      "handle": "ballistic-mach-ii-parachutes",
+      "productTitle": "Ballistic Mach II Drogue Parachutes",
+      "variantId": "42190381547614",
+      "variantTitle": "4 ft."
+    },
+    {
+      "partId": "hx-060",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195914096734",
+      "variantTitle": "60 in."
+    },
+    {
+      "partId": "el-060",
+      "supplier": "rocketman",
+      "handle": "rocketman-elliptical-parachutes-1",
+      "productTitle": "Rocketman Elliptical Parachutes",
+      "variantId": "42177654128734",
+      "variantTitle": "60 in."
+    },
+    {
+      "partId": "px-05",
+      "supplier": "rocketman",
+      "handle": "ballistic-mach-ii-parachutes",
+      "productTitle": "Ballistic Mach II Drogue Parachutes",
+      "variantId": "42190381580382",
+      "variantTitle": "5 ft."
+    },
+    {
+      "partId": "hx-072",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195914129502",
+      "variantTitle": "72 in."
+    },
+    {
+      "partId": "el-072",
+      "supplier": "rocketman",
+      "handle": "rocketman-elliptical-parachutes-1",
+      "productTitle": "Rocketman Elliptical Parachutes",
+      "variantId": "42177654161502",
+      "variantTitle": "72 in."
+    },
+    {
+      "partId": "px-06",
+      "supplier": "rocketman",
+      "handle": "ballistic-mach-ii-parachutes",
+      "productTitle": "Ballistic Mach II Drogue Parachutes",
+      "variantId": "42190381613150",
+      "variantTitle": "6 ft."
+    },
+    {
+      "partId": "hx-084",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195914162270",
+      "variantTitle": "84 in."
+    },
+    {
+      "partId": "el-084",
+      "supplier": "rocketman",
+      "handle": "rocketman-elliptical-parachutes-1",
+      "productTitle": "Rocketman Elliptical Parachutes",
+      "variantId": "42177654194270",
+      "variantTitle": "84 in."
+    },
+    {
+      "partId": "px-07",
+      "supplier": "rocketman",
+      "handle": "ballistic-mach-ii-parachutes",
+      "productTitle": "Ballistic Mach II Drogue Parachutes",
+      "variantId": "42190381645918",
+      "variantTitle": "7 ft."
+    },
+    {
+      "partId": "hx-096",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195914195038",
+      "variantTitle": "96 in."
+    },
+    {
+      "partId": "el-096",
+      "supplier": "rocketman",
+      "handle": "rocketman-elliptical-parachutes-1",
+      "productTitle": "Rocketman Elliptical Parachutes",
+      "variantId": "42177654227038",
+      "variantTitle": "96 in."
+    },
+    {
+      "partId": "px-08",
+      "supplier": "rocketman",
+      "handle": "ballistic-mach-ii-parachutes",
+      "productTitle": "Ballistic Mach II Drogue Parachutes",
+      "variantId": "42190381678686",
+      "variantTitle": "8 ft."
+    },
+    {
+      "partId": "px-09",
+      "supplier": "rocketman",
+      "handle": "ballistic-mach-ii-parachutes",
+      "productTitle": "Ballistic Mach II Drogue Parachutes",
+      "variantId": "42190381711454",
+      "variantTitle": "9 ft."
+    },
+    {
+      "partId": "hx-120",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195914227806",
+      "variantTitle": "120 in."
+    },
+    {
+      "partId": "el-120",
+      "supplier": "rocketman",
+      "handle": "rocketman-elliptical-parachutes-1",
+      "productTitle": "Rocketman Elliptical Parachutes",
+      "variantId": "42177654259806",
+      "variantTitle": "120 in."
+    },
+    {
+      "partId": "px-10",
+      "supplier": "rocketman",
+      "handle": "ballistic-mach-ii-parachutes",
+      "productTitle": "Ballistic Mach II Drogue Parachutes",
+      "variantId": "42190381744222",
+      "variantTitle": "10 ft."
+    },
+    {
+      "partId": "hs-024-cl",
+      "supplier": "spherachutes",
+      "handle": "24-inch-spherachute",
+      "productTitle": "24\" (15.28\" Diameter) Hemispherical Spherachute",
+      "variantId": "41480186659071",
+      "variantTitle": "Classic ($22.00) / No"
+    },
+    {
+      "partId": "hs-024-hd",
+      "supplier": "spherachutes",
+      "handle": "24-inch-spherachute",
+      "productTitle": "24\" (15.28\" Diameter) Hemispherical Spherachute",
+      "variantId": "41480186724607",
+      "variantTitle": "Heavy Duty ($32.25) / No"
+    },
+    {
+      "partId": "hs-024-ul",
+      "supplier": "spherachutes",
+      "handle": "24-inch-spherachute",
+      "productTitle": "24\" (15.28\" Diameter) Hemispherical Spherachute",
+      "variantId": "41480186790143",
+      "variantTitle": "Ultralight ($29.50) / No"
+    },
+    {
+      "partId": "hs-030-cl",
+      "supplier": "spherachutes",
+      "handle": "30-inch-spherachute",
+      "productTitle": "30\" (19.10\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482069147903",
+      "variantTitle": "Classic ($31.00) / No"
+    },
+    {
+      "partId": "hs-030-hd",
+      "supplier": "spherachutes",
+      "handle": "30-inch-spherachute",
+      "productTitle": "30\" (19.10\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482069213439",
+      "variantTitle": "Heavy Duty ($39.00) / No"
+    },
+    {
+      "partId": "hs-030-ul",
+      "supplier": "spherachutes",
+      "handle": "30-inch-spherachute",
+      "productTitle": "30\" (19.10\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482069278975",
+      "variantTitle": "Ultralight ($45.00) / No"
+    },
+    {
+      "partId": "hs-036-cl",
+      "supplier": "spherachutes",
+      "handle": "36-inch-spherachute",
+      "productTitle": "36\" (22.92\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482236100863",
+      "variantTitle": "Classic ($38.00) / No"
+    },
+    {
+      "partId": "hs-036-hd",
+      "supplier": "spherachutes",
+      "handle": "36-inch-spherachute",
+      "productTitle": "36\" (22.92\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482236166399",
+      "variantTitle": "Heavy Duty ($43.75) / No"
+    },
+    {
+      "partId": "hs-036-ul",
+      "supplier": "spherachutes",
+      "handle": "36-inch-spherachute",
+      "productTitle": "36\" (22.92\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482236231935",
+      "variantTitle": "Ultralight ($56.25) / No"
+    },
+    {
+      "partId": "hs-042-cl",
+      "supplier": "spherachutes",
+      "handle": "42-inch-spherachute",
+      "productTitle": "42\" (26.74\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482265002239",
+      "variantTitle": "Classic ($50.50) / No"
+    },
+    {
+      "partId": "hs-042-hd",
+      "supplier": "spherachutes",
+      "handle": "42-inch-spherachute",
+      "productTitle": "42\" (26.74\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482265067775",
+      "variantTitle": "Heavy Duty ($58.75) / No"
+    },
+    {
+      "partId": "hs-042-ul",
+      "supplier": "spherachutes",
+      "handle": "42-inch-spherachute",
+      "productTitle": "42\" (26.74\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482265133311",
+      "variantTitle": "Ultralight ($67.75) / No"
+    },
+    {
+      "partId": "hs-048-cl",
+      "supplier": "spherachutes",
+      "handle": "48-inch-spherachute",
+      "productTitle": "48\" (30.56\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482280829183",
+      "variantTitle": "Classic ($57.50) / No"
+    },
+    {
+      "partId": "hs-048-hd",
+      "supplier": "spherachutes",
+      "handle": "48-inch-spherachute",
+      "productTitle": "48\" (30.56\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482280894719",
+      "variantTitle": "Heavy Duty ($64.50) / No"
+    },
+    {
+      "partId": "hs-048-ul",
+      "supplier": "spherachutes",
+      "handle": "48-inch-spherachute",
+      "productTitle": "48\" (30.56\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482280960255",
+      "variantTitle": "Ultralight ($79.25) / No"
+    },
+    {
+      "partId": "hs-054-cl",
+      "supplier": "spherachutes",
+      "handle": "54-inch-spherachute",
+      "productTitle": "54\" (34.38\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482289971455",
+      "variantTitle": "Classic ($66.75) / No"
+    },
+    {
+      "partId": "hs-054-hd",
+      "supplier": "spherachutes",
+      "handle": "54-inch-spherachute",
+      "productTitle": "54\" (34.38\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482290036991",
+      "variantTitle": "Heavy Duty ($76.00) / No"
+    },
+    {
+      "partId": "hs-054-ul",
+      "supplier": "spherachutes",
+      "handle": "54-inch-spherachute",
+      "productTitle": "54\" (34.38\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482290102527",
+      "variantTitle": "Ultralight ($90.75) / No"
+    },
+    {
+      "partId": "hs-060-cl",
+      "supplier": "spherachutes",
+      "handle": "60-inch-spherachute",
+      "productTitle": "60\" (38.20\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482315038975",
+      "variantTitle": "Classic ($77.00) / No"
+    },
+    {
+      "partId": "hs-060-hd",
+      "supplier": "spherachutes",
+      "handle": "60-inch-spherachute",
+      "productTitle": "60\" (38.20\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482315104511",
+      "variantTitle": "Heavy Duty ($88.50) / No"
+    },
+    {
+      "partId": "hs-060-ul",
+      "supplier": "spherachutes",
+      "handle": "60-inch-spherachute",
+      "productTitle": "60\" (38.20\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482315170047",
+      "variantTitle": "Ultralight ($102.25) / No"
+    },
+    {
+      "partId": "hs-066-cl",
+      "supplier": "spherachutes",
+      "handle": "66-inch-spherachute",
+      "productTitle": "66\" (42.02\" Diameter) Hemispherical Spherachute",
+      "variantId": "41651386450175",
+      "variantTitle": "Classic ($86.25) / No"
+    },
+    {
+      "partId": "hs-066-hd",
+      "supplier": "spherachutes",
+      "handle": "66-inch-spherachute",
+      "productTitle": "66\" (42.02\" Diameter) Hemispherical Spherachute",
+      "variantId": "41651386515711",
+      "variantTitle": "Heavy Duty ($103.50) / No"
+    },
+    {
+      "partId": "hs-066-ul",
+      "supplier": "spherachutes",
+      "handle": "66-inch-spherachute",
+      "productTitle": "66\" (42.02\" Diameter) Hemispherical Spherachute",
+      "variantId": "41651386581247",
+      "variantTitle": "Ultralight ($113.75) / No"
+    },
+    {
+      "partId": "hs-072-cl",
+      "supplier": "spherachutes",
+      "handle": "72-inch-spherachute",
+      "productTitle": "72\" (45.84\" Diameter) Hemispherical Spherachute",
+      "variantId": "41651386646783",
+      "variantTitle": "Classic ($101.25) / No"
+    },
+    {
+      "partId": "hs-072-hd",
+      "supplier": "spherachutes",
+      "handle": "72-inch-spherachute",
+      "productTitle": "72\" (45.84\" Diameter) Hemispherical Spherachute",
+      "variantId": "41651386712319",
+      "variantTitle": "Heavy Duty ($120.75) / No"
+    },
+    {
+      "partId": "hs-072-ul",
+      "supplier": "spherachutes",
+      "handle": "72-inch-spherachute",
+      "productTitle": "72\" (45.84\" Diameter) Hemispherical Spherachute",
+      "variantId": "41651386777855",
+      "variantTitle": "Ultralight ($133.50) / No"
+    },
+    {
+      "partId": "hs-084-cl",
+      "supplier": "spherachutes",
+      "handle": "84-inch-spherachute",
+      "productTitle": "84\" (53.48\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482362159359",
+      "variantTitle": "Classic ($146.00) / No"
+    },
+    {
+      "partId": "hs-084-ul",
+      "supplier": "spherachutes",
+      "handle": "84-inch-spherachute",
+      "productTitle": "84\" (53.48\" Diameter) Hemispherical Spherachute",
+      "variantId": "42583240933631",
+      "variantTitle": "Ultralight ($197.00) / No"
+    },
+    {
+      "partId": "hs-096-cl",
+      "supplier": "spherachutes",
+      "handle": "96-inch-spherachute",
+      "productTitle": "96\" (61.12\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482440835327",
+      "variantTitle": "Classic ($156.50) / No"
+    },
+    {
+      "partId": "hs-096-ul",
+      "supplier": "spherachutes",
+      "handle": "96-inch-spherachute",
+      "productTitle": "96\" (61.12\" Diameter) Hemispherical Spherachute",
+      "variantId": "42583273472255",
+      "variantTitle": "Ultralight ($211.25) / No"
+    },
+    {
+      "partId": "hs-108-cl",
+      "supplier": "spherachutes",
+      "handle": "108-inch-spherachute",
+      "productTitle": "108\" (68.76\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482441130239",
+      "variantTitle": "Classic ($202.50) / No"
+    },
+    {
+      "partId": "hs-108-ul",
+      "supplier": "spherachutes",
+      "handle": "108-inch-spherachute",
+      "productTitle": "108\" (68.76\" Diameter) Hemispherical Spherachute",
+      "variantId": "42583297392895",
+      "variantTitle": "Ultralight ($273.25) / No"
+    },
+    {
+      "partId": "hs-120-cl",
+      "supplier": "spherachutes",
+      "handle": "120-inch-spherachute",
+      "productTitle": "120\" (76.40\" Diameter) Hemispherical Spherachute",
+      "variantId": "41482447814911",
+      "variantTitle": "Classic ($224.25) / No"
+    },
+    {
+      "partId": "hs-120-ul",
+      "supplier": "spherachutes",
+      "handle": "120-inch-spherachute",
+      "productTitle": "120\" (76.40\" Diameter) Hemispherical Spherachute",
+      "variantId": "42583299096831",
+      "variantTitle": "Ultralight ($302.75) / No"
+    },
+    {
+      "partId": "hx-009",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195913801822",
+      "variantTitle": "9 in."
+    },
+    {
+      "partId": "hx-012",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195913834590",
+      "variantTitle": "12 in."
+    },
+    {
+      "partId": "hx-015",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195913867358",
+      "variantTitle": "15 in."
+    },
+    {
+      "partId": "hx-018",
+      "supplier": "rocketman",
+      "handle": "hexagon-model-rocketry-parachutes",
+      "productTitle": "Hexagon Model Rocketry Parachutes",
+      "variantId": "42195913900126",
+      "variantTitle": "18 in."
+    },
+    {
+      "partId": "hs-018-cl",
+      "supplier": "spherachutes",
+      "handle": "18-inch-spherachute",
+      "productTitle": "18\" (11.46\" Diameter) Hemispherical Spherachute",
+      "variantId": "41480131936511",
+      "variantTitle": "Classic ($17.25) / No"
+    },
+    {
+      "partId": "hs-018-hd",
+      "supplier": "spherachutes",
+      "handle": "18-inch-spherachute",
+      "productTitle": "18\" (11.46\" Diameter) Hemispherical Spherachute",
+      "variantId": "41480131969279",
+      "variantTitle": "Heavy Duty ($27.60) / No"
+    },
+    {
+      "partId": "hs-018-ul",
+      "supplier": "spherachutes",
+      "handle": "18-inch-spherachute",
+      "productTitle": "18\" (11.46\" Diameter) Hemispherical Spherachute",
+      "variantId": "41480132002047",
+      "variantTitle": "Ultralight ($23.25) / No"
+    },
+    {
+      "partId": "jl-chute-release",
+      "supplier": "rocketman",
+      "handle": "chute-release",
+      "productTitle": "Jolly Logic Chute Release",
+      "variantId": "42200307892318",
+      "variantTitle": "Default Title"
+    },
+    {
+      "partId": "jl-altimeter-two",
+      "supplier": "rocketman",
+      "handle": "altimetertwo",
+      "productTitle": "AltimeterTwo",
+      "variantId": "42200287903838",
+      "variantTitle": "Default Title"
+    },
+    {
+      "partId": "jl-altimeter-three",
+      "supplier": "rocketman",
+      "handle": "altimeterthree",
+      "productTitle": "AltimeterThree",
+      "variantId": "42200300650590",
+      "variantTitle": "Default Title"
+    },
+    {
+      "partId": "cfc-024-n",
+      "supplier": "fruity",
+      "handle": "24-elliptical-parachute-2-2lb-20fps",
+      "productTitle": "24\" Elliptical Parachute - 2.2lb at 20fps",
+      "variantId": "32095113379930",
+      "variantTitle": "Stock"
+    },
+    {
+      "partId": "cfc-024-s",
+      "supplier": "fruity",
+      "handle": "24-compact-elliptical-parachute-2-1lb-20fps",
+      "productTitle": "24\" Compact Elliptical Parachute - 2.1lb at 20fps",
+      "variantId": "32095113314394",
+      "variantTitle": "Stock"
+    },
+    {
+      "partId": "cfc-030-n",
+      "supplier": "fruity",
+      "handle": "30-elliptical-parachute-3-3lb-20fps",
+      "productTitle": "30\" Elliptical Parachute - 3.3lb at 20fps",
+      "variantId": "32095113281626",
+      "variantTitle": "Stock"
+    },
+    {
+      "partId": "cfc-030-s",
+      "supplier": "fruity",
+      "handle": "30-compact-elliptical-parachute-3-3lb-20fps",
+      "productTitle": "30\" Compact Elliptical Parachute - 3.3lb at 20fps",
+      "variantId": "32095113248858",
+      "variantTitle": "Stock"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "supplier": "fruity",
+      "handle": "iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "productTitle": "Iris 30\" Ultralight Parachute - 2.6lb @ 15fps",
+      "variantId": "30358015836250",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-030-s",
+      "supplier": "fruity",
+      "handle": "iris-ultra-30-compact-parachute-5lb-20fps-2-26lb-15fps",
+      "productTitle": "Iris Ultra 30\" Compact Parachute - 5lb @ 20fps; 2.26lb @ 15fps",
+      "variantId": "42348052250838",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "cfc-036-n",
+      "supplier": "fruity",
+      "handle": "36-elliptical-parachute-4-8lb-20fps",
+      "productTitle": "36\" Elliptical Parachute - 4.8lb at 20fps",
+      "variantId": "31598578925658",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "cfc-036-s",
+      "supplier": "fruity",
+      "handle": "36-compact-elliptical-parachute-4-8lb-20fps",
+      "productTitle": "36\" Compact Elliptical Parachute - 4.8lb at 20fps",
+      "variantId": "31598590885978",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-036-n",
+      "supplier": "fruity",
+      "handle": "iris-ultra-36-standard-parachute-7lb-20fps",
+      "productTitle": "Iris Ultra 36\" Standard Parachute - 7lb @ 20fps",
+      "variantId": "31697248944218",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-036-sl",
+      "supplier": "fruity",
+      "handle": "iris-36-ultra-light-parachute-4lbs-15fps",
+      "productTitle": "Iris 36\" Ultralight Parachute - 4lb @ 15fps",
+      "variantId": "30358078029914",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "cfc-042-n",
+      "supplier": "fruity",
+      "handle": "42-elliptical-parachute-6-5lb-20fps",
+      "productTitle": "42\" Elliptical Parachute - 6.5lb at 20fps",
+      "variantId": "31598732083290",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "cfc-048-n",
+      "supplier": "fruity",
+      "handle": "48-elliptical-parachute-8-6lb-20fps",
+      "productTitle": "48\" Elliptical Parachute - 8.6lb at 20fps",
+      "variantId": "31598750367834",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-048-n",
+      "supplier": "fruity",
+      "handle": "iris-ultra-48-standard-parachute-12-5lbs-20fps",
+      "productTitle": "Iris Ultra 48\" Standard Parachute - 12.5lb @ 20fps",
+      "variantId": "31697259069530",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-048-s",
+      "supplier": "fruity",
+      "handle": "iris-ultra-48-compact-parachute-12-5lbs-20fps-7lbs-15fps",
+      "productTitle": "Iris Ultra 48\" Compact Parachute - 12.5lb @ 20fps; 7lb @ 15fps",
+      "variantId": "42348095799510",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "cfc-060-n",
+      "supplier": "fruity",
+      "handle": "60-elliptical-parachute-13lb-20fps",
+      "productTitle": "60\" Elliptical Parachute - 13lb at 20fps",
+      "variantId": "31598843560026",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-060-n",
+      "supplier": "fruity",
+      "handle": "iris-ultra-60-standard-parachute-19lbs-20fps",
+      "productTitle": "Iris Ultra 60\" Standard Parachute - 19lb @ 20fps",
+      "variantId": "31640783355994",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-060-s",
+      "supplier": "fruity",
+      "handle": "iris-ultra-60-compact-parachute-19lbs-20fps-12lbs-15fps",
+      "productTitle": "Iris Ultra 60\" Compact Parachute - 19lb @ 20fps; 12lb @ 15fps",
+      "variantId": "42348098650326",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-072-n",
+      "supplier": "fruity",
+      "handle": "iris-ultra-72-standard-parachute-28lbs-20fps",
+      "productTitle": "Iris Ultra 72\" Standard Parachute - 28lb @ 20fps",
+      "variantId": "31640928813146",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-072-s",
+      "supplier": "fruity",
+      "handle": "iris-ultra-72-compact-parachute-28lbs-20fps-15lbs-15fps",
+      "productTitle": "Iris Ultra 72\" Compact Parachute - 28lb @ 20fps; 15lb @ 15fps",
+      "variantId": "42348101468374",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-084-n",
+      "supplier": "fruity",
+      "handle": "iris-ultra-84-standard-parachute-39lbs-20fps",
+      "productTitle": "Iris Ultra 84\" Standard Parachute - 39lb @ 20fps",
+      "variantId": "31640995332186",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-084-s",
+      "supplier": "fruity",
+      "handle": "iris-ultra-84-compact-parachute-39lbs-20fps-22lbs-15fps",
+      "productTitle": "Iris Ultra 84\" Compact Parachute - 39lb @ 20fps; 22lb @ 15fps",
+      "variantId": "42348103336150",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-096-n",
+      "supplier": "fruity",
+      "handle": "iris-ultra-96-standard-parachute-50lbs-20fps",
+      "productTitle": "Iris Ultra 96\" Standard Parachute - 50lb @ 20fps",
+      "variantId": "31697150771290",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-096-s",
+      "supplier": "fruity",
+      "handle": "iris-ultra-compact-parachute-96inch-50lbs-20fps-28lbs-15fps",
+      "productTitle": "Iris Ultra 96\" Compact Parachute - 50lb @ 20fps; 28lb @ 15fps",
+      "variantId": "42348107432150",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-120-n",
+      "supplier": "fruity",
+      "handle": "iris-ultra-120-standard-parachute-79lbs-20fps",
+      "productTitle": "Iris Ultra 120\" Standard Parachute - 79lb @ 20fps",
+      "variantId": "17945693552730",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "ifc-120-s",
+      "supplier": "fruity",
+      "handle": "iris-ultra-120-compact-parachute-79lbs-20fps-44lbs-15fps",
+      "productTitle": "Iris Ultra 120\" Compact Parachute - 79lb @ 20fps; 44lb @ 15fps",
+      "variantId": "42347787321558",
+      "variantTitle": "Orange/Black"
+    },
+    {
+      "partId": "cfc-012-n",
+      "supplier": "fruity",
+      "handle": "12-elliptical-parachute-0-5lb-20fps",
+      "productTitle": "12\" Elliptical Parachute - 0.5lb at 20fps",
+      "variantId": "32095113511002",
+      "variantTitle": "Stock"
+    },
+    {
+      "partId": "cfc-012-s",
+      "supplier": "fruity",
+      "handle": "12-compact-elliptical-parachute-0-5lb-20fps",
+      "productTitle": "12\" Compact Elliptical Parachute - 0.5lb @ 20fps",
+      "variantId": "32095106826330",
+      "variantTitle": "Stock"
+    },
+    {
+      "partId": "cfc-015-n",
+      "supplier": "fruity",
+      "handle": "15-elliptical-parachute-0-8lb-20fps",
+      "productTitle": "15\" Elliptical Parachute - 0.8lb at 20fps",
+      "variantId": "32095113478234",
+      "variantTitle": "Stock"
+    },
+    {
+      "partId": "cfc-015-s",
+      "supplier": "fruity",
+      "handle": "15-compact-elliptical-parachute-0-8lb-20fps",
+      "productTitle": "15\" Compact Elliptical Parachute - 0.8lb at 20fps",
+      "variantId": "32095113445466",
+      "variantTitle": "Stock"
+    },
+    {
+      "partId": "cfc-018-n",
+      "supplier": "fruity",
+      "handle": "18-elliptical-parachute-1-2-lb-20fps",
+      "productTitle": "18\" Elliptical Parachute - 1.2lb at 20fps",
+      "variantId": "32095113412698",
+      "variantTitle": "Stock"
+    },
+    {
+      "partId": "cfc-018-s",
+      "supplier": "fruity",
+      "handle": "18-compact-elliptical-parachute-1-2lb-20fps",
+      "productTitle": "18\" Compact Elliptical Parachute - 1.2lb at 20fps",
+      "variantId": "32094927618138",
+      "variantTitle": "Stock"
+    }
+  ]
+}

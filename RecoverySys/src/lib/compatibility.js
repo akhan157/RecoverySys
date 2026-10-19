@@ -49,7 +49,7 @@ const MID_DROGUE_ALT_FT = 5000 // air ~15% thinner here vs sea level
 
 // Rule thresholds — moving these out of rule bodies so a future tuning
 // doesn't require finding them inside an if/else maze.
-const PACKING_EFFICIENCY = 0.7 // real-world packing is ~70% of ideal linear stacking
+const PACKING_EFFICIENCY = 0.7 // screening assumption; not measured physical occupancy
 const SF_MARGINAL_RATIO_QL = 1.2 // looser ratio for ql-vs-cord (links rarely exceed cord by much)
 const SHAPE_OPENING_FACTOR_Cx = {
   flat: 1.8,
@@ -151,6 +151,7 @@ const INPUT_PATHS = {
 }
 
 function normalizeWarning(warning) {
+  const classification = warning.slot === 'bay_volume' ? 'heuristic' : 'calculation'
   const inputPaths = INPUT_PATHS[warning.slot] ?? [`config.${warning.slot}`]
   const partRefs = [warning.slot]
   const finding = normalizeFinding({
@@ -158,9 +159,9 @@ function normalizeWarning(warning) {
     rule: warning.rule ?? warning.message,
     inputPaths,
     affectedPartIds: partRefs,
-    classification: 'calculation',
+    classification,
     source: {
-      classification: 'calculation',
+      classification,
       reference: 'src/lib/compatibility.js',
     },
   })
@@ -178,7 +179,7 @@ function normalizeWarning(warning) {
         ? 'Correct the affected input or replace the referenced part before flight.'
         : 'Review the affected input and address the recommendation before flight.'),
     evidenceClassification: 'derived',
-    sourceClassification: 'calculation',
+    sourceClassification: classification,
     evidence: {
       classification: 'derived',
       source: 'compatibility-rule',
@@ -654,7 +655,7 @@ function rule_packedDiameterFit(ctx) {
       out.push(
         err(
           slot,
-          `${item.name} packed diameter ${pd}" exceeds airframe ID ${airframe_id}" — won't fit in tube`
+          `${item.name} packed diameter ${pd}" exceeds airframe ID ${airframe_id}" — exceeds the nominal diameter screen; verify actual dimensions and packing`
         )
       )
     }
@@ -683,7 +684,7 @@ function rule_bayVolumeStacked(ctx) {
     return [
       err(
         'bay_volume',
-        `Packed components ~${stacked_vol.toFixed(0)} in³ exceed ~${effective_usable.toFixed(0)} in³ effective bay capacity (${Math.round(PACKING_EFFICIENCY * 100)}% packing efficiency of ${usable_volume.toFixed(0)} in³${obstrNote}) — won't close`,
+        `Nominal-height screening value ~${stacked_vol.toFixed(0)} in³ exceeds the ~${effective_usable.toFixed(0)} in³ model threshold (${Math.round(PACKING_EFFICIENCY * 100)}% assumed allowance applied to ${usable_volume.toFixed(0)} in³${obstrNote}) — above the nominal-height screening threshold; actual closure requires a physical packing trial`,
         { criterion }
       ),
     ]
@@ -693,7 +694,7 @@ function rule_bayVolumeStacked(ctx) {
     return [
       warn(
         'bay_volume',
-        `Bay is ${pct}% of effective capacity (~${stacked_vol.toFixed(0)} in³ of ~${effective_usable.toFixed(0)} in³ at ${Math.round(PACKING_EFFICIENCY * 100)}% packing efficiency${obstrNote}) — very tight`,
+        `Nominal-height screening index is ${pct}% of its assumed threshold (~${stacked_vol.toFixed(0)} in³ of ~${effective_usable.toFixed(0)} in³ at a fixed ${Math.round(PACKING_EFFICIENCY * 100)}% allowance${obstrNote}) — near the nominal-height screening threshold; actual occupied space is unknown`,
         { criterion }
       ),
     ]

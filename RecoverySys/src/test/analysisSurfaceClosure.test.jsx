@@ -189,7 +189,7 @@ describe('M3 Analysis usability closure', () => {
       <AnalysisTab state={baseState()} confidenceProps={confidenceProps()} />
     )
     expect(screen.queryByText(/FLIGHT_TIMELINE/)).not.toBeInTheDocument()
-    expect(screen.queryByText(/PACKING_VOLUME/)).not.toBeInTheDocument()
+    expect(screen.queryByText(/PACKING_SCREEN/)).not.toBeInTheDocument()
     unmount()
 
     render(<SimulationTab state={baseState()} runSim={vi.fn()} canRun resultFresh />)
@@ -198,8 +198,8 @@ describe('M3 Analysis usability closure', () => {
     expect(screen.getByText(/APOGEE @ 6,000 FT/)).toBeInTheDocument()
     expect(screen.getByText(/MAIN_DEPLOY @ 500 FT/)).toBeInTheDocument()
     expect(screen.getByText(/LANDING @ 1,000 FT DOWNWIND/)).toBeInTheDocument()
-    expect(screen.getByText(/PACKING_VOLUME/)).toBeInTheDocument()
-    expect(screen.getByText(/STACKED_COMPONENTS/)).toBeInTheDocument()
+    expect(screen.getByText(/PACKING_SCREEN/)).toBeInTheDocument()
+    expect(screen.getByText(/NOMINAL_HEIGHT_MODEL/)).toBeInTheDocument()
   })
 
   it('focuses the destination spec input and shows a return path from a review action', async () => {

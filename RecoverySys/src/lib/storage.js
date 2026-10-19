@@ -2,6 +2,7 @@
 import { SCHEMA_VERSION } from './schema.js'
 import {
   normalizeStoredPayload,
+  normalizeImportedSource,
   normalizeCustomParts,
   normalizeCustomMotor,
   isValidCustomPart as isValidBoundaryPart,
@@ -56,11 +57,17 @@ export function canPersistCustomParts(customParts) {
 
 export const rehydrateCustomMotor = normalizeCustomMotor
 
-export function saveConfigToStorage({ config, specs, customMotor }) {
+export function saveConfigToStorage({ config, specs, customMotor, importedSource }) {
   try {
     localStorage.setItem(
       STORAGE_KEYS.CONFIG,
-      JSON.stringify({ schemaVersion: SCHEMA_VERSION, config, specs, customMotor })
+      JSON.stringify({
+        schemaVersion: SCHEMA_VERSION,
+        config,
+        specs,
+        customMotor,
+        importedSource: normalizeImportedSource(importedSource),
+      })
     )
     return true
   } catch {

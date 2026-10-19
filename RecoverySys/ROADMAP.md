@@ -1,8 +1,8 @@
 # RecoverySys Product Roadmap
 
-**Roadmap revision:** 2026-08-13
+**Roadmap revision:** 2026-10-18
 **Current branch:** `main`
-**Current release:** `1.2.0.1`
+**Current candidate:** `1.3.0-rc.1` (2026-10-19; qualification pending)
 
 This is the high-level source of truth for product direction and progress. The
 detailed implementation plans remain useful, but they are subordinate to this
@@ -37,6 +37,17 @@ moving a planner from inputs to a current, traceable, independently reviewable
 decision without overstating what the model or evidence can prove. The six
 phase goal plan is defined in
 [`PRODUCT-STRATEGY-BRIEF.md`](PRODUCT-STRATEGY-BRIEF.md#15-six-phase-product-roadmap).
+
+## Current product expansion
+
+The user confirmed switchable 2D/3D recovery-bay inspection, legacy OpenRocket
+import, and supplier price/stock information for budgeting. These support the
+same recovery-review purpose. The 2D/3D size-view experiment was subsequently deferred after user review found insufficient practical value. Implementation details and remaining evidence are
+in [docs/next-steps.md](docs/next-steps.md),
+[docs/bay-visualization.md](docs/bay-visualization.md),
+[docs/supplier-refresh.md](docs/supplier-refresh.md), and
+[docs/v1-field-trial.md](docs/v1-field-trial.md). Code completion does not close
+Windows/macOS qualification, observed trials, or engineering-source review.
 
 ## How To Use This Roadmap
 
@@ -677,3 +688,5 @@ Until these gaps are reduced, RecoverySys should present itself as a transparent
 recovery-planning aid, not an authority that replaces engineering judgment,
 manufacturer guidance, field procedures, range rules, or validated flight
 simulation.
+
+Current candidate evidence supersedes historical snapshots: see `docs/release-qualification-2026-10-19.md` and `docs/next-steps.md`. Commercial coverage is 103 distinct IDs across three manufacturers; engineering proposals remain unaccepted.

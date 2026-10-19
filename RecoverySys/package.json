@@ -1,6 +1,6 @@
 {
   "name": "recoverysys",
-  "version": "1.2.0.1",
+  "version": "1.3.0-rc.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -29,7 +29,12 @@
     "report:catalog-provenance": "node scripts/report-catalog-provenance.js",
     "lint": "eslint src --max-warnings=0",
     "format": "prettier --write \"src/**/*.{js,jsx,css}\"",
-    "format:check": "prettier --check \"src/**/*.{js,jsx,css}\""
+    "format:check": "prettier --check \"src/**/*.{js,jsx,css}\"",
+    "suppliers:preview": "node scripts/refresh-suppliers.mjs",
+    "suppliers:refresh": "node scripts/refresh-suppliers.mjs --write",
+    "catalog:review": "node scripts/review-catalog.mjs",
+    "suppliers:coverage": "node scripts/supplier-coverage.mjs",
+    "catalog:stage:fruity": "node scripts/stage-fruity-engineering.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.3",
@@ -55,6 +60,7 @@
     "prettier": "^3.4.0",
     "tailwindcss": "^3.4.1",
     "vite": "^7.3.6",
-    "vitest": "^3.2.7"
+    "vitest": "^4.1.11",
+    "three": "0.186.1"
   }
 }

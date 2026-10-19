@@ -1,0 +1,61 @@
+{
+  "status": "review-only",
+  "constants": {
+    "g_m_s2": 9.80665,
+    "R_J_kg_K": 287.05287,
+    "T0_K": 288.15,
+    "P0_Pa": 101325.0,
+    "lapse_K_m": 0.0065
+  },
+  "sources": [
+    "https://www.grc.nasa.gov/www/k-12/airplane/atmosmet.html",
+    "https://www.grc.nasa.gov/www/k-12/airplane/termv.html"
+  ],
+  "limitations": [
+    "Shared governing equations are not independent experimental evidence.",
+    "More precise reference constants and exact conversions can exceed existing extremely tight regression tolerances. Review tolerance basis before accepting cases.",
+    "No case acceptance or production model changes are performed."
+  ],
+  "cases": [
+    {
+      "case": "isa-density-sea-level",
+      "reference": 1.225000018124288,
+      "recordedExpected": 1.2249781262,
+      "unit": "kg/m^3",
+      "difference": 2.1891924288031106e-05,
+      "withinRecordedTolerance": false,
+      "equation": "rho = P0*(T/T0)^(g/(R*L))/(R*T); T=T0-L*h",
+      "status": "requires-independent-review"
+    },
+    {
+      "case": "isa-density-5000m",
+      "reference": 0.736115547399152,
+      "recordedExpected": 0.736100614,
+      "unit": "kg/m^3",
+      "difference": 1.4933399151928484e-05,
+      "withinRecordedTolerance": false,
+      "equation": "rho = P0*(T/T0)^(g/(R*L))/(R*T); T=T0-L*h",
+      "status": "requires-independent-review"
+    },
+    {
+      "case": "terminal-descent-36in-main-sea-level",
+      "reference": 20.913924801480448,
+      "recordedExpected": 20.9141123491,
+      "unit": "ft/s",
+      "difference": -0.00018754761955364074,
+      "withinRecordedTolerance": false,
+      "equation": "v=sqrt(2*m*g/(rho*Cd*pi*d^2/4)); m/s / 0.3048 -> ft/s",
+      "status": "requires-independent-review"
+    },
+    {
+      "case": "landing-energy-36in-main-sea-level",
+      "reference": 37,
+      "recordedExpected": 37,
+      "unit": "ft-lbf",
+      "difference": 0,
+      "withinRecordedTolerance": true,
+      "equation": "KE = 0.5*m*v^2; J / 1.3558179483314004 -> ft-lbf, rounded",
+      "status": "requires-independent-review"
+    }
+  ]
+}

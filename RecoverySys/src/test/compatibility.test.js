@@ -1,3 +1,4 @@
+import { compatibilityFindingCode } from '../lib/findings.js'
 import { describe, it, expect } from 'vitest'
 import { checkCompatibility, slotStatus } from '../lib/compatibility.js'
 import { normalizeCalculationInputs } from '../lib/schema.js'
@@ -197,7 +198,10 @@ describe('checkCompatibility', () => {
     })
     expect(
       warnings.some(
-        (w) => w.slot === 'main_chute' && w.level === 'error' && w.message.includes("won't fit")
+        (w) =>
+          w.slot === 'main_chute' &&
+          w.level === 'error' &&
+          w.message.includes('nominal diameter screen')
       )
     ).toBe(true)
   })
@@ -466,5 +470,28 @@ describe('slotStatus', () => {
       { level: 'error', slot: 'main_chute', message: 'error' },
     ]
     expect(slotStatus('main_chute', warnings)).toBe('error')
+  })
+})
+
+describe('packing screening identity', () => {
+  it('preserves authored finding identity when closure claims are corrected', () => {
+    expect(compatibilityFindingCode('bay_volume', 'Nominal-height screening value 200')).toBe(
+      compatibilityFindingCode('bay_volume', 'Packed components 200')
+    )
+    expect(compatibilityFindingCode('bay_volume', 'Nominal-height screening index is 90%')).toBe(
+      compatibilityFindingCode('bay_volume', 'Bay is 90%')
+    )
+  })
+  it('labels packing assumptions as a heuristic and does not claim physical closure', () => {
+    const findings = checkCompatibility({
+      config: {
+        main_chute: { ...validMain, specs: { ...validMain.specs, packed_length_in: 100 } },
+      },
+      specs: baseSpecs,
+    })
+    const finding = findings.find((item) => item.slot === 'bay_volume')
+    expect(finding.classification).toBe('heuristic')
+    expect(finding.message).toContain('physical packing trial')
+    expect(finding.message).not.toContain("won't close")
   })
 })

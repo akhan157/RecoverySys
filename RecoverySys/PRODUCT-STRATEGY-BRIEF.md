@@ -121,7 +121,7 @@ The current product does not claim:
 - Full vehicle simulation, 6-DOF aerodynamics, stability, rail-exit analysis, or universal motor/airframe performance modeling.
 - Automatic launch authorization, certification, flight-readiness approval, or a safety score.
 - A universal dynamic snatch-load truth model.
-- Accounts, cloud persistence, live collaboration, automatic flight-log upload, or a hosted parts authority.
+- Accounts, cloud persistence, live collaboration, automatic flight-log upload, or a required hosted engineering-parts authority. Optional published commercial snapshots support budgeting without receiving user plans.
 - Automatic optimization before the objective function and model evidence are defensible.
 - Accepted comparison evidence, real-flight validation, manufacturer verification, or universal accuracy.
 - Python as a production runtime, release gate, or replacement for the browser authority.

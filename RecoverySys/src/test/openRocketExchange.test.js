@@ -1,8 +1,9 @@
 import { readFileSync } from 'node:fs'
+import { createHash } from 'node:crypto'
 import { cwd } from 'node:process'
 import { resolve } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { strToU8, zipSync } from 'fflate'
+import { strToU8, zipSync, gzipSync } from 'fflate'
 import { parseOpenRocketArchive } from '../lib/openRocketExchange.js'
 
 const fixtureRoot = resolve(cwd(), 'src/test/fixtures/openrocket')
@@ -216,4 +217,56 @@ describe('OpenRocket exchange parser', () => {
 
     expect(() => parseOpenRocketArchive(strToU8('not a zip'))).toThrow(/readable OpenRocket ZIP/i)
   })
+  it.each(['1.4', '1.5', '1.6', '1.7', '1.8', '1.9'])(
+    'reads authentic upstream legacy %s with reviewable geometry',
+    (version) => {
+      const exchange = parseOpenRocketArchive(fixture(`legacy-example-${version}.ork`))
+      expect(exchange.source.formatVersion).toBe(version)
+      expect(exchange.project.stages.length).toBeGreaterThan(0)
+      expect(exchange.project.configurations.length).toBeGreaterThan(0)
+      expect(
+        exchange.vehicleCandidates.some((candidate) => candidate.targetField === 'airframe_id_in')
+      ).toBe(true)
+      expect(exchange.warnings.some((warning) => warning.code === 'LEGACY_FORMAT')).toBe(true)
+    }
+  )
+  it('rejects oversized gzip expansion and unsafe plain XML', () => {
+    const bomb = gzipSync(strToU8('x'.repeat(13 * 1024 * 1024)))
+    expect(() => parseOpenRocketArchive(bomb)).toThrow(/size limit/i)
+    expect(() =>
+      parseOpenRocketArchive(
+        strToU8('<?xml version="1.0"?><!DOCTYPE openrocket><openrocket version="1.4"/>')
+      )
+    ).toThrow(/prohibited/i)
+  })
+  it('does not invent a radius when legacy auto neighbors disagree', () => {
+    const xml =
+      '<openrocket version="1.4"><rocket><subcomponents><stage><subcomponents><nosecone><aftradius>0.02</aftradius></nosecone><bodytube><radius>auto</radius><thickness>0.001</thickness><length>0.4</length></bodytube><transition><foreradius>0.03</foreradius></transition></subcomponents></stage></subcomponents></rocket></openrocket>'
+    const exchange = parseOpenRocketArchive(strToU8(xml))
+    expect(
+      exchange.vehicleCandidates.some((candidate) => candidate.targetField === 'airframe_id_in')
+    ).toBe(false)
+  })
+  it.each(
+    JSON.parse(readFileSync(`${fixtureRoot}/manifest.json`, 'utf8')).fixtures.filter((record) =>
+      record.file.startsWith('corpus-')
+    )
+  )(
+    'retains source hash and useful review candidates for $file',
+    (record) => {
+      const bytes = fixture(record.file)
+      expect(createHash('sha256').update(bytes).digest('hex')).toBe(record.sha256)
+      const exchange = parseOpenRocketArchive(bytes)
+      expect(exchange.source.formatVersion).toBe(record.version)
+      expect(exchange.project.stages.length).toBeGreaterThan(0)
+      expect(exchange.project.configurations.length).toBeGreaterThan(0)
+      expect(
+        exchange.vehicleCandidates.some((candidate) => candidate.targetField === 'airframe_id_in')
+      ).toBe(true)
+      expect(
+        exchange.externalResults.every((result) => result.status === 'external-reference')
+      ).toBe(true)
+    },
+    20000
+  )
 })

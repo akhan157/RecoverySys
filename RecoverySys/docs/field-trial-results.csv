@@ -1,0 +1,1 @@
+participant_id,candidate,artifact_sha256,os,ork_version,task,baseline_seconds,import_seconds,fields_proposed,fields_accepted,mass_ambiguity,stale_handling,source_identity_preserved,supplier_usefulness,next_plan_preference,notes
