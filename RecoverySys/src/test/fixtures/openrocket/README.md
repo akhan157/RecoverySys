@@ -3,6 +3,7 @@
 `manifest.json` records source repositories, pinned revisions and SHA-256 hashes.
 Upstream OpenRocket examples (including legacy formats) retain their upstream
 attribution; the original example authors are recorded inside their files.
+The pinned upstream notice is retained in `licenses/openrocket-LICENSE.TXT`.
 The Bryant file retains its original manifest source record.
 
 The 25 `corpus-real-*` files were sourced from three public design/tool projects.

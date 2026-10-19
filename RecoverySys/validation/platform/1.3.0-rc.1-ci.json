@@ -1,0 +1,42 @@
+{
+  "candidate": "1.3.0-rc.1",
+  "testedApplicationCommit": "65ab868fb0a9607b60fe7d9546074516ffe32c97",
+  "run": "https://github.com/akhan157/RecoverySys/actions/runs/39324880549",
+  "linux": {
+    "check": "passed",
+    "unitTests": 386,
+    "browserTests": 62
+  },
+  "windows": {
+    "archiveInspection": "passed",
+    "processAliveSeconds": 15,
+    "manualWorkflowReview": false
+  },
+  "macos": {
+    "slices": [
+      "x86_64",
+      "arm64"
+    ],
+    "signatureVerification": "passed",
+    "processAliveSeconds": 15,
+    "manualWorkflowReview": false,
+    "launchCoverage": "runner host architecture only"
+  },
+  "artifacts": [
+    {
+      "platform": "web",
+      "filename": "RecoverySys-web.zip",
+      "sha256": "c4232782ba8a3f09922a1949112fb460aef877d090c120b8c64eb3ecc514f93d"
+    },
+    {
+      "platform": "windows",
+      "filename": "RecoverySys-Portable.zip",
+      "sha256": "301c4cb1864dbfa6d563aeaac53e2f0c8a5520f54e723e1b602f59fe08aed9a0"
+    },
+    {
+      "platform": "macos",
+      "filename": "RecoverySys-macos-universal.zip",
+      "sha256": "8934c9636b124c80d83e0d44d10c6bcdca75e78cfaf5796810a5446e64546d4d"
+    }
+  ]
+}

@@ -26,8 +26,8 @@ state. Record conditions and method alongside each pair of dimensions.
 | B | | | | | |
 | C | | | | | |
 
-The app's minimum/maximum fields summarize independent bounds only. They do
-not preserve all packing-state relationships or imply that every combination
+The archived prototype's minimum/maximum fields summarized independent bounds
+only; those fields are not exposed in V1. They do not preserve all packing-state relationships or imply that every combination
 within the bounds is physically achievable.
 
 ## Whole-assembly observation

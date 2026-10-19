@@ -12,7 +12,7 @@ Legacy OpenRocket import, persistent accepted-source metadata, commercial suppli
 - Catalog: 225 category entries, 205 distinct IDs; unmatched commercial data stays unknown.
 - Import corpus: 38 fixtures, including 26 real-world files with substantial shared lineage.
 - Physics corpus: 14 review-only cases; zero accepted comparison cases and zero real-flight cases.
-- Local Node 22.23.3: clean dependency install succeeded; formatting, lint, catalog/corpus validation, 41 test files / 386 tests and production build passed. Full browser suite and remote platform jobs are pending.
+- Local Node 22.23.3: clean dependency install succeeded; formatting, lint, catalog/corpus validation, 41 test files / 386 tests and production build passed. Both initial and patched-dependency full browser suites passed 62/62. The patched Vitest 4.1.12 check passed all 386 tests and the build. Remote Linux checks and all 62 browser workflows also passed. Windows portable archive inspection, SHA-256 and 15-second process launch passed. macOS universal slices, signature verification, SHA-256 and a 15-second process launch on the runner host passed. These are automated smoke checks, not manual workflow qualification.
 - Manual Windows/macOS workflows and 10–15 observed user trials: open. CI builds cannot substitute for these observations.
 
 ## Tester workflow
@@ -33,3 +33,11 @@ parsing). The build processes repository-controlled CSS and glob patterns; none
 of this tooling is shipped in the browser runtime. A Tailwind major migration
 requires separate stylesheet/build qualification and is not silently forced in
 this candidate. Recheck advisories before promoting a stable release.
+
+Remote candidate: [PR #15](https://github.com/akhan157/RecoverySys/pull/15), application commit `65ab868fb0a9607b60fe7d9546074516ffe32c97`. [PR qualification run](https://github.com/akhan157/RecoverySys/actions/runs/39324880549) passed all three jobs. The redundant [branch run](https://github.com/akhan157/RecoverySys/actions/runs/39324862644) was cancelled. Machine-readable results and downloaded artifact hashes are in `validation/platform/1.3.0-rc.1-ci.json`.
+
+PR #15 merged as `095bdd3565c4537e18dc30468c3cb8c8e60d322d`. Web publication succeeded through [deployment run](https://github.com/akhan157/RecoverySys/actions/runs/39325818680). Final evidence/attribution edits do not change application code or these checked artifacts.
+
+Supplier automation: [manual verification run](https://github.com/akhan157/RecoverySys/actions/runs/39325970396) succeeded with 103 offers, zero commercial-field changes and zero failures. The bot published refreshed timestamps as `bcd429c`; scheduled refresh is now active on main.
+
+Public verification: `https://akhan157.github.io/RecoverySys/` served candidate asset `index-c0uUVPNx.js` containing `1.3.0-rc.1` and `V1.3 RC1`. The configured raw-main supplier snapshot returned 103 offers from all three suppliers. Release assets were downloaded, locally hashed, and matched GitHub server-side SHA-256 digests. Test release: `https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.1`.

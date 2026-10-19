@@ -1,8 +1,8 @@
 # RecoverySys Product Roadmap
 
-**Roadmap revision:** 2026-10-18
+**Roadmap revision:** 2026-10-19
 **Current branch:** `main`
-**Current candidate:** `1.3.0-rc.1` (2026-10-19; qualification pending)
+**Current candidate:** `1.3.0-rc.1` (2026-10-19; local and remote CI passed; manual/user evidence open)
 
 This is the high-level source of truth for product direction and progress. The
 detailed implementation plans remain useful, but they are subordinate to this

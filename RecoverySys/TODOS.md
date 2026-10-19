@@ -11,3 +11,5 @@ Updated 2026-10-19. The authoritative current gate list is `docs/next-steps.md`.
 - Keep Python-engine work and 2D/3D visualization deferred pending a justified use case and qualification plan.
 
 Historical notes are archived in `docs/history/todos-2026-07-17.md`.
+
+Cosmetic follow-up: the initial loading skeleton retains the legacy `RECOVERYSYS_V1.2` brand and the landing page retains its historical build marker. Loaded application and packaged version fields report the candidate version correctly.

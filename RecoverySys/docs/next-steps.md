@@ -9,11 +9,16 @@ Implemented in this candidate:
 - Packing language describes heuristic screening rather than measured capacity or physical fit.
 - The rejected 2D/3D prototype is archived under `experiments/bay-view`; it is absent from the V1 interface and production bundle.
 
-Remaining release evidence:
-1. Clean supported Node install, complete local checks and production browser workflows for the final candidate.
-2. Remote CI, Windows portable and macOS universal builds, artifact hashes and actual launch evidence. Automated builds do not replace manual platform workflow review.
-3. Publish a clearly identified test release and collect 10–15 observed rocketeer workflows using `v1-field-trial.md`.
-4. Independent physics review: the existing 14 cases remain review-only; there are zero accepted comparison cases and zero real-flight cases.
-5. Expand supplier coverage only when exact product/variant identity is established. Review engineering source proposals before catalog changes.
+Verified candidate preparation:
+- Clean supported Node 22 install, 386 tests, formatting/lint/catalog/corpus checks and production build.
+- All 62 desktop/mobile browser workflows, locally and in remote Linux CI.
+- Windows portable and macOS universal artifacts, SHA-256 hashes and 15-second process-launch smoke checks in CI. Manual platform workflows remain open.
+- PR #15 merged; the web candidate is deployed and verified. Test-release downloads have matching local/CI/GitHub SHA-256 digests. Supplier automation passed its first remote refresh.
+
+Remaining external/review evidence:
+1. Manual Windows/macOS workflow trials and 10–15 observed rocketeer workflows using `v1-field-trial.md`.
+2. Independent physics review: the existing 14 cases remain review-only; zero accepted comparison cases and zero real-flight cases. Review the new standalone analytic report, including its tolerance findings.
+3. Review 37 manufacturer engineering candidates / 35 proposed field differences before any catalog change. Expand supplier coverage only when exact product/variant identity is established.
+4. Qualify a Tailwind migration to clear the seven remaining development-only advisories before stable promotion; the production dependency audit is clean.
 
 Model changes and a Python-engine decision remain evidence-led follow-up work. Browser JavaScript remains authoritative. Revisit visualization only after a useful assembly-review task and prototype have been reviewed.

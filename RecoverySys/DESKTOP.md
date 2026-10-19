@@ -1,9 +1,10 @@
 # RecoverySys desktop builds
 
-These are build outputs from the current `main` branch, not automatically attached
-GitHub Release downloads. Current main produces a portable Windows ZIP and a macOS
-universal CI artifact. The historical GitHub v1.2.0.0 release contains the older
-Windows installer asset; do not treat that installer as the current portable build.
+The current test candidate has [portable release downloads](https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.1)
+for Windows and macOS universal, with `SHA256SUMS.txt`. Automated build, archive,
+signature (macOS) and process-launch smoke checks passed. Manual platform
+workflow qualification remains open. CI also retains build artifacts.
+The historical v1.2.0.0 Windows installer is a separate older release.
 
 ## Version identity
 
