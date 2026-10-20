@@ -144,9 +144,13 @@ const LPS_CSS = `
 }
 .lps-hero-title {
   font-family: var(--lp-heading-font, 'JetBrains Mono', monospace);
-  font-size: clamp(44px, 6vw, 84px);
+  font-size: clamp(36px, 5.5vw, 72px);
   line-height: 1.0; font-weight: 700; color: #fff;
   letter-spacing: -0.03em; margin: 0;
+}
+@media (max-width: 760px) {
+  .lps-hero-copy { left: 24px; right: 24px; max-width: none; }
+  .lps-hero-title { font-size: clamp(22px, calc((100vw - 48px) / 10.5), 42px); }
 }
 .lps-hero-sub {
   font-family: 'Inter', sans-serif;

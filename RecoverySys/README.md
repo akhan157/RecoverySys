@@ -2,10 +2,13 @@
 
 RecoverySys is a local-first recovery-bay configuration and flight-estimation tool for high-power rocketry. It helps you assemble recovery hardware, review configuration warnings, and explore simulated flight and landing behavior before a launch.
 
-**Version 1.2.0.1**
+**Current test candidate: [1.3.0-rc.1](https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.1)**
 The complete product strategy, requirements outline, feature breakdown, acceptance criteria, metrics, risks, release strategy, and six-phase roadmap are in [`PRODUCT-STRATEGY-BRIEF.md`](PRODUCT-STRATEGY-BRIEF.md).
 
 ## Capabilities
+
+- Import OpenRocket formats 1.4–1.11 through a local review flow; preserve accepted-source identity across saves, JSON and share links.
+- Review timestamped supplier price/stock and incomplete-budget subtotals for 103 matched IDs across three manufacturers. Commercial refreshes do not change engineering inputs.
 
 - Configure recovery-bay components from the built-in parts catalog, including main and drogue parachutes, shock cord, and related hardware.
 - Enter rocket, motor, airframe, deployment, and wind specifications.
