@@ -1,0 +1,133 @@
+.transfer-tab {
+  min-width: 0;
+  min-height: 0;
+}
+
+.transfer-tab .mc-export__content,
+.transfer-tab .transfer-tab__flight-content {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 880px;
+  min-width: 0;
+  min-height: 0;
+  margin: 0 auto;
+  padding: 24px 28px;
+  flex: 1;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
+}
+
+.transfer-tab .mc-export__content {
+  gap: 24px;
+}
+
+.transfer-tab .mc-export__section {
+  padding-bottom: 24px;
+}
+
+.transfer-tab .transfer-tab__section {
+  border-top: 1px solid var(--mc-border);
+  margin-top: 24px;
+  padding-top: 20px;
+}
+
+.transfer-tab .transfer-tab__heading {
+  margin: 0 0 10px;
+  color: var(--mc-text-dim);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  line-height: 1.5;
+  text-transform: uppercase;
+}
+
+.transfer-tab .transfer-tab__history-heading {
+  margin-top: 24px;
+}
+
+.transfer-tab .transfer-tab__description,
+.transfer-tab .transfer-tab__note {
+  margin: 0 0 12px;
+  color: var(--mc-text-dim);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.transfer-tab .transfer-tab__note {
+  margin: 8px 0 0;
+  font-size: 10px;
+}
+
+.transfer-tab .transfer-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.transfer-tab .transfer-actions__primary,
+.transfer-tab .transfer-actions__secondary {
+  width: auto;
+  max-width: 100%;
+  min-height: 44px;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  overflow-wrap: anywhere;
+}
+
+.transfer-tab .transfer-actions__primary {
+  align-self: flex-start;
+  border-color: var(--mc-green);
+  color: var(--mc-green);
+  padding: 10px 16px;
+}
+
+.transfer-tab .transfer-actions__secondary {
+  border-color: var(--mc-border);
+  color: var(--mc-text-dim);
+  padding: 8px 12px;
+}
+
+.transfer-tab .transfer-actions__secondary:hover {
+  border-color: var(--mc-text-dim);
+  color: var(--mc-text);
+}
+
+.transfer-tab .mc-run-btn:disabled {
+  border-color: var(--mc-border-card);
+  color: var(--mc-text-faint);
+}
+.transfer-tab .transfer-flight-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.transfer-tab .transfer-flight-form__grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.transfer-tab .transfer-flight-form__grid > div {
+  min-width: 0;
+}
+
+.transfer-tab select,
+.transfer-tab input,
+.transfer-tab textarea {
+  box-sizing: border-box;
+  max-width: 100%;
+  min-width: 0;
+}
+
+@media (max-width: 480px) {
+  .transfer-tab .mc-export__content,
+  .transfer-tab .transfer-tab__flight-content {
+    padding: 16px 12px;
+  }
+
+  .transfer-tab .transfer-flight-form__grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -1,0 +1,102 @@
+.specs-builder,
+.specs-inputs {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  gap: 20px;
+}
+
+.specs-builder {
+  padding: 16px;
+}
+
+.specs-inputs__intro {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.specs-inputs__group {
+  min-width: 0;
+  margin: 0;
+  padding: 14px 0 0;
+  border: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.specs-inputs__group > legend {
+  padding: 0 10px 0 0;
+  color: var(--text-primary);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.specs-inputs__grid,
+.specs-builder__hardware-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.specs-inputs__grid > *,
+.specs-builder__hardware-grid > * {
+  min-width: 0;
+}
+
+.specs-inputs__wind-layer {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.specs-inputs__wind-layer > * {
+  min-width: 0;
+}
+
+.specs-builder__actions {
+  padding-bottom: 4px;
+}
+
+.specs-builder__disclosure {
+  min-width: 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.specs-builder__disclosure > summary {
+  min-height: 44px;
+  padding: 12px 0;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.specs-builder__disclosure > summary > span {
+  display: inline-block;
+  margin-left: 12px;
+  color: var(--text-tertiary);
+  font-size: 11px;
+}
+
+.specs-builder__warnings > summary,
+.specs-builder__warnings > summary > span {
+  color: var(--warn-fg);
+}
+
+.specs-builder__disclosure > summary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+
+.specs-builder__disclosure[open] > summary {
+  margin-bottom: 8px;
+}
+
+@media (max-width: 600px) {
+  .specs-inputs__grid,
+  .specs-builder__hardware-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

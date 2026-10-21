@@ -1,21 +1,22 @@
-import { useState, useMemo, useEffect, useRef, useCallback } from 'react'
+import { lazy, Suspense, useState, useMemo, useEffect, useRef, useCallback } from 'react'
 import GuidedReview from './GuidedReview.jsx'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
 import { computePackingVolume } from '../lib/compatibility.js'
 import { isResultFresh } from '../lib/resultIntegrity.js'
 import DashboardTab from './tabs/DashboardTab.jsx'
-import SimulationTab from './tabs/SimulationTab.jsx'
-import DispersionTab from './tabs/DispersionTab.jsx'
 import SpecsTab from './tabs/SpecsTab.jsx'
-import ExportTab from './tabs/ExportTab.jsx'
-import CompareTab from './tabs/CompareTab.jsx'
-import FlightLogTab from './tabs/FlightLogTab.jsx'
-import AnalysisTab from './tabs/AnalysisTab.jsx'
-import RecoveryBriefTab from './tabs/RecoveryBriefTab.jsx'
 import { buildRecoveryBrief } from '../lib/recoveryBrief.js'
 import PrintChecklist from './PrintChecklist.jsx'
 import './MissionControlLayout.css'
+
+const SimulationTab = lazy(() => import('./tabs/SimulationTab.jsx'))
+const DispersionTab = lazy(() => import('./tabs/DispersionTab.jsx'))
+const ExportTab = lazy(() => import('./tabs/ExportTab.jsx'))
+const CompareTab = lazy(() => import('./tabs/CompareTab.jsx'))
+const FlightLogTab = lazy(() => import('./tabs/FlightLogTab.jsx'))
+const AnalysisTab = lazy(() => import('./tabs/AnalysisTab.jsx'))
+const RecoveryBriefTab = lazy(() => import('./tabs/RecoveryBriefTab.jsx'))
 
 const TABS = [
   { id: 'GUIDED_REVIEW', label: 'GUIDED_REVIEW' },
@@ -68,6 +69,14 @@ export default function MissionControlLayout({
 
   useEffect(() => {
     activeTabRef.current = activeTab
+  }, [activeTab])
+
+  useEffect(() => {
+    const revealActiveTab = () =>
+      tabRefs.current.get(activeTab)?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+    revealActiveTab()
+    window.addEventListener('resize', revealActiveTab)
+    return () => window.removeEventListener('resize', revealActiveTab)
   }, [activeTab])
 
   useEffect(() => {
@@ -131,14 +140,18 @@ export default function MissionControlLayout({
     resultFresh,
     onNavigate: handleNavigate,
   }
-  const recoveryBrief = buildRecoveryBrief({
-    specs: state.specs,
-    config: state.config,
-    customMotor: state.customMotor,
-    simulation: state.simulation,
-    resultFresh,
-    warnings: state.warnings,
-  })
+  const recoveryBrief = useMemo(
+    () =>
+      buildRecoveryBrief({
+        specs: state.specs,
+        config: state.config,
+        customMotor: state.customMotor,
+        simulation: state.simulation,
+        resultFresh,
+        warnings: state.warnings,
+      }),
+    [state.specs, state.config, state.customMotor, state.simulation, resultFresh, state.warnings]
+  )
 
   // Mirror runSimulation's preconditions exactly — inputs are strings from <input>,
   // so '0' and '-5' are truthy. parseFloat(...) > 0 matches what simulation.js rejects.
@@ -225,120 +238,128 @@ export default function MissionControlLayout({
             aria-labelledby={tabBtnId(activeTab)}
             tabIndex={0}
           >
-            {activeTab === 'GUIDED_REVIEW' && (
-              <GuidedReview
-                resultFresh={resultFresh}
-                state={state}
-                recoveryBrief={recoveryBrief}
-                onOpenDashboard={() => setActiveTab('DASHBOARD')}
-                onOpenSpecs={() => setActiveTab('SPECS')}
-                onOpenSimulation={() => setActiveTab('SIMULATION')}
-                onOpenImport={() => setActiveTab('EXPORT')}
-                onStartFresh={() => {
-                  // Demo data must never become (or be mistaken for) the user's own
-                  // plan: starting fresh inside a demo session leaves the session
-                  // the same way the banner's START_FRESH does, so no demo inputs
-                  // survive and a reload cannot reseed them over user work.
-                  if (demoMode) {
-                    onExitDemo()
-                    return
-                  }
-                  clearAll()
-                  setActiveTab('SPECS')
-                }}
-              />
-            )}
-            {activeTab === 'DASHBOARD' && (
-              <DashboardTab
-                state={state}
-                allParts={allParts}
-                customParts={customParts}
-                filledSlots={filledSlots}
-                packingVolume={packingVolume}
-                hasWarnings={hasWarnings}
-                hasErrors={hasErrors}
-                canRun={canRun}
-                resultFresh={resultFresh}
-                selectPart={selectPart}
-                removePart={removePart}
-                setCategory={setCategory}
-                runSim={runSim}
-                addCustomPart={addCustomPart}
-                deleteCustomPart={deleteCustomPart}
-                editCustomPart={editCustomPart}
-                confidenceProps={confidenceProps}
-                reviewOrigin={reviewNav?.origin ?? null}
-                focusTarget={reviewNav?.target ?? null}
-                onFocusConsumed={consumeReviewFocus}
-                onReturnToAnalysis={returnToAnalysis}
-              />
-            )}
-            {activeTab === 'SIMULATION' && (
-              <SimulationTab
-                state={state}
-                runSim={runSim}
-                canRun={canRun}
-                resultFresh={resultFresh}
-                confidenceProps={confidenceProps}
-                reviewOrigin={reviewNav?.origin ?? null}
-                focusTarget={reviewNav?.target ?? null}
-                onFocusConsumed={consumeReviewFocus}
-                onReturnToAnalysis={returnToAnalysis}
-              />
-            )}
-            {activeTab === 'ANALYSIS' && (
-              <AnalysisTab state={{ ...state, resultFresh }} confidenceProps={confidenceProps} />
-            )}
-            {activeTab === 'DISPERSION' && (
-              <DispersionTab state={state} resultFresh={resultFresh} />
-            )}
-            {activeTab === 'SPECS' && (
-              <SpecsTab
-                state={state}
-                setSpec={setSpec}
-                removePart={removePart}
-                setCategory={setCategory}
-                saveConfig={saveConfig}
-                copyShareLink={copyShareLink}
-                setCustomMotor={setCustomMotor}
-                clearCustomMotor={clearCustomMotor}
-                addToast={addToast}
-                reviewOrigin={reviewNav?.origin ?? null}
-                focusTarget={reviewNav?.target ?? null}
-                onFocusConsumed={consumeReviewFocus}
-                onReturnToAnalysis={returnToAnalysis}
-                onNavigate={(path) => {
-                  if (path.startsWith('config.')) setCategory(path.replace('config.', ''))
-                }}
-              />
-            )}
-            {activeTab === 'COMPARE' && (
-              <CompareTab
-                state={state}
-                resultFresh={resultFresh}
-                snapshot={state.compareSnapshot}
-                onSaveSnapshot={saveCompareSnapshot}
-                onClearSnapshot={clearCompareSnapshot}
-              />
-            )}
-            {activeTab === 'FLIGHT_LOG' && (
-              <FlightLogTab state={state} resultFresh={resultFresh} addToast={addToast} />
-            )}
-            {activeTab === 'RECOVERY_BRIEF' && <RecoveryBriefTab recoveryBrief={recoveryBrief} />}
-            {activeTab === 'EXPORT' && (
-              <ExportTab
-                state={state}
-                saveConfig={saveConfig}
-                copyShareLink={copyShareLink}
-                onLoadConfig={loadConfig}
-                onImportOpenRocket={onImportOpenRocket}
-                onAcceptOpenRocket={onAcceptOpenRocket}
-                recoveryBrief={recoveryBrief}
-                onOpenBrief={() => setActiveTab('RECOVERY_BRIEF')}
-                onPrintBrief={() => setPrintMode('brief')}
-                onPrintChecklist={() => setPrintMode('checklist')}
-              />
-            )}
+            <Suspense
+              fallback={
+                <p className="mc-loading" role="status">
+                  Loading workspace…
+                </p>
+              }
+            >
+              {activeTab === 'GUIDED_REVIEW' && (
+                <GuidedReview
+                  resultFresh={resultFresh}
+                  state={state}
+                  recoveryBrief={recoveryBrief}
+                  onOpenDashboard={() => setActiveTab('DASHBOARD')}
+                  onOpenSpecs={() => setActiveTab('SPECS')}
+                  onOpenSimulation={() => setActiveTab('SIMULATION')}
+                  onOpenImport={() => setActiveTab('EXPORT')}
+                  onStartFresh={() => {
+                    // Demo data must never become (or be mistaken for) the user's own
+                    // plan: starting fresh inside a demo session leaves the session
+                    // the same way the banner's START_FRESH does, so no demo inputs
+                    // survive and a reload cannot reseed them over user work.
+                    if (demoMode) {
+                      onExitDemo()
+                      return
+                    }
+                    clearAll()
+                    setActiveTab('SPECS')
+                  }}
+                />
+              )}
+              {activeTab === 'DASHBOARD' && (
+                <DashboardTab
+                  state={state}
+                  allParts={allParts}
+                  customParts={customParts}
+                  filledSlots={filledSlots}
+                  packingVolume={packingVolume}
+                  hasWarnings={hasWarnings}
+                  hasErrors={hasErrors}
+                  canRun={canRun}
+                  resultFresh={resultFresh}
+                  selectPart={selectPart}
+                  removePart={removePart}
+                  setCategory={setCategory}
+                  runSim={runSim}
+                  addCustomPart={addCustomPart}
+                  deleteCustomPart={deleteCustomPart}
+                  editCustomPart={editCustomPart}
+                  confidenceProps={confidenceProps}
+                  reviewOrigin={reviewNav?.origin ?? null}
+                  focusTarget={reviewNav?.target ?? null}
+                  onFocusConsumed={consumeReviewFocus}
+                  onReturnToAnalysis={returnToAnalysis}
+                />
+              )}
+              {activeTab === 'SIMULATION' && (
+                <SimulationTab
+                  state={state}
+                  runSim={runSim}
+                  canRun={canRun}
+                  resultFresh={resultFresh}
+                  confidenceProps={confidenceProps}
+                  reviewOrigin={reviewNav?.origin ?? null}
+                  focusTarget={reviewNav?.target ?? null}
+                  onFocusConsumed={consumeReviewFocus}
+                  onReturnToAnalysis={returnToAnalysis}
+                />
+              )}
+              {activeTab === 'ANALYSIS' && (
+                <AnalysisTab state={{ ...state, resultFresh }} confidenceProps={confidenceProps} />
+              )}
+              {activeTab === 'DISPERSION' && (
+                <DispersionTab state={state} resultFresh={resultFresh} />
+              )}
+              {activeTab === 'SPECS' && (
+                <SpecsTab
+                  state={state}
+                  setSpec={setSpec}
+                  removePart={removePart}
+                  setCategory={setCategory}
+                  saveConfig={saveConfig}
+                  copyShareLink={copyShareLink}
+                  setCustomMotor={setCustomMotor}
+                  clearCustomMotor={clearCustomMotor}
+                  addToast={addToast}
+                  reviewOrigin={reviewNav?.origin ?? null}
+                  focusTarget={reviewNav?.target ?? null}
+                  onFocusConsumed={consumeReviewFocus}
+                  onReturnToAnalysis={returnToAnalysis}
+                  onNavigate={(path) => {
+                    if (path.startsWith('config.')) setCategory(path.replace('config.', ''))
+                  }}
+                />
+              )}
+              {activeTab === 'COMPARE' && (
+                <CompareTab
+                  state={state}
+                  resultFresh={resultFresh}
+                  snapshot={state.compareSnapshot}
+                  onSaveSnapshot={saveCompareSnapshot}
+                  onClearSnapshot={clearCompareSnapshot}
+                />
+              )}
+              {activeTab === 'FLIGHT_LOG' && (
+                <FlightLogTab state={state} resultFresh={resultFresh} addToast={addToast} />
+              )}
+              {activeTab === 'RECOVERY_BRIEF' && <RecoveryBriefTab recoveryBrief={recoveryBrief} />}
+              {activeTab === 'EXPORT' && (
+                <ExportTab
+                  state={state}
+                  saveConfig={saveConfig}
+                  copyShareLink={copyShareLink}
+                  onLoadConfig={loadConfig}
+                  onImportOpenRocket={onImportOpenRocket}
+                  onAcceptOpenRocket={onAcceptOpenRocket}
+                  recoveryBrief={recoveryBrief}
+                  onOpenBrief={() => setActiveTab('RECOVERY_BRIEF')}
+                  onPrintBrief={() => setPrintMode('brief')}
+                  onPrintChecklist={() => setPrintMode('checklist')}
+                />
+              )}
+            </Suspense>
           </main>
         </div>
       </div>

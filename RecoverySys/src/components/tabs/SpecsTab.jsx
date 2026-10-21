@@ -11,6 +11,21 @@ const SPECS_TARGET_SELECTORS = Object.freeze({
   'specs.drag_cd': '#cd',
   'specs.main_deploy_alt_ft': '#deploy',
   'specs.wind_speed_mph': '#wind',
+  'specs.burn_time_s': '#burn',
+  'specs.airframe_id_in': '#airframe-id',
+  'specs.bay_length_in': '#bay-length',
+  'specs.bay_obstruction_vol_in3': '#bay-obstruction',
+  'specs.ejection_g_factor': '#g-factor',
+  'specs.wind_direction_deg': '#wind-dir',
+  'specs.wind_surface_alt_ft': '#wind-surface-alt',
+  'specs.wind_mid_speed_mph': '#wind-mid',
+  'specs.wind_mid_direction_deg': '#wind-mid-dir',
+  'specs.wind_mid_alt_ft': '#wind-mid-alt',
+  'specs.wind_aloft_speed_mph': '#wind-aloft',
+  'specs.wind_aloft_direction_deg': '#wind-aloft-dir',
+  'specs.wind_aloft_alt_ft': '#wind-aloft-alt',
+  'specs.launch_lat': '#launch-lat',
+  'specs.launch_lon': '#launch-lon',
 })
 
 export default function SpecsTab({
@@ -34,7 +49,11 @@ export default function SpecsTab({
     onConsumed: onFocusConsumed,
     resolve: (target) => {
       const selector = SPECS_TARGET_SELECTORS[target]
-      return selector ? document.querySelector(selector) : null
+      const element = selector ? document.querySelector(selector) : null
+      for (let ancestor = element?.parentElement; ancestor; ancestor = ancestor.parentElement) {
+        if (ancestor.tagName === 'DETAILS') ancestor.open = true
+      }
+      return element
     },
   })
 

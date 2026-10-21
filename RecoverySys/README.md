@@ -23,7 +23,7 @@ deferred-only; it is not used by the application or release builds.
 - Generate a Monte Carlo dispersion map with predicted drift vectors and uncertainty circles. This is an estimate of modeled dispersion, not a statistical confidence guarantee.
 - Compare a saved Config A with the current Config B.
 - Save and restore configurations in the browser, copy share links, import/export JSON, and print a recovery checklist.
-- Use light or dark appearance modes.
+- Use a dark technical workspace with compact status summaries and expandable evidence and supplier details.
 
 ## Local development
 
@@ -37,10 +37,20 @@ npm install
 npm run dev
 ```
 
+The app opens at `/RecoverySys/`; the landing page is at
+`/RecoverySys/landing/`. Both use the same Vite pipeline and npm React
+installation. Landing animations are bundled rather than loaded as CDN scripts;
+there is no browser-side JSX compilation.
+
+Heavy workspace tabs load on demand. If a view fails to render, the recovery
+screen offers a retry without clearing the current plan, or a reload of the
+saved session. Reloading can discard changes that have not yet been saved.
+
+
 Other useful commands:
 
 ```bash
-npm run build        # create the production build in dist/
+npm run build        # build app + landing in dist/ and dist/landing/
 npm run preview      # preview the production build locally
 npm test             # run the test suite once
 npm run test:watch   # run tests in watch mode

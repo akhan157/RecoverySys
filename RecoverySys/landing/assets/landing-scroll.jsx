@@ -4,8 +4,21 @@
    moments, final CTA. Built with GSAP + ScrollTrigger.
 
    Aesthetic: Mission Control dark + JetBrains Mono + green telemetry.
-   Reuses primitives from landing-primitives.jsx.
    ===================================================================== */
+import React from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import Lenis from 'lenis';
+import { CATEGORIES, PARTS } from '../../src/data/parts.js';
+import { VERSION } from '../../src/lib/constants.js';
+import FlightChart from './flight-chart.jsx';
+import LPScrollStyles from './landing-scroll-styles.jsx';
+
+gsap.registerPlugin(ScrollTrigger);
+
+const PART_COUNT = PARTS.length;
+const MANUFACTURER_COUNT = new Set(PARTS.map(part => part.manufacturer)).size;
+const CATEGORY_COUNT = CATEGORIES.length;
 
 /* ─────────────────────────────  GLOBE  ────────────────────────────── */
 /* Wire-globe renderer driven by scroll progress 0..1.
@@ -361,26 +374,7 @@ function LPProgressRail() {
     };
     onScroll();
     window.addEventListener('scroll', onScroll, { passive: true });
-
-    // Lenis swallows native scroll events — subscribe directly, with a retry
-    // loop since Lenis may initialize after this component mounts.
-    let lenisOff = null;
-    const tryBind = () => {
-      if (window.__lenis && window.__lenis.on) {
-        window.__lenis.on('scroll', onScroll);
-        lenisOff = () => window.__lenis.off && window.__lenis.off('scroll', onScroll);
-        return true;
-      }
-      return false;
-    };
-    let tries = 0;
-    const iv = setInterval(() => { if (tryBind() || ++tries > 40) clearInterval(iv); }, 50);
-
-    return () => {
-      window.removeEventListener('scroll', onScroll);
-      clearInterval(iv);
-      if (lenisOff) lenisOff();
-    };
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
@@ -398,8 +392,8 @@ function LPProgressRail() {
 /* Wrapper: listens for chart-variant tweak changes and re-runs the
  * path-draw ScrollTrigger animation each time the variant switches. */
 function LPFlightChartWrap() {
-  const [variant, setVariant] = React.useState(() => window.__LP_CHART_VARIANT || 'line');
-  const [palette, setPalette] = React.useState(() => window.__LP_CHART_PALETTE || 'green');
+  const [variant, setVariant] = React.useState('area');
+  const [palette, setPalette] = React.useState('green');
   const wrapRef = React.useRef(null);
 
   React.useEffect(() => {
@@ -412,92 +406,106 @@ function LPFlightChartWrap() {
   }, []);
 
   React.useEffect(() => {
-    if (!window.gsap || !window.ScrollTrigger || !wrapRef.current) return;
-    const paths = wrapRef.current.querySelectorAll('.lps-sim-path');
-    paths.forEach((p) => {
-      const len = p.getTotalLength();
-      p.style.strokeDasharray = len;
-      p.style.strokeDashoffset = len;
-      gsap.to(p, {
-        strokeDashoffset: 0,
-        ease: 'none',
-        scrollTrigger: {
-          trigger: wrapRef.current.closest('.lps-sim'),
-          start: 'top 70%', end: 'top 15%', scrub: 0.5,
-        },
+    if (!wrapRef.current) return;
+    const context = gsap.context(() => {
+      const paths = wrapRef.current.querySelectorAll('.lps-sim-path');
+      paths.forEach((p) => {
+        const len = p.getTotalLength();
+        p.style.strokeDasharray = len;
+        p.style.strokeDashoffset = len;
+        gsap.to(p, {
+          strokeDashoffset: 0,
+          ease: 'none',
+          scrollTrigger: {
+            trigger: wrapRef.current.closest('.lps-sim'),
+            start: 'top 70%', end: 'top 15%', scrub: 0.5,
+          },
+        });
       });
-    });
-    // Refresh so ScrollTrigger picks up the new path instantly
-    if (window.ScrollTrigger) window.ScrollTrigger.refresh();
+      ScrollTrigger.refresh();
+    }, wrapRef);
+    return () => context.revert();
   }, [variant, palette]);
 
-  const FC = window.FlightChart;
   return (
     <div ref={wrapRef}>
-      {FC ? <FC variant={variant} palette={palette} /> : null}
+      <FlightChart variant={variant} palette={palette} />
     </div>
   );
 }
 
 /* ───────────────────────────  MAIN PAGE  ──────────────────────────── */
-function LPScroll() {
+export default function LPScroll() {
   const rootRef = React.useRef(null);
   const heroStageRef = React.useRef(null);
   const progressRef = React.useRef(0);
 
-  // Wait for ScrollTrigger to load
   React.useEffect(() => {
-    let cancelled = false;
-    const attempt = () => {
-      if (cancelled) return;
-      if (window.gsap && window.ScrollTrigger) {
-        window.gsap.registerPlugin(window.ScrollTrigger);
-        setupScroll();
-      } else setTimeout(attempt, 40);
+    const lenis = new Lenis({
+      duration: 1.15,
+      easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.2,
+    });
+    const tick = time => lenis.raf(time * 1000);
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
+    return () => {
+      gsap.ticker.remove(tick);
+      lenis.destroy();
     };
-    attempt();
-    return () => { cancelled = true; };
+  }, []);
+
+  React.useEffect(() => {
+    const context = gsap.context(setupScroll, rootRef);
+    return () => context.revert();
   }, []);
 
   const setupScroll = () => {
-    const gsap = window.gsap;
-    const ST = window.ScrollTrigger;
+    const ST = ScrollTrigger;
     const scope = rootRef.current;
     if (!scope) return;
 
-    // 1. Hero pin: globe scales up and moves as you scroll.
-    ST.create({
-      trigger: scope.querySelector('.lps-hero'),
-      start: 'top top',
-      end: '+=120%',
-      pin: scope.querySelector('.lps-hero-pin'),
-      pinSpacing: true,
-      scrub: 0.4,
-      onUpdate: self => { progressRef.current = self.progress; },
-    });
-    gsap.to(scope.querySelector('.lps-hero-stage'), {
-      scale: 1.25,
-      ease: 'none',
-      scrollTrigger: {
+    // Mobile uses a natural-height hero so content never sits below a pinned spacer.
+    const media = gsap.matchMedia();
+    media.add('(min-width: 761px)', () => {
+      // 1. Hero pin: globe scales up and moves as you scroll.
+      ST.create({
         trigger: scope.querySelector('.lps-hero'),
         start: 'top top',
         end: '+=120%',
+        pin: scope.querySelector('.lps-hero-pin'),
+        pinSpacing: true,
         scrub: 0.4,
-      },
-    });
-    gsap.to(scope.querySelector('.lps-hero-copy'), {
-      y: -120, opacity: 0, ease: 'none',
-      scrollTrigger: {
-        trigger: scope.querySelector('.lps-hero'),
-        start: 'top top', end: '+=60%', scrub: 0.4,
-      },
-    });
-    gsap.to(scope.querySelector('.lps-hero-meta'), {
-      opacity: 0, y: -40, ease: 'none',
-      scrollTrigger: {
-        trigger: scope.querySelector('.lps-hero'),
-        start: 'top top', end: '+=40%', scrub: 0.4,
-      },
+        onUpdate: self => { progressRef.current = self.progress; },
+      });
+      gsap.to(scope.querySelector('.lps-hero-stage'), {
+        scale: 1.25,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: scope.querySelector('.lps-hero'),
+          start: 'top top',
+          end: '+=120%',
+          scrub: 0.4,
+        },
+      });
+      gsap.to(scope.querySelector('.lps-hero-copy'), {
+        y: -120, opacity: 0, ease: 'none',
+        scrollTrigger: {
+          trigger: scope.querySelector('.lps-hero'),
+          start: 'top top', end: '+=60%', scrub: 0.4,
+        },
+      });
+      gsap.to(scope.querySelector('.lps-hero-meta'), {
+        opacity: 0, y: -40, ease: 'none',
+        scrollTrigger: {
+          trigger: scope.querySelector('.lps-hero'),
+          start: 'top top', end: '+=40%', scrub: 0.4,
+        },
+      });
+      return () => { progressRef.current = 0; };
     });
 
     // 2. Big type manifesto: letters & clauses wipe in
@@ -618,9 +626,7 @@ function LPScroll() {
         scrollTrigger: { trigger: ctaSection, start: 'top 75%' },
       });
     }
-
-    // Cleanup on unmount
-    return () => ST.getAll().forEach(s => s.kill());
+    return () => media.revert();
   };
 
   return (
@@ -630,7 +636,7 @@ function LPScroll() {
 
       {/* Top chrome — sticky header */}
       <nav className="lps-nav">
-        <div className="lps-brand"><span className="lps-brand-dot" /> RECOVERYSYS <span className="lps-brand-v">v1.2</span></div>
+        <div className="lps-brand"><span className="lps-brand-dot" /> RECOVERYSYS <span className="lps-brand-v">v{VERSION}</span></div>
         <div className="lps-nav-links">
           <a href="#parts">PARTS</a>
           <a href="#sim">SIMULATION</a>
@@ -638,7 +644,7 @@ function LPScroll() {
           <a href="#validation">VALIDATION</a>
         </div>
         <div className="lps-nav-right">
-          <span className="lps-nav-meta">BUILD_20260813</span>
+          <span className="lps-nav-meta">RELEASE_{VERSION}</span>
           <a href="https://github.com/akhan157/RecoverySys" className="lps-btn lps-btn--ghost">GITHUB →</a>
           <a href="../?demo=1" className="lps-btn lps-btn--green">LAUNCH ▶</a>
         </div>
@@ -666,7 +672,7 @@ function LPScroll() {
             </h1>
             <p className="lps-hero-sub">
               Browser tool for L1 / L2 / L3 high-power rocketry. Configure a recovery bay
-              from a 225-part catalog, predict apogee with an RK4 engine and Mach-dependent
+              from a {PART_COUNT}-entry catalog, predict apogee with an RK4 engine and Mach-dependent
               drag, and plot landing dispersion via 500-iteration Monte Carlo. Free. No account.
               Runs entirely in your browser.
             </p>
@@ -705,7 +711,7 @@ function LPScroll() {
       <section className="lps-parts-section" id="parts">
         <div className="lps-section-head">
           <span>PARTS_CATALOG</span>
-          <span>189 PARTS · 11 MFRS · 05 CATEGORIES</span>
+          <span>{PART_COUNT} ENTRIES · {MANUFACTURER_COUNT} MFRS · {String(CATEGORY_COUNT).padStart(2, '0')} CATEGORIES</span>
         </div>
         <div className="lps-parts-inner">
           <div className="lps-parts-left">
@@ -714,19 +720,19 @@ function LPScroll() {
               <span className="lps-parts-hero-l2">Pick what's in your bay.</span>
             </h2>
             <p className="lps-parts-copy lps-reveal">
-              Browse 189 parachutes, altimeters, GPS beacons, shock cords, and
-              recovery hardware from 11 manufacturers. Filter by category,
+              Browse {PART_COUNT} parachutes, shock cords, and recovery hardware entries
+              from {MANUFACTURER_COUNT} manufacturers. Filter by category,
               diameter, or impulse class. Add custom parts — they save to your
               browser and stay there.
             </p>
             <div className="lps-parts-kv">
               <div className="lps-parts-kv-row">
                 <span className="lps-parts-kv-k">CATEGORIES</span>
-                <span className="lps-parts-kv-v">05 (CHUTE / ALT / GPS / CORD / HARDWARE)</span>
+                <span className="lps-parts-kv-v">{String(CATEGORY_COUNT).padStart(2, '0')} RECOVERY SLOTS</span>
               </div>
               <div className="lps-parts-kv-row">
                 <span className="lps-parts-kv-k">COMPONENTS</span>
-                <span className="lps-parts-kv-v">189</span>
+                <span className="lps-parts-kv-v">{PART_COUNT}</span>
               </div>
               <div className="lps-parts-kv-row">
                 <span className="lps-parts-kv-k">CUSTOM_PARTS</span>
@@ -1069,12 +1075,10 @@ function LPScroll() {
         </div>
         <div className="lps-footer-bot">
           <span>© 2026 RECOVERYSYS · MIT</span>
-          <span>BUILD_20260813</span>
+          <span>RELEASE_{VERSION}</span>
           <span>NODE 7A3F-22 · NOMINAL</span>
         </div>
       </footer>
     </div>
   );
 }
-
-Object.assign(window, { LPScroll, LPScrollGlobe });

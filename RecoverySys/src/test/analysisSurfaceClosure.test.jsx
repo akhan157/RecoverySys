@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { getDefaultSpecs } from '../lib/schema.js'
@@ -146,9 +146,11 @@ describe('M3 Analysis usability closure', () => {
     const onNavigate = vi.fn()
     render(<AnalysisTab state={baseState()} confidenceProps={confidenceProps(onNavigate)} />)
 
-    const rowButton = screen.getByRole('button', {
-      name: /Review main_chute affecting Main descent and landing impact/,
-    })
+    const rowButton = screen
+      .getAllByRole('button', {
+        name: /Review main_chute affecting Main descent and landing impact/,
+      })
+      .find((button) => within(button).queryByText('Error'))
     expect(rowButton).toBeInTheDocument()
     // Status is carried by text, not color alone.
     expect(screen.getAllByText('Error').length).toBeGreaterThan(0)
@@ -157,12 +159,15 @@ describe('M3 Analysis usability closure', () => {
     // Keyboard selection updates the inspector without hiding the queue.
     rowButton.focus()
     await user.keyboard('{Enter}')
-    expect(screen.getByRole('heading', { name: 'main_chute' })).toBeInTheDocument()
+    expect(rowButton).toHaveAttribute('aria-pressed', 'true')
+    expect(
+      screen.getByRole('complementary', { name: 'Selected finding details' })
+    ).toHaveTextContent(warning.message)
     expect(screen.getAllByText('Main descent and landing impact').length).toBeGreaterThan(0)
     expect(screen.getByText(/CAUSE → CONSEQUENCE REVIEW/)).toBeInTheDocument()
 
     // The direct action navigates to the affected hardware slot. Both the
-    // summary and the row carry the same remediation label — pick the row's.
+    // summary and row retain the remediation accessible name — pick the row's.
     const actionButton = screen
       .getAllByRole('button', {
         name: /Select a larger main chute or reduce mass before flight/,
@@ -171,6 +176,33 @@ describe('M3 Analysis usability closure', () => {
     expect(actionButton).toBeTruthy()
     await user.click(actionButton)
     expect(onNavigate).toHaveBeenCalledWith('config.main_chute')
+  })
+
+  it('keeps lower-severity findings selectable when an error is present', async () => {
+    const user = userEvent.setup()
+    const bayWarning = {
+      level: 'warn',
+      slot: 'bay_volume',
+      code: 'compatibility.bay-volume',
+      message: 'Recovery hardware exceeds the available packing space.',
+      remediation: 'Review recovery bay dimensions.',
+      actionDestination: 'specs.bay_length_in',
+    }
+    render(
+      <AnalysisTab
+        state={baseState({ warnings: [warning, bayWarning] })}
+        confidenceProps={confidenceProps()}
+      />
+    )
+    const selector = screen.getByRole('button', {
+      name: /Review bay_volume affecting Packed recovery hardware fit/,
+    })
+    await user.click(selector)
+    expect(selector).toHaveAttribute('aria-pressed', 'true')
+    const inspector = screen.getByRole('complementary', { name: 'Selected finding details' })
+    expect(inspector).toHaveTextContent(bayWarning.message)
+    expect(inspector).toHaveTextContent(bayWarning.remediation)
+    expect(inspector).not.toHaveTextContent('bay_volume')
   })
 
   it('consumes the canonical shock_load for static ejection load and cord safety factor', () => {
@@ -207,25 +239,29 @@ describe('M3 Analysis usability closure', () => {
     const onReturnToAnalysis = vi.fn()
     const onFocusConsumed = vi.fn()
     const { unmount } = render(
-      <SpecsTab
-        state={baseState()}
-        setSpec={vi.fn()}
-        removePart={vi.fn()}
-        setCategory={vi.fn()}
-        saveConfig={vi.fn()}
-        copyShareLink={vi.fn()}
-        setCustomMotor={vi.fn()}
-        clearCustomMotor={vi.fn()}
-        addToast={vi.fn()}
-        reviewOrigin="ANALYSIS"
-        focusTarget="specs.rocket_mass_g"
-        onFocusConsumed={onFocusConsumed}
-        onReturnToAnalysis={onReturnToAnalysis}
-      />
+      <details>
+        <summary>Input review</summary>
+        <SpecsTab
+          state={baseState()}
+          setSpec={vi.fn()}
+          removePart={vi.fn()}
+          setCategory={vi.fn()}
+          saveConfig={vi.fn()}
+          copyShareLink={vi.fn()}
+          setCustomMotor={vi.fn()}
+          clearCustomMotor={vi.fn()}
+          addToast={vi.fn()}
+          reviewOrigin="ANALYSIS"
+          focusTarget="specs.rocket_mass_g"
+          onFocusConsumed={onFocusConsumed}
+          onReturnToAnalysis={onReturnToAnalysis}
+        />
+      </details>
     )
 
     expect(document.activeElement).toBe(document.getElementById('mass'))
     expect(onFocusConsumed).toHaveBeenCalledTimes(1)
+    expect(document.getElementById('mass').closest('details')).toHaveAttribute('open')
 
     const returnButton = screen.getByRole('button', { name: 'Return to Analysis' })
     expect(returnButton).toBeInTheDocument()

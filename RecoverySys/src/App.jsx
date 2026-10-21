@@ -27,6 +27,7 @@ import { buildResultEnvelope } from './lib/resultIntegrity.js'
 import { captureSimulationProvenance } from './lib/simulationIdentity.js'
 import { parseOpenRocketArchive, sha256Hex } from './lib/openRocketExchange.js'
 import MissionControlLayout from './components/MissionControlLayout.jsx'
+import WorkspaceBoundary from './components/WorkspaceBoundary.jsx'
 import ToastContainer from './components/ToastContainer.jsx'
 import DemoBanner from './components/DemoBanner.jsx'
 
@@ -507,34 +508,36 @@ export default function App() {
   return (
     <>
       {demoMode && <DemoBanner onExit={exitDemo} />}
-      <MissionControlLayout
-        state={state}
-        demoMode={demoMode}
-        onExitDemo={exitDemo}
-        allParts={allParts}
-        customParts={customParts}
-        selectPart={selectPart}
-        removePart={removePart}
-        setSpec={setSpec}
-        setCategory={setCategory}
-        runSim={runSim}
-        saveConfig={saveConfig}
-        copyShareLink={copyShareLink}
-        addCustomPart={addCustomPart}
-        deleteCustomPart={deleteCustomPart}
-        editCustomPart={editCustomPart}
-        setCustomMotor={setCustomMotor}
-        clearCustomMotor={clearCustomMotor}
-        loadConfig={loadConfig}
-        onImportOpenRocket={importOpenRocket}
-        onAcceptOpenRocket={acceptOpenRocketSnapshot}
-        clearAll={clearAll}
-        addToast={addToast}
-        saveCompareSnapshot={saveCompareSnapshot}
-        clearCompareSnapshot={clearCompareSnapshot}
-        darkMode={darkMode}
-        setDarkMode={setDarkMode}
-      />
+      <WorkspaceBoundary>
+        <MissionControlLayout
+          state={state}
+          demoMode={demoMode}
+          onExitDemo={exitDemo}
+          allParts={allParts}
+          customParts={customParts}
+          selectPart={selectPart}
+          removePart={removePart}
+          setSpec={setSpec}
+          setCategory={setCategory}
+          runSim={runSim}
+          saveConfig={saveConfig}
+          copyShareLink={copyShareLink}
+          addCustomPart={addCustomPart}
+          deleteCustomPart={deleteCustomPart}
+          editCustomPart={editCustomPart}
+          setCustomMotor={setCustomMotor}
+          clearCustomMotor={clearCustomMotor}
+          loadConfig={loadConfig}
+          onImportOpenRocket={importOpenRocket}
+          onAcceptOpenRocket={acceptOpenRocketSnapshot}
+          clearAll={clearAll}
+          addToast={addToast}
+          saveCompareSnapshot={saveCompareSnapshot}
+          clearCompareSnapshot={clearCompareSnapshot}
+          darkMode={darkMode}
+          setDarkMode={setDarkMode}
+        />
+      </WorkspaceBoundary>
       <ToastContainer toasts={state.toasts} onRemove={removeToast} />
     </>
   )

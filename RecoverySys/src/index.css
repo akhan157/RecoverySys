@@ -115,6 +115,11 @@ body,
   -webkit-font-smoothing: antialiased;
 }
 
+#root {
+  display: flex;
+  flex-direction: column;
+}
+
 .mono {
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-weight: 600;

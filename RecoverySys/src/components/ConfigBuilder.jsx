@@ -24,38 +24,22 @@ export default function ConfigBuilder({
   onNavigate,
 }) {
   return (
-    <div style={{ padding: '16px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-      {/* Recovery Configuration */}
-      <div>
-        <div className="section-label" style={{ marginBottom: '10px' }}>
-          Recovery Configuration
-        </div>
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px' }}>
-          {categories.map((cat) => (
-            <div key={cat.id}>
-              <SectionLabel style={{ marginBottom: '4px', letterSpacing: '0.04em' }}>
-                {cat.label}
-              </SectionLabel>
-              <ConfigSlot
-                category={cat.id}
-                placeholder={cat.placeholder}
-                part={config[cat.id]}
-                warnings={warnings}
-                onRemove={onRemovePart}
-                onClickEmpty={() => onSelectCategory(cat.id)}
-              />
-            </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Compatibility warnings */}
-      {warnings.length > 0 && <WarningBox warnings={warnings} onNavigate={onNavigate} />}
-
-      {/* Divider */}
-      <div style={{ borderTop: '1px solid var(--border-subtle)', margin: '0 -16px' }} />
-
-      {/* Rocket Specs */}
+    <div className="specs-builder">
+      {warnings.length > 0 && (
+        <details className="specs-builder__disclosure specs-builder__warnings">
+          <summary>
+            {warnings.length} compatibility finding{warnings.length === 1 ? '' : 's'}
+            <span>
+              {
+                warnings.filter((warning) => warning.level === 'error' || warning.state === 'error')
+                  .length
+              }{' '}
+              errors
+            </span>
+          </summary>
+          <WarningBox warnings={warnings} onNavigate={onNavigate} />
+        </details>
+      )}
       <RocketSpecs
         specs={specs}
         onSetSpec={onSetSpec}
@@ -65,11 +49,7 @@ export default function ConfigBuilder({
         onToast={onToast}
       />
 
-      {/* Divider */}
-      <div style={{ borderTop: '1px solid var(--border-subtle)', margin: '0 -16px' }} />
-
-      {/* Actions */}
-      <div>
+      <div className="specs-builder__actions">
         <div className="section-label" style={{ marginBottom: '10px' }}>
           Actions
         </div>
@@ -87,6 +67,37 @@ export default function ConfigBuilder({
           </Button>
         </div>
       </div>
+      <details className="specs-builder__disclosure">
+        <summary>
+          Selected hardware
+          <span>
+            {categories.filter((category) => config[category.id]).length} / {categories.length}{' '}
+            selected
+          </span>
+        </summary>
+        <div>
+          <div className="section-label" style={{ marginBottom: '10px' }}>
+            Recovery Configuration
+          </div>
+          <div className="specs-builder__hardware-grid">
+            {categories.map((cat) => (
+              <div key={cat.id}>
+                <SectionLabel style={{ marginBottom: '4px', letterSpacing: '0.04em' }}>
+                  {cat.label}
+                </SectionLabel>
+                <ConfigSlot
+                  category={cat.id}
+                  placeholder={cat.placeholder}
+                  part={config[cat.id]}
+                  warnings={warnings}
+                  onRemove={onRemovePart}
+                  onClickEmpty={() => onSelectCategory(cat.id)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </details>
     </div>
   )
 }

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import { TOAST_LEVELS } from '../../lib/constants.js'
 import Input from '../primitives/Input.jsx'
@@ -11,6 +11,7 @@ import {
   exportCandidateEvidence,
   importCandidateEvidence,
 } from '../../lib/flightEvidence.js'
+import './TransferTabs.css'
 
 const REVIEWER_LABELS = Object.freeze({
   unreviewed: 'UNREVIEWED',
@@ -52,8 +53,8 @@ function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
   }
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+    <div className="transfer-flight-form">
+      <div className="transfer-flight-form__grid">
         <div>
           <label
             htmlFor="flight-date"
@@ -171,7 +172,7 @@ function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
           <option value="loss">Loss of Vehicle</option>
         </select>
       </div>
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+      <div className="transfer-flight-form__grid">
         <div>
           <label
             htmlFor="flight-observation-source"
@@ -268,7 +269,7 @@ function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
           onChange={(e) => set('notes', e.target.value)}
         />
       </div>
-      <button className="mc-run-btn" onClick={handleSave}>
+      <button className="mc-run-btn transfer-actions__primary" onClick={handleSave}>
         LOG_FLIGHT &rarr;
       </button>
     </div>
@@ -418,6 +419,8 @@ function LogEntry({ entry, onDelete }) {
 export default function FlightLogTab({ state, resultFresh, addToast }) {
   const usableSimulation = resultFresh ? state.simulation : null
   const [entries, setEntries] = useState(loadFlightLog)
+  const recordsFileRef = useRef(null)
+  const evidenceFileRef = useRef(null)
 
   useEffect(() => {
     saveFlightLog(entries)
@@ -487,21 +490,10 @@ export default function FlightLogTab({ state, resultFresh, addToast }) {
   }
 
   return (
-    <div className="mc-export">
+    <div className="mc-export transfer-tab">
       <h2 className="mc-panel-header">FLIGHT_LOG</h2>
-      <div style={{ padding: '12px', overflowY: 'auto', flex: 1 }}>
-        <div
-          style={{
-            fontSize: 10,
-            fontWeight: 600,
-            color: 'var(--mc-text-dim)',
-            textTransform: 'uppercase',
-            letterSpacing: '0.06em',
-            marginBottom: 8,
-          }}
-        >
-          New Entry
-        </div>
+      <div className="transfer-tab__flight-content">
+        <h3 className="transfer-tab__heading">New Entry</h3>
         {state.simulation && !resultFresh && (
           <div className="mc-validation mc-validation--warn" style={{ marginBottom: 10 }}>
             {RESULT_STATUS_DETAILS.stale.reasonCode} — {RESULT_STATUS_DETAILS.stale.remediation}
@@ -513,59 +505,78 @@ export default function FlightLogTab({ state, resultFresh, addToast }) {
           specs={state.specs}
           onSave={addEntry}
         />
-        <div style={{ display: 'flex', gap: 8, marginTop: 8, flexWrap: 'wrap' }}>
-          <button className="mc-run-btn" type="button" onClick={download}>
-            EXPORT_RECORDS
-          </button>
-          <label className="mc-run-btn">
-            IMPORT_RECORDS
+        <section className="transfer-tab__section" aria-labelledby="flight-record-transfer">
+          <h3 id="flight-record-transfer" className="transfer-tab__heading">
+            Flight records
+          </h3>
+          <p className="transfer-tab__description">
+            Back up local flight observations or bring records from another device into this log.
+          </p>
+          <div className="transfer-actions">
+            <button
+              className="mc-run-btn transfer-actions__secondary"
+              type="button"
+              onClick={download}
+            >
+              EXPORT_RECORDS
+            </button>
+            <button
+              className="mc-run-btn transfer-actions__secondary"
+              type="button"
+              onClick={() => recordsFileRef.current?.click()}
+            >
+              IMPORT_RECORDS
+            </button>
             <input
+              ref={recordsFileRef}
+              aria-label="IMPORT_RECORDS"
               type="file"
               accept="application/json"
               onChange={importRecords}
               style={{ display: 'none' }}
             />
-          </label>
-          <button className="mc-run-btn" type="button" onClick={downloadCandidateEvidence}>
-            EXPORT_CANDIDATE_EVIDENCE
-          </button>
-          <label className="mc-run-btn">
-            IMPORT_CANDIDATE_EVIDENCE
+          </div>
+        </section>
+        <section className="transfer-tab__section" aria-labelledby="flight-evidence-transfer">
+          <h3 id="flight-evidence-transfer" className="transfer-tab__heading">
+            Candidate evidence transfer
+          </h3>
+          <p className="transfer-tab__description">
+            Candidate evidence export carries source, units, conditions, reviewer status, and the
+            immutable prediction identity from the simulation provenance snapshot. Imported
+            observations stay local and are never promoted to accepted corpus evidence.
+          </p>
+          <div className="transfer-actions">
+            <button
+              className="mc-run-btn transfer-actions__secondary"
+              type="button"
+              onClick={downloadCandidateEvidence}
+            >
+              EXPORT_CANDIDATE_EVIDENCE
+            </button>
+            <button
+              className="mc-run-btn transfer-actions__secondary"
+              type="button"
+              onClick={() => evidenceFileRef.current?.click()}
+            >
+              IMPORT_CANDIDATE_EVIDENCE
+            </button>
             <input
+              ref={evidenceFileRef}
+              aria-label="IMPORT_CANDIDATE_EVIDENCE"
               type="file"
               accept="application/json"
               onChange={importCandidateEvidenceFile}
               style={{ display: 'none' }}
             />
-          </label>
-        </div>
-        <p
-          style={{
-            fontSize: 10,
-            color: 'var(--mc-text-dim)',
-            lineHeight: 1.5,
-            marginTop: 8,
-          }}
-        >
-          Candidate evidence export carries source, units, conditions, reviewer status, and the
-          immutable prediction identity from the simulation provenance snapshot. Imported
-          observations stay local and are never promoted to accepted corpus evidence.
-        </p>
+          </div>
+        </section>
 
         {entries.length > 0 && (
           <>
-            <div
-              style={{
-                fontSize: 10,
-                fontWeight: 600,
-                color: 'var(--mc-text-dim)',
-                textTransform: 'uppercase',
-                letterSpacing: '0.06em',
-                margin: '20px 0 8px',
-              }}
-            >
+            <h3 className="transfer-tab__heading transfer-tab__history-heading">
               History ({entries.length} flight{entries.length !== 1 ? 's' : ''})
-            </div>
+            </h3>
             {entries.map((entry) => (
               <LogEntry key={entry.id} entry={entry} onDelete={deleteEntry} />
             ))}

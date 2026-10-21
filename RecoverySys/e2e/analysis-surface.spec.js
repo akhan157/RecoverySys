@@ -80,8 +80,9 @@ test('Analysis first viewport identifies the highest-priority item and opens it'
   const errorCount = panel.locator('.analysis-review-summary [aria-label^="Errors:"]')
   await expect(errorCount).toBeVisible()
   await expect(errorCount).not.toHaveText('0')
-  await expect(panel.getByText('HIGHEST-PRIORITY ACTION')).toBeVisible()
-  await expect(panel.locator('[role="status"]')).toContainText(
+  const primaryAction = panel.locator('.analysis-review-summary button')
+  await expect(primaryAction).toBeVisible()
+  await expect(primaryAction).toHaveAccessibleName(
     /Correct the affected input or replace the referenced part before flight/
   )
 
@@ -92,12 +93,14 @@ test('Analysis first viewport identifies the highest-priority item and opens it'
 
   // Keyboard-only row selection opens the detail inspector.
   const rowButton = panel.getByRole('button', {
-    name: /Review main_chute affecting/,
-  }).first()
+    name: /Review main_chute affecting Main descent rate/,
+  })
   await rowButton.focus()
   await guardedPage.keyboard.press('Enter')
-  await expect(panel.getByRole('heading', { name: 'main_chute' })).toBeVisible()
-  await expect(panel.getByText(/exceeds \d+ fps/).first()).toBeVisible()
+  await expect(rowButton).toHaveAttribute('aria-pressed', 'true')
+  await expect(panel.getByRole('complementary', { name: 'Selected finding details' })).toContainText(
+    /exceeds \d+ fps/
+  )
 })
 
 test('review action opens the owning surface, focuses the target, and returns to Analysis', async ({
@@ -109,7 +112,7 @@ test('review action opens the owning surface, focuses the target, and returns to
   await guardedPage.getByRole('tab', { name: 'ANALYSIS' }).click()
   const analysisPanel = guardedPage.getByRole('tabpanel')
 
-  // The row carries the direct review action (not the summary duplicate).
+  // The concise row action retains the destination's remediation accessible name.
   const row = analysisPanel.locator('.analysis-causality-row').first()
   await row
     .getByRole('button', {
@@ -190,14 +193,17 @@ test('Analysis stays keyboard-usable with reduced motion and no clipped primary 
   // The highest-priority action is reachable without horizontal clipping on
   // the constrained desktop and Pixel 5 viewports (both projects run this
   // spec); the surface scrolls vertically by design.
-  const priorityAction = panel.getByText('HIGHEST-PRIORITY ACTION')
+  const priorityAction = panel.locator('.analysis-review-summary button')
   await priorityAction.scrollIntoViewIfNeeded()
   await expect(priorityAction).toBeVisible()
 
   const rowButton = panel.getByRole('button', {
-    name: /Review main_chute affecting/,
-  }).first()
+    name: /Review main_chute affecting Main descent rate/,
+  })
   await rowButton.focus()
   await guardedPage.keyboard.press('Enter')
-  await expect(panel.getByRole('heading', { name: 'main_chute' })).toBeVisible()
+  await expect(rowButton).toHaveAttribute('aria-pressed', 'true')
+  await expect(panel.getByRole('complementary', { name: 'Selected finding details' })).toContainText(
+    /exceeds \d+ fps/
+  )
 })

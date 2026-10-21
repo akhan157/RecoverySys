@@ -59,11 +59,18 @@ export default function ConfidenceStatus({
         </span>
       </div>
       <p className="mc-confidence__summary">{resultDetails.summary}</p>
-      <ul className="mc-confidence__reasons">
-        {reasons.slice(0, compact ? 2 : 4).map((code) => (
-          <li key={code}>{reasonText(code)}</li>
-        ))}
-      </ul>
+      <details className="mc-confidence__details">
+        <summary>Evidence &amp; limitations</summary>
+        <ul className="mc-confidence__reasons">
+          {reasons.map((code) => (
+            <li key={code}>{reasonText(code)}</li>
+          ))}
+        </ul>
+        <p className="mc-confidence__boundary">
+          Confidence describes evidence and model scope; it is not a probability of success, safety
+          approval, or certification.
+        </p>
+      </details>
       {onNavigate && envelope.reasons.length > 0 && (
         <div className="mc-confidence__actions">
           {envelope.reasons.slice(0, compact ? 1 : 3).map((reason) => (
@@ -78,10 +85,6 @@ export default function ConfidenceStatus({
           ))}
         </div>
       )}
-      <p className="mc-confidence__boundary">
-        Confidence describes evidence and model scope; it is not a probability of success, safety
-        approval, or certification.
-      </p>
     </section>
   )
 }

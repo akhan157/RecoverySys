@@ -112,9 +112,6 @@ export default [
       'dist/**',
       'node_modules/**',
       'public/**',
-      // landing page is a separate scroll-experience build with its own globals
-      // (Lenis, gsap, ScrollTrigger from CDN) — lint when we vendor those locally.
-      '../landing/**',
     ],
   },
 ]

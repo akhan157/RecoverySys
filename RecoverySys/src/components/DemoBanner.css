@@ -5,6 +5,7 @@
   border-bottom: 1px solid #2a2a2a;
   font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', monospace;
   color: #e0e0e0;
+  flex-shrink: 0;
 }
 
 .demo-banner__inner {
@@ -35,7 +36,7 @@
   color: #e0e0e0;
   border: 1px solid #2a2a2a;
   padding: 6px 12px;
-  min-height: 32px;
+  min-height: 44px;
   font: inherit;
   font-size: 11px;
   letter-spacing: 0.05em;
@@ -56,4 +57,22 @@
 .demo-banner__btn:focus-visible {
   outline: 2px solid #4caf50;
   outline-offset: 2px;
+}
+
+@media (max-width: 640px) {
+  .demo-banner__inner {
+    gap: 8px;
+    padding: 4px 12px;
+    font-size: 10px;
+  }
+
+  .demo-banner__help {
+    display: none;
+  }
+
+  .demo-banner__btn {
+    flex-shrink: 0;
+    padding-inline: 8px;
+    font-size: 10px;
+  }
 }

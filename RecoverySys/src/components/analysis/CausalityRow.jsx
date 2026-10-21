@@ -26,6 +26,31 @@ const FINDING_STATUS = Object.freeze({
   conditional: 'warn',
 })
 
+const DRIVER_LABELS = Object.freeze({
+  main_chute: 'Main parachute',
+  drogue_chute: 'Drogue parachute',
+  shock_cord: 'Shock cord',
+  quick_links: 'Quick links',
+  swivel: 'Swivel',
+  deployment_bag: 'Deployment bag',
+  chute_device: 'Chute release device',
+  bay_volume: 'Recovery bay volume',
+  rocket_mass_g: 'Rocket mass',
+  motor_total_impulse_ns: 'Motor impulse',
+  drag_cd: 'Drag coefficient',
+  main_deploy_alt_ft: 'Main deployment altitude',
+  wind_speed_mph: 'Surface wind speed',
+})
+
+export function formatDriverLabel(driver) {
+  const value = String(driver ?? 'Unresolved input or assumption')
+  const key = value.replace(/^(specs|config)\./, '')
+  if (DRIVER_LABELS[key]) return DRIVER_LABELS[key]
+  if (!key.includes('_')) return value
+  const words = key.replace(/_/g, ' ')
+  return words.charAt(0).toUpperCase() + words.slice(1)
+}
+
 function normalizeFinding(row = {}) {
   const finding = row.finding && typeof row.finding === 'object' ? row.finding : {}
   const rawState = String(finding.state ?? row.state ?? 'unknown')
@@ -44,7 +69,13 @@ function normalizeAction(row = {}) {
   return action && typeof action === 'object' ? action : null
 }
 
-export default function CausalityRow({ row = {}, selected = false, onSelect, onAction }) {
+export default function CausalityRow({
+  row = {},
+  selected = false,
+  compact = false,
+  onSelect,
+  onAction,
+}) {
   const finding = normalizeFinding(row)
   const action = normalizeAction(row)
   const actionHandler = onAction ?? action?.onActivate ?? action?.onClick
@@ -54,7 +85,11 @@ export default function CausalityRow({ row = {}, selected = false, onSelect, onA
   const rowId = row.id ?? row.code ?? `${driver}-${outcome}`
 
   return (
-    <article className="analysis-causality-row" data-selected={selected ? 'true' : 'false'}>
+    <article
+      className="analysis-causality-row"
+      data-selected={selected ? 'true' : 'false'}
+      data-compact={compact ? 'true' : undefined}
+    >
       <button
         type="button"
         className="analysis-causality-row__select"
@@ -65,7 +100,7 @@ export default function CausalityRow({ row = {}, selected = false, onSelect, onA
         <div className="analysis-causality-row__grid">
           <div className="analysis-causality-row__cell">
             <span className="analysis-causality-row__label">Driver</span>
-            <span className="analysis-causality-row__value">{driver}</span>
+            <span className="analysis-causality-row__value">{formatDriverLabel(driver)}</span>
           </div>
           <div className="analysis-causality-row__cell">
             <span className="analysis-causality-row__label">Affected outcome</span>
@@ -78,7 +113,9 @@ export default function CausalityRow({ row = {}, selected = false, onSelect, onA
                 status={FINDING_STATUS[finding.state]}
                 label={FINDING_LABELS[finding.state]}
               />
-              <span className="analysis-causality-row__value">{finding.label}</span>
+              {!compact && finding.label !== String(outcome) && (
+                <span className="analysis-causality-row__value">{finding.label}</span>
+              )}
             </span>
           </div>
         </div>
@@ -92,7 +129,7 @@ export default function CausalityRow({ row = {}, selected = false, onSelect, onA
             aria-label={actionText}
             onClick={() => actionHandler(action, row)}
           >
-            {actionText}
+            {compact ? 'Open affected area' : actionText}
           </Button>
         </div>
       )}

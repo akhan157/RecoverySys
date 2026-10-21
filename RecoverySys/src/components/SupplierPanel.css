@@ -1,9 +1,23 @@
 .supplier-panel {
-  margin: 12px;
-  padding: 12px;
-  border: 1px solid var(--border-subtle);
+  margin: 0;
+  padding: 16px 0;
+  border-top: 1px solid var(--border-subtle);
   background: var(--bg-panel, transparent);
   min-width: 0;
+}
+
+.supplier-panel > p {
+  margin: 10px 0;
+  line-height: 1.6;
+}
+
+.supplier-panel__details > summary {
+  cursor: pointer;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+  color: var(--text-primary);
+  font-size: 11px;
 }
 .supplier-panel__toolbar {
   display: flex;

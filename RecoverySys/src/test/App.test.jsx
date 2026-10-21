@@ -203,7 +203,7 @@ describe('MissionControl tab semantics', () => {
 
     await user.click(briefTab)
     expect(screen.getByRole('tabpanel')).toHaveAttribute('id', 'mc-panel-recovery_brief')
-    expect(screen.getByRole('heading', { name: 'Recovery Brief' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Recovery Brief' })).toBeInTheDocument()
   })
   it('supports wrapping arrow navigation and Home/End with roving focus', async () => {
     const user = userEvent.setup()

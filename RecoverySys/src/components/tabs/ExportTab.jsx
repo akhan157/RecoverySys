@@ -10,6 +10,7 @@ import {
 import { PARTS, SLOT_IDS, EMPTY_CONFIG } from '../../data/parts.js'
 import { loadCustomParts } from '../../lib/storage.js'
 import { OPENROCKET_IMPORT_LIMITS } from '../../lib/openRocketExchange.js'
+import './TransferTabs.css'
 
 function downloadJson(state) {
   const blob = new Blob([encodeJsonPayload(state)], { type: 'application/json' })
@@ -132,96 +133,82 @@ export default function ExportTab({
   }
 
   return (
-    <div className="mc-export">
+    <div className="mc-export transfer-tab">
       <h2 className="mc-panel-header" style={{ borderBottom: '1px solid var(--mc-border)' }}>
         EXPORT // SHARE_CONFIGURATION
       </h2>
       <div className="mc-export__content">
-        <div className="mc-export__section">
-          <div className="mc-metric__label">RECOVERY_BRIEF</div>
-          <div
-            style={{
-              fontSize: 10,
-              color: 'var(--mc-text-dim)',
-              margin: '6px 0 12px',
-              lineHeight: 1.6,
-            }}
-          >
+        <section className="mc-export__section" aria-labelledby="export-recovery-brief">
+          <h3 id="export-recovery-brief" className="transfer-tab__heading">
+            Recovery brief &amp; print
+          </h3>
+          <p className="transfer-tab__description">
             Review the mission envelope, evidence posture, hardware, estimates, unresolved checks,
             and model provenance before sharing or printing.
-          </div>
+          </p>
           <div className="mc-export__brief-status" role="status">
             {RESULT_STATUS_DETAILS[recoveryBrief?.status || 'not-run']?.reasonCode ||
               RESULT_STATUS_DETAILS['not-run'].reasonCode}{' '}
             · {recoveryBrief?.confidence?.label || 'Insufficient confidence'}
           </div>
-          <div className="mc-export__brief-actions">
-            <button className="mc-run-btn" onClick={onOpenBrief}>
+          <div className="transfer-actions">
+            <button className="mc-run-btn transfer-actions__primary" onClick={onOpenBrief}>
               OPEN_RECOVERY_BRIEF →
             </button>
-            <button className="mc-run-btn" onClick={onPrintBrief}>
+            <button className="mc-run-btn transfer-actions__secondary" onClick={onPrintBrief}>
               PRINT_RECOVERY_BRIEF →
             </button>
+            <button className="mc-run-btn transfer-actions__secondary" onClick={onPrintChecklist}>
+              PRINT_CHECKLIST &rarr;
+            </button>
           </div>
-        </div>
-        <div className="mc-export__section">
-          <div className="mc-metric__label">SAVE_TO_BROWSER</div>
-          <div
-            style={{
-              fontSize: 10,
-              color: 'var(--mc-text-dim)',
-              margin: '6px 0 12px',
-              lineHeight: 1.6,
-            }}
-          >
-            Stores your current configuration in the browser's local storage. Your config will
-            persist across sessions on this device.
+          <p className="transfer-tab__note">
+            The checklist includes specs, selected parts, compatibility warnings, simulation
+            results, and a packing order with checkboxes.
+          </p>
+        </section>
+        <section className="mc-export__section" aria-labelledby="export-save-share">
+          <h3 id="export-save-share" className="transfer-tab__heading">
+            Save &amp; share
+          </h3>
+          <p className="transfer-tab__description">
+            Save this configuration in your browser to keep it across sessions on this device, or
+            copy a link to share the exact recovery bay setup. No account required.
+          </p>
+          <div className="transfer-actions">
+            <button className="mc-run-btn transfer-actions__primary" onClick={saveConfig}>
+              {state.saveState === SAVE_STATES.SAVING
+                ? 'SAVING...'
+                : state.saveState === SAVE_STATES.SAVED
+                  ? '✓ SAVED'
+                  : 'SAVE_CONFIG →'}
+            </button>
+            <button className="mc-run-btn transfer-actions__secondary" onClick={copyShareLink}>
+              {state.shareState === SHARE_STATES.COPIED
+                ? '✓ COPIED_TO_CLIPBOARD'
+                : 'COPY_SHARE_LINK →'}
+            </button>
           </div>
-          <button className="mc-run-btn" onClick={saveConfig}>
-            {state.saveState === SAVE_STATES.SAVING
-              ? 'SAVING...'
-              : state.saveState === SAVE_STATES.SAVED
-                ? '✓ SAVED'
-                : 'SAVE_CONFIG →'}
-          </button>
-        </div>
-        <div className="mc-export__section">
-          <div className="mc-metric__label">SHARE_LINK</div>
-          <div
-            style={{
-              fontSize: 10,
-              color: 'var(--mc-text-dim)',
-              margin: '6px 0 12px',
-              lineHeight: 1.6,
-            }}
-          >
-            Creates a URL encoding your entire configuration. Anyone who opens it will see your
-            exact recovery bay setup. No account required.
-          </div>
-          <button className="mc-run-btn" onClick={copyShareLink}>
-            {state.shareState === SHARE_STATES.COPIED
-              ? '✓ COPIED_TO_CLIPBOARD'
-              : 'COPY_SHARE_LINK →'}
-          </button>
-        </div>
-        <div className="mc-export__section">
-          <div className="mc-metric__label">EXPORT_JSON</div>
-          <div
-            style={{
-              fontSize: 10,
-              color: 'var(--mc-text-dim)',
-              margin: '6px 0 12px',
-              lineHeight: 1.6,
-            }}
-          >
-            Download your full configuration as a JSON file. Share with teammates, back up before
-            changes, or template common setups.
-          </div>
-          <div style={{ display: 'flex', gap: 8 }}>
-            <button className="mc-run-btn" onClick={() => downloadJson(state)}>
+        </section>
+        <section className="mc-export__section" aria-labelledby="export-backup-restore">
+          <h3 id="export-backup-restore" className="transfer-tab__heading">
+            JSON backup &amp; restore
+          </h3>
+          <p className="transfer-tab__description">
+            Download your full configuration for a backup, teammate, or reusable template. Restore
+            from a RecoverySys JSON export.
+          </p>
+          <div className="transfer-actions">
+            <button
+              className="mc-run-btn transfer-actions__primary"
+              onClick={() => downloadJson(state)}
+            >
               DOWNLOAD_JSON &rarr;
             </button>
-            <button className="mc-run-btn" onClick={() => fileRef.current?.click()}>
+            <button
+              className="mc-run-btn transfer-actions__secondary"
+              onClick={() => fileRef.current?.click()}
+            >
               IMPORT_JSON &rarr;
             </button>
             <input
@@ -232,22 +219,22 @@ export default function ExportTab({
               onChange={handleImport}
             />
           </div>
-        </div>
-        <div className="mc-export__section">
-          <div className="mc-metric__label">IMPORT_OPENROCKET</div>
-          <div
-            style={{
-              fontSize: 10,
-              color: 'var(--mc-text-dim)',
-              margin: '6px 0 12px',
-              lineHeight: 1.6,
-            }}
-          >
+        </section>
+        <section className="mc-export__section" aria-labelledby="export-openrocket">
+          <h3 id="export-openrocket" className="transfer-tab__heading">
+            Advanced · OpenRocket import
+          </h3>
+          <p className="transfer-tab__description">
             Inspect a local OpenRocket .ork archive, choose one configuration and stage, then
             explicitly accept geometry and optional pre-launch mass. Saved simulation output stays a
             reference only.
-          </div>
-          <button className="mc-run-btn" onClick={() => openRocketFileRef.current?.click()}>
+          </p>
+          <button
+            className={`mc-run-btn ${
+              exchange ? 'transfer-actions__secondary' : 'transfer-actions__primary'
+            }`}
+            onClick={() => openRocketFileRef.current?.click()}
+          >
             SELECT_ORK_ARCHIVE →
           </button>
           <input
@@ -420,9 +407,9 @@ export default function ExportTab({
                   {warning.code} · {warning.message}
                 </div>
               ))}
-              <div style={{ display: 'flex', gap: 8 }}>
+              <div className="transfer-actions">
                 <button
-                  className="mc-run-btn"
+                  className="mc-run-btn transfer-actions__primary"
                   disabled={
                     !snapshotSelection.configurationId ||
                     !snapshotSelection.stagePath ||
@@ -440,24 +427,7 @@ export default function ExportTab({
               </div>
             </div>
           )}
-        </div>
-        <div className="mc-export__section">
-          <div className="mc-metric__label">PRINT_CHECKLIST</div>
-          <div
-            style={{
-              fontSize: 10,
-              color: 'var(--mc-text-dim)',
-              margin: '6px 0 12px',
-              lineHeight: 1.6,
-            }}
-          >
-            Print a recovery checklist with specs, selected parts, compatibility warnings,
-            simulation results, and a packing order with checkboxes.
-          </div>
-          <button className="mc-run-btn" onClick={onPrintChecklist}>
-            PRINT_CHECKLIST &rarr;
-          </button>
-        </div>
+        </section>
       </div>
     </div>
   )

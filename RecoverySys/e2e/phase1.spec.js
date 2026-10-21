@@ -373,6 +373,7 @@ test('hardware review exposes unverified provenance and actionable warning metad
   await configureRocket(guardedPage)
   await expect(guardedPage.getByText(/CATALOG DATA · UNVERIFIED/).first()).toBeVisible()
   await guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
+  await guardedPage.locator('.specs-builder__warnings > summary').click()
   await expect(guardedPage.getByText(/COMPATIBILITY_REVIEW/)).toBeVisible()
   await expect(guardedPage.getByText(/Acknowledgement records review only/)).toBeVisible()
 })

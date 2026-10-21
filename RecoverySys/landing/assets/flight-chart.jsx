@@ -1,5 +1,6 @@
 /* Flight chart variants for the SIM section. Four variations, all read
  * from the same parametric flight profile so they stay consistent. */
+import { createContext, useContext, useId } from 'react';
 
 // Shared flight model — ascent (quadratic decel to apogee) + linear descent.
 // Asymmetric padding: more left for Y-axis labels, more bottom for X-axis labels.
@@ -48,13 +49,10 @@ const FC_PALETTES = {
   violet: { path: '#a78bfa', accent: '#f5a623', grid: '#1f1a30', tick: '#6a5aa8' },
   mono:   { path: '#e0e0e0', accent: '#f5a623', grid: '#1e2230', tick: '#5a5a5a' },
 };
-function fcPal() {
-  const key = (typeof window !== 'undefined' && window.__LP_CHART_PALETTE) || 'green';
-  return FC_PALETTES[key] || FC_PALETTES.green;
-}
+const PaletteContext = createContext(FC_PALETTES.green);
 
 function FCGrid({ ticks = 5, labels = true }) {
-  const pal = fcPal();
+  const pal = useContext(PaletteContext);
   const gs = Array.from({ length: ticks }, (_, i) => i / (ticks - 1));
   const plotTop = FC_PAD_T, plotBot = FC_H - FC_PAD_B;
   const plotLeft = FC_PAD_L, plotRight = FC_W - FC_PAD_R;
@@ -100,7 +98,7 @@ function FCGrid({ ticks = 5, labels = true }) {
 function FCApogeeMarker() {
   const cx = fcXScale(FC_ASCENT);
   const cy = fcYScaleAlt(FC_APOGEE);
-  const pal = fcPal();
+  const pal = useContext(PaletteContext);
   // Label sits ABOVE the plot area, centered over the apogee tick
   const labelY = FC_PAD_T - 8;
   return (
@@ -116,7 +114,7 @@ function FCApogeeMarker() {
 
 /* Variant A — original: altitude line */
 function FCLine() {
-  const pal = fcPal();
+  const pal = useContext(PaletteContext);
   return (
     <svg viewBox={`0 0 ${FC_W} ${FC_H}`} width="100%" height="380" preserveAspectRatio="xMidYMid meet">
       <FCGrid />
@@ -128,10 +126,10 @@ function FCLine() {
 
 /* Variant B — filled area under altitude curve */
 function FCArea() {
-  const pal = fcPal();
+  const pal = useContext(PaletteContext);
   const p = fcAltPath();
   const floor = `L ${fcXScale(FC_TOTAL).toFixed(1)},${(FC_H - FC_PAD_B).toFixed(1)} L ${fcXScale(0).toFixed(1)},${(FC_H - FC_PAD_B).toFixed(1)} Z`;
-  const gradId = 'fcarea-' + (window.__LP_CHART_PALETTE || 'green');
+  const gradId = useId();
   return (
     <svg viewBox={`0 0 ${FC_W} ${FC_H}`} width="100%" height="380" preserveAspectRatio="xMidYMid meet">
       <defs>
@@ -150,7 +148,7 @@ function FCArea() {
 
 /* Variant C — altitude + velocity overlay */
 function FCDual() {
-  const pal = fcPal();
+  const pal = useContext(PaletteContext);
   return (
     <svg viewBox={`0 0 ${FC_W} ${FC_H}`} width="100%" height="380" preserveAspectRatio="xMidYMid meet">
       <FCGrid />
@@ -178,7 +176,7 @@ function FCDual() {
 
 /* Variant D — stepped / waveform style (blocky retro) */
 function FCStepped() {
-  const pal = fcPal();
+  const pal = useContext(PaletteContext);
   let d = '';
   let prev = 0;
   const SAMPLES = 42;
@@ -203,14 +201,11 @@ function FCStepped() {
   );
 }
 
-function FlightChart({ variant = 'line' }) {
-  switch (variant) {
-    case 'area':    return <FCArea />;
-    case 'dual':    return <FCDual />;
-    case 'stepped': return <FCStepped />;
-    case 'line':
-    default:        return <FCLine />;
-  }
+export default function FlightChart({ variant = 'line', palette = 'green' }) {
+  const Chart = { area: FCArea, dual: FCDual, stepped: FCStepped }[variant] || FCLine;
+  return (
+    <PaletteContext.Provider value={FC_PALETTES[palette] || FC_PALETTES.green}>
+      <Chart />
+    </PaletteContext.Provider>
+  );
 }
-
-window.FlightChart = FlightChart;

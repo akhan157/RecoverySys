@@ -29,7 +29,6 @@ jobs:
           cache-dependency-path: RecoverySys/package-lock.json
       - run: npm ci
       - run: npm run build
-      - run: node scripts/prepare-e2e.mjs
       - run: npx playwright install --with-deps chromium
       - name: Run production-artifact E2E
         run: npm run e2e

@@ -17,6 +17,9 @@ import {
   ResultUsabilityStrip,
   ReviewSummary,
 } from '../analysis/index.js'
+import { FINDING_LABELS, formatDriverLabel } from '../analysis/CausalityRow.jsx'
+import { textValue } from '../analysis/DetailInspector.jsx'
+import './AnalysisDeclutter.css'
 
 const RESULT_LABELS = Object.freeze({
   'not-run': 'Not run',
@@ -56,26 +59,14 @@ function buildSurfaceReviewModel({
     assumptions,
     evidence,
   })
-  const highestState = canonical.causalityRows.some((row) => row.findingState === 'error')
-    ? 'error'
-    : canonical.causalityRows.some((row) => row.findingState === 'warning')
-      ? 'warning'
-      : null
-  const prioritizedRows = highestState
-    ? canonical.causalityRows.filter((row) => row.findingState === highestState)
-    : canonical.causalityRows
-  const rows = prioritizedRows.map((row) => ({
+  const rows = canonical.causalityRows.map((row) => ({
     ...row,
     outcome: row.affectedOutcome,
     finding: row.finding?.message || row.consequence || 'Review finding available.',
     findingState: row.findingState,
     action: row.action?.label || 'Review supporting detail',
     actionPath: row.actionDestination,
-    detail:
-      row.source?.reference ||
-      row.evidenceIds?.join(', ') ||
-      row.remediation ||
-      'Canonical finding and supporting detail.',
+    detail: row.source?.reference || row.evidenceIds?.join(', ') || null,
   }))
   const criterionCrossings = canonical.testedResponse.rows.reduce(
     (count, row) => count + row.criterionCrossings.length,
@@ -253,6 +244,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
     reviewModel.rows.find(
       (row) => row.findingState === 'error' || row.findingState === 'warning'
     ) ??
+    reviewModel.rows[0] ??
     null
   return (
     <div className="mc-analysis">
@@ -282,17 +274,6 @@ export default function AnalysisTab({ state, confidenceProps }) {
             </div>
             <div className="mc-analysis__review-signals">
               <ReviewSignal
-                label="PRIORITY ACTION"
-                value={warnings.length ? reviewModel.priorityAction : 'NO PRIORITY WARNINGS'}
-                status={
-                  reviewModel.counts.errors
-                    ? 'error'
-                    : reviewModel.counts.warnings
-                      ? 'warn'
-                      : 'neutral'
-                }
-              />
-              <ReviewSignal
                 label="LANDING"
                 value={`${sim.drift_ft?.toLocaleString?.() ?? '—'} FT DRIFT · ${sim.main_fps?.toFixed?.(1) ?? '—'} FT/S`}
                 status={landingStatus}
@@ -304,13 +285,6 @@ export default function AnalysisTab({ state, confidenceProps }) {
               />
             </div>
           </section>
-          <SensitivityPanel
-            specs={specs}
-            config={config}
-            customMotor={state.customMotor}
-            resultFresh={state.resultFresh}
-            result={sensitivityResult}
-          />
           <section
             className="mc-analysis__board mc-analysis__section--wide"
             aria-label="Analysis review board"
@@ -337,10 +311,6 @@ export default function AnalysisTab({ state, confidenceProps }) {
               }
               onAction={(action) => confidenceProps?.onNavigate?.(action.destination)}
             />
-            <div className="mc-analysis__priority" role="status">
-              <span>HIGHEST-PRIORITY ACTION</span>
-              <strong>{reviewModel.priorityAction}</strong>
-            </div>
             <div className="mc-analysis__estimates" aria-label="Key estimates">
               {reviewModel.estimates.map((estimate) => (
                 <div key={estimate.label}>
@@ -373,6 +343,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
                         },
                       }}
                       selected={row.id === selectedRow?.id}
+                      compact
                       onSelect={() => setSelectedRowId(row.id)}
                       onAction={(_, selected) => confidenceProps?.onNavigate?.(selected.actionPath)}
                     />
@@ -390,6 +361,13 @@ export default function AnalysisTab({ state, confidenceProps }) {
               <ReviewInspector row={selectedRow} onNavigate={confidenceProps?.onNavigate} />
             </div>
           </section>
+          <SensitivityPanel
+            specs={specs}
+            config={config}
+            customMotor={state.customMotor}
+            resultFresh={state.resultFresh}
+            result={sensitivityResult}
+          />
           <details className="mc-analysis__supporting mc-analysis__section--wide">
             <summary>SUPPORTING CALCULATIONS / PROVENANCE</summary>
             {/* ── EJECTION LOADS ──────────────────────────────────────────────── */}
@@ -574,27 +552,79 @@ function ReviewInspector({ row, onNavigate }) {
       </aside>
     )
   }
+  const finding = typeof row.finding === 'object' ? row.finding.message : row.finding
 
   return (
     <aside className="mc-analysis__inspector" aria-label="Selected finding details">
       <span className="mc-analysis__eyebrow">SELECTED REVIEW DETAIL</span>
-      <h3>{row.driver}</h3>
+      <h3>{formatDriverLabel(row.driver)}</h3>
+      <StatusChip
+        status={
+          row.findingState === 'error'
+            ? 'error'
+            : row.findingState === 'warning'
+              ? 'warn'
+              : 'neutral'
+        }
+        label={FINDING_LABELS[row.findingState] || 'Not evaluated'}
+      />
+      <p className="mc-analysis__finding-message">{finding}</p>
       <dl>
-        <div>
-          <dt>Affected outcome</dt>
-          <dd>{row.outcome}</dd>
-        </div>
-        <div>
-          <dt>Method / provenance</dt>
-          <dd>{row.detail}</dd>
-        </div>
+        {row.outcome && row.outcome !== finding && (
+          <div>
+            <dt>Affected outcome</dt>
+            <dd>{row.outcome}</dd>
+          </div>
+        )}
+        {row.consequence && row.consequence !== finding && row.consequence !== row.outcome && (
+          <div>
+            <dt>Consequence</dt>
+            <dd>{row.consequence}</dd>
+          </div>
+        )}
+        {row.remediation && (
+          <div>
+            <dt>Recommended change</dt>
+            <dd>{row.remediation}</dd>
+          </div>
+        )}
+        {row.detail && row.detail !== row.remediation && (
+          <div>
+            <dt>Method / provenance</dt>
+            <dd>{textValue(row.detail)}</dd>
+          </div>
+        )}
+        {row.inputPaths?.length > 0 && (
+          <div>
+            <dt>Affected inputs</dt>
+            <dd>{row.inputPaths.map(formatDriverLabel).join(', ')}</dd>
+          </div>
+        )}
+        {row.classification && (
+          <div>
+            <dt>Evidence classification</dt>
+            <dd>{textValue(row.classification)}</dd>
+          </div>
+        )}
+        {(row.evidenceIds?.length > 0 || row.sourceRefs?.length > 0 || row.evidence) && (
+          <div>
+            <dt>Evidence / references</dt>
+            <dd>
+              {[row.evidenceIds, row.sourceRefs, row.evidence]
+                .filter((value) => value && (!Array.isArray(value) || value.length))
+                .map((value) => textValue(value))
+                .join(' · ')}
+            </dd>
+          </div>
+        )}
       </dl>
       <button
         type="button"
         className="mc-analysis__inspector-action"
         onClick={() => onNavigate?.(row.actionPath)}
+        aria-label={row.action}
       >
-        {row.action}
+        Open affected area
       </button>
     </aside>
   )
@@ -722,8 +752,7 @@ function screeningStatusLabel(status) {
   if (normalized === 'screened' || normalized === 'evaluated') return 'SCREENED'
   if (normalized === 'marginal') return 'MARGINAL'
   if (normalized === 'exceeds rating') return 'EXCEEDS RATING'
-  if (normalized === 'not evaluated' || normalized === 'unavailable')
-    return 'NOT EVALUATED // SUPPORTING DETAIL'
+  if (normalized === 'not evaluated' || normalized === 'unavailable') return 'NOT EVALUATED'
   return normalized.toUpperCase()
 }
 

@@ -1,11 +1,13 @@
 import CollapsibleGroup from '../primitives/CollapsibleGroup.jsx'
 import SectionLabel from '../primitives/SectionLabel.jsx'
 import StatusChip from '../primitives/StatusChip.jsx'
+import { formatDriverLabel } from './CausalityRow.jsx'
 import './AnalysisPrimitives.css'
 
 function textValue(value, fallback = 'Not provided') {
   if (value == null || value === '') return fallback
-  if (Array.isArray(value)) return value.length ? value.join(', ') : fallback
+  if (Array.isArray(value))
+    return value.length ? value.map((item) => textValue(item, fallback)).join(', ') : fallback
   if (typeof value === 'object') return value.label ?? value.name ?? JSON.stringify(value)
   return String(value)
 }
@@ -66,7 +68,7 @@ export default function DetailInspector({ row, detail, onClose }) {
       </div>
 
       <dl className="analysis-detail-inspector__facts">
-        <DetailFact label="Driver" value={row?.driver ?? row?.cause} />
+        <DetailFact label="Driver" value={formatDriverLabel(row?.driver ?? row?.cause)} />
         <DetailFact label="Affected outcome" value={row?.affectedOutcome ?? row?.outcome} />
         <DetailFact label="Estimate" value={source.estimate ?? finding.value ?? row?.value} />
         <DetailFact label="Criterion" value={source.criterion} />

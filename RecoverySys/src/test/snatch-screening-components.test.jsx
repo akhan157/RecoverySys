@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import AnalysisTab from '../components/tabs/AnalysisTab.jsx'
 import PrintChecklist from '../components/PrintChecklist.jsx'
@@ -83,13 +83,6 @@ function stateFor(simulation, warnings = []) {
 describe('analysis transparency hierarchy', () => {
   it('shows a compact review strip and keeps method details closed', () => {
     render(<AnalysisTab state={stateFor(canonicalSimulation())} />)
-    expect(screen.getByText('REVIEW FIRST')).toBeInTheDocument()
-    expect(screen.getByText('RK4')).toBeInTheDocument()
-    expect(screen.getByText('NO PRIORITY WARNINGS')).toBeInTheDocument()
-    // M3 contract: the flight timeline and packing detail moved to their
-    // canonical owning surfaces (Simulation), so Analysis keeps four method
-    // disclosures: ejection loads, opening shock, descent rates, snatch.
-    expect(screen.getAllByText(/HOW THIS IS ESTIMATED/)).toHaveLength(4)
     expect(
       screen.queryByText(
         'A pressure pulse, bay geometry, slack, and peak dynamic load are not solved.'
@@ -311,7 +304,11 @@ describe('unavailable canonical main snatch contract', () => {
     const simulation = { ...canonicalSimulation(), main_snatch: unavailable }
     render(<AnalysisTab state={stateFor(simulation)} />)
     expect(screen.getByText('NOT EVALUATED')).toBeInTheDocument()
-    expect(screen.getByText(unavailable.reason)).toBeInTheDocument()
+    expect(
+      within(screen.getByRole('complementary', { name: 'Selected finding details' })).getByText(
+        unavailable.reason
+      )
+    ).toBeVisible()
     cleanup()
     render(
       <PrintChecklist

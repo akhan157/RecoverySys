@@ -143,27 +143,6 @@ export default function DashboardTab({
         <h2 className="mc-panel-header">CONFIG_SUMMARY</h2>
         <div className="mc-summary">
           <ConfidenceStatus {...confidenceProps} compact />
-          <SupplierPanel config={state.config} />
-          <div className="mc-metric">
-            <div className="mc-metric__label">PACKING_SCREEN</div>
-            <div className="mc-metric__sub">
-              Actual occupied space and remaining capacity are unknown. Folding, wrapping, voids and
-              rigid hardware require a physical packing trial.
-            </div>
-            {packingVolume.bay_known && (
-              <details>
-                <summary>Nominal-height screening index</summary>
-                <p className="mc-metric__sub">
-                  {packingVolume.fraction == null
-                    ? 'Unavailable'
-                    : `${Math.round(packingVolume.fraction * 100)}%`}{' '}
-                  of an assumed threshold. This model uses nominal heights and a fixed 70%
-                  allowance; it does not measure fill percentage or determine whether the bay will
-                  close.
-                </p>
-              </details>
-            )}
-          </div>
 
           {/* Sim results in summary */}
           {state.simulation && resultFresh && (
@@ -197,18 +176,6 @@ export default function DashboardTab({
             </div>
           )}
 
-          {/* Slots count */}
-          <div className="mc-slots-grid">
-            <div className="mc-slots-grid__item">
-              <div className="mc-slots-grid__value">{String(filledSlots).padStart(2, '0')}/08</div>
-              <div className="mc-slots-grid__label">SLOTS</div>
-            </div>
-            <div className="mc-slots-grid__item">
-              <div className="mc-slots-grid__value">{filledSlots}</div>
-              <div className="mc-slots-grid__label">COMPONENTS</div>
-            </div>
-          </div>
-
           {/* Validation badge */}
           {hasErrors ? (
             <div className="mc-validation mc-validation--error">
@@ -226,6 +193,34 @@ export default function DashboardTab({
           <button className="mc-run-btn" onClick={runSim} disabled={!canRun}>
             {state.simRunning ? 'RUNNING_SIMULATION...' : 'RUN_SIMULATION →'}
           </button>
+          <SupplierPanel config={state.config} />
+          <div className="mc-metric">
+            <div className="mc-metric__label">PACKING_SCREEN</div>
+            <div className="mc-metric__sub">
+              Actual occupied space and remaining capacity are unknown. Folding, wrapping, voids and
+              rigid hardware require a physical packing trial.
+            </div>
+            {packingVolume.bay_known && (
+              <details>
+                <summary>Nominal-height screening index</summary>
+                <p className="mc-metric__sub">
+                  {packingVolume.fraction == null
+                    ? 'Unavailable'
+                    : `${Math.round(packingVolume.fraction * 100)}%`}{' '}
+                  of an assumed threshold. This model uses nominal heights and a fixed 70%
+                  allowance; it does not measure fill percentage or determine whether the bay will
+                  close.
+                </p>
+              </details>
+            )}
+          </div>
+          {/* Slots count */}
+          <div className="mc-slots-grid">
+            <div className="mc-slots-grid__item">
+              <div className="mc-slots-grid__value">{String(filledSlots).padStart(2, '0')}/08</div>
+              <div className="mc-slots-grid__label">SLOTS</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

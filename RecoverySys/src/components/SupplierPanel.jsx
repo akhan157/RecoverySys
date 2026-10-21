@@ -55,68 +55,6 @@ export default function SupplierPanel({ config }) {
           {status === 'loading' ? 'Checking…' : 'Check price & stock'}
         </button>
       </div>
-      <p className="supplier-panel__note">
-        Supplier snapshots, not checkout quotes. One item per selected slot; excludes tax, shipping
-        and required extra quantities. Stock can change before purchase.
-      </p>
-      {status === 'idle' && (
-        <p className="supplier-panel__note">
-          Showing bundled supplier data. Check for a newer published snapshot via GitHub. No plan
-          data is sent; planning works offline.
-        </p>
-      )}
-      {status === 'error' && (
-        <p role="status">
-          Could not refresh supplier data. Any previous prices retain their original timestamps.
-          Check the supplier directly.
-        </p>
-      )}
-      <ul className="supplier-panel__legend">
-        {parts.map((part) => {
-          const offer = offers.find(
-            (candidate) => candidate.partId === part.id && !part.id.startsWith('custom-')
-          )
-          const stale = offer && commercialStatus(offer, now) === 'stale'
-          const url = offer?.url || MANUFACTURER_SHOPS[part.manufacturer]
-          return (
-            <li key={`${part.category}:${part.id}`}>
-              <strong>{part.name}</strong>
-              <br />
-              {offer ? (
-                <>
-                  <span>
-                    {money(offer.price, offer.currency)} ·{' '}
-                    {stale
-                      ? 'Stale snapshot; current stock unknown'
-                      : offer.stock === 'in-stock'
-                        ? 'Reported in stock'
-                        : offer.stock === 'out-of-stock'
-                          ? 'Reported out of stock'
-                          : 'Stock unknown'}
-                  </span>
-                  <br />
-                  <small>
-                    {offer.productTitle} · {offer.variantTitle}
-                    <br />
-                    Retrieved {new Date(offer.fetchedAt).toLocaleString()}
-                  </small>
-                </>
-              ) : (
-                <span>Price and stock unknown</span>
-              )}
-              {url && (
-                <>
-                  {' '}
-                  ·{' '}
-                  <a href={url} target="_blank" rel="noopener noreferrer">
-                    Check supplier
-                  </a>
-                </>
-              )}
-            </li>
-          )
-        })}
-      </ul>
       {parts.length === 0 ? (
         <p>Select parts to see supplier information.</p>
       ) : (
@@ -130,6 +68,74 @@ export default function SupplierPanel({ config }) {
           {budget.missing + budget.stale > 0 ? 'Budget is incomplete.' : ''}
         </p>
       )}
+      {status === 'error' && (
+        <p role="status">
+          Could not refresh supplier data. Any previous prices retain their original timestamps.
+          Check the supplier directly.
+        </p>
+      )}
+      <p className="supplier-panel__note">
+        Snapshot only; one item per slot. Excludes tax, shipping and extra quantities.
+      </p>
+      <details className="supplier-panel__details">
+        <summary>Selected parts &amp; supplier details ({parts.length})</summary>
+        <p className="supplier-panel__note">
+          Supplier snapshots, not checkout quotes. One item per selected slot; excludes tax,
+          shipping and required extra quantities. Stock can change before purchase.
+        </p>
+        {status === 'idle' && (
+          <p className="supplier-panel__note">
+            Showing bundled supplier data. Check for a newer published snapshot via GitHub. No plan
+            data is sent; planning works offline.
+          </p>
+        )}
+        <ul className="supplier-panel__legend">
+          {parts.map((part) => {
+            const offer = offers.find(
+              (candidate) => candidate.partId === part.id && !part.id.startsWith('custom-')
+            )
+            const stale = offer && commercialStatus(offer, now) === 'stale'
+            const url = offer?.url || MANUFACTURER_SHOPS[part.manufacturer]
+            return (
+              <li key={`${part.category}:${part.id}`}>
+                <strong>{part.name}</strong>
+                <br />
+                {offer ? (
+                  <>
+                    <span>
+                      {money(offer.price, offer.currency)} ·{' '}
+                      {stale
+                        ? 'Stale snapshot; current stock unknown'
+                        : offer.stock === 'in-stock'
+                          ? 'Reported in stock'
+                          : offer.stock === 'out-of-stock'
+                            ? 'Reported out of stock'
+                            : 'Stock unknown'}
+                    </span>
+                    <br />
+                    <small>
+                      {offer.productTitle} · {offer.variantTitle}
+                      <br />
+                      Retrieved {new Date(offer.fetchedAt).toLocaleString()}
+                    </small>
+                  </>
+                ) : (
+                  <span>Price and stock unknown</span>
+                )}
+                {url && (
+                  <>
+                    {' '}
+                    ·{' '}
+                    <a href={url} target="_blank" rel="noopener noreferrer">
+                      Check supplier
+                    </a>
+                  </>
+                )}
+              </li>
+            )
+          })}
+        </ul>
+      </details>
     </section>
   )
 }

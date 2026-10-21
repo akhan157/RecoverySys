@@ -190,7 +190,7 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
         {sensitivity?.status === 'complete' ? (
           <>
             <p>{display(sensitivity.method)}</p>
-            <dl className="mc-brief__facts mc-brief__facts--compact">
+            <dl className="mc-brief__facts">
               {SENSITIVITY_OUTPUTS.map(([key, label, unit]) => (
                 <div key={key}>
                   <dt>{label}</dt>

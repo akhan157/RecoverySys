@@ -1,0 +1,45 @@
+.mc-analysis .analysis-causality-row[data-compact='true'] {
+  gap: 8px;
+  padding: 10px 12px;
+}
+
+.mc-analysis .analysis-causality-row[data-compact='true'] .analysis-causality-row__grid {
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) auto;
+  align-items: start;
+}
+
+.mc-analysis .analysis-causality-row[data-compact='true'] .analysis-causality-row__actions {
+  justify-content: flex-end;
+}
+
+.mc-analysis .mc-analysis__finding-message {
+  margin: 12px 0 16px;
+  color: var(--mc-text, var(--text-primary));
+  font-size: 12px;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.mc-analysis .mc-analysis__inspector dd {
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 600px) {
+  .mc-analysis .analysis-causality-row[data-compact='true'] .analysis-causality-row__grid {
+    grid-template-columns: minmax(0, 1fr) auto;
+  }
+
+  .mc-analysis
+    .analysis-causality-row[data-compact='true']
+    .analysis-causality-row__cell:nth-child(2) {
+    grid-column: 1;
+    grid-row: 2;
+  }
+
+  .mc-analysis
+    .analysis-causality-row[data-compact='true']
+    .analysis-causality-row__cell:nth-child(3) {
+    grid-column: 2;
+    grid-row: 1 / 3;
+  }
+}

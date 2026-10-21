@@ -3,6 +3,24 @@
 All notable changes to RecoverySys are documented here.
 Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
+## [Unreleased]
+
+### Changed
+
+- Prioritize Dashboard estimates and simulation actions; keep supplier subtotals visible with per-part details on demand.
+- Group Specs by input purpose, move hardware and compatibility detail behind review disclosures, and simplify Analysis actions and driver labels.
+- Separate Flight Log record/evidence transfer and Export brief, save/share, backup and OpenRocket workflows.
+- Reduce the mobile demo banner, give navigation a full-width row, improve secondary-text contrast and remove nested workspace scrolling on small screens.
+- Load heavy workspace tabs on demand and provide a render-error recovery screen that preserves plan state on retry.
+- Compile the landing page with the app's Vite/React pipeline, bundle animation dependencies, and derive catalog counts and version labels from source data.
+
+### Fixed
+
+- Keep the app within the viewport when the demo banner is visible, eliminating document-level overflow above the independently scrolling workspace.
+- Preserve the Simulation flight chart and metrics band when confidence, snatch and timeline sections occupy the page.
+- Prevent long Analysis action labels from squeezing finding columns; omit finding text that duplicates the affected outcome.
+- Keep Analysis section titles beside their accent marker and remove empty gray sensitivity-grid filler, including the Recovery Brief's five-output layout.
+
 ## [1.3.0-rc.1] - 2026-10-19
 
 - Extend bounded OpenRocket import to formats 1.4–1.9 and preserve accepted source identity through save, JSON and share links.

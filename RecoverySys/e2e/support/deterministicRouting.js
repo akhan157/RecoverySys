@@ -16,14 +16,7 @@ export async function installDeterministicRouting(page) {
 
   await page.route('**/*', async (route) => {
     const url = new URL(route.request().url())
-    if (
-      url.origin === FIRST_PARTY_ORIGIN &&
-      (url.pathname.endsWith('/landing/index.html') || url.pathname.endsWith('/landing/'))
-    ) {
-      const response = await route.fetch()
-      const body = await response.text()
-      await route.fulfill({ response, body: body.replace(/\s+integrity="[^"]*"/g, '') })
-    } else if (url.origin === FIRST_PARTY_ORIGIN) {
+    if (url.origin === FIRST_PARTY_ORIGIN) {
       await route.continue()
     } else if (url.hostname === 'fonts.googleapis.com') {
       state.fulfilledFixtures.push(url.href)
@@ -37,18 +30,6 @@ export async function installDeterministicRouting(page) {
     } else if (url.hostname.endsWith('tile.openstreetmap.org') && url.pathname.endsWith('.png')) {
       state.fulfilledFixtures.push(url.href)
       await route.fulfill({ status: 200, contentType: 'image/png', body: transparentTile })
-    } else if (
-      (url.hostname === 'cdnjs.cloudflare.com' && url.pathname.startsWith('/ajax/libs/gsap/')) ||
-      (url.hostname === 'unpkg.com' &&
-        [
-          '/lenis@1.1.14/dist/lenis.min.js',
-          '/react@18.3.1/umd/react.production.min.js',
-          '/react-dom@18.3.1/umd/react-dom.production.min.js',
-          '/@babel/standalone@7.29.0/babel.min.js',
-        ].includes(url.pathname))
-    ) {
-      state.fulfilledFixtures.push(url.href)
-      await route.fulfill({ status: 200, contentType: 'application/javascript', body: '' })
     } else {
       state.blockedThirdPartyRequests.push(url.href)
       await route.abort('blockedbyclient')

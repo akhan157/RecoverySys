@@ -11,8 +11,8 @@
   --mc-border-active: #555555;
   --mc-white: #ffffff;
   --mc-text: #e0e0e0;
-  --mc-text-dim: #888888;
-  --mc-text-faint: #555555;
+  --mc-text-dim: #aaaaaa;
+  --mc-text-faint: #888888;
   --mc-green: #4caf50;
   --mc-amber: #f5a623;
   --mc-red: #e74c3c;
@@ -58,7 +58,10 @@
   font-family: 'JetBrains Mono', 'Fira Code', 'SF Mono', 'Consolas', monospace;
   color: var(--mc-text);
   background: var(--mc-bg);
-  height: 100%;
+  /* Fill whatever #root leaves after the demo banner; height:100% here made
+     the document overflow by the banner height (double scrollbars). */
+  flex: 1;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   position: relative;
@@ -774,6 +777,66 @@
   color: var(--mc-text-faint);
 }
 
+.mc-confidence__details > summary {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  color: var(--mc-text);
+  font-size: 11px;
+}
+
+.mc-confidence__details > summary::before {
+  content: '+';
+  margin-right: 8px;
+  color: var(--mc-amber);
+}
+
+.mc-confidence__details[open] > summary::before {
+  content: '−';
+}
+
+.mc-confidence--compact .mc-confidence__header {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.mc-loading,
+.mc-recovery {
+  padding: clamp(24px, 5vw, 64px);
+  line-height: 1.7;
+}
+
+.mc-recovery {
+  max-width: 720px;
+}
+
+.mc-recovery h1 {
+  font-size: 22px;
+  line-height: 1.3;
+  margin-bottom: 20px;
+}
+
+.mc-recovery p {
+  margin-bottom: 16px;
+}
+
+.mc-recovery__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.mc-recovery__actions button {
+  min-height: 44px;
+  padding: 10px 16px;
+  color: var(--mc-text);
+  background: var(--mc-bg-panel);
+  border: 1px solid var(--mc-border-active);
+  font: inherit;
+  cursor: pointer;
+}
+
 .mc-sensitivity {
   margin: 0;
 }
@@ -1222,13 +1285,15 @@
 .mc-sim {
   display: flex;
   flex-direction: column;
-  height: 100%;
+  min-height: 100%;
 }
 
 .mc-sim__top {
   display: flex;
-  flex: 1;
-  min-height: 0;
+  /* Fixed band: the sections below (confidence, snatch, timeline, compat) used
+     to absorb all space and collapse the chart to 0px. */
+  flex: 0 0 auto;
+  height: clamp(320px, 45vh, 520px);
 }
 
 .mc-sim__chart {
@@ -1723,10 +1788,6 @@
   font-size: 10px;
 }
 
-.mc-brief__facts--compact {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-}
-
 .mc-brief__boundary {
   color: var(--mc-text-faint) !important;
   font-size: 10px !important;
@@ -1737,7 +1798,9 @@
 @media (max-width: 1024px) {
   .mc-dashboard {
     flex-direction: column;
-    overflow-y: auto;
+    height: auto;
+    min-height: 100%;
+    overflow: visible;
   }
   .mc-parts-panel {
     width: 100%;
@@ -1754,12 +1817,18 @@
     border-left: none;
     border-top: 1px solid var(--mc-border);
   }
+  .mc-schematic,
+  .mc-config-summary {
+    flex: none;
+    overflow: visible;
+  }
   .mc-schematic {
     min-height: 300px;
   }
 
   .mc-sim__top {
     flex-direction: column;
+    height: auto;
   }
   .mc-sim__chart {
     border-right: none;
@@ -1803,23 +1872,23 @@
   }
 
   .mc-header {
-    padding: 0 12px;
-    gap: 8px;
-    position: relative;
+    height: auto;
+    min-height: 80px;
+    padding: 8px 12px 0;
+    gap: 4px;
+    flex-wrap: wrap;
   }
-  /* Fade-out gradient on the right edge of the nav tabs hints that more tabs
-     are available by scrolling horizontally. Pointer-events none so it doesn't
-     block clicks. */
   .mc-header__tabs {
+    flex: 1 0 100%;
+    order: 2;
     margin-left: 0;
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-    mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
-    -webkit-mask-image: linear-gradient(to right, black calc(100% - 24px), transparent);
+    scrollbar-width: thin;
+    scrollbar-color: var(--mc-border-active) transparent;
+    scroll-padding-inline: 8px;
   }
-  .mc-header__tabs::-webkit-scrollbar {
+  .mc-header__right {
     display: none;
   }
   .mc-header__tab {
@@ -1850,6 +1919,7 @@
   }
   .mc-sim__top {
     flex-direction: column;
+    height: auto;
   }
   .mc-sim__chart {
     border-right: none;
@@ -1888,7 +1958,6 @@
     text-align: left;
   }
   .mc-brief__facts,
-  .mc-brief__facts--compact,
   .mc-brief__metadata {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
@@ -1962,7 +2031,7 @@
 
 .mc-analysis__review-signals {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 1px;
   margin-top: 14px;
   background: var(--mc-border);
@@ -2211,6 +2280,12 @@
   color: var(--mc-green);
   font-weight: 700;
   letter-spacing: 0.1em;
+  /* space-between split the ::before bar from the title text */
+  justify-content: flex-start;
+}
+
+.mc-analysis .mc-panel-header__right {
+  margin-left: auto;
 }
 
 .mc-analysis .mc-panel-header::before {
@@ -2302,14 +2377,6 @@
   .mc-analysis__review-head {
     align-items: flex-start;
     flex-direction: column;
-  }
-
-  .mc-analysis__review-signals {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .mc-analysis__review-signal:last-child {
-    grid-column: 1 / -1;
   }
 }
 
@@ -2683,16 +2750,18 @@
 /* ── Tested model response ─────────────────────────────────────────────── */
 .mc-sensitivity__outputs {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  /* auto-fit + per-cell outlines: a border-colored grid background showed as
+     a gray block wherever the last row was short. */
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
   gap: 1px;
   margin-top: 14px;
-  background: var(--mc-border);
 }
 
 .mc-sensitivity__output {
   min-width: 0;
   padding: 11px;
   background: var(--mc-bg-panel);
+  outline: 1px solid var(--mc-border);
 }
 
 .mc-sensitivity__output h3 {
