@@ -11,7 +11,7 @@
       "price": 91.11,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-024-s",
@@ -23,7 +23,7 @@
       "price": 99.94,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-030-n",
@@ -35,7 +35,7 @@
       "price": 97.91,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-030-s",
@@ -47,7 +47,7 @@
       "price": 104.95,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-030-sl",
@@ -59,7 +59,7 @@
       "price": 208.06,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-030-s",
@@ -71,7 +71,7 @@
       "price": 190.38,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-036-n",
@@ -83,7 +83,7 @@
       "price": 121.03,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-036-s",
@@ -95,7 +95,7 @@
       "price": 121.03,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-036-n",
@@ -107,7 +107,7 @@
       "price": 170.5,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-036-sl",
@@ -119,7 +119,7 @@
       "price": 216.22,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-042-n",
@@ -131,7 +131,7 @@
       "price": 137.15,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-048-n",
@@ -143,7 +143,7 @@
       "price": 161.21,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-048-n",
@@ -155,7 +155,7 @@
       "price": 186.3,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-048-s",
@@ -167,7 +167,7 @@
       "price": 228.46,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-060-n",
@@ -179,7 +179,7 @@
       "price": 195.01,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-060-n",
@@ -191,7 +191,7 @@
       "price": 244.78,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-060-s",
@@ -203,7 +203,7 @@
       "price": 305.97,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-072-n",
@@ -215,7 +215,7 @@
       "price": 285.57,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-072-s",
@@ -227,7 +227,7 @@
       "price": 360.37,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-084-n",
@@ -239,7 +239,7 @@
       "price": 375.66,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-084-s",
@@ -251,7 +251,7 @@
       "price": 469.16,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-096-n",
@@ -263,7 +263,7 @@
       "price": 440.41,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-096-s",
@@ -275,7 +275,7 @@
       "price": 548.88,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-120-n",
@@ -287,7 +287,7 @@
       "price": 547.06,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "ifc-120-s",
@@ -299,7 +299,7 @@
       "price": 685.59,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-012-n",
@@ -311,7 +311,7 @@
       "price": 77.51,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-012-s",
@@ -323,7 +323,7 @@
       "price": 87.51,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-015-n",
@@ -335,7 +335,7 @@
       "price": 78.87,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-015-s",
@@ -347,7 +347,7 @@
       "price": 88.2,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-018-n",
@@ -359,7 +359,7 @@
       "price": 81.59,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "cfc-018-s",
@@ -371,7 +371,7 @@
       "price": 89.65,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:02.795Z"
+      "fetchedAt": "2026-10-21T04:58:27.555Z"
     },
     {
       "partId": "hx-024",
@@ -383,7 +383,7 @@
       "price": 18,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "el-024",
@@ -395,7 +395,7 @@
       "price": 70,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "px-02",
@@ -407,7 +407,7 @@
       "price": 75.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-030",
@@ -419,7 +419,7 @@
       "price": 24,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-036",
@@ -431,7 +431,7 @@
       "price": 28,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "el-036",
@@ -443,7 +443,7 @@
       "price": 85,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "px-03",
@@ -455,7 +455,7 @@
       "price": 95.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-042",
@@ -467,7 +467,7 @@
       "price": 32,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-048",
@@ -479,7 +479,7 @@
       "price": 36,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "el-048",
@@ -491,7 +491,7 @@
       "price": 100,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "px-04",
@@ -503,7 +503,7 @@
       "price": 120,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-060",
@@ -515,7 +515,7 @@
       "price": 42,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "el-060",
@@ -527,7 +527,7 @@
       "price": 115,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "px-05",
@@ -539,7 +539,7 @@
       "price": 135,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-072",
@@ -551,7 +551,7 @@
       "price": 55,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "el-072",
@@ -563,7 +563,7 @@
       "price": 150,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "px-06",
@@ -575,7 +575,7 @@
       "price": 150,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-084",
@@ -587,7 +587,7 @@
       "price": 90,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "el-084",
@@ -599,7 +599,7 @@
       "price": 200,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "px-07",
@@ -611,7 +611,7 @@
       "price": 165,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-096",
@@ -623,7 +623,7 @@
       "price": 100,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "el-096",
@@ -635,7 +635,7 @@
       "price": 220,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "px-08",
@@ -647,7 +647,7 @@
       "price": 190,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "px-09",
@@ -659,7 +659,7 @@
       "price": 210,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-120",
@@ -671,7 +671,7 @@
       "price": 113,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "el-120",
@@ -683,7 +683,7 @@
       "price": 290,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "px-10",
@@ -695,7 +695,7 @@
       "price": 235,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-009",
@@ -707,7 +707,7 @@
       "price": 9,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-012",
@@ -719,7 +719,7 @@
       "price": 10,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-015",
@@ -731,7 +731,7 @@
       "price": 12,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hx-018",
@@ -743,7 +743,7 @@
       "price": 15,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "jl-chute-release",
@@ -755,7 +755,7 @@
       "price": 139.95,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "jl-altimeter-two",
@@ -767,7 +767,7 @@
       "price": 79.95,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "jl-altimeter-three",
@@ -779,7 +779,7 @@
       "price": 99.95,
       "currency": "USD",
       "stock": "out-of-stock",
-      "fetchedAt": "2026-10-20T17:17:03.927Z"
+      "fetchedAt": "2026-10-21T04:58:28.169Z"
     },
     {
       "partId": "hs-024-cl",
@@ -791,7 +791,7 @@
       "price": 22,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-024-hd",
@@ -803,7 +803,7 @@
       "price": 32.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-024-ul",
@@ -815,7 +815,7 @@
       "price": 29.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-030-cl",
@@ -827,7 +827,7 @@
       "price": 31,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-030-hd",
@@ -839,7 +839,7 @@
       "price": 39,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-030-ul",
@@ -851,7 +851,7 @@
       "price": 45,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-036-cl",
@@ -863,7 +863,7 @@
       "price": 38,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-036-hd",
@@ -875,7 +875,7 @@
       "price": 43.75,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-036-ul",
@@ -887,7 +887,7 @@
       "price": 56.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-042-cl",
@@ -899,7 +899,7 @@
       "price": 50.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-042-hd",
@@ -911,7 +911,7 @@
       "price": 58.75,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-042-ul",
@@ -923,7 +923,7 @@
       "price": 67.75,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-048-cl",
@@ -935,7 +935,7 @@
       "price": 57.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-048-hd",
@@ -947,7 +947,7 @@
       "price": 64.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-048-ul",
@@ -959,7 +959,7 @@
       "price": 79.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-054-cl",
@@ -971,7 +971,7 @@
       "price": 66.75,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-054-hd",
@@ -983,7 +983,7 @@
       "price": 76,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-054-ul",
@@ -995,7 +995,7 @@
       "price": 90.75,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-060-cl",
@@ -1007,7 +1007,7 @@
       "price": 77,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-060-hd",
@@ -1019,7 +1019,7 @@
       "price": 88.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-060-ul",
@@ -1031,7 +1031,7 @@
       "price": 102.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-066-cl",
@@ -1043,7 +1043,7 @@
       "price": 86.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-066-hd",
@@ -1055,7 +1055,7 @@
       "price": 103.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-066-ul",
@@ -1067,7 +1067,7 @@
       "price": 113.75,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-072-cl",
@@ -1079,7 +1079,7 @@
       "price": 101.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-072-hd",
@@ -1091,7 +1091,7 @@
       "price": 120.75,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-072-ul",
@@ -1103,7 +1103,7 @@
       "price": 133.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-084-cl",
@@ -1115,7 +1115,7 @@
       "price": 146,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-084-ul",
@@ -1127,7 +1127,7 @@
       "price": 197,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-096-cl",
@@ -1139,7 +1139,7 @@
       "price": 156.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-096-ul",
@@ -1151,7 +1151,7 @@
       "price": 211.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-108-cl",
@@ -1163,7 +1163,7 @@
       "price": 202.5,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-108-ul",
@@ -1175,7 +1175,7 @@
       "price": 273.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-120-cl",
@@ -1187,7 +1187,7 @@
       "price": 224.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-120-ul",
@@ -1199,7 +1199,7 @@
       "price": 302.75,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-018-cl",
@@ -1211,7 +1211,7 @@
       "price": 17.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-018-hd",
@@ -1223,7 +1223,7 @@
       "price": 27.6,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     },
     {
       "partId": "hs-018-ul",
@@ -1235,7 +1235,7 @@
       "price": 23.25,
       "currency": "USD",
       "stock": "in-stock",
-      "fetchedAt": "2026-10-20T17:17:04.859Z"
+      "fetchedAt": "2026-10-21T04:58:28.761Z"
     }
   ]
 }
