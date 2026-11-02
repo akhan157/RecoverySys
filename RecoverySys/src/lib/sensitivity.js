@@ -65,7 +65,7 @@ function numeric(value) {
 }
 
 function variantValue(base, delta, key) {
-  if (key === 'main_deploy_alt_ft') return Math.max(0, base + delta)
+  if (key === 'main_deploy_alt_ft') return base + delta
   return Math.max(Number.EPSILON, base * (1 + delta))
 }
 
@@ -190,11 +190,28 @@ function buildRow(definition, specs, config, customMotor, baseResult, outputKeys
   const baselineOutput = outputFor(baseResult, outputKeys)
   const variants = definition.deltas.map((delta) => {
     const value = variantValue(base, delta, definition.key)
-    const variantSpecs = copySpecs(specs, definition.key, value)
-    const envelope = evaluateMissionEnvelope({ specs: variantSpecs, config, customMotor })
-    const result = runSimulation({ specs: variantSpecs, config, customMotor })
+    // A non-positive deploy altitude would be silently replaced by the 500 ft
+    // calculation default, so mark the variant unusable instead of reporting
+    // a response for a value that was never simulated.
+    const validVariant = Number.isFinite(value) && value > 0
+    const variantSpecs = validVariant ? copySpecs(specs, definition.key, value) : null
+    const envelope = variantSpecs
+      ? evaluateMissionEnvelope({ specs: variantSpecs, config, customMotor })
+      : {
+          status: ENVELOPE_STATUS.OUT_OF_SCOPE,
+          assumptionsVersion: 'mission-envelope-v1',
+          reasons: [
+            {
+              code: 'INVALID_VARIANT_VALUE',
+              message: 'Variant value must be positive.',
+              remediation: null,
+              path: definition.key,
+            },
+          ],
+        }
+    const result = variantSpecs ? runSimulation({ specs: variantSpecs, config, customMotor }) : null
     const output = outputFor(result, outputKeys)
-    const usable = isUsableVariant(result, envelope)
+    const usable = validVariant && isUsableVariant(result, envelope)
     return {
       label:
         delta === 0

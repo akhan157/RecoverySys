@@ -239,3 +239,27 @@ describe('transfer migration parity', () => {
     expect(decodeMigrateValidateNormalize(future, legacyOptions).error.code).toBe('future-version')
   })
 })
+
+describe('share-link base URL', () => {
+  it('uses the page origin in a browser', async () => {
+    const { shareBaseUrl, buildShareUrl } = await import('../lib/shareLink.js')
+    const loc = {
+      protocol: 'https:',
+      hostname: 'akhan157.github.io',
+      origin: 'https://akhan157.github.io',
+      pathname: '/RecoverySys/',
+    }
+    expect(shareBaseUrl(loc)).toBe('https://akhan157.github.io/RecoverySys/')
+    expect(buildShareUrl('abc', loc)).toBe('https://akhan157.github.io/RecoverySys/?c=abc')
+  })
+
+  it.each([
+    ['macOS/Linux Tauri', { protocol: 'tauri:', hostname: 'localhost' }],
+    ['Windows Tauri', { protocol: 'http:', hostname: 'tauri.localhost' }],
+  ])('uses the public web app for the %s shell', async (_label, partial) => {
+    const { shareBaseUrl } = await import('../lib/shareLink.js')
+    expect(shareBaseUrl({ origin: 'tauri://localhost', pathname: '/', ...partial })).toBe(
+      'https://akhan157.github.io/RecoverySys/'
+    )
+  })
+})

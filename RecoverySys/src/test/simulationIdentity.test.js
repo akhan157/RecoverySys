@@ -63,6 +63,8 @@ describe('simulation identity', () => {
     ['model', 'modelVersion'],
     ['assumptions', 'assumptionsVersion'],
     ['schema', 'schemaVersion'],
+    ['app version', 'appVersion'],
+    ['method', 'method'],
   ])('invalidates a run when its %s provenance changes', (_label, field) => {
     const provenance = captureSimulationProvenance(input, 'fixed-time')
     const run = { provenance: { ...provenance, [field]: `${provenance[field]}-changed` } }

@@ -7,6 +7,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Changed
 
+- Treat an unreadable saved plan, custom-parts store, or flight log as preserved data and report it instead of silently replacing it.
+- Make flight-record and candidate-evidence imports idempotent, and keep free-text missing-data entry intact.
+- Clear an active share parameter after an explicit Save or Start Fresh so the chosen plan survives reload.
+- Gate GitHub Pages deployment on the full unit/format/lint/validation/build check, and use the qualified web build for its E2E job.
+- Verify the built app/landing identity before publishing and verify the live Pages brand, tabs, assets, and landing bundle after deployment.
+- Add app description/theme metadata and a shared favicon, and document `VITE_BASE_PATH` for forks.
+- Use the canonical opening-shock model in compatibility review, apply the shared 5G floor and raw criterion values in simulation, and correct drogue-only/timeline timing.
+- Re-enable the scheduled supplier snapshot workflow and correct the supplier, desktop, testing and dependency documentation.
 - Prioritize Dashboard estimates and simulation actions; keep supplier subtotals visible with per-part details on demand.
 - Group Specs by input purpose, move hardware and compatibility detail behind review disclosures, and simplify Analysis actions and driver labels.
 - Separate Flight Log record/evidence transfer and Export brief, save/share, backup and OpenRocket workflows.
@@ -16,6 +24,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### Fixed
 
+- Preserve the saved plan when one spec value is transiently invalid, and refuse to persist oversized or invalid configs.
+- Preserve accepted OpenRocket source identity through JSON restore and warn when referenced parts are unavailable.
+- Prevent demo mode from overwriting the user's saved plan and make the share-link Save action durable.
+- Restore custom-part slots from definitions inlined in a saved config when the separate parts store is missing.
+- Reject malformed main-chute specs and zero-impulse `.eng` motors instead of hanging the simulation or persisting unusable data.
+- Fix overlapping Edit/Delete controls on custom-part cards, Specs review/empty-slot navigation, unevaluated packing badges, collapsible-group accessibility, search empty-state copy, and the printed version string.
+- Generate browser-openable share links from the desktop shell instead of Tauri-internal origins.
 - Keep the app within the viewport when the demo banner is visible, eliminating document-level overflow above the independently scrolling workspace.
 - Preserve the Simulation flight chart and metrics band when confidence, snatch and timeline sections occupy the page.
 - Prevent long Analysis action labels from squeezing finding columns; omit finding text that duplicates the affected outcome.

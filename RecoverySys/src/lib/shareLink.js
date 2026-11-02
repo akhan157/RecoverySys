@@ -1,5 +1,6 @@
 import { normalizePayload, isValidCustomPart, SHARE_LINK_LIMITS } from './payloadBoundary.js'
 import { makeConfigPayload } from './payloadBoundary.js'
+import { PUBLIC_WEB_APP_URL } from './constants.js'
 
 export const SHARE_PARAM = 'c'
 
@@ -14,8 +15,18 @@ export function encodeSharePayload(state) {
   return btoa(encodeURIComponent(JSON.stringify(makeConfigPayload(state))))
 }
 
-export function buildShareUrl(encoded) {
-  return `${location.origin}${location.pathname}?${SHARE_PARAM}=${encodeURIComponent(encoded)}`
+export function isDesktopShell(loc = globalThis.location) {
+  if (!loc) return false
+  return loc.protocol === 'tauri:' || loc.hostname === 'tauri.localhost'
+}
+
+export function shareBaseUrl(loc = globalThis.location) {
+  if (isDesktopShell(loc)) return PUBLIC_WEB_APP_URL
+  return `${loc.origin}${loc.pathname}`
+}
+
+export function buildShareUrl(encoded, loc = globalThis.location) {
+  return `${shareBaseUrl(loc)}?${SHARE_PARAM}=${encodeURIComponent(encoded)}`
 }
 
 export function decodeSharePayload(encoded, options) {

@@ -152,6 +152,18 @@ export function parseEng(text) {
     if (p.thrust_N > peakThrust_N) peakThrust_N = p.thrust_N
   }
 
+  // A curve with no positive thrust or no burn duration cannot drive the
+  // simulation and cannot pass the persisted-motor boundary.
+  if (!(totalImpulse_ns > 0)) {
+    return { success: false, error: 'Motor curve has zero total impulse' }
+  }
+  if (!(burnTime_s > 0)) {
+    return { success: false, error: 'Motor curve has no positive-thrust burn duration' }
+  }
+  if (curve.length > 10_000) {
+    return { success: false, error: 'Motor curve exceeds the 10,000-point import limit' }
+  }
+
   return {
     success: true,
     data: {

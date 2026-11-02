@@ -40,7 +40,10 @@ export default function DashboardTab({
   const descentPresentation =
     state.simulation?.main_fps != null
       ? presentCriterion(
-          evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, state.simulation.main_fps)
+          evaluateCriterion(
+            CRITERION_IDS.MAIN_DESCENT_RATE,
+            state.simulation._criteriaInputs?.main_fps ?? state.simulation.main_fps
+          )
         )
       : null
 

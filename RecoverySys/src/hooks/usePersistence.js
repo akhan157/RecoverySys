@@ -27,9 +27,11 @@ export default function usePersistence({
   importedSource,
   delayMs = 300,
   disabled = false,
+  onError,
 }) {
   const debounceRef = useRef(null)
   const isFirstRender = useRef(true)
+  const failureReported = useRef(false)
 
   useEffect(() => {
     if (isFirstRender.current) {
@@ -39,8 +41,16 @@ export default function usePersistence({
     if (disabled) return
     clearTimeout(debounceRef.current)
     debounceRef.current = setTimeout(() => {
-      saveConfigToStorage({ config, specs, customMotor, importedSource })
+      const ok = saveConfigToStorage({ config, specs, customMotor, importedSource })
+      if (!ok && !failureReported.current) {
+        failureReported.current = true
+        onError?.(
+          'Auto-save failed — this plan exceeds local storage limits or storage is unavailable.'
+        )
+      } else if (ok) {
+        failureReported.current = false
+      }
     }, delayMs)
     return () => clearTimeout(debounceRef.current)
-  }, [config, specs, customMotor, importedSource, delayMs, disabled])
+  }, [config, specs, customMotor, importedSource, delayMs, disabled, onError])
 }

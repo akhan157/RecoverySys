@@ -76,3 +76,17 @@ describe('FlightLogTab candidate-evidence UI', () => {
     expect(screen.getByText(/4050 ft/)).toBeInTheDocument()
   })
 })
+
+describe('FlightLogTab entry fields', () => {
+  it('preserves spaces and commas in Missing Data and stores itemized values', async () => {
+    renderTab()
+    const input = screen.getByLabelText('Missing Data (optional)')
+    fireEvent.change(input, { target: { value: 'landing, coordinates' } })
+    expect(input).toHaveValue('landing, coordinates')
+    fireEvent.click(screen.getByRole('button', { name: /LOG_FLIGHT/ }))
+    await waitFor(() => {
+      const stored = JSON.parse(localStorage.getItem('recoverysys-flight-log') ?? '[]')
+      expect(stored[0].missingData).toEqual(['landing', 'coordinates'])
+    })
+  })
+})

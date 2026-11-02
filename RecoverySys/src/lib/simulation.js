@@ -545,7 +545,9 @@ export function runDispersionMonteCarlo({ simulation, specs, iterations = 500, s
   const launch_lon = parseSpec('launch_lon', specs.launch_lon)
   if (launch_lat == null || launch_lon == null) return null
 
-  const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation
+  // Prefer the unrounded phase rates captured at simulation time; the public
+  // drogue_fps/main_fps fields are presentation-rounded.
+  const { drogue_fps, main_fps, apogee_ft, deploy_ft } = simulation._driftSimulation ?? simulation
   if (!drogue_fps || !apogee_ft) return null
 
   const ALT_STEP = 200
@@ -760,7 +762,10 @@ export function runSimulation({ specs, config, customMotor = null }) {
   const deploy_ft = parseSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft) ?? 500
   // Stays in lockstep with compatibility.js + SuggestPanel.jsx via parseSpec.
   const g_factor_user = parseSpec('ejection_g_factor', specs.ejection_g_factor)
-  const g_factor = g_factor_user ?? (mass_g / 1000 >= 10 ? 30 : 20)
+  // Match normalizeCalculationInputs: positive user values below 5G clamp to
+  // 5G so compatibility, suggestions, and the simulation share one load.
+  const g_factor =
+    g_factor_user != null ? Math.max(5, g_factor_user) : mass_g / 1000 >= 10 ? 30 : 20
 
   if (!mass_g || !impulse || mass_g <= 0 || impulse <= 0) return null
 
@@ -810,18 +815,28 @@ export function runSimulation({ specs, config, customMotor = null }) {
   const drogue_fps_raw = config.drogue_chute
     ? computeDescentRate(config.drogue_chute.specs, mass_kg, mid_drogue_ft)
     : 100
-  if (drogue_fps_raw <= 0) return null
+  if (!(Number.isFinite(drogue_fps_raw) && drogue_fps_raw > 0)) return null
   const drogue_fps = drogue_fps_raw
 
   const main_fps = config.main_chute
     ? computeDescentRate(config.main_chute.specs, mass_kg, deploy_ft)
     : null
+  // A selected main chute with a zero/NaN terminal rate cannot produce a
+  // finite phase time. Reject the result instead of dividing by zero and
+  // handing an infinite step count to the timeline builder.
+  if (config.main_chute && !(Number.isFinite(main_fps) && main_fps > 0)) return null
+
+  // A drogue-only plan keeps descending under the same canopy below the main
+  // deploy altitude, so the second phase uses the drogue rate instead of
+  // stopping the timeline at deploy_ft.
+  const below_deploy_fps = main_fps ?? drogue_fps
 
   // ── Phase timings (constraint #6: no transient → time = dist / terminal) ──
   const phase1_dist_ft = apogee_ft - deploy_ft
   const phase1_time_s = phase1_dist_ft / drogue_fps
-  const phase2_time_s = main_fps ? deploy_ft / main_fps : null
-  const total_time_s = phase2_time_s != null ? phase1_time_s + phase2_time_s : null
+  const phase2_time_s = deploy_ft / below_deploy_fps
+  const total_time_s = phase1_time_s + phase2_time_s
+  if (!Number.isFinite(phase1_time_s) || !Number.isFinite(phase2_time_s)) return null
 
   const main_fps_rounded = main_fps != null ? Math.round(main_fps * 10) / 10 : null
   const drogue_fps_rounded = Math.round(drogue_fps)
@@ -840,7 +855,7 @@ export function runSimulation({ specs, config, customMotor = null }) {
   const descentTimeline = buildTimeline({
     apogee_ft,
     drogue_fps: drogue_fps_rounded,
-    main_fps: main_fps_rounded,
+    main_fps: main_fps_rounded ?? drogue_fps_rounded,
     deploy_ft,
     phase1_time_s,
     phase2_time_s,
@@ -897,6 +912,16 @@ export function runSimulation({ specs, config, customMotor = null }) {
     value: { apogee_ft, deploy_ft, drogue_fps, main_fps },
     enumerable: false,
   })
+  // Presentation values are rounded; criterion verdicts must use the raw
+  // values or a 19.99 fps plan can be classified from 20.0.
+  Object.defineProperty(result, '_criteriaInputs', {
+    value: {
+      main_fps,
+      drogue_fps,
+      landing_ke_ftlbf,
+    },
+    enumerable: false,
+  })
   return result
 }
 
@@ -911,15 +936,15 @@ function buildTimeline({
 }) {
   const points = []
 
-  const steps1 = Math.max(30, Math.ceil(phase1_time_s / 2))
+  const steps1 = Math.min(20_000, Math.max(30, Math.ceil(phase1_time_s / 2)))
   for (let i = 0; i <= steps1; i++) {
     const t = offset + (i / steps1) * phase1_time_s
     const alt = apogee_ft - drogue_fps * (i / steps1) * phase1_time_s
     points.push({ t, alt: Math.max(deploy_ft, alt) })
   }
 
-  if (main_fps != null && phase2_time_s != null) {
-    const steps2 = Math.max(15, Math.ceil(phase2_time_s / 2))
+  if (Number.isFinite(main_fps) && main_fps > 0 && Number.isFinite(phase2_time_s)) {
+    const steps2 = Math.min(20_000, Math.max(15, Math.ceil(phase2_time_s / 2)))
     for (let i = 1; i <= steps2; i++) {
       const frac = i / steps2
       const t = offset + phase1_time_s + frac * phase2_time_s

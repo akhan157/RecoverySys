@@ -26,13 +26,17 @@ const MIGRATIONS = [
     from: 0,
     to: 1,
     migrate(payload) {
-      if (payload?.specs?.airframe_od_in != null && payload?.specs?.airframe_id_in == null) {
-        payload.specs.airframe_id_in = payload.specs.airframe_od_in
+      const specs =
+        payload?.specs && typeof payload.specs === 'object' && !Array.isArray(payload.specs)
+          ? payload.specs
+          : null
+      if (specs?.airframe_od_in != null && specs.airframe_id_in == null) {
+        specs.airframe_id_in = specs.airframe_od_in
       }
       // Always remove the ghost key so it doesn't pollute state.specs even
       // if airframe_id_in was already populated.
-      if (payload?.specs && 'airframe_od_in' in payload.specs) {
-        delete payload.specs.airframe_od_in
+      if (specs && 'airframe_od_in' in specs) {
+        delete specs.airframe_od_in
       }
       return payload
     },

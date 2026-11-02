@@ -41,3 +41,11 @@ PR #15 merged as `095bdd3565c4537e18dc30468c3cb8c8e60d322d`. Web publication suc
 Supplier automation: [manual verification run](https://github.com/akhan157/RecoverySys/actions/runs/39325970396) succeeded with 103 offers, zero commercial-field changes and zero failures. The bot published refreshed timestamps as `bcd429c`; scheduled refresh is now active on main.
 
 Public verification: `https://akhan157.github.io/RecoverySys/` served candidate asset `index-c0uUVPNx.js` containing `1.3.0-rc.1` and `V1.3 RC1`. The configured raw-main supplier snapshot returned 103 offers from all three suppliers. Release assets were downloaded, locally hashed, and matched GitHub server-side SHA-256 digests. Test release: `https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.1`.
+
+## 2026-10-31 post-candidate recheck
+
+This addendum does not re-qualify the rc.1 artifacts or the deployed build.
+
+- The supplier refresh workflow was manually disabled on 2026-10-23 after its last successful run. All 103 bundled offers therefore exceeded the 24-hour freshness window and were excluded from subtotals. The workflow was re-enabled on 2026-10-31. The first dispatch partially failed on a transient Spherachutes HTTP 503 but preserved successful updates; the retry succeeded with 103 offers, zero failures, and fresh timestamps for all three suppliers in the committed snapshot. Raw GitHub delivery may lag briefly behind the commit.
+- Dependency audit now reports one high (`vite@7.3.6`, fix available within range) and seven moderate development findings; production dependencies remain clean. The Tailwind-specific description above is historical.
+- The deployed Pages build (`40eae60`) predates current `main`; current `main` passes 42 test files / 410 tests and 90 desktop/mobile browser runs, but those are not rc.1 evidence and no new release has been qualified.

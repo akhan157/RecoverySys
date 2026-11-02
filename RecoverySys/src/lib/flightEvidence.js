@@ -73,15 +73,25 @@ export function migrateFlightEntry(raw) {
   })
 }
 
-export function loadFlightLog(storage = globalThis.localStorage) {
+/**
+ * Read the flight log without collapsing corruption into an empty list.
+ * `ok:false` means the stored bytes are unreadable and must not be overwritten
+ * merely by opening the tab.
+ */
+export function readFlightLog(storage = globalThis.localStorage) {
   try {
     const parsed = JSON.parse(storage?.getItem(FLIGHT_LOG_STORAGE_KEY) || '[]')
-    return (Array.isArray(parsed) ? parsed : parsed?.entries || [])
-      .map(migrateFlightEntry)
-      .filter(Boolean)
+    const records = Array.isArray(parsed) ? parsed : parsed?.entries
+    if (!Array.isArray(records)) return { ok: false, entries: [] }
+    const entries = records.map(migrateFlightEntry).filter(Boolean)
+    return { ok: entries.length === records.length, entries }
   } catch {
-    return []
+    return { ok: false, entries: [] }
   }
+}
+
+export function loadFlightLog(storage = globalThis.localStorage) {
+  return readFlightLog(storage).entries
 }
 
 export function saveFlightLog(entries, storage = globalThis.localStorage) {
@@ -116,10 +126,18 @@ export function createFlightEntry(
       method: 'manual-entry',
     },
     instrumentation: {
-      devices: form.instrumentation || [],
+      devices: String(form.instrumentation || '')
+        .split(',')
+        .map((device) => device.trim())
+        .filter(Boolean),
       notes: form.instrumentation_notes || '',
     },
-    missingData: form.missing_data?.length ? form.missing_data : undefined,
+    missingData: Array.isArray(form.missing_data)
+      ? form.missing_data
+      : String(form.missing_data ?? '')
+          .split(',')
+          .map((item) => item.trim())
+          .filter(Boolean),
     conditions: typeof form.conditions === 'string' ? form.conditions : '',
     reviewerStatus: DEFAULT_REVIEWER_STATUS,
   })
@@ -186,6 +204,23 @@ export function importCandidateEvidence(text) {
       return identity == null ? null : { ...migrated, predictionIdentity: identity }
     })
     .filter(Boolean)
+}
+
+/**
+ * Merge imported records into the local log without duplicating ids.
+ * Flight-entry ids are stable across export/import; importing the same backup
+ * twice must not create duplicate React keys or make one delete remove two
+ * records. Newest additions are placed first, matching the UI's insert order.
+ */
+export function mergeFlightEntries(existing, imported) {
+  const knownIds = new Set((existing ?? []).map((entry) => entry?.id).filter(Boolean))
+  const additions = []
+  for (const entry of imported ?? []) {
+    if (!entry || entry.id == null || knownIds.has(entry.id)) continue
+    knownIds.add(entry.id)
+    additions.push(entry)
+  }
+  return { entries: [...additions, ...(existing ?? [])], added: additions.length }
 }
 
 export function exportFlightRecords(entries) {

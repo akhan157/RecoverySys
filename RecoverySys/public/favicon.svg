@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="RecoverySys">
+  <rect width="64" height="64" rx="12" fill="#0a0a0a"/>
+  <path d="M12 30a20 20 0 0 1 40 0" fill="none" stroke="#4ade80" stroke-width="4" stroke-linecap="round"/>
+  <path d="M12 30h40M22 30l-5 18M32 30v20M42 30l5 18" fill="none" stroke="#4ade80" stroke-width="3" stroke-linecap="round"/>
+  <circle cx="32" cy="54" r="3" fill="#4ade80"/>
+</svg>

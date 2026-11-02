@@ -1,7 +1,11 @@
-import { airDensity, computeDescentRate } from './simulation.js'
+import { computeDescentRate } from './simulation.js'
 import { WARN_LEVELS, PHYSICS } from './constants.js'
 import { parseSpec, coerceSpec } from './schema.js'
-import { computeDrogueDeploymentVelocity, computeMainSnatchLoad } from './recoveryLoad.js'
+import {
+  computeDrogueDeploymentVelocity,
+  computeMainSnatchLoad,
+  computeOpeningShockLoad,
+} from './recoveryLoad.js'
 import { CRITERION_IDS, evaluateCriterion } from './criteria.js'
 import { normalizeFinding } from './findings.js'
 
@@ -51,14 +55,6 @@ const MID_DROGUE_ALT_FT = 5000 // air ~15% thinner here vs sea level
 // doesn't require finding them inside an if/else maze.
 const PACKING_EFFICIENCY = 0.7 // screening assumption; not measured physical occupancy
 const SF_MARGINAL_RATIO_QL = 1.2 // looser ratio for ql-vs-cord (links rarely exceed cord by much)
-const SHAPE_OPENING_FACTOR_Cx = {
-  flat: 1.8,
-  elliptical: 1.6,
-  conical: 1.5,
-  cruciform: 2.2,
-  toroidal: 1.4,
-}
-const Cx_DEFAULT = 1.8
 const QL_OPENING_RATIO = 3 // quick-link opening ≈ 3× wire gauge
 
 // Mass tiers for harness-length minimum (matches NAR/TRA L1/L2/L3 guidance).
@@ -345,15 +341,18 @@ function rule_drogueDescentRate(ctx) {
 function rule_openingShock(ctx) {
   const { config, mass_kg, deploy_alt_ft } = ctx
   if (!config.drogue_chute || !config.main_chute || !mass_kg) return []
-  const drogue_at_deploy = computeDescentRate(config.drogue_chute.specs, mass_kg, deploy_alt_ft)
-  const drogue_mps = drogue_at_deploy / FT_PER_M
-  const rho_deploy = airDensity(deploy_alt_ft / FT_PER_M)
-  const main_r_m = (config.main_chute.specs.diameter_in * PHYSICS.IN_TO_M) / 2
-  const main_area = Math.PI * main_r_m * main_r_m
-  const Cx = SHAPE_OPENING_FACTOR_Cx[config.main_chute.specs.shape] || Cx_DEFAULT
-  const F_open_N =
-    0.5 * rho_deploy * drogue_mps * drogue_mps * config.main_chute.specs.cd * main_area * Cx
-  const F_open_lbs = F_open_N / N_PER_LBF
+  const drogue_at_deploy = computeDrogueDeploymentVelocity(
+    config.drogue_chute.specs,
+    mass_kg,
+    deploy_alt_ft
+  )
+  const opening = computeOpeningShockLoad({
+    mainSpecs: config.main_chute.specs,
+    deploy_alt_ft,
+    approach_velocity_fps: drogue_at_deploy,
+  })
+  if (opening.status !== 'evaluated') return []
+  const F_open_lbs = opening.force_lbs
   const cord_lbs = config.shock_cord?.specs.strength_lbs
   const ql_lbs = config.quick_links?.specs.strength_lbs
   const weakest = Math.min(cord_lbs ?? Infinity, ql_lbs ?? Infinity)

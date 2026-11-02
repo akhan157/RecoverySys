@@ -39,7 +39,14 @@ export default function useShareLinkLoader({
     }
 
     if (typeof onLoadConfig === 'function') {
-      onLoadConfig(decoded)
+      const loadResult = onLoadConfig(decoded)
+      if (loadResult?.ok === false) {
+        addToast(
+          TOAST_LEVELS.ERROR,
+          loadResult.error ?? 'Imported custom parts could not be loaded.'
+        )
+        return
+      }
     } else if (typeof mergeCustomParts === 'function') {
       const mergeResult = mergeCustomParts(decoded.inlinedCustomParts ?? [])
       if (!mergeResult?.ok) {

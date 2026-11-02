@@ -65,11 +65,16 @@ macOS still blocks this app, remove quarantine only from this app:
 `xattr -dr com.apple.quarantine /path/to/RecoverySys.app`.
 Do not disable Gatekeeper globally.
 
-The workflow uploads `RecoverySys-macos-universal.zip` as a GitHub Actions artifact.
-It is not a GitHub Release download: fetch it from the workflow run's artifacts,
-then extract it once to reach `RecoverySys.app`. If a GitHub Release is added, the
-inner `RecoverySys-macos-universal.zip` should be attached directly.
+The workflow uploads `RecoverySys-macos-universal.zip` as a GitHub Actions
+artifact. For the `v1.3.0-rc.1` test release the same ZIP is also attached as a
+GitHub Release download alongside `SHA256SUMS.txt`; release assets are attached
+manually, not by the workflow. Verify the release checksum before opening. If a
+future release omits the asset, fetch it from the workflow run's artifacts and
+extract it once to reach `RecoverySys.app`.
 
 The current-main Windows workflow uploads the extracted contents as the
-`RecoverySys-Portable` Actions artifact; it is not the historical v1.2.0.0
-installer and is not currently a release asset.
+`RecoverySys-Portable` Actions artifact. The `v1.3.0-rc.1` test release also
+attaches `RecoverySys-Portable.zip` manually. It is not the historical
+v1.2.0.0 installer. The Windows executable is unsigned, so SmartScreen may warn
+on first launch; verify the SHA-256 digest before running it and do not bypass
+the warning for files from an untrusted source.

@@ -78,7 +78,11 @@ if needed.
 
 ## GitHub Pages
 
-The Vite configuration currently builds for a GitHub Pages project site at `/RecoverySys/`. Keep that base path when deploying this repository as `https://<account>.github.io/RecoverySys/`. If the repository is published under a different Pages path, update the Vite `base` setting before building; otherwise asset URLs will not match the deployed site.
+The Vite configuration builds for a GitHub Pages project site at `/RecoverySys/`. Keep that base path when deploying this repository as `https://<account>.github.io/RecoverySys/`. For a fork or a different Pages path, set `VITE_BASE_PATH=/<repo>/` at build time instead of editing the config; Tauri builds continue to use relative assets. If the base path is wrong, asset URLs will 404 after deployment.
+
+`npm run verify:build` is part of `npm run check` and asserts that the built app and landing page carry the current version label, reference existing hashed assets, and include the favicon. `npm run verify:pages` checks the published site after deployment: expected brand/version, all ten pre-hydration tabs, asset availability, and the current landing CTA/footer. The Pages workflow runs it after `deploy-pages`; it can also be run manually against the live site.
+
+The deployed site is static, uses query parameters rather than history routes, and has no SPA fallback. Unknown paths correctly return GitHub Pages' 404 page.
 
 ## Local-first and privacy
 

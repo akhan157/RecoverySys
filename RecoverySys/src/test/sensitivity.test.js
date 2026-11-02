@@ -114,3 +114,21 @@ describe('deterministic sensitivity analysis', () => {
     expect(deploy.criterionCrossings).toEqual([])
   })
 })
+
+describe('sensitivity variant validity', () => {
+  it('withholds a non-positive deployment-altitude variant instead of simulating the fallback', () => {
+    const result = runSensitivity({
+      specs: { ...specs, main_deploy_alt_ft: '100' },
+      config,
+    })
+    const deploy = result.rows.find(({ key }) => key === 'main_deploy_alt_ft')
+    const negative = deploy.variants.find(({ value }) => value <= 0)
+    expect(negative).toMatchObject({ value: -100, usable: false, output: null })
+    expect(deploy.usableVariants.every(({ value }) => value > 0)).toBe(true)
+    expect(
+      deploy.usableVariants.every(
+        ({ output }) => output.apogee_ft !== deploy.baseOutput.apogee_ft * 5
+      )
+    ).toBe(true)
+  })
+})

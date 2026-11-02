@@ -9,6 +9,7 @@ import {
 import {
   loadSaved,
   loadCustomParts,
+  readCustomParts,
   saveConfigToStorage,
   saveCustomPartsToStorage,
   STORAGE_KEYS,
@@ -199,5 +200,84 @@ describe('imported source transfer', () => {
     )
     expect(result.ok).toBe(true)
     expect(result.importedSource).toBeNull()
+  })
+})
+
+describe('storage write/read symmetry', () => {
+  const plan = {
+    config: { main_chute: { id: 'cl-24-n' } },
+    specs: { rocket_mass_g: '2500', motor_total_impulse_ns: '640' },
+    customMotor: null,
+    importedSource: null,
+  }
+
+  it('keeps the saved plan when one field is transiently invalid', () => {
+    localStorage.clear()
+    expect(
+      saveConfigToStorage({
+        ...plan,
+        specs: { ...plan.specs, drag_cd: '0', ejection_g_factor: '0' },
+      })
+    ).toBe(true)
+
+    const restored = loadSaved()
+    expect(restored).not.toBeNull()
+    expect(restored.config.main_chute.id).toBe('cl-24-n')
+    expect(restored.specs.rocket_mass_g).toBe('2500')
+    expect(restored.specs.drag_cd).toBe('')
+    expect(restored.specs.ejection_g_factor).toBe('')
+  })
+
+  it('drops an invalid persisted motor without discarding the plan', () => {
+    localStorage.clear()
+    expect(
+      saveConfigToStorage({
+        ...plan,
+        customMotor: {
+          designation: 'BROKEN',
+          curve: [
+            { t: 0, thrust_N: 0 },
+            { t: 1, thrust_N: 0 },
+          ],
+          totalImpulse_ns: 0,
+          burnTime_s: 0,
+        },
+      })
+    ).toBe(true)
+
+    const restored = loadSaved()
+    expect(restored).not.toBeNull()
+    expect(restored.config.main_chute.id).toBe('cl-24-n')
+    expect(restored.customMotor).toBeNull()
+  })
+
+  it('refuses to persist a payload larger than its own load limit', () => {
+    localStorage.clear()
+    expect(localStorage.getItem(STORAGE_KEYS.CONFIG)).toBeNull()
+    expect(
+      saveConfigToStorage({
+        ...plan,
+        customMotor: {
+          designation: 'HUGE',
+          curve: [
+            { t: 0, thrust_N: 0 },
+            { t: 1, thrust_N: 100 },
+            { t: 2, thrust_N: 0 },
+          ],
+          totalImpulse_ns: 100,
+          burnTime_s: 1,
+          padding: 'x'.repeat(PAYLOAD_LIMITS.jsonBytes),
+        },
+      })
+    ).toBe(false)
+    expect(localStorage.getItem(STORAGE_KEYS.CONFIG)).toBeNull()
+  })
+
+  it('reports an unreadable custom-parts store without erasing it', () => {
+    localStorage.setItem(STORAGE_KEYS.CUSTOM_PARTS, '{corrupt')
+    const read = readCustomParts()
+    expect(read.ok).toBe(false)
+    expect(read.parts).toEqual([])
+    expect(localStorage.getItem(STORAGE_KEYS.CUSTOM_PARTS)).toBe('{corrupt')
   })
 })

@@ -327,9 +327,7 @@ export default function MissionControlLayout({
                   focusTarget={reviewNav?.target ?? null}
                   onFocusConsumed={consumeReviewFocus}
                   onReturnToAnalysis={returnToAnalysis}
-                  onNavigate={(path) => {
-                    if (path.startsWith('config.')) setCategory(path.replace('config.', ''))
-                  }}
+                  onNavigate={handleNavigate}
                 />
               )}
               {activeTab === 'COMPARE' && (

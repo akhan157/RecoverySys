@@ -1,6 +1,6 @@
-import { useState, useEffect, useMemo, useCallback } from 'react'
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react'
 import { PARTS, SLOT_IDS } from '../data/parts.js'
-import { canPersistCustomParts, loadCustomParts, saveCustomPartsToStorage } from '../lib/storage.js'
+import { canPersistCustomParts, readCustomParts, saveCustomPartsToStorage } from '../lib/storage.js'
 import { isValidCustomPart } from '../lib/payloadBoundary.js'
 
 /**
@@ -26,12 +26,38 @@ import { isValidCustomPart } from '../lib/payloadBoundary.js'
  *   - deleteCustomPart:  remove one + clear matching config slot
  *   - editCustomPart:    replace one + update matching config slot
  */
-export default function useCustomParts({ config, dispatch }) {
-  const [customParts, setCustomParts] = useState(loadCustomParts)
+export default function useCustomParts({ config, dispatch, initialParts = [], onLoadError }) {
+  const initialRef = useRef(null)
+  if (initialRef.current == null) initialRef.current = readCustomParts()
+  const initial = initialRef.current
+  const [customParts, setCustomParts] = useState(() => {
+    const known = new Set(initial.parts.map((part) => part.id))
+    const fromSavedConfig = initialParts.filter(
+      (part) => isValidCustomPart(part, SLOT_IDS) && !known.has(part.id)
+    )
+    return [...initial.parts, ...fromSavedConfig]
+  })
+  // Do not overwrite an unreadable store with an empty list. It stays intact
+  // for manual recovery, and the first real mutation will replace it.
+  const skipInitialSave = useRef(!initial.ok)
+  const reportedLoadError = useRef(false)
 
   const allParts = useMemo(() => [...customParts, ...PARTS], [customParts])
 
   useEffect(() => {
+    if (!initial.ok && !reportedLoadError.current) {
+      reportedLoadError.current = true
+      onLoadError?.()
+    }
+    // Mount-only: report an unreadable initial store once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (skipInitialSave.current) {
+      skipInitialSave.current = false
+      return
+    }
     saveCustomPartsToStorage(customParts)
   }, [customParts])
 

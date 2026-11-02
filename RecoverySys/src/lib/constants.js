@@ -57,6 +57,11 @@ export const PHYSICS = Object.freeze({
 export const VERSION = '1.3.0-rc.1'
 export const VERSION_DISPLAY = 'V1.3 RC1'
 
+// Share links copied from the desktop shell must point at the public web app;
+// the Tauri webview origin (tauri://localhost, http://tauri.localhost) is not
+// reachable from a browser.
+export const PUBLIC_WEB_APP_URL = 'https://akhan157.github.io/RecoverySys/'
+
 // Result provenance metadata. Keep these distinct: app release, payload schema,
 // and the numerical model can evolve independently.
 export const SIMULATION_SCHEMA_VERSION = 1

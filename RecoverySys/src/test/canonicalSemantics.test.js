@@ -52,6 +52,36 @@ describe('canonical result envelope', () => {
     })
     expect(envelope.assessments.main_fps.status).toBe(ASSESSMENT_STATUS.NOT_EVALUATED)
   })
+
+  it('carries unrounded drift inputs and revision through the result envelope', () => {
+    const result = { apogee_ft: 4200, apogee_method: 'rk4', deploy_ft: 500 }
+    Object.defineProperty(result, '_driftSimulation', {
+      value: { apogee_ft: 4200.4, deploy_ft: 500, drogue_fps: 70.7, main_fps: 15.34 },
+      enumerable: false,
+    })
+    const envelope = buildResultEnvelope(result, { specs: {}, config: {} }, 9)
+
+    expect(envelope.provenance.inputRevision).toBe(9)
+    expect(envelope._driftSimulation).toEqual({
+      apogee_ft: 4200.4,
+      deploy_ft: 500,
+      drogue_fps: 70.7,
+      main_fps: 15.34,
+    })
+    // Presentation values must not be replaced by the raw drift inputs.
+    expect(envelope.apogee_ft).toBe(4200)
+  })
+
+  it('carries raw criterion inputs through the result envelope', () => {
+    const result = { apogee_ft: 4200, main_fps: 20, landing_ke_ftlbf: 100 }
+    Object.defineProperty(result, '_criteriaInputs', {
+      value: { main_fps: 19.994, landing_ke_ftlbf: 99.61 },
+      enumerable: false,
+    })
+    const envelope = buildResultEnvelope(result, { specs: {}, config: {} }, 1)
+    expect(envelope._criteriaInputs).toEqual({ main_fps: 19.994, landing_ke_ftlbf: 99.61 })
+    expect(envelope.main_fps).toBe(20)
+  })
 })
 
 describe('canonical criteria', () => {

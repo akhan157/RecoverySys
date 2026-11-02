@@ -49,8 +49,8 @@ export default function CompareTab({
               }}
             >
               Save your current configuration as "Config A". Then change parts or specs — this tab
-              will show A vs B side-by-side so you can compare descent rates, drift, warnings, and
-              part choices.
+              will show A vs B side-by-side so you can compare descent rates, drift, and part or
+              specification choices.
             </div>
             <button className="mc-run-btn" onClick={onSaveSnapshot}>
               SAVE_AS_CONFIG_A &rarr;

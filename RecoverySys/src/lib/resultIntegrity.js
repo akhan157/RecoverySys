@@ -24,7 +24,7 @@ export function fingerprintInputs({ specs, config, customMotor }) {
 
 export function buildResultEnvelope(result, inputs, inputRevision) {
   if (!result) return null
-  return {
+  const envelope = {
     ...result,
     assessments: buildResultAssessments(result, {
       fresh: true,
@@ -35,6 +35,17 @@ export function buildResultEnvelope(result, inputs, inputRevision) {
       ...captureSimulationProvenance(inputs),
     },
   }
+  // The scalar result keeps unrounded phase rates on a non-enumerable field so
+  // drift consumers can avoid re-deriving from presentation-rounded values.
+  // Object spread drops non-enumerable properties, so carry it explicitly.
+  for (const key of ['_driftSimulation', '_criteriaInputs']) {
+    if (!result[key]) continue
+    Object.defineProperty(envelope, key, {
+      value: result[key],
+      enumerable: false,
+    })
+  }
+  return envelope
 }
 
 export function isResultFresh(result, inputs, inputRevision) {

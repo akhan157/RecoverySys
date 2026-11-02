@@ -99,14 +99,30 @@ const DEMO_SPECS = {
   wind_aloft_alt_ft: '8000',
 }
 
+function stripShareParamFromLocation() {
+  try {
+    const url = new URL(window.location.href)
+    if (!url.searchParams.has(SHARE_PARAM)) return
+    url.searchParams.delete(SHARE_PARAM)
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`)
+  } catch {
+    /* ignore URL/history failures */
+  }
+}
+
 function buildInitialState() {
   const saved = loadSaved()
   const custom = loadCustomParts()
-  const allParts = [...custom, ...PARTS]
+  // Saved configs inline custom-part definitions. Keep them as a fallback so a
+  // config still restores when the separate custom-parts store is missing or
+  // unreadable; the local store wins for an edited part with the same id.
+  const inlinedCustomParts = saved?.inlinedCustomParts ?? []
+  const allParts = [...custom, ...inlinedCustomParts, ...PARTS]
   const rehydrate = (part) =>
     part ? (allParts.find((p) => p.id === part.id && p.category === part.category) ?? null) : null
   return {
     config: Object.fromEntries(SLOT_IDS.map((id) => [id, rehydrate(saved?.config?.[id])])),
+    inlinedCustomParts,
     specs: {
       ...DEFAULT_SPECS,
       ...Object.fromEntries(Object.entries(saved?.specs ?? {}).filter(([k]) => k in DEFAULT_SPECS)),
@@ -267,6 +283,22 @@ export default function App() {
   // Dark mode (persisted to localStorage; applies data-theme="dark" to <html>)
   const [darkMode, setDarkMode] = useDarkMode()
 
+  const addToast = useCallback((level, message) => {
+    dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
+  }, [])
+  const handlePersistenceError = useCallback(
+    (message) => addToast(TOAST_LEVELS.ERROR, message),
+    [addToast]
+  )
+  const handleCustomPartsError = useCallback(
+    () =>
+      addToast(
+        TOAST_LEVELS.WARN,
+        'Stored custom parts could not be read — the original data was left unchanged.'
+      ),
+    [addToast]
+  )
+
   // Custom parts (persisted; merged with PARTS into allParts; CRUD cleans
   // up matching config slots when parts are deleted or edited).
   const {
@@ -276,7 +308,12 @@ export default function App() {
     addCustomPart,
     deleteCustomPart,
     editCustomPart,
-  } = useCustomParts({ config: state.config, dispatch })
+  } = useCustomParts({
+    config: state.config,
+    dispatch,
+    initialParts: state.inlinedCustomParts,
+    onLoadError: handleCustomPartsError,
+  })
 
   // Debounced compatibility re-evaluation on config/specs change.
   useCompatibilityWatcher({ config: state.config, specs: state.specs, dispatch })
@@ -301,6 +338,7 @@ export default function App() {
     customMotor: state.customMotor,
     importedSource: state.importedSource,
     disabled: demoMode || importSession,
+    onError: handlePersistenceError,
   })
 
   // ── Actions ───────────────────────────────────────────────────────────────
@@ -329,19 +367,19 @@ export default function App() {
   const clearAll = useCallback(() => {
     dispatch({ type: 'CLEAR_ALL' })
     setImportSession(false)
+    // A cleared plan must not be reseeded from a share link on reload.
+    stripShareParamFromLocation()
   }, [])
 
-  const addToast = useCallback((level, message) => {
-    dispatch({ type: 'ADD_TOAST', id: ++toastCounter.current, toast: { level, message } })
-  }, [])
   const importOpenRocket = useCallback(
     async (file) => {
       try {
         const bytes = await file.arrayBuffer()
         const exchange = parseOpenRocketArchive(bytes, { sourceFilename: file.name })
         exchange.source.sourceHash = await sha256Hex(bytes)
+        // Previewing an archive does not change plan inputs; keep auto-save
+        // enabled until a snapshot is explicitly accepted.
         dispatch({ type: 'SET_OPENROCKET_IMPORT', exchange })
-        setImportSession(true)
         return { ok: true }
       } catch (error) {
         addToast(
@@ -403,6 +441,7 @@ export default function App() {
           acceptedAt: new Date().toISOString(),
         },
       })
+      setImportSession(true)
       addToast(
         TOAST_LEVELS.OK,
         'OpenRocket snapshot accepted — run a fresh simulation before using estimates.'
@@ -417,7 +456,8 @@ export default function App() {
     const inputs = { specs: state.specs, config: state.config, customMotor: state.customMotor }
     const result = runSimulation(inputs)
     const envelope = buildResultEnvelope(result, inputs, state.inputRevision)
-    if (envelope) envelope.provenance = captureSimulationProvenance(inputs)
+    if (envelope)
+      envelope.provenance = { ...envelope.provenance, ...captureSimulationProvenance(inputs) }
     dispatch({
       type: 'SET_SIM',
       simulation: envelope,
@@ -431,6 +471,14 @@ export default function App() {
   }, [state.specs, state.config, state.customMotor, state.inputRevision, addToast])
 
   const saveConfig = useCallback(() => {
+    // Demo inputs are sample data and must never replace the user's saved plan.
+    if (demoMode) {
+      addToast(
+        TOAST_LEVELS.WARN,
+        'Demo mode does not overwrite your saved plan. Start Fresh or export JSON to keep a copy.'
+      )
+      return
+    }
     dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVING })
     const ok = saveConfigToStorage({
       config: state.config,
@@ -440,6 +488,9 @@ export default function App() {
     })
     if (ok) {
       setImportSession(false)
+      // An explicit save must survive reload; otherwise the still-present
+      // share payload would replace the just-saved session on every load.
+      stripShareParamFromLocation()
       safeTimeout(
         () => dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.SAVED }),
         SAVE_FLASH_MS
@@ -450,9 +501,20 @@ export default function App() {
       )
     } else {
       dispatch({ type: 'SET_SAVE_STATE', state: SAVE_STATES.IDLE })
-      addToast(TOAST_LEVELS.ERROR, 'Save failed — storage full')
+      addToast(
+        TOAST_LEVELS.ERROR,
+        'Save failed — the configuration exceeds local storage limits or storage is unavailable.'
+      )
     }
-  }, [state.config, state.specs, state.customMotor, state.importedSource, safeTimeout, addToast])
+  }, [
+    demoMode,
+    state.config,
+    state.specs,
+    state.customMotor,
+    state.importedSource,
+    safeTimeout,
+    addToast,
+  ])
 
   const copyShareLink = useCallback(() => {
     try {
@@ -493,8 +555,19 @@ export default function App() {
       if (params.get(SHARE_PARAM)) return // share link active — URL state takes precedence
       if (demoMode) return // demo (explicit or first-visit) — no "restored" toast
       const raw = localStorage.getItem('recoverysys-config')
-      if (raw && JSON.parse(raw)) {
+      if (!raw) return
+      try {
+        JSON.parse(raw)
+      } catch {
+        return
+      }
+      if (loadSaved()) {
         addToast(TOAST_LEVELS.OK, 'Restored your last session.')
+      } else {
+        addToast(
+          TOAST_LEVELS.WARN,
+          'Saved session could not be restored — starting with an empty plan. The saved data was left unchanged.'
+        )
       }
     } catch {
       /* silent */

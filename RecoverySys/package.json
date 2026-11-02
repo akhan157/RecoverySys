@@ -23,7 +23,7 @@
     "e2e:narrow": "playwright test e2e/phase1.spec.js",
     "e2e:serve": "npm run build && vite preview --host 127.0.0.1 --port 4174",
     "e2e:serve:artifact": "vite preview --host 127.0.0.1 --port 4174",
-    "check": "npm run format:check && npm run validate:parts && npm run validate:corpus && npm run lint && npm test && npm run build",
+    "check": "npm run format:check && npm run validate:parts && npm run validate:corpus && npm run lint && npm test && npm run build && npm run verify:build",
     "validate:parts": "node scripts/validate-parts.js",
     "validate:corpus": "node scripts/validate-corpus.js",
     "report:catalog-provenance": "node scripts/report-catalog-provenance.js",
@@ -34,7 +34,9 @@
     "suppliers:refresh": "node scripts/refresh-suppliers.mjs --write",
     "catalog:review": "node scripts/review-catalog.mjs",
     "suppliers:coverage": "node scripts/supplier-coverage.mjs",
-    "catalog:stage:fruity": "node scripts/stage-fruity-engineering.mjs"
+    "catalog:stage:fruity": "node scripts/stage-fruity-engineering.mjs",
+    "verify:build": "node scripts/verify-build-identity.mjs",
+    "verify:pages": "node scripts/verify-pages.mjs"
   },
   "dependencies": {
     "fflate": "^0.8.3",

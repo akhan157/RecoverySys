@@ -31,7 +31,12 @@ export default function SimulationTab({
   // the card never re-derives the 15/20 ft/s thresholds.
   const descentPresentation =
     usableSim?.main_fps != null
-      ? presentCriterion(evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, usableSim.main_fps))
+      ? presentCriterion(
+          evaluateCriterion(
+            CRITERION_IDS.MAIN_DESCENT_RATE,
+            usableSim._criteriaInputs?.main_fps ?? usableSim.main_fps
+          )
+        )
       : null
 
   // Arriving from a review action (e.g. the Analysis "Rerun simulation" strip
@@ -206,14 +211,16 @@ function FlightTimelinePanel({ sim, specs }) {
             event={`APOGEE @ ${sim.apogee_ft.toLocaleString()} FT`}
             note={`Method: ${sim.apogee_method?.toUpperCase() ?? 'RK4'} — ejection fires, drogue deploys`}
           />
-          <TimelineRow
-            marker={`T+${sim.apogee_t_s + sim.phase1_time_s}s`}
-            event={`MAIN_DEPLOY @ ${deploy_ft.toLocaleString()} FT`}
-            note="Altimeter fires main — opening shock occurs here"
-          />
-          {sim.total_time_s && (
+          {sim.main_fps != null && (
             <TimelineRow
-              marker={`T+${sim.total_time_s}s`}
+              marker={`T+${sim.apogee_t_s + sim.phase1_time_s}s`}
+              event={`MAIN_DEPLOY @ ${deploy_ft.toLocaleString()} FT`}
+              note="Altimeter fires main — opening shock occurs here"
+            />
+          )}
+          {sim.total_time_s != null && (
+            <TimelineRow
+              marker={`T+${sim.apogee_t_s + sim.total_time_s}s`}
               event={`LANDING @ ${sim.drift_ft.toLocaleString()} FT DOWNWIND`}
               note="Primary wind drift; use DISPERSION tab for uncertainty bounds"
             />
@@ -230,7 +237,8 @@ function PackingVolumePanel({ specs, config }) {
   const packing = computePackingVolume({ config, specs })
   if (!packing.bay_known) return null
   const packingCriterion = evaluateCriterion(CRITERION_IDS.PACKING_CAPACITY_RATIO, packing.fraction)
-  const fillPct = Math.round((packing.fraction ?? 0) * 100)
+  const packingEvaluated = packingCriterion?.evaluated === true
+  const fillPct = packingEvaluated ? Math.round(packing.fraction * 100) : null
   return (
     <section className="mc-sim__packing" aria-label="Packing screening">
       <h2 className="mc-panel-header">PACKING_SCREEN</h2>
@@ -251,22 +259,26 @@ function PackingVolumePanel({ specs, config }) {
         />
         <AnalRow
           label="SCREENING_INDEX"
-          value={`${fillPct}%`}
+          value={fillPct == null ? 'Unavailable' : `${fillPct}%`}
           badge={
-            packingCriterion?.severity === 'error'
-              ? 'ABOVE CRITERION'
-              : packingCriterion?.severity === 'warn'
-                ? 'NEAR THRESHOLD'
-                : 'SCREENING AVAILABLE'
+            !packingEvaluated
+              ? 'NOT EVALUATED'
+              : packingCriterion.severity === 'error'
+                ? 'ABOVE CRITERION'
+                : packingCriterion.severity === 'warn'
+                  ? 'NEAR THRESHOLD'
+                  : 'SCREENING AVAILABLE'
           }
           badgeStatus={
-            packingCriterion?.severity === 'error'
-              ? 'fail'
-              : packingCriterion?.severity === 'warn'
-                ? 'warn'
-                : 'ok'
+            !packingEvaluated
+              ? 'neutral'
+              : packingCriterion.severity === 'error'
+                ? 'fail'
+                : packingCriterion.severity === 'warn'
+                  ? 'warn'
+                  : 'ok'
           }
-          highlight={packingCriterion?.severity !== 'none'}
+          highlight={packingEvaluated && packingCriterion.severity !== 'none'}
           note={`Criterion: ${packingCriterion?.policyVersion ?? 'not evaluated'}; exact boundary behavior is owned by the canonical packing criterion.`}
         />
       </div>

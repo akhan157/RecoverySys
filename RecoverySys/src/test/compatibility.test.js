@@ -2,7 +2,11 @@ import { compatibilityFindingCode } from '../lib/findings.js'
 import { describe, it, expect } from 'vitest'
 import { checkCompatibility, slotStatus } from '../lib/compatibility.js'
 import { normalizeCalculationInputs } from '../lib/schema.js'
-import { computeMainSnatchLoad, computeDrogueDeploymentVelocity } from '../lib/recoveryLoad.js'
+import {
+  computeMainSnatchLoad,
+  computeDrogueDeploymentVelocity,
+  computeOpeningShockLoad,
+} from '../lib/recoveryLoad.js'
 
 const baseSpecs = {
   rocket_mass_g: '2500',
@@ -22,6 +26,30 @@ const validDrogue = {
   name: 'Test Drogue',
   specs: { diameter_in: 12, cd: 1.5, packed_diam_in: 2, packed_length_in: 2 },
 }
+
+describe('opening-shock parity', () => {
+  it('uses the canonical opening-load model rather than double-counting chute Cd', () => {
+    const config = {
+      main_chute: { specs: { diameter_in: 60, cd: 1.89, shape: 'flat' } },
+      drogue_chute: { specs: { diameter_in: 12, cd: 1.5 } },
+      quick_links: { specs: { strength_lbs: 880 } },
+    }
+    const specs = { rocket_mass_g: '5000', main_deploy_alt_ft: '500' }
+    const velocity = computeDrogueDeploymentVelocity(config.drogue_chute.specs, 5, 500)
+    const canonical = computeOpeningShockLoad({
+      mainSpecs: config.main_chute.specs,
+      deploy_alt_ft: 500,
+      approach_velocity_fps: velocity,
+    })
+
+    const warnings = checkCompatibility({ config, specs })
+    const opening = warnings.find((warning) => /^Main chute opening shock/i.test(warning.message))
+    // Canonical load is ~37% of the 880 lb rating, so no opening-shock warning
+    // should fire. The old Cd x Cx formula produced ~71% and warned.
+    expect(canonical.force_lbs / 880).toBeLessThan(0.7)
+    expect(opening).toBeUndefined()
+  })
+})
 
 describe('checkCompatibility', () => {
   it('does not partially parse malformed numeric spec prefixes', () => {

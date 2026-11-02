@@ -118,10 +118,19 @@ export default function ExportTab({
           config: decoded.config,
           specs: decoded.specs,
           customMotor: decoded.customMotor,
+          importedSource: decoded.importedSource,
           inlinedCustomParts: decoded.inlinedCustomParts,
         })
         if (loadResult?.ok === false) {
           alert(`Invalid config file — ${loadResult.error}.`)
+        } else if (decoded.catalogMissing + decoded.customMissing > 0) {
+          alert(
+            `Configuration imported, but ${
+              decoded.catalogMissing + decoded.customMissing
+            } referenced part${
+              decoded.catalogMissing + decoded.customMissing === 1 ? ' is' : 's are'
+            } no longer available. Those slots were left empty.`
+          )
         }
       } catch {
         alert('Failed to parse config file — not valid JSON.')

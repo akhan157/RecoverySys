@@ -4,6 +4,7 @@ import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest'
 import App, { reducer } from '../App.jsx'
 import { encodeSharePayload } from '../lib/shareLink.js'
 import useShareLinkLoader from '../hooks/useShareLinkLoader.js'
+import { loadSaved } from '../lib/storage.js'
 import { EMPTY_CONFIG, SLOT_IDS } from '../data/parts.js'
 
 // Stub clipboard API not supported in jsdom
@@ -362,5 +363,86 @@ describe('App — OpenRocket snapshot freshness', () => {
     expect(nextState.openRocketImport).toBeNull()
     expect(nextState.importedSource).toMatchObject({ formatVersion: '1.10' })
     expect(nextState.inputRevision).toBe(8)
+  })
+})
+
+describe('App — share-link production load path', () => {
+  it('surfaces a rejected custom-part merge instead of silently aborting', () => {
+    const originalSearch = window.location.search
+    Object.defineProperty(window, 'location', {
+      value: {
+        ...window.location,
+        search: `?c=${encodeURIComponent(
+          encodeSharePayload({
+            config: { ...SAVED_SESSION.config },
+            specs: SAVED_SESSION.specs,
+          })
+        )}`,
+      },
+      writable: true,
+      configurable: true,
+    })
+
+    const dispatch = vi.fn()
+    const addToast = vi.fn()
+    const onLoadConfig = vi.fn(() => ({
+      ok: false,
+      error: 'Imported custom parts exceed local storage limits.',
+    }))
+    renderHook(() => useShareLinkLoader({ allParts: [], addToast, dispatch, onLoadConfig }))
+
+    expect(onLoadConfig).toHaveBeenCalled()
+    expect(dispatch).not.toHaveBeenCalledWith(expect.objectContaining({ type: 'LOAD_SHARE' }))
+    expect(addToast).toHaveBeenCalledWith(
+      expect.anything(),
+      'Imported custom parts exceed local storage limits.'
+    )
+
+    Object.defineProperty(window, 'location', {
+      value: { ...window.location, search: originalSearch },
+      writable: true,
+      configurable: true,
+    })
+  })
+})
+
+describe('App — inline custom-part restore', () => {
+  beforeEach(() => clearLocalStorage())
+  afterEach(() => clearLocalStorage())
+
+  it('restores a saved custom slot from the config when the parts store is missing', async () => {
+    const inlinePart = {
+      id: 'custom-inline-main',
+      category: 'main_chute',
+      name: 'Inline Saved Main',
+      manufacturer: 'Custom',
+      specs: {
+        diameter_in: 36,
+        cd: 1.2,
+        packed_diam_in: 3,
+        packed_length_in: 4,
+        weight_g: 300,
+      },
+    }
+    setReturningUser()
+    setLocalStorage({
+      schemaVersion: 1,
+      config: { main_chute: inlinePart },
+      specs: { rocket_mass_g: '2500' },
+      customMotor: null,
+    })
+    expect(loadSaved()?.config.main_chute?.name).toBe('Inline Saved Main')
+
+    await act(async () => {
+      render(<App />)
+    })
+    await userEvent.click(screen.getByRole('tab', { name: 'DASHBOARD' }))
+    expect(await screen.findAllByText('Inline Saved Main')).not.toHaveLength(0)
+    expect(document.querySelector('[data-slot="main_chute"]')).toHaveTextContent(
+      'Inline Saved Main'
+    )
+    await waitFor(() =>
+      expect(JSON.parse(localStorage.getItem('recoverysys-custom-parts'))).toEqual([inlinePart])
+    )
   })
 })

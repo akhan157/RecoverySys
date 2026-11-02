@@ -59,10 +59,12 @@
 
 /* ── Delete badge on custom cards ───────────────────────────── */
 
+/* The action container is already absolutely positioned; keeping the
+   buttons in flex flow prevents Edit and Delete from occupying the same
+   coordinates (Delete previously painted over Edit and blocked clicks). */
 .parts-card__delete {
-  position: absolute;
-  top: 4px;
-  right: 4px;
+  position: static;
+  flex: 0 0 auto;
   width: 16px;
   height: 16px;
   background: var(--bg-right);

@@ -28,7 +28,9 @@ jobs:
           cache: 'npm'
           cache-dependency-path: RecoverySys/package-lock.json
       - run: npm ci
-      - run: npm run build
+      # Unit, format, lint, catalog/corpus validation, and build must pass
+      # before the same dist is published.
+      - run: npm run check
       - run: npx playwright install --with-deps chromium
       - name: Run production-artifact E2E
         run: npm run e2e
@@ -85,6 +87,13 @@ jobs:
     steps:
       - uses: actions/deploy-pages@v4
         id: deployment
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Verify published Pages build
+        working-directory: RecoverySys
+        run: node scripts/verify-pages.mjs
 
   macos-portable:
     name: macOS universal portable release

@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { provenanceForPart } from '../data/catalogProvenance.js'
-import { getDefaultSpecs } from '../lib/schema.js'
+import { getDefaultSpecs, parseSpec } from '../lib/schema.js'
 
 const STEPS = [
   { id: 'scope', index: '01', label: 'PLAN SCOPE' },
@@ -60,21 +60,25 @@ export default function GuidedReview({
   // Optional values are only "current" when they differ from the schema default;
   // a value sitting at its documented default stays labeled as a default so
   // defaulted inputs are never presented as user-supplied.
+  // A value the calculation rejects falls back to its default, so it must not
+  // be presented as an active current input.
+  const mainDeployParsed = parseSpec('main_deploy_alt_ft', specs.main_deploy_alt_ft)
+  const gFactorParsed = parseSpec('ejection_g_factor', specs.ejection_g_factor)
   const optionalInputs = [
     {
       label: 'Main deploy altitude',
       value:
-        hasValue(specs.main_deploy_alt_ft) &&
+        mainDeployParsed != null &&
         String(specs.main_deploy_alt_ft) !== String(DEFAULT_SPECS.main_deploy_alt_ft)
-          ? `${specs.main_deploy_alt_ft} ft · current value`
+          ? `${mainDeployParsed} ft · current value`
           : '500 ft · default if blank',
     },
     {
       label: 'Ejection G-factor',
       value:
-        hasValue(specs.ejection_g_factor) &&
+        gFactorParsed != null &&
         String(specs.ejection_g_factor) !== String(DEFAULT_SPECS.ejection_g_factor)
-          ? `${specs.ejection_g_factor}G · current value`
+          ? `${gFactorParsed}G · current value`
           : 'Auto by mass · default if blank',
     },
   ]

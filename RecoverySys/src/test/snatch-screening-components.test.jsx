@@ -175,12 +175,12 @@ describe('canonical main snatch component contract', () => {
       )
     ).toBeInTheDocument()
     expect(
-      screen.getByText(
+      screen.getAllByText(
         new RegExp(
           `${simulation.main_snatch.approach_velocity_fps.toLocaleString(undefined, { maximumFractionDigits: 2 })} ft/s`
         )
-      )
-    ).toBeInTheDocument()
+      ).length
+    ).toBeGreaterThan(0)
     expect(
       screen.getByText(
         new RegExp(
@@ -231,12 +231,12 @@ describe('canonical main snatch component contract', () => {
       )
     ).toBeInTheDocument()
     expect(
-      screen.getByText(
+      screen.getAllByText(
         new RegExp(
           `${simulation.main_snatch.approach_velocity_fps.toLocaleString(undefined, { maximumFractionDigits: 2 })} ft/s`
         )
-      )
-    ).toBeInTheDocument()
+      ).length
+    ).toBeGreaterThan(0)
     expect(
       screen.getByText(
         new RegExp(

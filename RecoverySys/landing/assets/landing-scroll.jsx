@@ -1069,8 +1069,8 @@ export default function LPScroll() {
             <div className="lps-brand"><span className="lps-brand-dot"/> RECOVERYSYS</div>
             <div className="lps-footer-tag">Recovery bay design &amp; simulation for high-power rocketry.</div>
           </div>
-          <div className="lps-footer-col"><div className="lps-footer-title">PRODUCT</div><a href="#">PARTS</a><a href="#">SIM</a><a href="#">DISPERSION</a><a href="#">VALIDATION</a></div>
-          <div className="lps-footer-col"><div className="lps-footer-title">DOCS</div><a href="#">START</a><a href="#">PHYSICS</a><a href="#">API</a></div>
+          <div className="lps-footer-col"><div className="lps-footer-title">PRODUCT</div><a href="#parts">PARTS</a><a href="#sim">SIM</a><a href="#dispersion">DISPERSION</a><a href="#validation">VALIDATION</a></div>
+          <div className="lps-footer-col"><div className="lps-footer-title">DOCS</div><a href="../?demo=1">START</a><a href="https://github.com/akhan157/RecoverySys#readme">PHYSICS</a><a href="https://github.com/akhan157/RecoverySys/blob/main/RecoverySys/docs/v1-field-trial.md">FIELD_TRIAL</a></div>
           <div className="lps-footer-col"><div className="lps-footer-title">COMMUNITY</div><a href="https://github.com/akhan157/RecoverySys">GITHUB</a><a href="https://www.nar.org">NAR</a><a href="https://www.tripoli.org">TRA</a></div>
         </div>
         <div className="lps-footer-bot">

@@ -452,6 +452,12 @@ describe('runSimulation', () => {
     // So drift should be more than just the phase1 portion
     expect(result).not.toBeNull()
     expect(result.drift_ft).toBeGreaterThan(0)
+    // The drogue continues below deploy altitude: the timeline must reach ground
+    // and total flight time must include that final segment.
+    expect(result.timeline.at(-1).alt).toBe(0)
+    expect(
+      Math.abs(result.total_time_s - (result.phase1_time_s + result.phase2_time_s))
+    ).toBeLessThanOrEqual(1)
   })
 
   it('timeline has at least 2 points', () => {
@@ -742,5 +748,55 @@ describe('runSimulation — custom motor thrust curve', () => {
     const result = runSimulation({ specs, config, customMotor: minCurve })
     // Expect null OR low apogee — the key is it doesn't throw
     expect(() => runSimulation({ specs, config, customMotor: minCurve })).not.toThrow()
+  })
+})
+
+describe('simulation input guards', () => {
+  const guardSpecs = {
+    rocket_mass_g: '2500',
+    motor_total_impulse_ns: '640',
+    burn_time_s: '1.8',
+    airframe_id_in: '3.9',
+    drag_cd: '0.5',
+    main_deploy_alt_ft: '500',
+  }
+  const goodDrogue = { specs: { diameter_in: 12, cd: 1.5 } }
+
+  it('rejects a selected main chute that cannot produce a descent rate', () => {
+    expect(
+      runSimulation({
+        specs: guardSpecs,
+        config: { main_chute: { specs: {} }, drogue_chute: goodDrogue },
+      })
+    ).toBeNull()
+  })
+
+  it('applies the shared 5G floor to ejection loads', () => {
+    const cord = {
+      specs: {
+        material: 'nylon',
+        elongation_pct: 20,
+        strength_lbs: 2000,
+        length_ft: 20,
+        packed_height_in: 2,
+      },
+    }
+    const config = {
+      main_chute: { specs: { diameter_in: 42, cd: 1.5 } },
+      drogue_chute: goodDrogue,
+      shock_cord: cord,
+    }
+    const low = runSimulation({ specs: { ...guardSpecs, ejection_g_factor: '2' }, config })
+    const five = runSimulation({ specs: { ...guardSpecs, ejection_g_factor: '5' }, config })
+    expect(low.shock_load.peak_load_lbs).toBe(five.shock_load.peak_load_lbs)
+  })
+
+  it('exposes unrounded criterion inputs alongside rounded presentation values', () => {
+    const result = runSimulation({
+      specs: guardSpecs,
+      config: { main_chute: { specs: { diameter_in: 42, cd: 1.5 } }, drogue_chute: goodDrogue },
+    })
+    expect(result._criteriaInputs.main_fps).toBeGreaterThan(0)
+    expect(result.main_fps).toBe(Math.round(result._criteriaInputs.main_fps * 10) / 10)
   })
 })

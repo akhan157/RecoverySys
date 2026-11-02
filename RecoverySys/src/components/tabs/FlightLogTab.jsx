@@ -4,12 +4,13 @@ import { TOAST_LEVELS } from '../../lib/constants.js'
 import Input from '../primitives/Input.jsx'
 import {
   createFlightEntry,
-  loadFlightLog,
+  readFlightLog,
   saveFlightLog,
   exportFlightRecords,
   importFlightRecords,
   exportCandidateEvidence,
   importCandidateEvidence,
+  mergeFlightEntries,
 } from '../../lib/flightEvidence.js'
 import './TransferTabs.css'
 
@@ -33,7 +34,7 @@ function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
     observation_source: 'manual',
     instrumentation: '',
     conditions: '',
-    missing_data: [],
+    missing_data: '',
   })
 
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
@@ -239,16 +240,8 @@ function NewEntryForm({ simulation, resultFresh = false, specs, onSave }) {
         <Input
           id="flight-missing-data"
           placeholder="e.g. landing coordinates"
-          value={form.missing_data.join(', ')}
-          onChange={(e) =>
-            set(
-              'missing_data',
-              e.target.value
-                .split(',')
-                .map((v) => v.trim())
-                .filter(Boolean)
-            )
-          }
+          value={form.missing_data}
+          onChange={(e) => set('missing_data', e.target.value)}
           mono={false}
         />
       </div>
@@ -341,6 +334,7 @@ function LogEntry({ entry, onDelete }) {
           }}
           onClick={() => onDelete(entry.id)}
           title="Delete entry"
+          aria-label={`Delete flight entry ${entry.date}`}
         >
           &times;
         </button>
@@ -418,13 +412,36 @@ function LogEntry({ entry, onDelete }) {
 
 export default function FlightLogTab({ state, resultFresh, addToast }) {
   const usableSimulation = resultFresh ? state.simulation : null
-  const [entries, setEntries] = useState(loadFlightLog)
+  const initialRef = useRef(null)
+  if (initialRef.current == null) initialRef.current = readFlightLog()
+  const initial = initialRef.current
+  const [entries, setEntries] = useState(initial.entries)
+  const skipInitialSave = useRef(!initial.ok)
+  const reportedReadError = useRef(false)
   const recordsFileRef = useRef(null)
   const evidenceFileRef = useRef(null)
 
   useEffect(() => {
-    saveFlightLog(entries)
-  }, [entries])
+    if (!initial.ok && !reportedReadError.current) {
+      reportedReadError.current = true
+      addToast?.(
+        TOAST_LEVELS.WARN,
+        'Stored flight log could not be read — the original data was left unchanged.'
+      )
+    }
+    // Mount-only: report the initial read state once.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    if (skipInitialSave.current) {
+      skipInitialSave.current = false
+      return
+    }
+    if (!saveFlightLog(entries)) {
+      addToast?.(TOAST_LEVELS.ERROR, 'Flight log could not be saved — browser storage is full.')
+    }
+  }, [entries, addToast])
 
   const addEntry = (entry) => setEntries((prev) => [entry, ...prev])
   const deleteEntry = (id) => setEntries((prev) => prev.filter((e) => e.id !== id))
@@ -455,10 +472,13 @@ export default function FlightLogTab({ state, resultFresh, addToast }) {
     reader.onload = () => {
       try {
         const imported = importFlightRecords(reader.result)
-        setEntries((prev) => [...imported, ...prev])
+        const merged = mergeFlightEntries(entries, imported)
+        setEntries((previous) => mergeFlightEntries(previous, imported).entries)
         addToast?.(
-          TOAST_LEVELS.OK,
-          `Imported ${imported.length} flight record${imported.length === 1 ? '' : 's'}.`
+          merged.added > 0 ? TOAST_LEVELS.OK : TOAST_LEVELS.WARN,
+          merged.added > 0
+            ? `Imported ${merged.added} flight record${merged.added === 1 ? '' : 's'}.`
+            : 'No new flight records — every record is already in this log.'
         )
       } catch (error) {
         addToast?.(TOAST_LEVELS.ERROR, error.message ?? 'Invalid flight records file.')
@@ -474,12 +494,15 @@ export default function FlightLogTab({ state, resultFresh, addToast }) {
     reader.onload = () => {
       try {
         const imported = importCandidateEvidence(reader.result)
-        setEntries((prev) => [...imported, ...prev])
+        const merged = mergeFlightEntries(entries, imported)
+        setEntries((previous) => mergeFlightEntries(previous, imported).entries)
         addToast?.(
-          TOAST_LEVELS.OK,
-          `Imported ${imported.length} candidate evidence record${
-            imported.length === 1 ? '' : 's'
-          }. Observations are never promoted to accepted corpus evidence.`
+          merged.added > 0 ? TOAST_LEVELS.OK : TOAST_LEVELS.WARN,
+          merged.added > 0
+            ? `Imported ${merged.added} candidate evidence record${
+                merged.added === 1 ? '' : 's'
+              }. Observations are never promoted to accepted corpus evidence.`
+            : 'No new candidate evidence — every record is already in this log.'
         )
       } catch (error) {
         addToast?.(TOAST_LEVELS.ERROR, error.message ?? 'Invalid candidate evidence file.')

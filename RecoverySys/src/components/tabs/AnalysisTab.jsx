@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { normalizeCalculationInputs } from '../../lib/schema.js'
-import { computeOpeningShockLoad } from '../../lib/recoveryLoad.js'
+import { computeDrogueDeploymentVelocity, computeOpeningShockLoad } from '../../lib/recoveryLoad.js'
 import { buildAnalysisReviewModel } from '../../lib/analysisReview.js'
 import { computeStaticEjectionLoad } from '../../lib/simulation.js'
 
@@ -124,14 +124,20 @@ export default function AnalysisTab({ state, confidenceProps }) {
       cord_sf_status = cord_sf_presentation.status
     }
 
-    // Opening shock: main chute opens at deploy_ft while descending at drogue speed
+    // Opening shock: the main canopy opens at deploy_ft while the vehicle is
+    // still descending under the drogue. Consume the same deployment-velocity
+    // derivation as the canonical main-snatch screen; sim.drogue_fps is a
+    // mid-drogue-phase presentation value sampled at a different altitude.
     const main = config.main_chute?.specs ?? null
     const deploy_ft = sim.deploy_ft || 500
     const drogue_fps = sim.drogue_fps || 0
+    const approach_velocity_fps =
+      sim.main_snatch?.approach_velocity_fps ??
+      computeDrogueDeploymentVelocity(config.drogue_chute?.specs, mass_kg, deploy_ft)
     const openingShock = computeOpeningShockLoad({
       mainSpecs: main,
       deploy_alt_ft: deploy_ft,
-      approach_velocity_fps: drogue_fps,
+      approach_velocity_fps,
     })
     const opening_shock_N = openingShock.status === 'evaluated' ? openingShock.force_N : null
     const opening_shock_lbs = openingShock.status === 'evaluated' ? openingShock.force_lbs : null
@@ -144,8 +150,12 @@ export default function AnalysisTab({ state, confidenceProps }) {
     const deployAtmosphere = isa(deploy_ft / FEET_PER_METER)
 
     const ke_ftlbf = sim.landing_ke_ftlbf
-    const descentCriterion = evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, sim.main_fps)
-    const landingCriterion = evaluateCriterion(CRITERION_IDS.LANDING_ENERGY, ke_ftlbf)
+    // Classify from unrounded values so verdicts match compatibility and do
+    // not flip when a boundary value is rounded for display.
+    const rawMainFps = sim._criteriaInputs?.main_fps ?? sim.main_fps
+    const rawLandingKe = sim._criteriaInputs?.landing_ke_ftlbf ?? ke_ftlbf
+    const descentCriterion = evaluateCriterion(CRITERION_IDS.MAIN_DESCENT_RATE, rawMainFps)
+    const landingCriterion = evaluateCriterion(CRITERION_IDS.LANDING_ENERGY, rawLandingKe)
     const descentCriterionPresentation = presentCriterion(descentCriterion)
     const landingCriterionPresentation = presentCriterion(landingCriterion)
     const ke_status = landingCriterionPresentation.status
@@ -169,6 +179,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
       main,
       deploy_ft,
       drogue_fps,
+      approach_velocity_fps,
       mid_drogue_ft,
       rho_mid,
       deploy_temperature_K: deployAtmosphere.T,
@@ -418,7 +429,7 @@ export default function AnalysisTab({ state, confidenceProps }) {
                 <div className="mc-panel-header">OPENING_SHOCK // MAIN_CHUTE</div>
                 <MethodDisclosure
                   method="Opening-load estimate"
-                  inputs={`Drogue ${ap.drogue_fps.toFixed(1)} ft/s · deploy ${ap.deploy_ft.toLocaleString()} ft`}
+                  inputs={`Approach ${ap.approach_velocity_fps?.toFixed(1) ?? '—'} ft/s · deploy ${ap.deploy_ft.toLocaleString()} ft`}
                   defaults={`Shape factor ${ap.main_Cx ?? 'not evaluated'}; air density sampled at deployment altitude.`}
                   limitations="Porosity, reefing, line stretch, and actual inflation timing are omitted."
                 />
@@ -429,8 +440,12 @@ export default function AnalysisTab({ state, confidenceProps }) {
                   />
                   <AnalRow
                     label="APPROACH_SPEED"
-                    value={`${ap.drogue_fps} ft/s`}
-                    badge={`${(ap.drogue_fps / FEET_PER_METER).toFixed(1)} m/s`}
+                    value={`${ap.approach_velocity_fps?.toFixed?.(1) ?? '—'} ft/s`}
+                    badge={
+                      ap.approach_velocity_fps != null
+                        ? `${(ap.approach_velocity_fps / FEET_PER_METER).toFixed(1)} m/s`
+                        : undefined
+                    }
                   />
                   <AnalRow
                     label="AIR_DENSITY_ρ"

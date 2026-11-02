@@ -22,10 +22,16 @@ writes `public/supplier-prices.json`. The GitHub workflow
 `../.github/workflows/supplier-snapshots.yml` refreshes twice daily (UTC) and on
 manual dispatch, committing only that JSON file. It needs repository Actions
 write permission and a branch policy permitting the bot's snapshot commits.
-It becomes active after these changes are pushed; it has not been run remotely.
-The app reads the raw snapshot directly because commits made with GITHUB_TOKEN
-do not trigger a second deployment workflow. Existing installed/offline builds
-retain bundled data until the user explicitly checks.
+The workflow ran successfully from 2026-10-19 through 2026-10-23, was manually
+disabled on 2026-10-23, and was re-enabled on 2026-10-31. While it was disabled
+the bundled snapshot aged past the 24-hour freshness window, so every offer was
+shown as stale and excluded from subtotals. After re-enabling, a manual dispatch
+refreshed all 103 offers across all three suppliers with zero failures (a first
+attempt hit a transient Spherachutes HTTP 503 and preserved partial updates).
+Freshness still depends on this workflow remaining enabled; raw GitHub delivery
+can lag briefly behind the committing run. The app reads the raw snapshot directly because commits made with
+GITHUB_TOKEN do not trigger a second deployment workflow. Existing
+installed/offline builds retain bundled data until the user explicitly checks.
 
 Rocketman, Spherachutes and Fruity Chutes feeds currently cover 103 distinct catalog IDs, using
 explicit handles and variant IDs in `src/data/supplierMappings.json`. A product

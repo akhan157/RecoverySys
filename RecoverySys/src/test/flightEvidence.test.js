@@ -7,6 +7,8 @@ import {
   exportCandidateEvidence,
   importCandidateEvidence,
   predictionIdentity,
+  mergeFlightEntries,
+  readFlightLog,
 } from '../lib/flightEvidence.js'
 
 describe('flight evidence storage', () => {
@@ -45,6 +47,34 @@ describe('flight evidence storage', () => {
     const records = [{ id: 1, date: '2026-01-01' }]
     expect(importFlightRecords(exportFlightRecords(records))).toHaveLength(1)
     expect(() => importFlightRecords('{}')).toThrow()
+  })
+
+  it('reports an unreadable stored log instead of returning a clean empty log', () => {
+    const storage = { getItem: () => '{corrupt' }
+    expect(readFlightLog(storage)).toEqual({ ok: false, entries: [] })
+    expect(readFlightLog({ getItem: () => '[]' })).toEqual({ ok: true, entries: [] })
+  })
+
+  it('stores free-text instrumentation as a device list', () => {
+    const entry = createFlightEntry(
+      { date: '2026-01-01', instrumentation: 'Raven, GPS ' },
+      { resultFresh: false }
+    )
+    expect(entry.instrumentation.devices).toEqual(['Raven', 'GPS'])
+  })
+
+  it('merges imported records without duplicating stable ids', () => {
+    const existing = [{ id: 'flight-existing', date: '2026-01-01' }]
+    const imported = [
+      { id: 'flight-new', date: '2026-01-02' },
+      { id: 'flight-existing', date: '2026-01-01' },
+      { id: 'flight-new', date: '2026-01-02' },
+    ]
+
+    const merged = mergeFlightEntries(existing, imported)
+
+    expect(merged.added).toBe(1)
+    expect(merged.entries.map((entry) => entry.id)).toEqual(['flight-new', 'flight-existing'])
   })
 })
 

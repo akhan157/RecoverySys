@@ -73,7 +73,9 @@ export function isSimulationStale(simulation, input) {
     provenance.modelId !== SIMULATION_MODEL_ID ||
     provenance.modelVersion !== SIMULATION_MODEL_VERSION ||
     provenance.assumptionsVersion !== SIMULATION_ASSUMPTIONS_VERSION ||
-    provenance.schemaVersion !== SIMULATION_SCHEMA_VERSION
+    provenance.schemaVersion !== SIMULATION_SCHEMA_VERSION ||
+    provenance.appVersion !== VERSION ||
+    provenance.method !== SIMULATION_METHOD
   )
 }
 

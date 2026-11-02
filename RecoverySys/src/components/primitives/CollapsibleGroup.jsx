@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useId, useState } from 'react'
 
 /**
  * Disclosure-style collapsible section. Pass 1 + Pass 2 found that
@@ -30,11 +30,14 @@ export default function CollapsibleGroup({
   bodyStyle,
 }) {
   const [open, setOpen] = useState(defaultOpen)
+  const contentId = useId()
 
   return (
     <div style={{ borderBottom: '1px solid var(--border-subtle)' }}>
       <button
         onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        aria-controls={contentId}
         style={{
           width: '100%',
           display: 'flex',
@@ -75,6 +78,8 @@ export default function CollapsibleGroup({
       {/* 9999px max-height trick avoids catalog truncation; replace with
           <details> or content-visibility:auto when the perf rebuild lands. */}
       <div
+        id={contentId}
+        hidden={!open}
         style={{
           overflow: 'hidden',
           maxHeight: open ? '9999px' : '0',

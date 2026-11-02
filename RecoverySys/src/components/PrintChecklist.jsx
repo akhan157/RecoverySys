@@ -1,6 +1,6 @@
 import { CATEGORIES } from '../data/parts.js'
 import { partSpecLine } from '../lib/format.js'
-import { WARN_LEVELS } from '../lib/constants.js'
+import { VERSION, WARN_LEVELS } from '../lib/constants.js'
 import { RESULT_STATUS_DETAILS } from '../lib/assessment.js'
 // Physical packing order (bottom of bay → top). Only selected parts are shown.
 const PACKING_ORDER = [
@@ -498,7 +498,7 @@ export default function PrintChecklist({
           color: '#666',
         }}
       >
-        RecoverySys v1.2 — recoverysys.app — Simulation constraints documented in source
+        RecoverySys v{VERSION} — recoverysys.app — Simulation constraints documented in source
       </footer>
     </div>
   )

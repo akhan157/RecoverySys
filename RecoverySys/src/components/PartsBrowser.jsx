@@ -331,6 +331,10 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
       setError('Name is required')
       return
     }
+    if (form.name.trim().length > 200) {
+      setError('Name must be 200 characters or fewer')
+      return
+    }
     // Preserve extra measurements from the deferred visualization experiment
     // without exposing its unfinished data-entry fields in the main workflow.
     const specs = Object.fromEntries(
@@ -453,6 +457,7 @@ function CustomPartForm({ category, categoryLabel, onAdd, onEdit, onCancel, edit
           style={inputStyle}
           placeholder="e.g. My Custom Part"
           aria-label="Custom part name"
+          maxLength={200}
           value={form.name}
           onChange={(e) => set('name', e.target.value)}
           {...focusHandlers}
@@ -794,7 +799,7 @@ export default function PartsBrowser({
                 )
               })}
             </div>
-          ) : (
+          ) : categoryCustomParts.length === 0 ? (
             <div
               style={{
                 padding: '16px 12px',
@@ -805,7 +810,7 @@ export default function PartsBrowser({
             >
               No parts match "{searchQuery}"
             </div>
-          )
+          ) : null
         ) : (
           /* Normal: collapsible manufacturer groups */
           Object.entries(byMfr).map(([mfr, mfrParts], index) => (
