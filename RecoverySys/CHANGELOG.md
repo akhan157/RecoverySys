@@ -31,6 +31,8 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Reject malformed main-chute specs and zero-impulse `.eng` motors instead of hanging the simulation or persisting unusable data.
 - Fix overlapping Edit/Delete controls on custom-part cards, Specs review/empty-slot navigation, unevaluated packing badges, collapsible-group accessibility, search empty-state copy, and the printed version string.
 - Generate browser-openable share links from the desktop shell instead of Tauri-internal origins.
+- Persist Start Fresh immediately so an immediate reload cannot restore the previous plan.
+- Stop pending Leaflet animations and bail on detached map containers when leaving Dispersion.
 - Keep the app within the viewport when the demo banner is visible, eliminating document-level overflow above the independently scrolling workspace.
 - Preserve the Simulation flight chart and metrics band when confidence, snatch and timeline sections occupy the page.
 - Prevent long Analysis action labels from squeezing finding columns; omit finding text that duplicates the affected outcome.

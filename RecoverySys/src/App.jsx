@@ -366,6 +366,14 @@ export default function App() {
   )
   const clearAll = useCallback(() => {
     dispatch({ type: 'CLEAR_ALL' })
+    // Write the cleared plan immediately; waiting for the debounced auto-save
+    // would restore the previous plan if the user reloads right away.
+    saveConfigToStorage({
+      config: { ...EMPTY_CONFIG },
+      specs: getDefaultSpecs(),
+      customMotor: null,
+      importedSource: null,
+    })
     setImportSession(false)
     // A cleared plan must not be reseeded from a share link on reload.
     stripShareParamFromLocation()

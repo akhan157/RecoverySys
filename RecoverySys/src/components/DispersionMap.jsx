@@ -117,7 +117,15 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
     return () => {
       destroyed = true
       if (leafRef.current) {
-        leafRef.current.remove()
+        // A pending pan/zoom animation can still fire a frame after the tab
+        // unmounts and throw from DomUtil.getPosition (_leaflet_pos). Stop it
+        // before detaching the container.
+        try {
+          leafRef.current.stop()
+        } catch {}
+        try {
+          leafRef.current.remove()
+        } catch {}
         leafRef.current = null
       }
       // Renderer's DOM canvas is torn down together with the map; clear the ref
@@ -135,8 +143,15 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
     getLeaflet().then((Lf) => {
       if (cancelled || !leafRef.current) return
       const map = leafRef.current
+      const container = map.getContainer()
+      // The tab may have unmounted between promise resolution and this callback.
+      if (!container || !container.isConnected) return
 
-      map.invalidateSize()
+      try {
+        map.invalidateSize({ animate: false })
+      } catch {
+        return
+      }
 
       layersRef.current.forEach((l) => {
         try {
@@ -162,7 +177,7 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
       add(Lf.marker([launch_lat, launch_lon], { icon: launchIcon }).bindPopup('<b>Launch Site</b>'))
 
       if (!drift) {
-        map.setView([launch_lat, launch_lon], 13)
+        map.setView([launch_lat, launch_lon], 13, { animate: false })
         return
       }
 
@@ -302,7 +317,7 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
               [minLat, minLon],
               [maxLat, maxLon],
             ],
-            { padding: [40, 40] }
+            { padding: [40, 40], animate: false }
           )
         } else {
           map.fitBounds(
@@ -310,11 +325,11 @@ export default function DispersionMap({ simulation, specs, forceOpen = false }) 
               [launch_lat, launch_lon],
               [land_lat, land_lon],
             ],
-            { padding: [40, 40] }
+            { padding: [40, 40], animate: false }
           )
         }
       } else {
-        map.setView([launch_lat, launch_lon], 13)
+        map.setView([launch_lat, launch_lon], 13, { animate: false })
       }
     })
     return () => {

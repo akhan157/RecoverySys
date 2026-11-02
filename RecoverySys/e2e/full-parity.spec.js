@@ -3,9 +3,7 @@ import { readFile } from 'node:fs/promises'
 import { resolve } from 'node:path'
 import { installDeterministicRouting } from './support/deterministicRouting.js'
 
-const supplierSnapshot = JSON.parse(
-  await readFile(resolve('public/supplier-prices.json'), 'utf8')
-)
+const supplierSnapshot = JSON.parse(await readFile(resolve('public/supplier-prices.json'), 'utf8'))
 
 const test = base.extend({
   guardedPage: async ({ page }, use) => {
@@ -34,18 +32,14 @@ const test = base.extend({
   },
 })
 
-async function prepareStorage(
-  page,
-  { firstVisit = false, seed = null, customParts = [] } = {}
-) {
+async function prepareStorage(page, { firstVisit = false, seed = null, customParts = [] } = {}) {
   await page.addInitScript(
     ({ isFirstVisit, payload, parts }) => {
       if (sessionStorage.getItem('__e2e_storage_initialized')) return
       localStorage.clear()
       if (!isFirstVisit) localStorage.setItem('recoverysys-visited', '1')
       if (payload) localStorage.setItem('recoverysys-config', JSON.stringify(payload))
-      if (parts.length > 0)
-        localStorage.setItem('recoverysys-custom-parts', JSON.stringify(parts))
+      if (parts.length > 0) localStorage.setItem('recoverysys-custom-parts', JSON.stringify(parts))
       sessionStorage.setItem('__e2e_storage_initialized', '1')
     },
     { isFirstVisit: firstVisit, payload: seed, parts: customParts }
@@ -179,9 +173,7 @@ test('custom parts can be created, edited, selected, reloaded, and deleted', asy
 
   await guardedPage.getByRole('button', { name: 'Delete E2E Renamed Main' }).click()
   await expect(guardedPage.getByRole('button', { name: /^E2E Renamed Main —/ })).toHaveCount(0)
-  await expect(guardedPage.locator('[data-slot="main_chute"]')).toContainText(
-    'NO_COMPONENT_LOADED'
-  )
+  await expect(guardedPage.locator('[data-slot="main_chute"]')).toContainText('NO_COMPONENT_LOADED')
   await expect
     .poll(() =>
       guardedPage.evaluate(() => {
@@ -362,9 +354,9 @@ test('a corrupt custom-parts store is reported and left untouched', async ({ gua
     guardedPage.getByText(/Stored flight log could not be read|Restored your last session/)
   ).toHaveCount(0)
   await guardedPage.waitForTimeout(500)
-  expect(
-    await guardedPage.evaluate(() => localStorage.getItem('recoverysys-custom-parts'))
-  ).toBe('{corrupt')
+  expect(await guardedPage.evaluate(() => localStorage.getItem('recoverysys-custom-parts'))).toBe(
+    '{corrupt'
+  )
 })
 
 test('saving a share-link session clears the share parameter and survives reload', async ({
@@ -475,4 +467,38 @@ test('packing screening does not show a passing badge when capacity is not evalu
   await expect(packing).toContainText('Unavailable')
   await expect(packing).toContainText('NOT EVALUATED')
   await expect(packing).not.toContainText('SCREENING AVAILABLE')
+})
+
+test('rapidly leaving the dispersion map does not raise runtime errors', async ({
+  guardedPage,
+}) => {
+  await openDashboard(guardedPage, {
+    seed: {
+      schemaVersion: 1,
+      config: { main_chute: { id: 'cl-24-n' } },
+      specs: {
+        rocket_mass_g: '2500',
+        motor_total_impulse_ns: '640',
+        burn_time_s: '1.8',
+        airframe_id_in: '3.9',
+        bay_length_in: '18',
+        drag_cd: '0.5',
+        wind_speed_mph: '10',
+        wind_direction_deg: '270',
+        launch_lat: '35.3456',
+        launch_lon: '-117.8083',
+      },
+    },
+  })
+  await guardedPage.getByRole('tab', { name: 'SIMULATION' }).click()
+  await guardedPage.getByRole('button', { name: /RUN_SIMULATION/ }).click()
+  await expect(guardedPage.getByText('APOGEE_ALTITUDE')).toBeVisible()
+  for (let index = 0; index < 6; index += 1) {
+    await guardedPage.getByRole('tab', { name: 'DISPERSION' }).click()
+    await guardedPage.waitForTimeout(80)
+    await guardedPage.getByRole('tab', { name: 'COMPARE' }).click()
+    await guardedPage.waitForTimeout(20)
+  }
+  await guardedPage.getByRole('tab', { name: 'DISPERSION' }).click()
+  await expect(guardedPage.locator('.leaflet-container')).toBeVisible()
 })
