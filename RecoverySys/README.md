@@ -57,6 +57,7 @@ npm run test:watch   # run tests in watch mode
 npm run lint         # lint src/
 npm run format:check # check formatting
 npm run validate:corpus # validate reproducible comparison cases
+npm run -s report:benchmarks # report review-only model comparisons (Python 3 required)
 npm run report:catalog-provenance # summarize catalog-source posture
 npm run check        # formatting, catalog/corpus validation, lint, unit tests, and build
 ```

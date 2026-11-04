@@ -36,7 +36,8 @@
     "suppliers:coverage": "node scripts/supplier-coverage.mjs",
     "catalog:stage:fruity": "node scripts/stage-fruity-engineering.mjs",
     "verify:build": "node scripts/verify-build-identity.mjs",
-    "verify:pages": "node scripts/verify-pages.mjs"
+    "verify:pages": "node scripts/verify-pages.mjs",
+    "report:benchmarks": "node scripts/report-benchmarks.js"
   },
   "dependencies": {
     "fflate": "^0.8.3",
