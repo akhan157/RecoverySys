@@ -22,6 +22,14 @@ function formatEstimate(value) {
     : Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })
 }
 
+// Screening values match the on-screen two-decimal presentation while keeping
+// raw float arithmetic out of the printed artifact.
+function formatScreening(value) {
+  return value == null || value === '' || !Number.isFinite(Number(value))
+    ? '—'
+    : Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })
+}
+
 export default function PrintChecklist({
   specs,
   config,
@@ -387,8 +395,8 @@ export default function PrintChecklist({
                   <tr>
                     <th>Legacy Static Ejection</th>
                     <td>
-                      {simulation.shock_load.peak_load_lbs} lbs (SF{' '}
-                      {simulation.shock_load.safety_factor})
+                      {formatScreening(simulation.shock_load.peak_load_lbs)} lbs (SF{' '}
+                      {formatScreening(simulation.shock_load.safety_factor)})
                     </td>
                   </tr>
                 </>
@@ -402,7 +410,7 @@ export default function PrintChecklist({
                       .toLowerCase()
                       .replace(/[- ]/g, '_')
                   )
-                    ? `${simulation.main_snatch.peak_force_proxy_lbs ?? '—'} lbs — linear-elastic screening proxy`
+                    ? `${formatScreening(simulation.main_snatch.peak_force_proxy_lbs)} lbs — linear-elastic screening proxy`
                     : 'NOT EVALUATED'}
                 </td>
               </tr>
@@ -414,15 +422,15 @@ export default function PrintChecklist({
                   </tr>
                   <tr>
                     <th>Rating margin</th>
-                    <td>{simulation.main_snatch.rating_margin ?? '—'}</td>
+                    <td>{formatScreening(simulation.main_snatch.rating_margin)}</td>
                   </tr>
                   <tr>
                     <th>Approach velocity</th>
-                    <td>{simulation.main_snatch.approach_velocity_fps ?? '—'} ft/s</td>
+                    <td>{formatScreening(simulation.main_snatch.approach_velocity_fps)} ft/s</td>
                   </tr>
                   <tr>
                     <th>Predicted extension</th>
-                    <td>{simulation.main_snatch.predicted_extension_m ?? '—'} m</td>
+                    <td>{formatScreening(simulation.main_snatch.predicted_extension_m)} m</td>
                   </tr>
                   <tr>
                     <th>Snatch source / data quality</th>

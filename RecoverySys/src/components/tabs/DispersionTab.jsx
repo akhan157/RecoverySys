@@ -15,8 +15,9 @@ export default function DispersionTab({ state, resultFresh }) {
         </span>
       </h2>
       <div className="mc-dispersion__content">
-        <DispersionMap simulation={usableSimulation} specs={state.specs} forceOpen={true} />
-        {!usableSimulation && (
+        {usableSimulation ? (
+          <DispersionMap simulation={usableSimulation} specs={state.specs} forceOpen={true} />
+        ) : (
           <div className="mc-dispersion__empty">
             <div className="mc-metric__label" style={{ marginBottom: 8 }}>
               {resultDetails.reasonCode}

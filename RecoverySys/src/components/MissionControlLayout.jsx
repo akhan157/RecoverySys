@@ -3,6 +3,7 @@ import GuidedReview from './GuidedReview.jsx'
 import { CATEGORIES } from '../data/parts.js'
 import { WARN_LEVELS, VERSION_DISPLAY } from '../lib/constants.js'
 import { computePackingVolume } from '../lib/compatibility.js'
+import { getDefaultSpecs, SPECS_SCHEMA } from '../lib/schema.js'
 import { isResultFresh } from '../lib/resultIntegrity.js'
 import DashboardTab from './tabs/DashboardTab.jsx'
 import SpecsTab from './tabs/SpecsTab.jsx'
@@ -66,18 +67,38 @@ export default function MissionControlLayout({
   const [reviewNav, setReviewNav] = useState(null)
   const activeTabRef = useRef(activeTab)
   const tabRefs = useRef(new Map())
+  const tabListRef = useRef(null)
+  // True when the tab strip has content beyond the visible edge; drives the
+  // mobile edge fade that signals the row can be swiped.
+  const [tabOverflow, setTabOverflow] = useState({ atStart: true, atEnd: true })
 
   useEffect(() => {
     activeTabRef.current = activeTab
   }, [activeTab])
 
+  const updateTabOverflow = useCallback(() => {
+    const list = tabListRef.current
+    if (!list) return
+    const atStart = list.scrollLeft <= 2
+    const atEnd = list.scrollLeft + list.clientWidth >= list.scrollWidth - 2
+    setTabOverflow((previous) =>
+      previous.atStart === atStart && previous.atEnd === atEnd ? previous : { atStart, atEnd }
+    )
+  }, [])
+
   useEffect(() => {
-    const revealActiveTab = () =>
+    const revealActiveTab = () => {
       tabRefs.current.get(activeTab)?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' })
+      if (typeof window.requestAnimationFrame === 'function') {
+        window.requestAnimationFrame(updateTabOverflow)
+      } else {
+        updateTabOverflow()
+      }
+    }
     revealActiveTab()
     window.addEventListener('resize', revealActiveTab)
     return () => window.removeEventListener('resize', revealActiveTab)
-  }, [activeTab])
+  }, [activeTab, updateTabOverflow])
 
   useEffect(() => {
     if (!printMode) return undefined
@@ -160,6 +181,21 @@ export default function MissionControlLayout({
     parseFloat(state.specs.motor_total_impulse_ns) > 0 &&
     !!(state.config.main_chute || state.config.drogue_chute)
 
+  // "Start a new plan" overwrites the auto-saved local plan, so only ask for
+  // confirmation when there is user-entered work to lose.
+  const hasEnteredPlan = useMemo(() => {
+    const hasParts = Object.values(state.config ?? {}).some(Boolean)
+    const defaults = getDefaultSpecs()
+    // Compare every schema field against its default, not just a subset: a plan
+    // that only changes deploy altitude or ejection G-factor still has user
+    // input to lose, and a custom motor or accepted import is plan state too.
+    const hasSpecChanges = Object.keys(SPECS_SCHEMA).some((key) => {
+      const current = String(state.specs?.[key] ?? defaults[key] ?? '').trim()
+      return current !== String(defaults[key] ?? '').trim()
+    })
+    return hasParts || hasSpecChanges || Boolean(state.customMotor) || Boolean(state.importedSource)
+  }, [state.config, state.specs, state.customMotor, state.importedSource])
+
   const tabBtnId = (id) => `mc-tab-${id.toLowerCase()}`
   const tabPanelId = (id) => `mc-panel-${id.toLowerCase()}`
   const focusTab = (index) => {
@@ -200,7 +236,19 @@ export default function MissionControlLayout({
         {/* ── Header ──────────────────────────────────────────────────────── */}
         <header className="mc-header">
           <h1 className="mc-header__brand">RECOVERYSYS_{VERSION_DISPLAY}</h1>
-          <nav className="mc-header__tabs" role="tablist" aria-label="Main navigation">
+          <nav
+            ref={tabListRef}
+            className={[
+              'mc-header__tabs',
+              !tabOverflow.atStart && 'mc-header__tabs--more-left',
+              !tabOverflow.atEnd && 'mc-header__tabs--more-right',
+            ]
+              .filter(Boolean)
+              .join(' ')}
+            role="tablist"
+            aria-label="Main navigation"
+            onScroll={updateTabOverflow}
+          >
             {TABS.map((tab, index) => {
               const isActive = activeTab === tab.id
               return (
@@ -261,6 +309,14 @@ export default function MissionControlLayout({
                     // survive and a reload cannot reseed them over user work.
                     if (demoMode) {
                       onExitDemo()
+                      return
+                    }
+                    if (
+                      hasEnteredPlan &&
+                      !window.confirm(
+                        'Start a new plan? This clears the current inputs and replaces the saved plan on this device.'
+                      )
+                    ) {
                       return
                     }
                     clearAll()

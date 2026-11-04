@@ -25,7 +25,7 @@ A local-first recovery-planning tool for high-power rocketry. Bring in a rocket,
 | Motor inputs | Search ThrustCurve.org or import a RASP `.eng` thrust curve. |
 | Flight estimates | Review ascent, descent, drift, load screening, landing energy and deterministic sensitivity. |
 | Dispersion | Explore modeled landing scatter and drift, with assumptions visible. |
-| Plan continuity | Save, reopen, compare, export, share and print; preserve current-versus-stale result status. |
+| Plan continuity | Save, reopen, compare, export, share and print the plan; simulation results stay session-scoped and require a rerun after reload. |
 
 Packing checks are heuristic screens. They do not measure occupied space or establish physical fit. The experimental 2D/3D viewer is deferred and is not part of V1.
 
@@ -33,7 +33,7 @@ Packing checks are heuristic screens. They do not measure occupied space or esta
 
 **[v1.3.0-rc.1](https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.1)** includes the web build, portable Windows ZIP, macOS universal ZIP and `SHA256SUMS.txt`. See [desktop instructions](RecoverySys/DESKTOP.md) before using a portable build.
 
-The tagged candidate passed **386 tests and 62 desktop/mobile browser workflows**, plus Windows/macOS build and process-launch smoke checks. Post-tag `main` adds review fixes and now passes 410 tests and 90 desktop/mobile browser runs locally, but it is **not** a new qualified release and the deployed web build predates it. These are software checks. Manual platform workflows, observed rocketeer trials and independent engineering/flight evidence remain open. The physics corpus has no accepted comparison or real-flight cases. See the [qualification record](RecoverySys/docs/release-qualification-2026-10-19.md) for evidence and limitations, including remaining development-tool advisories.
+The tagged candidate passed **386 tests and 62 desktop/mobile browser workflows**, plus Windows/macOS build and process-launch smoke checks. Post-tag `main` adds review fixes and now passes 414 tests and 92 desktop/mobile browser runs locally, but it is **not** a new qualified release even though the deployed web build tracks `main`. These are software checks. Manual platform workflows, observed rocketeer trials and independent engineering/flight evidence remain open. The physics corpus has no accepted comparison or real-flight cases. See the [qualification record](RecoverySys/docs/release-qualification-2026-10-19.md) for evidence and limitations, including remaining development-tool advisories.
 
 Trying your own rocket? Use the [field-trial guide](RecoverySys/docs/v1-field-trial.md) and [results template](RecoverySys/docs/field-trial-results.csv).
 

@@ -65,4 +65,45 @@ describe('MissionControlLayout guided start-fresh', () => {
     fireEvent.click(screen.getByRole('button', { name: /start a new plan/i }))
     expect(clearAll).toHaveBeenCalledOnce()
   })
+
+  it('asks before clearing entered plan data', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    try {
+      const { clearAll } = renderGuided({
+        state: {
+          ...baseState,
+          config: { main_chute: { id: 'cl-24-n' } },
+          specs: { ...baseState.specs, rocket_mass_g: '2500' },
+        },
+      })
+      const start = screen.getByRole('button', { name: /start a new plan/i })
+
+      fireEvent.click(start)
+      expect(confirm).toHaveBeenCalledOnce()
+      expect(clearAll).not.toHaveBeenCalled()
+
+      confirm.mockReturnValue(true)
+      fireEvent.click(start)
+      expect(clearAll).toHaveBeenCalledOnce()
+    } finally {
+      confirm.mockRestore()
+    }
+  })
+
+  it('asks when only a defaulted spec field has been changed', () => {
+    const confirm = vi.spyOn(window, 'confirm').mockReturnValue(false)
+    try {
+      const { clearAll } = renderGuided({
+        state: {
+          ...baseState,
+          specs: { ...baseState.specs, main_deploy_alt_ft: '700' },
+        },
+      })
+      fireEvent.click(screen.getByRole('button', { name: /start a new plan/i }))
+      expect(confirm).toHaveBeenCalledOnce()
+      expect(clearAll).not.toHaveBeenCalled()
+    } finally {
+      confirm.mockRestore()
+    }
+  })
 })

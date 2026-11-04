@@ -8,7 +8,16 @@ function textValue(value, fallback = 'Not provided') {
   if (value == null || value === '') return fallback
   if (Array.isArray(value))
     return value.length ? value.map((item) => textValue(item, fallback)).join(', ') : fallback
-  if (typeof value === 'object') return value.label ?? value.name ?? JSON.stringify(value)
+  if (typeof value === 'object') {
+    if (value.label != null) return String(value.label)
+    if (value.name != null) return String(value.name)
+    const entries = Object.entries(value).filter(
+      ([, entry]) => entry != null && entry !== '' && !(Array.isArray(entry) && entry.length === 0)
+    )
+    return entries.length
+      ? entries.map(([key, entry]) => `${key}: ${textValue(entry, fallback)}`).join(' · ')
+      : fallback
+  }
   return String(value)
 }
 

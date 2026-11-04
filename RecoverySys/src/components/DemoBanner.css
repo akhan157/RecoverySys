@@ -76,3 +76,9 @@
     font-size: 10px;
   }
 }
+
+@media print {
+  .demo-banner {
+    display: none !important;
+  }
+}

@@ -258,14 +258,17 @@ describe('canonical main snatch component contract', () => {
         warnings={[]}
       />
     )
+    const formatScreening = (value) => value.toLocaleString(undefined, { maximumFractionDigits: 2 })
     expect(
-      screen.getByText(new RegExp(`${simulation.main_snatch.peak_force_proxy_lbs} lbs`))
+      screen.getByText(
+        new RegExp(`${formatScreening(simulation.main_snatch.peak_force_proxy_lbs)} lbs`)
+      )
     ).toBeInTheDocument()
     expect(
-      screen.getByText(`${simulation.main_snatch.approach_velocity_fps} ft/s`)
+      screen.getByText(`${formatScreening(simulation.main_snatch.approach_velocity_fps)} ft/s`)
     ).toBeInTheDocument()
     expect(
-      screen.getByText(`${simulation.main_snatch.predicted_extension_m} m`)
+      screen.getByText(`${formatScreening(simulation.main_snatch.predicted_extension_m)} m`)
     ).toBeInTheDocument()
     expect(
       screen.getByText(new RegExp(simulation.main_snatch.approach_velocity_source))

@@ -153,7 +153,7 @@ export default function CompareTab({
         <span>COMPARE // A vs B</span>
         <button
           className="mc-run-btn"
-          style={{ fontSize: 9, padding: '2px 8px' }}
+          style={{ fontSize: 9, padding: '2px 8px', width: 'auto', flexShrink: 0 }}
           onClick={onClearSnapshot}
         >
           CLEAR

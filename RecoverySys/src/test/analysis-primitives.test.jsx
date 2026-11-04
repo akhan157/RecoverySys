@@ -3,12 +3,18 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import { RESULT_ACTION_DESTINATIONS } from '../lib/assessment.js'
 import CausalityRow from '../components/analysis/CausalityRow.jsx'
-import DetailInspector from '../components/analysis/DetailInspector.jsx'
+import DetailInspector, { textValue } from '../components/analysis/DetailInspector.jsx'
 import ResultUsabilityStrip from '../components/analysis/ResultUsabilityStrip.jsx'
 import ReviewSummary from '../components/analysis/ReviewSummary.jsx'
 import TestedResponseSummary from '../components/analysis/TestedResponseSummary.jsx'
 
 describe('Analysis shared review primitives', () => {
+  it('renders evidence objects as readable fields instead of JSON', () => {
+    expect(textValue({ classification: 'derived', source: 'compatibility-rule' })).toBe(
+      'classification: derived · source: compatibility-rule'
+    )
+  })
+
   it('shows stale result state, reason, identity, and an explicit keyboard action', async () => {
     const user = userEvent.setup()
     const onAction = vi.fn()

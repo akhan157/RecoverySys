@@ -47,5 +47,5 @@ Public verification: `https://akhan157.github.io/RecoverySys/` served candidate 
 This addendum does not re-qualify the rc.1 artifacts or the deployed build.
 
 - The supplier refresh workflow was manually disabled on 2026-10-23 after its last successful run. All 103 bundled offers therefore exceeded the 24-hour freshness window and were excluded from subtotals. The workflow was re-enabled on 2026-10-31. The first dispatch partially failed on a transient Spherachutes HTTP 503 but preserved successful updates; the retry succeeded with 103 offers, zero failures, and fresh timestamps for all three suppliers in the committed snapshot. Raw GitHub delivery may lag briefly behind the commit.
-- Dependency audit now reports one high (`vite@7.3.6`, fix available within range) and seven moderate development findings; production dependencies remain clean. The Tailwind-specific description above is historical.
-- The deployed Pages build (`40eae60`) predates current `main`; current `main` passes 42 test files / 410 tests and 90 desktop/mobile browser runs, but those are not rc.1 evidence and no new release has been qualified.
+- Dependency audit after upgrading to `vite@7.3.7` reports zero high/critical and seven moderate development-only findings; production dependencies remain clean. The Tailwind-specific description above is historical.
+- The deployed Pages build now tracks `main` (`b4853cb`); current `main` passes 42 test files / 414 tests and 92 desktop/mobile browser runs, but those are not rc.1 evidence and no new release has been qualified.

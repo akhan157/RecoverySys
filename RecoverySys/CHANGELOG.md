@@ -13,6 +13,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Gate GitHub Pages deployment on the full unit/format/lint/validation/build check, and use the qualified web build for its E2E job.
 - Verify the built app/landing identity before publishing and verify the live Pages brand, tabs, assets, and landing bundle after deployment.
 - Add app description/theme metadata and a shared favicon, and document `VITE_BASE_PATH` for forks.
+- Upgrade Vite to 7.3.7, clearing the remaining high development-tool advisory; production dependencies remain clean.
 - Use the canonical opening-shock model in compatibility review, apply the shared 5G floor and raw criterion values in simulation, and correct drogue-only/timeline timing.
 - Re-enable the scheduled supplier snapshot workflow and correct the supplier, desktop, testing and dependency documentation.
 - Prioritize Dashboard estimates and simulation actions; keep supplier subtotals visible with per-part details on demand.
@@ -37,6 +38,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Preserve the Simulation flight chart and metrics band when confidence, snatch and timeline sections occupy the page.
 - Prevent long Analysis action labels from squeezing finding columns; omit finding text that duplicates the affected outcome.
 - Keep Analysis section titles beside their accent marker and remove empty gray sensitivity-grid filler, including the Recovery Brief's five-output layout.
+- Keep the Compare header title on one line and size the CLEAR action to its content.
+- Show a centered no-result state on Dispersion instead of a full-height blank map area.
+- Hide the demo banner from printed artifacts and round printed screening values.
+- Round accepted OpenRocket geometry to thousandths instead of exposing metric-conversion floats.
+- Render Analysis evidence objects as readable fields instead of raw JSON.
+- Confirm "Start a new plan" when entered data would be cleared.
+- Add a mobile tab-strip edge fade that indicates additional tabs off-screen.
+- Remove the unused DetailsTab and MethodDetailsTab components.
 
 ## [1.3.0-rc.1] - 2026-10-19
 

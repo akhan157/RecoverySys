@@ -87,6 +87,36 @@ describe('PrintChecklist recovery brief', () => {
     expect(screen.queryByText(/1,000 ft/)).not.toBeInTheDocument()
   })
 
+  it('rounds screening values in printed results', () => {
+    render(
+      <PrintChecklist
+        specs={{}}
+        config={{}}
+        simulation={{
+          apogee_ft: 2000,
+          drift_ft: 500,
+          main_snatch: {
+            status: 'screened',
+            peak_force_proxy_lbs: 968.490809502554,
+            rating_margin: 2.0650686412060586,
+            approach_velocity_fps: 52.32213096322108,
+            predicted_extension_m: 0.6494311972200343,
+          },
+          shock_load: { peak_load_lbs: 704.123456, safety_factor: 2.6666 },
+        }}
+        resultFresh
+        recoveryBrief={{ status: 'current' }}
+        printMode="checklist"
+      />
+    )
+    expect(screen.getByText(/968\.49 lbs — linear-elastic screening proxy/)).toBeInTheDocument()
+    expect(screen.getByText('2.07')).toBeInTheDocument()
+    expect(screen.getByText(/52\.32 ft\/s/)).toBeInTheDocument()
+    expect(screen.getByText(/0\.65 m/)).toBeInTheDocument()
+    expect(screen.getByText(/704\.12 lbs \(SF 2\.67\)/)).toBeInTheDocument()
+    expect(screen.queryByText(/968\.4908/)).not.toBeInTheDocument()
+  })
+
   it('prints key estimates, sensitivity, findings, and identity in parity with the screen brief', () => {
     render(
       <PrintChecklist

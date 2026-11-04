@@ -50,6 +50,14 @@ function prefetchLeaflet() {
 // — a fresh object is built so callers can mutate without touching the schema.
 const DEFAULT_SPECS = getDefaultSpecs()
 
+// OpenRocket geometry is converted from metric sources into inches. Keep the
+// accepted display/storage value at thousandths instead of surfacing float
+// artifacts such as 2.44251968503937.
+function importedInches(value) {
+  const inches = Number(value)
+  return Number.isFinite(inches) ? String(Number(inches.toFixed(3))) : ''
+}
+
 // ── Demo config ──────────────────────────────────────────────────────────────
 // Loaded when the app is opened with ?demo=1 (e.g. from the landing page LAUNCH
 // button). Showcases a typical L3 dual-deploy configuration at FAR Mojave so
@@ -426,8 +434,8 @@ export default function App() {
       if (airframe.targetField !== 'airframe_id_in' || bay.targetField !== 'bay_length_in') {
         return { ok: false, error: 'Choose valid airframe diameter and bay-length candidates.' }
       }
-      specs.airframe_id_in = String(airframe.normalizedValue)
-      specs.bay_length_in = String(bay.normalizedValue)
+      specs.airframe_id_in = importedInches(airframe.normalizedValue)
+      specs.bay_length_in = importedInches(bay.normalizedValue)
 
       if (massCandidateId) {
         if (!mass || mass.simulation.configId !== configurationId) {

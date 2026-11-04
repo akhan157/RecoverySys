@@ -233,6 +233,7 @@ test('guided start-fresh clears entered values and returns the plan to new state
   await guardedPage.reload()
   await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
   await expect(guardedPage.getByRole('button', { name: /resume this plan/i })).toBeEnabled()
+  guardedPage.once('dialog', (dialog) => dialog.accept())
   await guardedPage.getByRole('button', { name: /start a new plan/i }).click()
   await expect(guardedPage.getByRole('tab', { name: 'ROCKET_SPECS' })).toHaveAttribute(
     'aria-selected',

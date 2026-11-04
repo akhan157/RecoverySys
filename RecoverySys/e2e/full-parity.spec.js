@@ -437,6 +437,7 @@ test('Start Fresh after a share link clears the link so reload stays empty', asy
   const shareUrl = await guardedPage.evaluate(() => navigator.clipboard.readText())
   await guardedPage.goto(shareUrl)
   await guardedPage.getByRole('tab', { name: 'GUIDED_REVIEW' }).click()
+  guardedPage.on('dialog', (dialog) => dialog.accept())
   await guardedPage.getByRole('button', { name: /start a new plan/i }).click()
   expect(guardedPage.url()).not.toContain('?c=')
   await guardedPage.reload()
