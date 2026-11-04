@@ -1,3 +1,4 @@
+import { CATEGORY_BY_ID } from '../../data/parts.js'
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import { presentCriterion } from '../../lib/criterionPresentation.js'
 import StatusChip from '../primitives/StatusChip.jsx'
@@ -66,6 +67,9 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
   const hardware = Array.isArray(recoveryBrief.selectedHardware)
     ? recoveryBrief.selectedHardware
     : []
+  const recoveryMass = recoveryBrief.recoveryMass
+  const massItems = Array.isArray(recoveryMass?.items) ? recoveryMass.items : []
+  const missingMassSlots = Array.isArray(recoveryMass?.missing) ? recoveryMass.missing : []
 
   return (
     <div className="mc-brief">
@@ -168,6 +172,81 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
           <p>No hardware selected.</p>
         )}
       </section>
+
+      {recoveryMass && (
+        <section className="mc-brief__section" aria-labelledby="brief-mass-title">
+          <h3 id="brief-mass-title">Recovery hardware mass</h3>
+          {massItems.length ? (
+            <>
+              <table className="mc-brief__table">
+                <thead>
+                  <tr>
+                    <th scope="col">Slot</th>
+                    <th scope="col">Selected part</th>
+                    <th scope="col">Weight</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {massItems.map((item) => (
+                    <tr key={item.slot}>
+                      <td>{display(CATEGORY_BY_ID[item.slot]?.label, item.slot)}</td>
+                      <td>{display(item.name, 'Selected part')}</td>
+                      <td className="mc-brief__table-number">
+                        {item.weight_g == null
+                          ? 'Missing weight'
+                          : `${formatNumber(item.weight_g)} g`}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              <dl className="mc-brief__facts mc-brief__facts--compact">
+                <div>
+                  <dt>Known recovery total</dt>
+                  <dd>
+                    {formatNumber(recoveryMass.total_g)} <span>g</span>
+                  </dd>
+                </div>
+                <div>
+                  <dt>Entered rocket mass</dt>
+                  <dd>
+                    {recoveryMass.rocket_mass_g == null
+                      ? '—'
+                      : `${formatNumber(recoveryMass.rocket_mass_g)} g`}
+                  </dd>
+                </div>
+                <div>
+                  <dt>Share of entered mass</dt>
+                  <dd>
+                    {recoveryMass.fraction_of_rocket == null
+                      ? '—'
+                      : `${formatNumber(recoveryMass.fraction_of_rocket * 100)}%`}
+                  </dd>
+                </div>
+              </dl>
+              {missingMassSlots.length > 0 && (
+                <p className="mc-brief__boundary">
+                  Missing catalog weight:{' '}
+                  {missingMassSlots.map((slot) => CATEGORY_BY_ID[slot]?.label || slot).join(', ')}.
+                  The reported total excludes those selected slots.
+                </p>
+              )}
+              {recoveryMass.exceeds_rocket_mass && (
+                <p className="mc-brief__boundary">
+                  Known recovery mass is at or above the entered rocket mass. The entered mass must
+                  include the selected recovery hardware.
+                </p>
+              )}
+              <p className="mc-brief__boundary">
+                Quantity is one selected part per slot. This roll-up is informational and is not
+                added to the simulated rocket mass.
+              </p>
+            </>
+          ) : (
+            <p>No recovery hardware selected.</p>
+          )}
+        </section>
+      )}
 
       <section className="mc-brief__section" aria-labelledby="brief-warnings-title">
         <h3 id="brief-warnings-title">Compatibility findings</h3>

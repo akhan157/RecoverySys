@@ -8,6 +8,7 @@ import {
 } from './recoveryLoad.js'
 import { CRITERION_IDS, evaluateCriterion } from './criteria.js'
 import { normalizeFinding } from './findings.js'
+import { computeRecoveryMass } from './recoveryMass.js'
 
 /**
  * Compatibility rules engine.
@@ -144,6 +145,7 @@ const INPUT_PATHS = {
   deployment_bag: ['config.deployment_bag'],
   chute_device: ['config.chute_device'],
   bay_volume: ['specs.airframe_id_in', 'specs.bay_length_in'],
+  recovery_mass: ['specs.rocket_mass_g'],
 }
 
 function normalizeWarning(warning) {
@@ -745,6 +747,24 @@ function rule_noMainChute(ctx) {
   return []
 }
 
+// Informational mass consistency only: the entered liftoff mass is a single
+// number and the selected recovery catalog weights are a lower bound on the
+// hardware it must include. The roll-up never changes simulated mass.
+function rule_recoveryMassExceedsRocketMass(ctx) {
+  const recoveryMass = computeRecoveryMass({ config: ctx.config, specs: ctx.specs })
+  if (!recoveryMass.exceeds_rocket_mass) return []
+  return [
+    warn(
+      'recovery_mass',
+      `Entered rocket mass must include recovery hardware — selected parts total ${Math.round(recoveryMass.total_g * 10) / 10} g against ${recoveryMass.rocket_mass_g} g entered.`,
+      {
+        code: 'compatibility.recovery_mass.recovery-mass-exceeds-rocket-mass',
+        rule: 'recovery-mass-exceeds-rocket-mass',
+      }
+    ),
+  ]
+}
+
 // Ordered rule registry. Order matters for one rule (rule_quickLinksVsCord
 // suppresses itself when the earlier rule_quickLinksEjectionLoad already
 // fired an error on the same slot) — see the (ctx, warningsSoFar) signature
@@ -770,6 +790,7 @@ const RULES = [
   rule_singleDeploy,
   rule_dualDeployNoBag,
   rule_noMainChute,
+  rule_recoveryMassExceedsRocketMass,
 ]
 
 /**
