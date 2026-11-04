@@ -1,11 +1,28 @@
 import { CATEGORY_BY_ID } from '../../data/parts.js'
 import { RESULT_STATUS_DETAILS } from '../../lib/assessment.js'
 import { presentCriterion } from '../../lib/criterionPresentation.js'
+import { CRITERIA, CRITERION_IDS } from '../../lib/criteria.js'
 import StatusChip from '../primitives/StatusChip.jsx'
 
 function crossingLabel(category, severity) {
   return presentCriterion({ evaluated: true, category, severity }).label
 }
+
+const STRENGTH_BANDS = CRITERIA[CRITERION_IDS.STRENGTH_MARGIN].bands
+
+// The load path reuses the strength-margin criterion for its chips, so a margin
+// category always renders with the same vocabulary as the rest of the app.
+function strengthChip(category) {
+  if (!category) return presentCriterion(null)
+  const band = STRENGTH_BANDS.find((entry) => entry.category === category)
+  return presentCriterion({ evaluated: true, category, severity: band?.severity ?? 'none' })
+}
+
+const LOAD_PATH_STATUS_LABELS = Object.freeze({
+  evaluated: 'All chain elements and load cases evaluated.',
+  partial: 'Partial — some chain ratings or load cases are unavailable.',
+  unavailable: 'Not evaluated — select chain hardware and enter a rocket mass.',
+})
 
 const STATUS_LABELS = Object.freeze({
   current: 'CURRENT RESULT',
@@ -101,6 +118,14 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
   const deploymentLimitations = Array.isArray(deploymentSequence?.limitations)
     ? deploymentSequence.limitations
     : []
+  const loadPath = recoveryBrief.loadPath
+  const loadCases = Array.isArray(loadPath?.loadCases) ? loadPath.loadCases : []
+  const chainElements = Array.isArray(loadPath?.elements) ? loadPath.elements : []
+  const loadPathLimitations = Array.isArray(loadPath?.limitations) ? loadPath.limitations : []
+  const loadCaseLabel = (caseId) =>
+    loadCases.find((loadCase) => loadCase.id === caseId)?.label || caseId
+  const elementName = (element) =>
+    element.name || CATEGORY_BY_ID[element.slot]?.label || element.slot
 
   return (
     <div className="mc-brief">
@@ -235,6 +260,103 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
           {deploymentLimitations.length > 0 && (
             <ul className="mc-brief__boundary-list">
               {deploymentLimitations.map((limitation, index) => (
+                <li key={index}>{limitation}</li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
+
+      {loadPath && (
+        <section className="mc-brief__section" aria-labelledby="brief-load-path-title">
+          <h3 id="brief-load-path-title">Load path</h3>
+          <p className="mc-brief__lead">
+            <strong>{LOAD_PATH_STATUS_LABELS[loadPath.status] || display(loadPath.status)}</strong>
+          </p>
+          {loadPath.governingCase && (
+            <p>
+              Governing load case: <strong>{loadPath.governingCase.label}</strong> —{' '}
+              {formatNumber(loadPath.governingCase.force_lbs)} lbs
+            </p>
+          )}
+          {loadPath.weakestLink ? (
+            <p>
+              Weakest link: <strong>{elementName(loadPath.weakestLink)}</strong> rated{' '}
+              {formatNumber(loadPath.weakestLink.rating_lbs)} lbs
+              {loadPath.weakestLink.governing && (
+                <>
+                  {' '}
+                  — {loadCaseLabel(loadPath.weakestLink.governing.caseId)} margin{' '}
+                  {loadPath.weakestLink.governing.ratio.toFixed(2)}×
+                </>
+              )}
+            </p>
+          ) : (
+            <p>Weakest link: no rated chain element selected.</p>
+          )}
+          {loadCases.length > 0 && (
+            <ul className="mc-brief__load-cases" aria-label="Load cases">
+              {loadCases.map((loadCase) => (
+                <li key={loadCase.id} className="mc-brief__load-case">
+                  <div className="mc-brief__load-case-head">
+                    <span className="mc-brief__load-case-label">{loadCase.label}</span>
+                    <span className="mc-brief__load-case-value">
+                      {loadCase.status === 'evaluated'
+                        ? `${formatNumber(loadCase.force_lbs)} lbs`
+                        : 'Not evaluated'}
+                    </span>
+                  </div>
+                  {loadCase.status !== 'evaluated' && loadCase.reason && (
+                    <p className="mc-brief__load-case-reason">{loadCase.reason}</p>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+          {chainElements.length > 0 && (
+            <div className="mc-brief__table-scroll">
+              <table className="mc-brief__table mc-brief__table--load-path">
+                <thead>
+                  <tr>
+                    <th scope="col">Chain element</th>
+                    <th scope="col">Rating</th>
+                    <th scope="col">Governing case</th>
+                    <th scope="col">Margin</th>
+                    <th scope="col">Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {chainElements.map((element) => {
+                    const chip = strengthChip(element.governing?.category)
+                    return (
+                      <tr key={element.slot}>
+                        <td data-label="Chain element">{elementName(element)}</td>
+                        <td data-label="Rating" className="mc-brief__table-number">
+                          {element.rating_lbs == null
+                            ? 'Missing rating'
+                            : `${formatNumber(element.rating_lbs)} lbs`}
+                        </td>
+                        <td data-label="Governing case">
+                          {element.governing
+                            ? loadCaseLabel(element.governing.caseId)
+                            : 'Not evaluated'}
+                        </td>
+                        <td data-label="Margin" className="mc-brief__table-number">
+                          {element.governing ? `${element.governing.ratio.toFixed(2)}×` : '—'}
+                        </td>
+                        <td data-label="Status">
+                          <StatusChip status={chip.metricStatus} label={chip.metricLabel} />
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+          {loadPathLimitations.length > 0 && (
+            <ul className="mc-brief__boundary-list">
+              {loadPathLimitations.map((limitation, index) => (
                 <li key={index}>{limitation}</li>
               ))}
             </ul>

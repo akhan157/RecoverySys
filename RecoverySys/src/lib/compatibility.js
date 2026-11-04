@@ -63,7 +63,13 @@ const HARNESS_MIN_LENGTH_FT = (mass_kg) => (mass_kg >= 10 ? 15 : mass_kg >= 2.5 
 
 // ── Context ─────────────────────────────────────────────────────────────────
 
-function buildContext({ config, specs }) {
+/**
+ * Derive every value the compatibility rules read, once, from the current
+ * config and specs. Exported so presentation-only consumers (the recovery
+ * brief's load path) read the exact same ejection/load numbers as the rules
+ * instead of re-deriving them.
+ */
+export function buildCompatibilityContext({ config, specs }) {
   const mass_g = parseSpec('rocket_mass_g', specs.rocket_mass_g)
   const airframe_id = parseSpec('airframe_id_in', specs.airframe_id_in) ?? 0
   const bay_length = parseSpec('bay_length_in', specs.bay_length_in) ?? 0
@@ -115,6 +121,47 @@ function buildContext({ config, specs }) {
       ),
     }),
   }
+}
+
+/**
+ * Elongation-amplified ejection snatch load for the selected shock cord.
+ *
+ * This is the exact arithmetic `rule_shockCordStrength` uses for its dynamic
+ * warning: the static ejection pull multiplied by sqrt(1 / elongation). It
+ * returns null when the rule would not evaluate the dynamic load at all
+ * (no cord, no mass-derived ejection load, or no positive elongation).
+ */
+export function computeEjectionSnatchLoad(ctx) {
+  const cord = ctx?.config?.shock_cord?.specs
+  if (!cord || !ctx.mass_kg || ctx.required_lbs == null) return null
+  if (!(cord.elongation_pct > 0)) return null
+  const multiplier = Math.sqrt(1 / (cord.elongation_pct / 100))
+  return { force_lbs: ctx.required_lbs * multiplier, multiplier }
+}
+
+/**
+ * Main opening-shock load with exactly the inputs `rule_openingShock` uses:
+ * the drogue's terminal velocity at the entered deployment altitude and the
+ * selected main chute's specs. `opening` is null when the rule short-circuits
+ * (no drogue, no main, or no mass); otherwise it is the canonical
+ * `computeOpeningShockLoad` result, evaluated or not.
+ */
+export function computeOpeningShockForContext(ctx) {
+  const { config = {}, mass_kg, deploy_alt_ft } = ctx ?? {}
+  if (!config.drogue_chute || !config.main_chute || !mass_kg) {
+    return { approach_velocity_fps: null, opening: null }
+  }
+  const approach_velocity_fps = computeDrogueDeploymentVelocity(
+    config.drogue_chute.specs,
+    mass_kg,
+    deploy_alt_ft
+  )
+  const opening = computeOpeningShockLoad({
+    mainSpecs: config.main_chute.specs,
+    deploy_alt_ft,
+    approach_velocity_fps,
+  })
+  return { approach_velocity_fps, opening }
 }
 
 // ── Rule helpers ────────────────────────────────────────────────────────────
@@ -341,19 +388,9 @@ function rule_drogueDescentRate(ctx) {
 }
 
 function rule_openingShock(ctx) {
-  const { config, mass_kg, deploy_alt_ft } = ctx
-  if (!config.drogue_chute || !config.main_chute || !mass_kg) return []
-  const drogue_at_deploy = computeDrogueDeploymentVelocity(
-    config.drogue_chute.specs,
-    mass_kg,
-    deploy_alt_ft
-  )
-  const opening = computeOpeningShockLoad({
-    mainSpecs: config.main_chute.specs,
-    deploy_alt_ft,
-    approach_velocity_fps: drogue_at_deploy,
-  })
-  if (opening.status !== 'evaluated') return []
+  const { config } = ctx
+  const { approach_velocity_fps: drogue_at_deploy, opening } = computeOpeningShockForContext(ctx)
+  if (!opening || opening.status !== 'evaluated') return []
   const F_open_lbs = opening.force_lbs
   const cord_lbs = config.shock_cord?.specs.strength_lbs
   const ql_lbs = config.quick_links?.specs.strength_lbs
@@ -420,9 +457,10 @@ function rule_shockCordStrength(ctx) {
 
   // Dynamic snatch force multiplier from cord elongation.
   // F_dynamic ≈ F_static × sqrt(1 / elongation). Replaces the old hardcoded 2× Kevlar rule.
-  if (elongation_pct > 0) {
-    const snatch_multiplier = Math.sqrt(1 / (elongation_pct / 100))
-    const dynamic_load_lbs = required_lbs * snatch_multiplier
+  const snatch = computeEjectionSnatchLoad(ctx)
+  if (snatch) {
+    const dynamic_load_lbs = snatch.force_lbs
+    const snatch_multiplier = snatch.multiplier
     const dynamicCriterion = evaluateCriterion(
       CRITERION_IDS.STRENGTH_MARGIN,
       strength_lbs / dynamic_load_lbs
@@ -832,7 +870,7 @@ export function computePackingVolume({ config, specs }) {
  *   { level: 'warn' | 'error', slot: string, message: string }
  */
 export function checkCompatibility({ config, specs }) {
-  const ctx = buildContext({ config, specs })
+  const ctx = buildCompatibilityContext({ config, specs })
   const warnings = []
   for (const rule of RULES) {
     // Rules that read warnings emitted by earlier rules use a 2-arg signature.

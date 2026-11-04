@@ -2,7 +2,10 @@ import { CATEGORIES } from '../data/parts.js'
 import { partSpecLine } from '../lib/format.js'
 import { VERSION, WARN_LEVELS } from '../lib/constants.js'
 import { RESULT_STATUS_DETAILS } from '../lib/assessment.js'
+import { presentCriterion } from '../lib/criterionPresentation.js'
+import { CRITERIA, CRITERION_IDS } from '../lib/criteria.js'
 import { buildDeploymentSequence } from '../lib/deploymentSequence.js'
+import { computeLoadPath } from '../lib/loadPath.js'
 import { computeRecoveryMass } from '../lib/recoveryMass.js'
 // Physical packing order (bottom of bay → top). Only selected parts are shown.
 const PACKING_ORDER = [
@@ -43,6 +46,21 @@ function formatEventValue(value, resultStatus) {
   return formatEstimate(value)
 }
 
+const STRENGTH_BANDS = CRITERIA[CRITERION_IDS.STRENGTH_MARGIN].bands
+
+function strengthStatusLabel(category) {
+  if (!category) return presentCriterion(null).metricLabel
+  const band = STRENGTH_BANDS.find((entry) => entry.category === category)
+  return presentCriterion({ evaluated: true, category, severity: band?.severity ?? 'none' })
+    .metricLabel
+}
+
+const LOAD_PATH_STATUS_LABELS = Object.freeze({
+  evaluated: 'All chain elements and load cases evaluated.',
+  partial: 'Partial — some chain ratings or load cases are unavailable.',
+  unavailable: 'Not evaluated — select chain hardware and enter a rocket mass.',
+})
+
 export default function PrintChecklist({
   specs,
   config,
@@ -81,6 +99,10 @@ export default function PrintChecklist({
   const deploymentLimitations = Array.isArray(deploymentSequence?.limitations)
     ? deploymentSequence.limitations
     : []
+  const loadPath = recoveryBrief?.loadPath ?? computeLoadPath({ config, specs })
+  const loadCases = Array.isArray(loadPath?.loadCases) ? loadPath.loadCases : []
+  const chainElements = Array.isArray(loadPath?.elements) ? loadPath.elements : []
+  const loadPathLimitations = Array.isArray(loadPath?.limitations) ? loadPath.limitations : []
 
   return (
     <div className={`print-checklist print-checklist--${printMode}`}>
@@ -391,6 +413,88 @@ export default function PrintChecklist({
               to the simulated rocket mass.
             </p>
           </>
+        )}
+      </section>
+
+      {/* ── Load path ──────────────────────────────────────────── */}
+      <section>
+        <h2>Load path</h2>
+        <p>{LOAD_PATH_STATUS_LABELS[loadPath.status] || loadPath.status}</p>
+        {loadPath.governingCase && (
+          <p>
+            Governing load case: {loadPath.governingCase.label} —{' '}
+            {formatEstimate(loadPath.governingCase.force_lbs)} lbs.
+          </p>
+        )}
+        {loadPath.weakestLink ? (
+          <p>
+            Weakest link: {loadPath.weakestLink.name || loadPath.weakestLink.slot} rated{' '}
+            {formatEstimate(loadPath.weakestLink.rating_lbs)} lbs.
+          </p>
+        ) : (
+          <p>Weakest link: no rated chain element selected.</p>
+        )}
+        {loadCases.length > 0 && (
+          <table>
+            <thead>
+              <tr>
+                <th>Load case</th>
+                <th>Force</th>
+              </tr>
+            </thead>
+            <tbody>
+              {loadCases.map((loadCase) => (
+                <tr key={loadCase.id}>
+                  <td>{loadCase.label}</td>
+                  <td>
+                    {loadCase.status === 'evaluated'
+                      ? `${formatEstimate(loadCase.force_lbs)} lbs`
+                      : `Not evaluated — ${loadCase.reason}`}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {chainElements.length > 0 && (
+          <table>
+            <thead>
+              <tr>
+                <th>Chain element</th>
+                <th>Rating</th>
+                <th>Governing case</th>
+                <th>Margin</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              {chainElements.map((element) => (
+                <tr key={element.slot}>
+                  <td>{element.name || element.slot}</td>
+                  <td>
+                    {element.rating_lbs == null
+                      ? 'Missing rating'
+                      : `${formatEstimate(element.rating_lbs)} lbs`}
+                  </td>
+                  <td>
+                    {element.governing
+                      ? (loadCases.find((loadCase) => loadCase.id === element.governing.caseId)
+                          ?.label ?? element.governing.caseId)
+                      : 'Not evaluated'}
+                  </td>
+                  <td>{element.governing ? `${element.governing.ratio.toFixed(2)}×` : '—'}</td>
+                  <td>{strengthStatusLabel(element.governing?.category)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {loadPathLimitations.length > 0 && (
+          <ul>
+            {loadPathLimitations.map((limitation, index) => (
+              <li key={index}>{limitation}</li>
+            ))}
+          </ul>
         )}
       </section>
 
