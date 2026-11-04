@@ -42,6 +42,7 @@ export default function ConfigBuilder({
       )}
       <RocketSpecs
         specs={specs}
+        config={config}
         onSetSpec={onSetSpec}
         customMotor={customMotor}
         onSetCustomMotor={onSetCustomMotor}

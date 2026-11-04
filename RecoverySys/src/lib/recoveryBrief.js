@@ -2,6 +2,7 @@ import { RESULT_STATUS_DETAILS, currentResultOrNull } from './assessment.js'
 import { evaluateConfidence } from './confidence.js'
 import { EVIDENCE_LEVEL } from './evidenceCoverage.js'
 import { evaluateMissionEnvelope } from './missionEnvelope.js'
+import { computeRecoveryMass } from './recoveryMass.js'
 import { runSensitivity } from './sensitivity.js'
 
 export const RECOVERY_BRIEF_VERSION = 'recovery-brief-v1'
@@ -106,6 +107,7 @@ export function buildRecoveryBrief({
       evidenceNote: 'No accepted comparison or flight evidence is available in the current corpus.',
     },
     selectedHardware,
+    recoveryMass: computeRecoveryMass({ config, specs }),
     warnings,
     keyEstimates: usableSimulation
       ? {

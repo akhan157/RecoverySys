@@ -2,6 +2,7 @@ import SpecInput from './specs/SpecInput.jsx'
 import MotorSearch from './specs/MotorSearch.jsx'
 import CustomMotorImport from './specs/CustomMotorImport.jsx'
 import SectionLabel from './primitives/SectionLabel.jsx'
+import { computeRecoveryMass } from '../lib/recoveryMass.js'
 import './specs/SpecsPanel.css'
 
 // Auto G-factor: 20G for L1/L2 (<10 kg), 30G for L3 (≥10 kg). Matches NAR/TRA guidelines.
@@ -11,8 +12,31 @@ function autoGFactor(mass_g) {
   return mass_kg >= 10000 ? 30 : 20
 }
 
+function formatMass(value) {
+  return Number(value).toLocaleString(undefined, { maximumFractionDigits: 1 })
+}
+
+// One-line informational summary beside the rocket-mass input. The parenthetical
+// percentage is only shown when the entered mass can be parsed.
+function recoveryMassHint(recoveryMass) {
+  if (!recoveryMass || recoveryMass.status === 'unavailable') return null
+  const total = formatMass(recoveryMass.total_g)
+  const missingCount = recoveryMass.missing?.length ?? 0
+  const missingNote =
+    missingCount > 0
+      ? `; ${missingCount} selected weight${missingCount === 1 ? '' : 's'} missing`
+      : ''
+  if (recoveryMass.rocket_mass_g != null) {
+    return `Selected recovery hardware: ${total} g (${formatMass(
+      recoveryMass.fraction_of_rocket * 100
+    )}% of entered mass${missingNote})`
+  }
+  return `Selected recovery hardware: ${total} g (enter rocket mass to compare${missingNote})`
+}
+
 export default function RocketSpecs({
   specs,
+  config = {},
   onSetSpec,
   customMotor,
   onSetCustomMotor,
@@ -35,6 +59,8 @@ export default function RocketSpecs({
   const bayVolume =
     airframe_id > 0 && bay_length > 0 ? Math.PI * Math.pow(airframe_id / 2, 2) * bay_length : null
   const usableVolume = bayVolume != null ? Math.max(0, bayVolume - obstruction_vol) : null
+  const recoveryMass = computeRecoveryMass({ config, specs })
+  const massHint = recoveryMassHint(recoveryMass)
 
   return (
     <div className="specs-inputs">
@@ -42,15 +68,26 @@ export default function RocketSpecs({
       <fieldset className="specs-inputs__group">
         <legend>Rocket</legend>
         <div className="specs-inputs__grid">
-          <SpecInput
-            id="mass"
-            label="Rocket Mass"
-            value={specs.rocket_mass_g}
-            unit="g"
-            placeholder="e.g. 2500"
-            onChange={(v) => onSetSpec('rocket_mass_g', v)}
-            help="Total liftoff weight including motor, recovery hardware, and airframe"
-          />
+          <div className="specs-inputs__field">
+            <SpecInput
+              id="mass"
+              label="Rocket Mass"
+              value={specs.rocket_mass_g}
+              unit="g"
+              placeholder="e.g. 2500"
+              onChange={(v) => onSetSpec('rocket_mass_g', v)}
+              help="Total liftoff weight including motor, recovery hardware, and airframe"
+            />
+            {massHint && (
+              <p
+                className={`specs-inputs__hint${
+                  recoveryMass.exceeds_rocket_mass ? ' specs-inputs__hint--warn' : ''
+                }`}
+              >
+                {massHint}
+              </p>
+            )}
+          </div>
           <SpecInput
             id="cd"
             label="Drag Coeff (Cd)"

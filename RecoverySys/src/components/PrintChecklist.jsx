@@ -2,6 +2,7 @@ import { CATEGORIES } from '../data/parts.js'
 import { partSpecLine } from '../lib/format.js'
 import { VERSION, WARN_LEVELS } from '../lib/constants.js'
 import { RESULT_STATUS_DETAILS } from '../lib/assessment.js'
+import { computeRecoveryMass } from '../lib/recoveryMass.js'
 // Physical packing order (bottom of bay → top). Only selected parts are shown.
 const PACKING_ORDER = [
   'shock_cord',
@@ -14,7 +15,11 @@ const PACKING_ORDER = [
   'drogue_chute',
 ]
 
-const CATEGORY_LABELS = Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label]))
+const CATEGORY_LABELS = {
+  ...Object.fromEntries(CATEGORIES.map((c) => [c.id, c.label])),
+  // Synthetic compatibility finding area for the informational mass roll-up.
+  recovery_mass: 'Recovery hardware mass',
+}
 
 function formatEstimate(value) {
   return value == null || value === '' || !Number.isFinite(Number(value))
@@ -53,6 +58,7 @@ export default function PrintChecklist({
 
   const selectedParts = CATEGORIES.filter((c) => config[c.id])
   const packingSteps = PACKING_ORDER.filter((slot) => config[slot])
+  const recoveryMass = recoveryBrief?.recoveryMass ?? computeRecoveryMass({ config, specs })
   const resultStatus =
     recoveryBrief?.status ?? (simulation ? (resultFresh ? 'current' : 'stale') : 'not-run')
   const resultDetails = RESULT_STATUS_DETAILS[resultStatus]
@@ -310,6 +316,62 @@ export default function PrintChecklist({
               })}
             </tbody>
           </table>
+        )}
+      </section>
+
+      {/* ── Recovery Hardware Mass ─────────────────────────────── */}
+      <section className="print-artifact--checklist">
+        <h2>Recovery hardware mass</h2>
+        {recoveryMass.items.length === 0 ? (
+          <p>No recovery hardware selected.</p>
+        ) : (
+          <>
+            <p>
+              Total known recovery mass: {formatEstimate(recoveryMass.total_g)} g
+              {recoveryMass.rocket_mass_g != null
+                ? ` (${formatEstimate(recoveryMass.fraction_of_rocket * 100)}% of entered rocket mass)`
+                : ''}
+            </p>
+            <table>
+              <thead>
+                <tr>
+                  <th>Slot</th>
+                  <th>Part</th>
+                  <th>Weight</th>
+                </tr>
+              </thead>
+              <tbody>
+                {recoveryMass.items.map((item) => (
+                  <tr key={item.slot}>
+                    <td>{CATEGORY_LABELS[item.slot] || item.slot}</td>
+                    <td>{item.name || 'Selected part'}</td>
+                    <td>
+                      {item.weight_g == null
+                        ? 'Missing weight'
+                        : `${formatEstimate(item.weight_g)} g`}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+            {recoveryMass.missing.length > 0 && (
+              <p>
+                Missing catalog weight:{' '}
+                {recoveryMass.missing.map((slot) => CATEGORY_LABELS[slot] || slot).join(', ')}. The
+                reported total excludes those selected slots.
+              </p>
+            )}
+            {recoveryMass.exceeds_rocket_mass && (
+              <p>
+                Known recovery mass is at or above the entered rocket mass. The entered mass must
+                include the selected recovery hardware.
+              </p>
+            )}
+            <p>
+              Quantity is one selected part per slot. This roll-up is informational and is not added
+              to the simulated rocket mass.
+            </p>
+          </>
         )}
       </section>
 
