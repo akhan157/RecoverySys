@@ -213,7 +213,9 @@ export function buildDeploymentSequence({
   })
 
   const limitations = [
-    'Event times are elapsed seconds from liftoff; altitudes are above ground level as modeled.',
+    ascentTimed || !result
+      ? 'Event times are elapsed seconds from liftoff; altitudes are above ground level as modeled.'
+      : 'Altitudes are above ground level as modeled.',
     'The simulation uses one terminal velocity per phase with no opening transient; times and speeds shown here are its rounded result fields.',
     'Ejection-charge sizing and deployment-hardware timing are not modeled.',
     ...architectureLimitations(architecture),

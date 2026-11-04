@@ -425,7 +425,9 @@ export default function PrintChecklist({
                   <td>{formatEventValue(event.altitude_ft, deploymentStatus)}</td>
                   <td>
                     {event.time_s == null && Number.isFinite(event.time_after_apogee_s)
-                      ? `Apogee + ${formatEstimate(event.time_after_apogee_s)}`
+                      ? event.time_after_apogee_s === 0
+                        ? 'Not timed'
+                        : `Apogee + ${formatEstimate(event.time_after_apogee_s)}`
                       : formatEventValue(event.time_s, deploymentStatus)}
                   </td>
                   <td>{formatEventValue(event.velocity_fps, deploymentStatus)}</td>
