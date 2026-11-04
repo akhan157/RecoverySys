@@ -19,7 +19,8 @@ import { CRITERION_IDS, evaluateCriterion } from './criteria.js'
  *   - main opening shock → compatibility's computeOpeningShockForContext
  *
  * It adds no compatibility warnings and changes no thresholds: margin
- * categories come from the shared STRENGTH_MARGIN criterion.
+ * categories come from the shared STRENGTH_MARGIN criterion, except opening
+ * shock, which uses OPENING_SHOCK_RATIO exactly as rule_openingShock does.
  */
 
 export const LOAD_PATH_MODEL = 'load-path-margins-v1'
@@ -161,8 +162,24 @@ function buildElement(slot, part, loadCases) {
           .filter((loadCase) => loadCase.status === 'evaluated')
           .map((loadCase) => {
             const ratio = rating_lbs / loadCase.force_lbs
-            const criterion = evaluateCriterion(CRITERION_IDS.STRENGTH_MARGIN, ratio)
-            return { caseId: loadCase.id, ratio, category: criterion.category }
+            // Opening shock is classified by the same criterion rule_openingShock
+            // uses (force / rating), so the view never disagrees with the
+            // compatibility warning for that case. Every other case uses the
+            // shared strength-margin criterion (rating / force).
+            const criterion =
+              loadCase.id === LOAD_PATH_CASE_IDS.OPENING_SHOCK
+                ? evaluateCriterion(
+                    CRITERION_IDS.OPENING_SHOCK_RATIO,
+                    loadCase.force_lbs / rating_lbs
+                  )
+                : evaluateCriterion(CRITERION_IDS.STRENGTH_MARGIN, ratio)
+            return {
+              caseId: loadCase.id,
+              ratio,
+              criterionId: criterion.criterionId,
+              category: criterion.category,
+              severity: criterion.severity,
+            }
           })
   // The governing case is the one that consumes the most of the element's
   // rating. Ties keep the earlier load case (ejection is listed first).

@@ -48,11 +48,14 @@ function formatEventValue(value, resultStatus) {
 
 const STRENGTH_BANDS = CRITERIA[CRITERION_IDS.STRENGTH_MARGIN].bands
 
-function strengthStatusLabel(category) {
-  if (!category) return presentCriterion(null).metricLabel
-  const band = STRENGTH_BANDS.find((entry) => entry.category === category)
-  return presentCriterion({ evaluated: true, category, severity: band?.severity ?? 'none' })
-    .metricLabel
+function strengthStatusLabel(margin) {
+  if (!margin?.category) return presentCriterion(null).metricLabel
+  const band = STRENGTH_BANDS.find((entry) => entry.category === margin.category)
+  return presentCriterion({
+    evaluated: true,
+    category: margin.category,
+    severity: margin.severity ?? band?.severity ?? 'none',
+  }).metricLabel
 }
 
 const LOAD_PATH_STATUS_LABELS = Object.freeze({
@@ -483,7 +486,7 @@ export default function PrintChecklist({
                       : 'Not evaluated'}
                   </td>
                   <td>{element.governing ? `${element.governing.ratio.toFixed(2)}×` : '—'}</td>
-                  <td>{strengthStatusLabel(element.governing?.category)}</td>
+                  <td>{strengthStatusLabel(element.governing)}</td>
                 </tr>
               ))}
             </tbody>

@@ -12,10 +12,14 @@ const STRENGTH_BANDS = CRITERIA[CRITERION_IDS.STRENGTH_MARGIN].bands
 
 // The load path reuses the strength-margin criterion for its chips, so a margin
 // category always renders with the same vocabulary as the rest of the app.
-function strengthChip(category) {
-  if (!category) return presentCriterion(null)
-  const band = STRENGTH_BANDS.find((entry) => entry.category === category)
-  return presentCriterion({ evaluated: true, category, severity: band?.severity ?? 'none' })
+function strengthChip(margin) {
+  if (!margin?.category) return presentCriterion(null)
+  const band = STRENGTH_BANDS.find((entry) => entry.category === margin.category)
+  return presentCriterion({
+    evaluated: true,
+    category: margin.category,
+    severity: margin.severity ?? band?.severity ?? 'none',
+  })
 }
 
 const LOAD_PATH_STATUS_LABELS = Object.freeze({
@@ -327,7 +331,7 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
                 </thead>
                 <tbody>
                   {chainElements.map((element) => {
-                    const chip = strengthChip(element.governing?.category)
+                    const chip = strengthChip(element.governing)
                     return (
                       <tr key={element.slot}>
                         <td data-label="Chain element">{elementName(element)}</td>

@@ -206,12 +206,15 @@ describe('element margins', () => {
     expect(ejectionCategory(force * 1.51)).toBe('nominal')
     expect(ejectionCategory(force * 2)).toBe('nominal')
 
-    // Every margin category is the shared STRENGTH_MARGIN evaluation of its ratio.
+    // Every non-opening-shock margin category is the shared STRENGTH_MARGIN
+    // evaluation of its ratio; opening shock uses OPENING_SHOCK_RATIO.
     for (const element of loadPathAt(force).elements) {
       for (const margin of element.margins) {
-        expect(margin.category).toBe(
-          evaluateCriterion(CRITERION_IDS.STRENGTH_MARGIN, margin.ratio).category
-        )
+        const expected =
+          margin.caseId === 'opening-shock'
+            ? evaluateCriterion(CRITERION_IDS.OPENING_SHOCK_RATIO, 1 / margin.ratio)
+            : evaluateCriterion(CRITERION_IDS.STRENGTH_MARGIN, margin.ratio)
+        expect(margin.category).toBe(expected.category)
       }
     }
     expect(evaluateCriterion(CRITERION_IDS.STRENGTH_MARGIN, 1.5).category).toBe('nominal')
@@ -324,5 +327,38 @@ describe('parity with the existing compatibility path', () => {
     expect(
       messages.some((message) => /^Main chute opening shock ~\d+ lbs at \d+ fps/.test(message))
     ).toBe(true)
+  })
+})
+
+describe('opening shock margin parity with rule_openingShock', () => {
+  const openingForce = () =>
+    caseById(computeLoadPath({ config: fullConfig, specs }), 'opening-shock').force_lbs
+
+  const atRating = (rating) => {
+    const config = {
+      main_chute: main,
+      drogue_chute: drogue,
+      shock_cord: { ...cord, specs: { ...cord.specs, strength_lbs: rating } },
+      quick_links: { ...links, specs: { strength_lbs: rating * 10 } },
+    }
+    const element = elementBySlot(computeLoadPath({ config, specs }), 'shock_cord')
+    const warned = checkCompatibility({ config, specs }).some(
+      (warning) => warning.slot === 'main_chute' && /opening shock/i.test(warning.message)
+    )
+    return { margin: marginByCase(element, 'opening-shock'), warned }
+  }
+
+  it('does not call a 1.45x opening-shock margin marginal when the rule does not warn', () => {
+    const { margin, warned } = atRating(openingForce() * 1.45)
+    expect(warned).toBe(false)
+    expect(margin.category).toBe('nominal')
+    expect(margin.severity).toBe('none')
+  })
+
+  it('agrees with the rule when the opening shock is close to the rating', () => {
+    const { margin, warned } = atRating(openingForce() * 1.2)
+    expect(warned).toBe(true)
+    expect(margin.category).toBe('close-to-rating')
+    expect(margin.severity).toBe('warn')
   })
 })
