@@ -2,6 +2,12 @@
 
 Tagged test candidate: **1.3.0-rc.1**, 2026-10-19. See the release qualification record for measured results. Historical implementation notes are in `history/next-steps-through-2026-10-19.md`.
 
+## Recovery-chain additions (2026-11-04, local main, not pushed or deployed)
+
+Three presentation features merged on local `main` (`a5f81e1`), each built in its own lane, reviewed and fixed by the orchestrator: recovery hardware mass roll-up, deployment sequence, and whole-chain load-path margins. Checks on the merged tree: 469 unit/component tests in 48 files, format/lint/catalog/corpus/build/build-identity, and 92/92 desktop/mobile browser workflows against the production build. Records: `history/lanes-2026-11-04/`.
+
+Open decision: the load-path view shows elements that no compatibility rule checks against some load cases (quick links and swivel vs the elongation-amplified snatch and the main snatch proxy; swivel vs opening shock). A 2.5 kg dual-deploy fixture puts a 400 lb swivel at 0.88x the snatch proxy. Adding rules would change warning output and needs an owner decision.
+
 ## Post-candidate main (2026-10-31, not yet a release)
 
 The current `main` contains unreleased review fixes beyond the tagged rc.1 artifact:

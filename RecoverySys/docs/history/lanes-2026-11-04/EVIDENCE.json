@@ -1,0 +1,26 @@
+{
+  "date": "2026-11-04",
+  "base": "ff9f429",
+  "merged_head": "a5f81e1",
+  "pushed": false,
+  "deployed": false,
+  "author_model": "opencode-go/deepseek-v4.1-flash (variant max)",
+  "reviewer_model": "claude-opus-5-5",
+  "lanes": {
+    "recovery-mass-rollup": { "author": "1313477", "fixes": ["d507910", "414a0ee"], "merge": "e8a4dd3" },
+    "deployment-sequence": { "author": "b8b6add", "fixes": ["b2f519e", "d5772fd"], "merge": "688c073" },
+    "load-path-margins": { "author": "4125664", "fixes": ["f91cfc8"], "merge": "a5f81e1" }
+  },
+  "checks_on_merged_head": {
+    "format_check": "pass",
+    "lint": "pass",
+    "validate_parts": "pass (225 parts)",
+    "validate_corpus": "pass (14 cases)",
+    "unit_tests": { "files": 48, "tests": 469, "failed": 0, "command": "npx vitest run --maxWorkers=2" },
+    "build": "pass",
+    "verify_build": "pass (1.3.0-rc.1 / V1.3 RC1)",
+    "playwright": { "passed": 92, "total": 92, "command": "npx playwright test --workers=2" },
+    "built_surface": "Chromium via vite preview, 1440px and 375px, demo and no-burn-time plans, 0 console/page errors, 0 px horizontal overflow"
+  },
+  "open_decisions": ["series-chain compatibility rules for links/swivel vs snatch and opening-shock cases"]
+}

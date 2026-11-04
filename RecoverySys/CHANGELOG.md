@@ -5,6 +5,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Added
+
+- Recovery hardware mass roll-up: per-part catalog weights, known total and share of the entered rocket mass in the brief, print checklist and Specs. A warning flags selected hardware that weighs as much as the entered rocket. Informational only; simulated mass is unchanged.
+- Deployment sequence: the recovery architecture and an ordered liftoff-to-landing timeline with altitude, time, speed and provenance, taken from the current simulation result. Without a burn time, descent events are timed from apogee.
+- Load-path margins: every selected cord, link and swivel against every load case the app already computes, with the governing case and weakest link. Presentation only; no thresholds or warnings changed.
+
 ### Changed
 
 - Treat an unreadable saved plan, custom-parts store, or flight log as preserved data and report it instead of silently replacing it.
