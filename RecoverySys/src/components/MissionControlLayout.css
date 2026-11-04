@@ -2031,6 +2031,12 @@
   .mc-brief__metadata {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
+
+  /* An odd item count would leave an empty border-colored cell. */
+  .mc-brief__facts > div:last-child:nth-child(odd),
+  .mc-brief__metadata > div:last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
 }
 
 /* ── Analysis Tab ────────────────────────────────────────────────────────── */
