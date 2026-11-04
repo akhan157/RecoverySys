@@ -145,3 +145,20 @@ describe('recovery mass compatibility rule', () => {
     )
   })
 })
+
+describe('recovery mass finding consumers', () => {
+  it('routes the finding to the rocket mass input in the brief and labels it in analysis', async () => {
+    const { formatDriverLabel } = await import('../components/analysis/CausalityRow.jsx')
+    const config = { main_chute: part('Main', 300.04) }
+    const specs = { rocket_mass_g: '300' }
+    const warnings = checkCompatibility({ config, specs })
+    const warning = warnings.find((item) => item.code === ruleCode)
+    expect(warning.message).toContain('300 g against 300 g')
+
+    const brief = buildRecoveryBrief({ config, specs, warnings, sensitivity: false })
+    const check = brief.unresolvedChecks.find((item) => item.code === ruleCode)
+    expect(check.path).toBe('specs.rocket_mass_g')
+
+    expect(formatDriverLabel('recovery_mass')).toBe('Recovery hardware mass')
+  })
+})

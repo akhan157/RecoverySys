@@ -35,6 +35,7 @@ const DRIVER_LABELS = Object.freeze({
   deployment_bag: 'Deployment bag',
   chute_device: 'Chute release device',
   bay_volume: 'Recovery bay volume',
+  recovery_mass: 'Recovery hardware mass',
   rocket_mass_g: 'Rocket mass',
   motor_total_impulse_ns: 'Motor impulse',
   drag_cd: 'Drag coefficient',

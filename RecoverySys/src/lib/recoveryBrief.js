@@ -51,7 +51,7 @@ export function buildRecoveryBrief({
       code: warning.code ?? 'COMPATIBILITY_WARNING',
       message: warning.message,
       level: warning.level,
-      path: warning.slot ? `config.${warning.slot}` : null,
+      path: warning.inputPaths?.[0] ?? (warning.slot ? `config.${warning.slot}` : null),
     })),
   ]
   if (!simulation) {

@@ -756,7 +756,7 @@ function rule_recoveryMassExceedsRocketMass(ctx) {
   return [
     warn(
       'recovery_mass',
-      `Entered rocket mass must include recovery hardware — selected parts total ${recoveryMass.total_g} g against ${recoveryMass.rocket_mass_g} g entered.`,
+      `Entered rocket mass must include recovery hardware — selected parts total ${Math.round(recoveryMass.total_g * 10) / 10} g against ${recoveryMass.rocket_mass_g} g entered.`,
       {
         code: 'compatibility.recovery_mass.recovery-mass-exceeds-rocket-mass',
         rule: 'recovery-mass-exceeds-rocket-mass',
