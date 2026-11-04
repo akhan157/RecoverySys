@@ -1839,6 +1839,83 @@
   font-size: 10px !important;
 }
 
+/* ── Deployment sequence timeline ────────────────────────────────────────── */
+.mc-brief__timeline {
+  display: grid;
+  gap: 1px;
+  margin: 12px 0 0;
+  padding: 0;
+  list-style: none;
+  background: var(--mc-border);
+}
+
+.mc-brief__timeline-item {
+  padding: 10px;
+  background: var(--mc-bg-panel);
+}
+
+.mc-brief__section .mc-brief__timeline li + li {
+  margin-top: 0;
+}
+
+.mc-brief__timeline-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.mc-brief__timeline-label {
+  color: var(--mc-text);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mc-brief__timeline-source {
+  color: var(--mc-text-faint);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.mc-brief__section .mc-brief__timeline-trigger {
+  margin: 4px 0 0;
+}
+
+.mc-brief__timeline-facts {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 8px 0 0;
+}
+
+.mc-brief__timeline-facts dt {
+  color: var(--mc-text-faint);
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.mc-brief__timeline-facts dd {
+  margin: 4px 0 0;
+  color: var(--mc-text);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
+}
+
+.mc-brief__section .mc-brief__boundary-list {
+  margin: 10px 0 0;
+  padding-left: 16px;
+}
+
+.mc-brief__section .mc-brief__boundary-list li {
+  color: var(--mc-text-faint);
+  font-size: 10px;
+}
+
 /* ── Responsive: Tablet ──────────────────────────────────────────────── */
 
 @media (max-width: 1024px) {
@@ -2036,6 +2113,21 @@
   .mc-brief__facts > div:last-child:nth-child(odd),
   .mc-brief__metadata > div:last-child:nth-child(odd) {
     grid-column: 1 / -1;
+  }
+  .mc-brief__timeline-facts {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 2px;
+  }
+  .mc-brief__timeline-facts > div {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 2px 0;
+  }
+  .mc-brief__timeline-facts dd {
+    margin: 0;
+    text-align: right;
   }
 }
 

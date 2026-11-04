@@ -1,5 +1,6 @@
 import { RESULT_STATUS_DETAILS, currentResultOrNull } from './assessment.js'
 import { evaluateConfidence } from './confidence.js'
+import { buildDeploymentSequence } from './deploymentSequence.js'
 import { EVIDENCE_LEVEL } from './evidenceCoverage.js'
 import { evaluateMissionEnvelope } from './missionEnvelope.js'
 import { computeRecoveryMass } from './recoveryMass.js'
@@ -108,6 +109,7 @@ export function buildRecoveryBrief({
     },
     selectedHardware,
     recoveryMass: computeRecoveryMass({ config, specs }),
+    deploymentSequence: buildDeploymentSequence({ config, specs, simulation, resultFresh }),
     warnings,
     keyEstimates: usableSimulation
       ? {

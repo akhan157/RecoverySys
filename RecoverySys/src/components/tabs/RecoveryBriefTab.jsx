@@ -19,6 +19,28 @@ const STATUS_TONES = Object.freeze({
   'not-run': 'neutral',
 })
 
+const SOURCE_LABELS = Object.freeze({
+  simulation: 'Simulation',
+  input: 'Entered spec',
+})
+
+const EVENT_UNITS = Object.freeze({
+  altitude_ft: 'ft',
+  time_s: 's',
+  velocity_fps: 'ft/s',
+})
+
+function eventValue(event, key, resultStatus) {
+  const value = event?.[key]
+  if (key === 'time_s' && value == null && Number.isFinite(event?.time_after_apogee_s)) {
+    return `Apogee + ${formatNumber(event.time_after_apogee_s)} s`
+  }
+  if (value == null || !Number.isFinite(Number(value))) {
+    return resultStatus === 'not-run' ? 'Run simulation' : '—'
+  }
+  return `${formatNumber(value)} ${EVENT_UNITS[key]}`
+}
+
 const ESTIMATES = Object.freeze([
   ['apogee_ft', 'Apogee', 'ft'],
   ['drift_ft', 'Drift', 'ft'],
@@ -70,6 +92,15 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
   const recoveryMass = recoveryBrief.recoveryMass
   const massItems = Array.isArray(recoveryMass?.items) ? recoveryMass.items : []
   const missingMassSlots = Array.isArray(recoveryMass?.missing) ? recoveryMass.missing : []
+  const deploymentSequence = recoveryBrief.deploymentSequence
+  const deploymentEvents = Array.isArray(deploymentSequence?.events)
+    ? deploymentSequence.events
+    : []
+  const deploymentStatus = deploymentSequence?.resultStatus || status
+  const deploymentDetails = RESULT_STATUS_DETAILS[deploymentStatus] || resultDetails
+  const deploymentLimitations = Array.isArray(deploymentSequence?.limitations)
+    ? deploymentSequence.limitations
+    : []
 
   return (
     <div className="mc-brief">
@@ -157,6 +188,59 @@ export default function RecoveryBriefTab({ recoveryBrief = {} }) {
           </p>
         )}
       </section>
+
+      {deploymentSequence && (
+        <section className="mc-brief__section" aria-labelledby="brief-deployment-title">
+          <h3 id="brief-deployment-title">Deployment sequence</h3>
+          <p className="mc-brief__lead">
+            <strong>{display(deploymentSequence.architectureLabel, 'Architecture unknown')}</strong>
+          </p>
+          {deploymentStatus !== 'current' && (
+            <p>
+              {display(deploymentDetails.reasonCode, 'NO_CURRENT_RESULT')} —{' '}
+              {deploymentDetails.remediation}
+            </p>
+          )}
+          {deploymentEvents.length ? (
+            <ol className="mc-brief__timeline">
+              {deploymentEvents.map((event) => (
+                <li key={event.id} className="mc-brief__timeline-item">
+                  <div className="mc-brief__timeline-head">
+                    <span className="mc-brief__timeline-label">{event.label}</span>
+                    <span className="mc-brief__timeline-source">
+                      {SOURCE_LABELS[event.source] || 'Unknown'}
+                    </span>
+                  </div>
+                  <p className="mc-brief__timeline-trigger">{event.trigger}</p>
+                  <dl className="mc-brief__timeline-facts">
+                    <div>
+                      <dt>Altitude</dt>
+                      <dd>{eventValue(event, 'altitude_ft', deploymentStatus)}</dd>
+                    </div>
+                    <div>
+                      <dt>Time</dt>
+                      <dd>{eventValue(event, 'time_s', deploymentStatus)}</dd>
+                    </div>
+                    <div>
+                      <dt>Speed</dt>
+                      <dd>{eventValue(event, 'velocity_fps', deploymentStatus)}</dd>
+                    </div>
+                  </dl>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <p>No deployment events are available for the selected hardware.</p>
+          )}
+          {deploymentLimitations.length > 0 && (
+            <ul className="mc-brief__boundary-list">
+              {deploymentLimitations.map((limitation, index) => (
+                <li key={index}>{limitation}</li>
+              ))}
+            </ul>
+          )}
+        </section>
+      )}
 
       <section className="mc-brief__section" aria-labelledby="brief-hardware-title">
         <h3 id="brief-hardware-title">Selected hardware</h3>

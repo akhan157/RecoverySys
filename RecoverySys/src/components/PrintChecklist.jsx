@@ -2,6 +2,7 @@ import { CATEGORIES } from '../data/parts.js'
 import { partSpecLine } from '../lib/format.js'
 import { VERSION, WARN_LEVELS } from '../lib/constants.js'
 import { RESULT_STATUS_DETAILS } from '../lib/assessment.js'
+import { buildDeploymentSequence } from '../lib/deploymentSequence.js'
 import { computeRecoveryMass } from '../lib/recoveryMass.js'
 // Physical packing order (bottom of bay → top). Only selected parts are shown.
 const PACKING_ORDER = [
@@ -35,6 +36,13 @@ function formatScreening(value) {
     : Number(value).toLocaleString(undefined, { maximumFractionDigits: 2 })
 }
 
+function formatEventValue(value, resultStatus) {
+  if (value == null || value === '' || !Number.isFinite(Number(value))) {
+    return resultStatus === 'not-run' ? 'Run simulation' : '—'
+  }
+  return formatEstimate(value)
+}
+
 export default function PrintChecklist({
   specs,
   config,
@@ -62,6 +70,17 @@ export default function PrintChecklist({
   const resultStatus =
     recoveryBrief?.status ?? (simulation ? (resultFresh ? 'current' : 'stale') : 'not-run')
   const resultDetails = RESULT_STATUS_DETAILS[resultStatus]
+  const deploymentSequence =
+    recoveryBrief?.deploymentSequence ??
+    buildDeploymentSequence({ config, specs, simulation, resultFresh })
+  const deploymentEvents = Array.isArray(deploymentSequence?.events)
+    ? deploymentSequence.events
+    : []
+  const deploymentStatus = deploymentSequence?.resultStatus || resultStatus
+  const deploymentDetails = RESULT_STATUS_DETAILS[deploymentStatus] || resultDetails
+  const deploymentLimitations = Array.isArray(deploymentSequence?.limitations)
+    ? deploymentSequence.limitations
+    : []
 
   return (
     <div className={`print-checklist print-checklist--${printMode}`}>
@@ -372,6 +391,55 @@ export default function PrintChecklist({
               to the simulated rocket mass.
             </p>
           </>
+        )}
+      </section>
+
+      {/* ── Deployment sequence ────────────────────────────────── */}
+      <section>
+        <h2>Deployment sequence</h2>
+        <p>Architecture: {deploymentSequence?.architectureLabel || 'Not available'}</p>
+        {deploymentStatus !== 'current' && (
+          <p>
+            {deploymentDetails?.reasonCode || 'NO_CURRENT_RESULT'} —{' '}
+            {deploymentDetails?.remediation}
+          </p>
+        )}
+        {deploymentEvents.length === 0 ? (
+          <p>No deployment events are available for the selected hardware.</p>
+        ) : (
+          <table>
+            <thead>
+              <tr>
+                <th>Event</th>
+                <th>Trigger</th>
+                <th>Altitude (ft)</th>
+                <th>Time (s)</th>
+                <th>Speed (ft/s)</th>
+              </tr>
+            </thead>
+            <tbody>
+              {deploymentEvents.map((event) => (
+                <tr key={event.id}>
+                  <td>{event.label}</td>
+                  <td>{event.trigger}</td>
+                  <td>{formatEventValue(event.altitude_ft, deploymentStatus)}</td>
+                  <td>
+                    {event.time_s == null && Number.isFinite(event.time_after_apogee_s)
+                      ? `Apogee + ${formatEstimate(event.time_after_apogee_s)}`
+                      : formatEventValue(event.time_s, deploymentStatus)}
+                  </td>
+                  <td>{formatEventValue(event.velocity_fps, deploymentStatus)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+        {deploymentLimitations.length > 0 && (
+          <ul>
+            {deploymentLimitations.map((limitation, index) => (
+              <li key={index}>{limitation}</li>
+            ))}
+          </ul>
         )}
       </section>
 
