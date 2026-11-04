@@ -30,6 +30,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Prevent demo mode from overwriting the user's saved plan and make the share-link Save action durable.
 - Restore custom-part slots from definitions inlined in a saved config when the separate parts store is missing.
 - Reject malformed main-chute specs and zero-impulse `.eng` motors instead of hanging the simulation or persisting unusable data.
+- Compute landing kinetic energy from the unrounded terminal rate so presentation rounding cannot flip a criterion verdict at the 75/100 ft-lbf boundaries.
 - Fix overlapping Edit/Delete controls on custom-part cards, Specs review/empty-slot navigation, unevaluated packing badges, collapsible-group accessibility, search empty-state copy, and the printed version string.
 - Generate browser-openable share links from the desktop shell instead of Tauri-internal origins.
 - Persist Start Fresh immediately so an immediate reload cannot restore the previous plan.

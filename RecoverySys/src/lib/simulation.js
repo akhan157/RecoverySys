@@ -884,7 +884,10 @@ export function runSimulation({ specs, config, customMotor = null }) {
   // KE = 0.5 * m * v². Landing speed is main descent rate (or drogue if no main).
   // Convert fps → m/s, compute KE in joules, then to ft-lbf (1 J = 0.7376 ft-lbf).
   // Slightly conservative: actual ground speed is 3-5% lower due to denser surface air.
-  const landing_fps = main_fps_rounded ?? drogue_fps_rounded
+  // Use the raw terminal rate, not the presentation-rounded rate: a 0.1 fps
+  // main rounding or 1 fps drogue rounding can move KE by ~1-3% and flip a
+  // criterion verdict at the 75/100 ft-lbf boundaries.
+  const landing_fps = main_fps ?? drogue_fps
   const landing_mps = landing_fps / FT_PER_M
   const landing_ke_J = 0.5 * mass_kg * landing_mps * landing_mps
   const landing_ke_ftlbf = landing_ke_J * 0.7376

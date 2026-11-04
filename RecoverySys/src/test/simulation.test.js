@@ -798,5 +798,8 @@ describe('simulation input guards', () => {
     })
     expect(result._criteriaInputs.main_fps).toBeGreaterThan(0)
     expect(result.main_fps).toBe(Math.round(result._criteriaInputs.main_fps * 10) / 10)
+    const rawKe = 0.5 * 2.5 * (result._criteriaInputs.main_fps / 3.28084) ** 2 * 0.7376
+    expect(result._criteriaInputs.landing_ke_ftlbf).toBeCloseTo(rawKe, 10)
+    expect(result.landing_ke_ftlbf).toBe(Math.round(rawKe))
   })
 })
