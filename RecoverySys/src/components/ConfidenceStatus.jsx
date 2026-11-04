@@ -1,3 +1,4 @@
+import BenchmarkComparisons from './BenchmarkComparisons.jsx'
 import { RESULT_STATUS_DETAILS } from '../lib/assessment.js'
 import { evaluateConfidence } from '../lib/confidence.js'
 import { EVIDENCE_LEVEL } from '../lib/evidenceCoverage.js'
@@ -71,6 +72,7 @@ export default function ConfidenceStatus({
           approval, or certification.
         </p>
       </details>
+      {!compact && <BenchmarkComparisons />}
       {onNavigate && envelope.reasons.length > 0 && (
         <div className="mc-confidence__actions">
           {envelope.reasons.slice(0, compact ? 1 : 3).map((reason) => (
