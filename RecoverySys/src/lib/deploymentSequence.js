@@ -127,7 +127,13 @@ export function buildDeploymentSequence({
     architecture === DEPLOYMENT_ARCHITECTURES.DROGUE_ONLY
 
   const apogeeAltitude = result ? finiteOrNull(result.apogee_ft) : null
-  const apogeeTime = result ? finiteOrNull(result.apogee_t_s) : null
+  // Without a burn time the simulation estimates apogee heuristically and
+  // leaves apogee_t_s at a 0 placeholder, so elapsed-from-liftoff times are
+  // unknown. Descent durations are still modeled and are reported relative to
+  // apogee instead.
+  const ascentTimed = Boolean(result) && result.apogee_method !== 'heuristic'
+  const apogeeTime = ascentTimed ? finiteOrNull(result.apogee_t_s) : null
+  const afterApogee = (value) => (result ? finiteOrNull(value) : null)
   // The simulation stops integrating ascent at its zero-velocity turnaround, so
   // apogee and ground contact are modeled at 0 ft/s and 0 ft AGL respectively.
   const apogeeVelocity = result && apogeeAltitude != null ? 0 : null
@@ -167,6 +173,7 @@ export function buildDeploymentSequence({
         : 'Apogee detected; no canopy selected',
     altitude_ft: apogeeAltitude,
     time_s: apogeeTime,
+    time_after_apogee_s: afterApogee(0),
     velocity_fps: apogeeVelocity,
     source: eventSource(result, [apogeeAltitude, apogeeTime, apogeeVelocity]),
   })
@@ -175,7 +182,7 @@ export function buildDeploymentSequence({
     const enteredDeployAltitude = parseSpec('main_deploy_alt_ft', specs?.main_deploy_alt_ft)
     const resultDeployAltitude = result ? finiteOrNull(result.deploy_ft) : null
     const deployAltitude = resultDeployAltitude ?? enteredDeployAltitude
-    const deployTime = result ? sumTimes(result.apogee_t_s, result.phase1_time_s) : null
+    const deployTime = ascentTimed ? sumTimes(result.apogee_t_s, result.phase1_time_s) : null
     const approachVelocity = result ? finiteOrNull(result.drogue_fps) : null
     // The altitude can be an entered spec while the time and approach speed are
     // simulation fields; label the event by the strongest provenance present.
@@ -183,13 +190,14 @@ export function buildDeploymentSequence({
       result != null &&
       (resultDeployAltitude != null || deployTime != null || approachVelocity != null)
     const deploySource = hasSimulationValue ? 'simulation' : deployAltitude != null ? 'input' : null
-    events.push(
-      deploymentEvent(architecture, deployAltitude, deployTime, approachVelocity, deploySource)
-    )
+    events.push({
+      ...deploymentEvent(architecture, deployAltitude, deployTime, approachVelocity, deploySource),
+      time_after_apogee_s: afterApogee(result?.phase1_time_s),
+    })
   }
 
   const landingAltitude = result ? 0 : null
-  const landingTime = result ? sumTimes(result.apogee_t_s, result.total_time_s) : null
+  const landingTime = ascentTimed ? sumTimes(result.apogee_t_s, result.total_time_s) : null
   const landingVelocity = result
     ? (finiteOrNull(result.main_fps) ?? finiteOrNull(result.drogue_fps))
     : null
@@ -199,6 +207,7 @@ export function buildDeploymentSequence({
     trigger: 'Ground contact at the modeled terminal descent rate',
     altitude_ft: landingAltitude,
     time_s: landingTime,
+    time_after_apogee_s: afterApogee(result?.total_time_s),
     velocity_fps: landingVelocity,
     source: eventSource(result, [landingAltitude, landingTime, landingVelocity]),
   })
@@ -209,6 +218,11 @@ export function buildDeploymentSequence({
     'Ejection-charge sizing and deployment-hardware timing are not modeled.',
     ...architectureLimitations(architecture),
   ]
+  if (result && !ascentTimed) {
+    limitations.push(
+      'No burn time was entered, so apogee is a heuristic estimate with no ascent timing; descent events are timed from apogee instead of liftoff.'
+    )
+  }
   if (resultStatus !== 'current') {
     limitations.push(
       'Simulation-derived values are withheld until a current result exists; entered deployment altitudes remain visible.'
@@ -221,6 +235,7 @@ export function buildDeploymentSequence({
     architectureLabel: ARCHITECTURE_LABELS[architecture],
     events,
     resultStatus,
+    ascentTimed,
     limitations,
   }
 }

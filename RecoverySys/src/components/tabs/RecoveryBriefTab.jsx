@@ -32,6 +32,9 @@ const EVENT_UNITS = Object.freeze({
 
 function eventValue(event, key, resultStatus) {
   const value = event?.[key]
+  if (key === 'time_s' && value == null && Number.isFinite(event?.time_after_apogee_s)) {
+    return `Apogee + ${formatNumber(event.time_after_apogee_s)} s`
+  }
   if (value == null || !Number.isFinite(Number(value))) {
     return resultStatus === 'not-run' ? 'Run simulation' : '—'
   }

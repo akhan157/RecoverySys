@@ -131,6 +131,17 @@ describe('deployment sequence simulation mapping', () => {
       'main-deployment',
       'landing',
     ])
+    // Heuristic apogee has a 0 s placeholder apogee time; the sequence must not
+    // present it, or deploy/landing times derived from it, as elapsed time.
+    expect(simulation.apogee_method).toBe('heuristic')
+    expect(sequence.ascentTimed).toBe(false)
+    const events = Object.fromEntries(sequence.events.map((event) => [event.id, event]))
+    expect(events.apogee.time_s).toBeNull()
+    expect(events['main-deployment'].time_s).toBeNull()
+    expect(events.landing.time_s).toBeNull()
+    expect(events['main-deployment'].time_after_apogee_s).toBe(simulation.phase1_time_s)
+    expect(events.landing.time_after_apogee_s).toBe(simulation.total_time_s)
+    expect(sequence.limitations.join(' ')).toMatch(/timed from apogee/)
   })
 
   it('never lets a stale result contribute simulation numbers', () => {
