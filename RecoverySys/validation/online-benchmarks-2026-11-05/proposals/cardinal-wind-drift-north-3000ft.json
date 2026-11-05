@@ -1,0 +1,62 @@
+{
+  "id": "cardinal-wind-drift-north-3000ft",
+  "kind": "analytic",
+  "domain": "drift",
+  "status": "review",
+  "inputs": {
+    "simulation": {
+      "drogue_fps": 60,
+      "main_fps": 20,
+      "apogee_ft": 3000,
+      "deploy_ft": 500
+    },
+    "specs": {
+      "wind_speed_mph": 15,
+      "wind_direction_deg": 180,
+      "wind_surface_alt_ft": 0
+    }
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "drift_ft",
+        "value": 1467,
+        "unit": "ft",
+        "tolerance": {
+          "absolute": 1,
+          "basis": "analyst-derived"
+        },
+        "notes": "Total drift under 15 mph wind from South: 916.67 + 550.0 = 1466.67 ft"
+      },
+      {
+        "name": "bearing_deg",
+        "value": 0,
+        "unit": "deg",
+        "tolerance": {
+          "absolute": 0.1,
+          "basis": "source-stated"
+        },
+        "notes": "Drift is opposite to 180 deg South wind: (180 + 180) mod 360 = 0 deg"
+      }
+    ],
+    "notes": "Cardinal wind direction and drift vector verification"
+  },
+  "source": {
+    "url": "https://www.weather.gov/hfo/windbarbinfo",
+    "title": "Information about wind barbs (NOAA NWS)",
+    "accessed": "2026-11-05",
+    "citation": "NOAA National Weather Service. Information about wind barbs.",
+    "derivation": "drift_bearing = (wind_direction + 180) mod 360; drift = v_wind * (t_drogue + t_main)"
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "RecoverySys computeDrift"
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Bearing must equal 0 deg and drift must equal rounded 1467 ft"
+  },
+  "notes": "Proposed Gate 1 review case"
+}

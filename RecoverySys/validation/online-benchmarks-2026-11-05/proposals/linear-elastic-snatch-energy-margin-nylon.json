@@ -1,0 +1,84 @@
+{
+  "id": "linear-elastic-snatch-energy-margin-nylon",
+  "kind": "analytic",
+  "domain": "shock-load",
+  "status": "review",
+  "inputs": {
+    "config": {
+      "main_chute": {
+        "specs": {
+          "diameter_in": 60
+        }
+      },
+      "drogue_chute": {
+        "specs": {
+          "diameter_in": 18
+        }
+      },
+      "shock_cord": {
+        "specs": {
+          "strength_lbs": 1500,
+          "length_ft": 20,
+          "elongation_pct": 25,
+          "material": "nylon"
+        }
+      }
+    },
+    "mass_kg": 6,
+    "deploy_alt_ft": 800,
+    "approach_velocity_fps": 65
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "rating_margin",
+        "value": 2.078,
+        "unit": "dimensionless",
+        "tolerance": {
+          "relative": 0.001,
+          "basis": "analyst-derived"
+        },
+        "notes": "F_rated / F_peak_proxy = 1500 / 721.90 = 2.078"
+      },
+      {
+        "name": "peak_force_proxy_lbs",
+        "value": 721.9,
+        "unit": "lbf",
+        "tolerance": {
+          "relative": 0.001,
+          "basis": "analyst-derived"
+        },
+        "notes": "secant stiffness times predicted extension"
+      },
+      {
+        "name": "energy_margin",
+        "value": 4.318,
+        "unit": "dimensionless",
+        "tolerance": {
+          "relative": 0.001,
+          "basis": "analyst-derived"
+        },
+        "notes": "capacity_energy_J / event_energy_J = 5084.1 / 1177.55"
+      }
+    ],
+    "notes": "Linear-elastic snatch energy proxy invariant"
+  },
+  "source": {
+    "url": "https://archive.org/details/DTIC_ADA247666",
+    "title": "Parachute Recovery Systems Design Manual (Knacke 1992)",
+    "accessed": "2026-11-05",
+    "citation": "T. W. Knacke. Parachute Recovery Systems Design Manual. NWC TP 6575, Section 7.3.7.7.",
+    "derivation": "Elastic strain energy capacity and peak force proxy under secant modulus approximation"
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "RecoverySys computeMainSnatchLoad"
+  },
+  "comparison": {
+    "method": "relative",
+    "decisionRule": "Rating margin and peak force proxy must match secant elasticity derivation within 0.1%"
+  },
+  "notes": "Proposed Gate 1 review case"
+}
