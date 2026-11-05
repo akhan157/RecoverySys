@@ -16,7 +16,10 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
  * Works uniformly whether invoked from worktrees, primary repository root, or subdirectories.
  */
 export function resolvePrimaryRoot(fromDir = __dirname) {
-  const rawCommonDir = execSync('git rev-parse --git-common-dir', { cwd: fromDir, encoding: 'utf8' }).trim()
+  const rawCommonDir = execSync('git rev-parse --git-common-dir', {
+    cwd: fromDir,
+    encoding: 'utf8',
+  }).trim()
   const commonDir = resolve(fromDir, rawCommonDir)
   return resolve(commonDir, '..')
 }
@@ -52,7 +55,12 @@ export async function auditCatalogEvidence(options = {}) {
   // Load staged diff
   let stagedDiff = options.stagedDiff
   if (!stagedDiff || typeof stagedDiff === 'string') {
-    const p = stagedDiff || resolve(primaryRoot, 'RecoverySys/validation/catalog-review/primary-pages-2026-11-05-diff.json')
+    const p =
+      stagedDiff ||
+      resolve(
+        primaryRoot,
+        'RecoverySys/validation/catalog-review/primary-pages-2026-11-05-diff.json'
+      )
     stagedDiff = JSON.parse(await readFile(p, 'utf8'))
   }
   const stagedChanges = stagedDiff.changes
@@ -89,7 +97,11 @@ export async function auditCatalogEvidence(options = {}) {
       exists = false
     }
 
-    assert(exists, `Artifact exists: ${src.sourceId}`, `Artifact file not found at ${absArtifactPath}`)
+    assert(
+      exists,
+      `Artifact exists: ${src.sourceId}`,
+      `Artifact file not found at ${absArtifactPath}`
+    )
     assert(
       calculatedHash === src.artifact.sha256,
       `Artifact SHA-256 matches: ${src.sourceId}`,
@@ -129,7 +141,7 @@ export async function auditCatalogEvidence(options = {}) {
 
   // Group 3: Comparison with Production Catalog (PARTS) & Staged Proposals
   for (const p of proposals) {
-    const part = parts.find(item => item.id === p.catalogId)
+    const part = parts.find((item) => item.id === p.catalogId && item.category === p.category)
     assert(
       Boolean(part),
       `Catalog part exists in parts.js: ${p.catalogId}`,
@@ -150,7 +162,7 @@ export async function auditCatalogEvidence(options = {}) {
     }
 
     const staged = stagedChanges.find(
-      s => s.partId === p.catalogId && s.category === p.category && s.field === p.field
+      (s) => s.partId === p.catalogId && s.category === p.category && s.field === p.field
     )
     assert(
       Boolean(staged),
@@ -180,12 +192,17 @@ export async function auditCatalogEvidence(options = {}) {
   // Group 4: Source Reference & Variant Mapping Metadata
   for (const p of proposals) {
     const matchedSource = sources.find(
-      s => s.artifact.relativePath === p.source.artifactRelativePath || s.url === p.source.url
+      (s) => s.artifact.relativePath === p.source.artifactRelativePath && s.url === p.source.url
     )
     assert(
       Boolean(matchedSource),
       `Proposal cites valid archived source: ${p.proposalId}`,
       `No archived source in sources.json matches URL ${p.source.url}`
+    )
+    assert(
+      Boolean(matchedSource) && p.source.artifactSha256 === matchedSource.artifact.sha256,
+      `Proposal source SHA-256 matches capture metadata: ${p.proposalId}`,
+      'Proposal source SHA-256 or URL/path does not match the cited capture'
     )
 
     // Variant mapping checks:
@@ -239,6 +256,18 @@ export async function auditCatalogEvidence(options = {}) {
 
   // Group 5: Units & Conversion Sanity Checks
   for (const p of proposals) {
+    const expectedUnit = {
+      weight_g: 'g',
+      packed_diam_in: 'in',
+      packed_length_in: 'in',
+    }[p.field]
+    assert(
+      expectedUnit !== undefined &&
+        p.currentUnit === expectedUnit &&
+        p.proposedUnit === expectedUnit,
+      `Declared units match field: ${p.proposalId}`,
+      `Unit labels must both be ${expectedUnit} for ${p.field}`
+    )
     if (p.field === 'weight_g') {
       // Ounce-as-gram error detector: For parachutes >= 24 in, mass in grams cannot equal raw ounce figure
       const rawOunceValues = [0.7, 1.34, 1.5, 1.88, 2.1, 3.1, 4.8]
@@ -281,7 +310,7 @@ export async function auditCatalogEvidence(options = {}) {
   }
 
   // Ambiguous range preservation: CFC-30-N Cd range [1.5, 1.6] preserved without inventing constant
-  const cfc30Src = sources.find(s => s.sourceId === 'fruitychutes-cfc-30-n-standard')
+  const cfc30Src = sources.find((s) => s.sourceId === 'fruitychutes-cfc-30-n-standard')
   assert(
     Array.isArray(cfc30Src?.specs?.cd_range) &&
       cfc30Src.specs.cd_range[0] === 1.5 &&
@@ -293,10 +322,12 @@ export async function auditCatalogEvidence(options = {}) {
   // Deriving summary counts dynamically rather than asserting fixed constants
   const derivedSummary = {
     total_proposals_evaluated: proposals.length,
-    proposed_reject_count: proposals.filter(p => p.proposedDisposition === 'reject').length,
-    proposed_hold_count: proposals.filter(p => p.proposedDisposition === 'hold').length,
-    proposed_retain_rounded_count: proposals.filter(p => p.proposedDisposition === 'retain-rounded').length,
-    proposed_accept_count: proposals.filter(p => p.proposedDisposition === 'accept').length,
+    proposed_reject_count: proposals.filter((p) => p.proposedDisposition === 'reject').length,
+    proposed_hold_count: proposals.filter((p) => p.proposedDisposition === 'hold').length,
+    proposed_retain_rounded_count: proposals.filter(
+      (p) => p.proposedDisposition === 'retain-rounded'
+    ).length,
+    proposed_accept_count: proposals.filter((p) => p.proposedDisposition === 'accept').length,
   }
 
   assert(
@@ -324,7 +355,8 @@ export async function auditCatalogEvidence(options = {}) {
   )
 
   assert(
-    proposalsData.summary.proposed_retain_rounded_count === derivedSummary.proposed_retain_rounded_count,
+    proposalsData.summary.proposed_retain_rounded_count ===
+      derivedSummary.proposed_retain_rounded_count,
     `Summary retain-rounded count matches derived retain-rounded count (${derivedSummary.proposed_retain_rounded_count})`,
     `Expected ${derivedSummary.proposed_retain_rounded_count}, got ${proposalsData.summary.proposed_retain_rounded_count}`
   )
@@ -340,20 +372,25 @@ export async function auditCatalogEvidence(options = {}) {
     passes,
     failures,
     diagnostics,
-    derivedSummary
+    derivedSummary,
   }
 }
 
 // CLI Execution Entrypoint
-const isMain = process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))
+const isMain =
+  process.argv[1] && resolve(process.argv[1]) === resolve(fileURLToPath(import.meta.url))
 if (isMain) {
   console.log('=== RecoverySys Online Catalog Evidence Auditor ===\n')
   console.log('Boundaries & Disclaimers:')
   console.log('  - Strictly read-only audit of local records and archived evidence.')
   console.log('  - No production enforcement or catalog modification is performed or claimed.')
   console.log('  - SHA-256 and byte length establish archive integrity against recorded captures;')
-  console.log('    they DO NOT establish freshness, identity, or absence of upstream vendor changes.')
-  console.log('  - Semantic validity of manufacturer claims and rating conventions requires manual engineering review.\n')
+  console.log(
+    '    they DO NOT establish freshness, identity, or absence of upstream vendor changes.'
+  )
+  console.log(
+    '  - Semantic validity of manufacturer claims and rating conventions requires manual engineering review.\n'
+  )
 
   try {
     const result = await auditCatalogEvidence()
@@ -369,7 +406,9 @@ if (isMain) {
     console.log(`  Total Proposals Evaluated: ${result.derivedSummary.total_proposals_evaluated}`)
     console.log(`  Proposed Reject:           ${result.derivedSummary.proposed_reject_count}`)
     console.log(`  Proposed Hold:             ${result.derivedSummary.proposed_hold_count}`)
-    console.log(`  Proposed Retain-Rounded:   ${result.derivedSummary.proposed_retain_rounded_count}`)
+    console.log(
+      `  Proposed Retain-Rounded:   ${result.derivedSummary.proposed_retain_rounded_count}`
+    )
     console.log(`  Proposed Accept:           ${result.derivedSummary.proposed_accept_count}`)
 
     console.log(`\nAudit Results: ${result.passes} passed, ${result.failures} failed.`)
