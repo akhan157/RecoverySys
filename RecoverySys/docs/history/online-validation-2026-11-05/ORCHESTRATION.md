@@ -22,3 +22,14 @@ No fallback provider/model was silently substituted. Next: receive the catalog
 result and obtain owner direction on the physics provider choice; T3 routing
 rules require explicit direction before replacing the requested provider.
 The overall validation task is incomplete. No new PR/push or release occurred.
+
+## Owner-authorized model routing after failure
+
+The owner subsequently directed use of other working models within Antigravity.
+No switch to Codex or another provider is authorized by that instruction.
+The catalog Gemini assignment is still running on its original scope. The
+next physics attempt will use `claude-sonnet-4-6`, high thinking; if that route
+also fails, other available Antigravity models may be selected without another
+provider-choice question. Actual failures and resolved models must be recorded
+separately; catalog availability does not prove any model has remaining quota.
+The failed Opus task is settled with task_cancel before replacement.
