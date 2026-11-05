@@ -51,7 +51,7 @@
   },
   "comparison": {
     "method": "relative",
-    "decisionRule": "RK4 numerical integration with dt=0.02s must match analytic apogee within 0.5%"
+    "decisionRule": "Marked not-executable-against-current-productionAPI: production integrateAscent models powered ascent with varying density and APCP mass depletion; unpowered coast is not exposed as a public API seam"
   },
-  "notes": "Proposed Gate 1 review case"
+  "notes": "Excluded from execution against current production API; retained as reference design only"
 }

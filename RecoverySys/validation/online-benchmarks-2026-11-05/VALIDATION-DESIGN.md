@@ -28,13 +28,13 @@
   | Sea-Level Temp $T_0$ | $288.15\text{ K}$ ($15.00^\circ\text{C}$) | $288.15\text{ K}$ | $288.14\text{ K}$ ($15.04 + 273.1^\circ\text{C}$) | Glenn educational curve fit shifts base by $+0.04\text{ K}$ |
   | Sea-Level Press $P_0$ | $101,325\text{ Pa}$ | $101,325\text{ Pa}$ | $101,290\text{ Pa}$ | Glenn fit differs by $-35\text{ Pa}$ ($-0.035\%$) |
   | Lapse Rate $L$ | $-0.0065\text{ K/m'}$ | $-0.0065\text{ K/m}$ | $-0.00649\text{ K/m}$ | Glenn fit differs by $+0.15\%$ |
-  | Dry Air Constant $R$ | $287.05287\text{ J/(kg K)}$ | $287.058\text{ J/(kg K)}$ | $286.9\text{ J/(kg K)}$ | RecoverySys uses $287.058$, yielding $\Delta \approx +0.0018\%$ |
+  | Dry Air Constant $R$ | $287.053072\text{ J/(kg K)}$ | $287.058\text{ J/(kg K)}$ | $286.9\text{ J/(kg K)}$ | RecoverySys uses $287.058$, yielding $\Delta \approx +0.0017\%$ (derived from $R^* = 8314.32 / M_0 = 28.9644$) |
   | Standard Gravity $g_0$ | $9.80665\text{ m/s}^2$ | $9.80665\text{ m/s}^2$ | $9.8\text{ m/s}^2$ | Exact agreement with SI standard |
-  | Troposphere Exponent | $\frac{g_0}{R L} = 5.255877$ | $5.2559$ | $5.256$ | RecoverySys rounds to 4 decimal places ($\Delta = +0.0004\%$) |
+  | Troposphere Exponent | $\frac{g_0 M_0}{R^* (-L)} = 5.255876$ | $5.2559$ | $5.256$ | RecoverySys rounds to 4 decimal places ($\Delta = +0.00014\%$) |
   | Troposphere Bound | $11,000\text{ m'}$ (geopotential) | $11,000\text{ m}$ (geometric) | $11,000\text{ m}$ | Geopotential vs geometric altitude discrepancy |
 - **Geopotential vs. Geometric Altitude Convention:**
   $$H = \frac{r_0 \cdot Z}{r_0 + Z}, \quad r_0 = 6,356,766\text{ m}$$
-  At geometric altitude $Z = 11,000\text{ m}$, the true geopotential altitude is $H = 10,981.0\text{ m'}$ (a difference of $19.0\text{ m}$ or $0.17\%$). RecoverySys assumes $H \equiv Z$, which introduces a max density error of $0.0022\text{ kg/m}^3$ ($0.6\%$) at the $11\text{ km}$ boundary. This boundary effect must be accounted for with a preset numerical allowance ($\le 0.05\%$ up to $5\text{ km}$, $\le 0.2\%$ at $11\text{ km}$).
+  At geometric altitude $Z = 11,000\text{ m}$, the true geopotential altitude is $H = 10,981.0\text{ m'}$ (0.17% discrepancy). Below 11 km, RecoverySys treats altitude as geometric without geopotential correction. At 2500 m, geometric $Z = 2500\text{ m}$ corresponds to geopotential $H = 2499.017\text{ m'}$ (0.039% difference). Benchmark 1 evaluates at matched 2500 m coordinate, with preset tolerance 0.01% covering known constant/rounding differences.
 
 ---
 
@@ -116,7 +116,7 @@
     const coefficient = OPENING_SHOCK_CX[mainSpecs?.shape] ?? OPENING_SHOCK_CX.flat
     const force_N = coefficient * 0.5 * rho * velocity_mps ** 2 * area_m2
     ```
-    Notice that RecoverySys multiplies $C_x$ directly by $area\_m2$ **without $C_D$**. It treats $C_x$ as a lumped opening force coefficient assuming nominal $C_D = 1.0$. If $C_{D0} = 0.80$, this introduces an implicit $+25\%$ conservatism in calculated opening shock. This conservatism must be explicitly documented and tested as an internal design policy.
+    Notice that RecoverySys multiplies $C_x$ directly by $area\_m2$ **without $C_D$**. It evaluates a lumped empirical opening load proxy $F_o = C_x \cdot q \cdot S$ where $C_x$ is a canopy shape factor (Knacke 1992 p. 5-3 Table 5-1 lists flat circular 1.6-1.8, conical 1.4-1.5, cruciform 1.1-2.2). This formula is a generic mathematical screening proxy, not a universal conservative upper bound or material structural certification.
 
 ---
 
@@ -184,16 +184,20 @@
   | Main Descent | $157.97\text{ s}$ | $79.97\text{ s}$ | $448.9\text{ m} \to 0\text{ m}$ | $v_{desc} \approx 5.61\text{ m/s}$ ($18.42\text{ ft/s}$) |
   | Touchdown | $237.94\text{ s}$ | — | $0\text{ m}$ (Height: $1.4\text{ m}$) | Ground hit velocity: $0.8\text{ m/s}$ |
   | Total Ground Drift | — | $208.01\text{ s}$ descent | Landing: $32.9494937^\circ$, $-106.9154488^\circ$ | Total Drift: $1,171.7\text{ m}$ ($3,844.1\text{ ft}$) at $341.4^\circ$ bearing |
-- **Measurement Uncertainty & Sensor Noise:**
-  - Barometric pressure resolution: $\pm 1\text{ Pa}$ ($\approx \pm 0.1\text{ m}$ near sea level, $\pm 0.8\text{ m}$ near $4,000\text{ m}$).
-  - Pyrotechnic charge artifact: During drogue firing at $t=29.93\text{ s}$ and main firing at $t=157.97\text{ s}$, bay overpressure causes a momentary transient step in computed barometric height.
-  - GPS fix: 11 satellites locked, HDOP $< 1.4$, horizontal positioning error $\approx \pm 2.5\text{ m}$ CEP.
+- **Measurement Uncertainty & Blocked Status:**
+  - Vehicle mass (14.5 kg), drogue diameter (24 in), and main diameter (120 in) are unverified assumptions lacking provenance in the supplied TeleMetrum CSV header.
+  - Pad weather and launch site atmospheric properties are not recorded in the file.
+  - Barometric readings show pyrotechnic pressurization transients at deployment events, but sensor accuracy and calibration are not source-stated.
+  - A proposed $\pm 15\%$ tolerance is an analyst choice, not a source-stated standard. Flight comparison remains strictly BLOCKED pending configuration, environment, and uncertainty provenance.
 
 ### 4.2 Juno III Spaceport America Cup Flight Dataset
 - **Primary Source:** Projeto Jupiter (Universidade de São Paulo) / RocketPy team (MIT License).
-  - Path: `../RecoverySys-artifacts/online-validation-2026-11-05/physics/juno3/`
-  - Altimeter SHA-256: `eef81b3bcc4c285667727c1e2c9ca502a67cb374f5e31bc4f87ed76b8a04c1ee`
-  - GNSS SHA-256: `557c80be4c0d9a5e6a5493177a9adfaa3b02c11b8ff814ed238b53540ac9f062`
+  - Directory Path: `../RecoverySys-artifacts/online-validation-2026-11-05/physics/juno3/`
+  - `cots_altimeter.csv`: 28,537 bytes, SHA-256 `eef81b3bcc4c285667727c1e2c9ca502a67cb374f5e31bc4f87ed76b8a04c1ee`
+  - `cots_GNSS.csv`: 18,596 bytes, SHA-256 `557c80be4c0d9a5e6a5493177a9adfaa3b02c11b8ff814ed238b53540ac9f062`
+  - `drag_curve.csv`: 1,542 bytes, SHA-256 `02711cd44cd877427b6b951ffe792253526149c2afeb17097e398cb7d8fd6511`
+  - `README.txt`: 873 bytes, SHA-256 `4b29eceff1eedb237ec337ee5e158e07c3ed9ed579399af08ce0d5336310ef47`
+  - Provenance note: README.txt explicitly records that only the drogue chute ejected (main chute failed to deploy).
 - **Significance (Real-World Descent Anomaly):**
   - Spaceport America Cup 2023 (10k Solid SRAD, June 23, 2023).
   - Official apogee registered: $3,213\text{ m}$.
@@ -270,7 +274,7 @@ Every proposed benchmark below is structured with:
 
 ---
 
-### Proposal 3: Unpowered Vertical Coast Apogee & Duration (Closed-Form Analytic Reference)
+### Proposal 3: Unpowered Vertical Coast Apogee & Duration (Closed-Form Analytic Reference - EXCLUDED FROM EXECUTION)
 - **Domain:** `ascent`
 - **Kind:** `analytic`
 - **Inputs:**
@@ -340,7 +344,7 @@ Every proposed benchmark below is structured with:
 
 ---
 
-### Proposal 5: Linear-Elastic Dynamic Snatch Proxy Rating Margin (Load Screening Invariant)
+### Proposal 5: Linear-Elastic Dynamic Snatch Proxy Rating Margin (Secant Elasticity Arithmetic Proxy)
 - **Domain:** `shock-load`
 - **Kind:** `analytic`
 - **Inputs:**
@@ -388,7 +392,7 @@ Every proposed benchmark below is structured with:
 
 ---
 
-### Proposal 6: Dual-Deploy Descent & Touchdown Velocity Parity (Real-Flight Comparison)
+### Proposal 6: Dual-Deploy Descent & Touchdown Velocity Parity (Real-Flight Comparison - BLOCKED)
 - **Domain:** `descent`
 - **Kind:** `real-flight`
 - **Inputs:**
@@ -414,13 +418,13 @@ Every proposed benchmark below is structured with:
 
 To address the open release gates in `docs/release-gates-1.3.0.md` without conflating online obtainable data with physical human participation, the validation actions are categorized into a clear matrix:
 
-| Validation Category | Target Surface / Check | Method & Execution Path | Evidence Type Obtained Online | Physical Blocker Remaining |
+| Validation Category | Target Surface / Check | Method & Execution Path | Evidence Type Obtained Online | Clarified Protocol / Status |
 | :--- | :--- | :--- | :--- | :--- |
-| **Windows OS Packaging** | Windows portable binary & Tauri runner | Hosted CI workflow (`remote-42123690801`), GitHub Actions Windows runner | Build artifact SHA-256, signature check, 15-second headless smoke execution | Actual user interaction on bare-metal Windows desktop (file open dialogs, hardware DPI scaling) |
-| **macOS Packaging** | Universal macOS .dmg / .app bundle | Hosted CI workflow on macOS runner | Universal binary slice inspection (`lipo`), codesign verification, arm64 headless launch | Bare-metal Apple Silicon / Intel manual UI checklist, system print dialog interaction |
-| **Platform Print Workflow** | Brief & checklist print CSS | Headless Chromium in CI (`playwright` / browser test suite) | DOM snapshot, layout inspection, active notification suppression test | Physical printer paper output, margin cutoff on consumer inkjets |
-| **Observed Rocketeer Trials** | Field trial usability protocol (`v1-field-trial.md`) | Review-only protocol and template staging | Analysis of protocol clarity, input field coverage, boundary warnings | Requires 10–15 actual physical participants launching real rockets at sanctioned launch sites |
-| **Physics Model Validation** | 6 physics domains, 21 review cases + proposals | Mathematical derivations, sources.json hashes, OpenRocket exchange schemas | Analytical closed-form solutions, simulator comparison schemas, open flight logs | Independent peer review and physical load cell instrumentation on airframe shock cords |
+| **Windows OS Packaging** | Windows portable binary & Tauri runner | Hosted CI workflow (`remote-42123690801`), GitHub Actions Windows runner | Build artifact SHA-256, signature check, headless/interactive smoke execution | Accessible real OS sessions (standard desktop environments/VMs) sufficient; no bare-metal gate required |
+| **macOS Packaging** | Universal macOS .dmg / .app bundle | Hosted CI workflow on macOS runner | Universal binary slice inspection (`lipo`), codesign verification, app launch verification | Accessible macOS sessions sufficient; no extra bare-metal hardware gate required |
+| **Platform Print Workflow** | Brief & checklist print CSS | Headless Chromium in CI / browser test suite (`playwright`) | DOM snapshot, print CSS media rendering, page-break verification | Standard digital print preview and layout inspection sufficient; no physical inkjet printing gate required |
+| **Observed Rocketeer Trials** | Usability trial protocol (`v1-field-trial.md`) | Documented desktop app trial protocol | Protocol clarity, configuration validation, warning clarity | Software trial protocol evaluates configurator usability; app workflows do NOT require physical rocket launches |
+| **Physics Model Validation** | 4 approved reachable benchmarks (atmosphere, terminal descent, drift, snatch) | Independent Python reference calculator + Node adapter | Closed-form derivations, independent metrics, negative controls report | Four reachable benchmarks executed; coast and flight excluded/blocked with explicit evidence requirements |
 
 ---
 

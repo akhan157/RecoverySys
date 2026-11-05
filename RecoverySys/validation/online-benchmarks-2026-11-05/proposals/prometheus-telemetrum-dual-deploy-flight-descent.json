@@ -23,9 +23,9 @@
         "unit": "ft/s",
         "tolerance": {
           "relative": 0.15,
-          "basis": "source-stated"
+          "basis": "analyst-derived"
         },
-        "notes": "Empirical mean descent velocity recorded by TeleMetrum flight 5115"
+        "notes": "Empirical mean descent velocity recorded by TeleMetrum flight 5115; +/- 15% tolerance is an analyst choice, not a source-stated acceptance standard"
       },
       {
         "name": "main_descent_fps",
@@ -33,15 +33,15 @@
         "unit": "ft/s",
         "tolerance": {
           "relative": 0.15,
-          "basis": "source-stated"
+          "basis": "analyst-derived"
         },
-        "notes": "Empirical mean descent velocity recorded by TeleMetrum flight 5115"
+        "notes": "Empirical mean descent velocity recorded by TeleMetrum flight 5115; +/- 15% tolerance is an analyst choice, not a source-stated acceptance standard"
       }
     ],
     "notes": "Measured rocketry flight dual-deploy descent reference from Spaceport America"
   },
   "source": {
-    "url": "https://github.com/RocketPy-Team/RocketPy/blob/master/data/rockets/prometheus/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
+    "url": "https://raw.githubusercontent.com/RocketPy-Team/RocketPy/96f9a0c47d636dbdf1daeb8a9ca8915b2c75a408/data/rockets/prometheus/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
     "title": "High-Power Rocket Flight TeleMetrum Log (Prometheus 2022-06-24)",
     "accessed": "2026-11-05",
     "citation": "Altus Metrum TeleMetrum v6 flight recording at Spaceport America, 2022-06-24",
@@ -53,11 +53,11 @@
     "id": "browser-js-recovery",
     "version": "isa-apogee-descent-v1",
     "assumptionsVersion": "recovery-assumptions-v1",
-    "description": "RecoverySys end-to-end descent simulation"
+    "description": "RecoverySys flight comparison"
   },
   "comparison": {
     "method": "relative",
-    "decisionRule": "Descent rates must match measured avionics telemetry within 15% physical flight tolerance band"
+    "decisionRule": "Blocked on unverified 14.5 kg dry mass, 24/120-inch configuration, launch pad environment, and sensor uncertainty evidence"
   },
-  "notes": "Proposed Gate 1 real-flight comparison case (review status, zero accepted flight cases)"
+  "notes": "Blocked case: not treated as matched flight validation"
 }

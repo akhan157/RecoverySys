@@ -9,16 +9,6 @@
   "expected": {
     "metrics": [
       {
-        "name": "density_kg_m3",
-        "value": 0.95686,
-        "unit": "kg/m^3",
-        "tolerance": {
-          "relative": 0.0001,
-          "basis": "source-stated"
-        },
-        "notes": "Derived from U.S. Standard Atmosphere 1976 exact formulation"
-      },
-      {
         "name": "temperature_K",
         "value": 271.9,
         "unit": "K",
@@ -26,27 +16,37 @@
           "absolute": 0.01,
           "basis": "source-stated"
         },
-        "notes": "T = 288.15 - 0.0065 * 2500"
+        "notes": "T = 288.15 - 0.0065 * 2500 K (exact lapse rate)"
       },
       {
         "name": "pressure_Pa",
-        "value": 74691.56,
+        "value": 74682.53,
         "unit": "Pa",
         "tolerance": {
           "relative": 0.0001,
-          "basis": "source-stated"
+          "basis": "analyst-derived"
         },
-        "notes": "P = 101325 * (271.9/288.15)^5.255877"
+        "notes": "P = 101325 * (271.9 / 288.15)^5.255876 = 74682.53 Pa; production formula with exponent 5.2559 yields 74682.43 Pa (0.00014% difference)"
+      },
+      {
+        "name": "density_kg_m3",
+        "value": 0.95687,
+        "unit": "kg/m^3",
+        "tolerance": {
+          "relative": 0.0001,
+          "basis": "analyst-derived"
+        },
+        "notes": "rho = P / (R * T) = 74682.53 / (287.053072 * 271.9) = 0.95687 kg/m^3; production R=287.058 yields 0.95684 kg/m^3 (0.0035% difference)"
       }
     ],
-    "notes": "Analytic reference for standard atmosphere density at 2500m MSL"
+    "notes": "Analytic reference for standard atmosphere at 2500m matched coordinate (geometric/geopotential matched)"
   },
   "source": {
     "url": "https://ntrs.nasa.gov/citations/19770009539",
     "title": "U.S. Standard Atmosphere, 1976 (NASA-TM-X-74335)",
     "accessed": "2026-11-05",
     "citation": "NOAA, NASA, USAF. U.S. Standard Atmosphere, 1976. NASA-TM-X-74335, p. 1-12.",
-    "derivation": "Exact barometric equation evaluation using ISA 1976 constants",
+    "derivation": "Exact barometric equation evaluation using ISA 1976 constants: R* = 8314.32, M0 = 28.9644, R = 287.053072, n = 5.255876113",
     "artifact": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/NASA-TM-X-74335-US-Standard-Atmosphere-1976.pdf",
     "artifactSha256": "23eb6b68346d4abc6071fc598872d51c40cf8c613d1a5d1006c6261bcd09dcea"
   },
@@ -58,7 +58,7 @@
   },
   "comparison": {
     "method": "relative",
-    "decisionRule": "Measured relative error must remain <= 0.01% to account for gas constant rounding"
+    "decisionRule": "Measured relative error must remain <= 0.01% to account for explicit gas constant (287.058 vs 287.053072) and exponent differences"
   },
-  "notes": "Review-only proposed benchmark for Gate 1"
+  "notes": "Approved bounded analytic benchmark 1: 2500m matched-coordinate atmosphere"
 }
