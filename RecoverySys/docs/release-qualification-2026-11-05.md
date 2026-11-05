@@ -22,6 +22,8 @@ and Pages deployment both succeeded at `3a98e9a` (runs `41914063998` and
   with initial-render/edit regression tests that advance no timers.
 - Brief and checklist print artifacts share provenance, result state, evidence
   posture and mission-envelope/unresolved-check content.
+- Production-print inspection found a restore notification overlaying the
+  artifact. Both print modes now suppress notifications; screen messages remain.
 - Supported runtime majors are bounded to 22/24/26 and CI defines all three.
 - rc.2 package/web/Tauri/Cargo/display identities agree; build verification
   checks every file and the display candidate number.
@@ -49,11 +51,21 @@ contention. Earlier checks are explicitly distinguished from final checks.
 | Final clean-install Node 22 check | Pass: 51 files / 481 tests; format/catalog/corpus/lint/build/identity pass. |
 | Final clean-install Node 24 check | Pass: 51 files / 481 tests; all check gates pass. |
 | Final clean-install Node 26 check | Pass: 51 files / 481 tests; all check gates pass. |
-| Full production browser suite | Pending final run; includes the added fresh-context transfer matrix. |
+| Full production browser suite at `e7a9f3b` | 94/94 passed in 6.6 minutes, including the fresh-context transfer matrix, on Chromium desktop/mobile. |
+| Integration check at `3bef511` | Node 22: 51 files / 481 tests; format/catalog/corpus/lint/build/identity pass after cache cleanup and print suppression. |
+| Integration browser checks at `3bef511` | 34/34 full-parity and print-notification workflows passed in 1.7 minutes on desktop/mobile. The complete local 94-test run predates this small follow-up; final CI has 96 workflows. |
+| Independent code review | PASS at exact pin `e7a9f3b783fa74938fb0f5cc10289aa730e298a7`; 79 focused tests and two low findings. Dispositions and follow-up scope in the historical packet. |
 | Full and production npm audits | Zero advisories, 2026-11-05. |
 | Benchmark/provenance reports | Generated successfully; no acceptance decisions. |
 | Live published baseline | Original main verifier passes against public rc.1: 10 tabs, referenced assets and landing. rc.2 deployment remains pending. |
 | Remote rc.2 matrix/portable jobs | Pending branch publication and workflow execution. |
+
+The local web archive was built from application source at
+`3bef5116a67031de33ff183c1f225dc42e1cdc19`. Its SHA-256 is
+`f088bbadf5a007fe36dfbe6ab3817f75c3f3dfd3c698232ad17e43ccbf62a393`.
+Archive, raw logs and screenshots live outside git at
+`../RecoverySys-artifacts/1.3.0-rc.2/` relative to the repository root.
+This is a local Linux-built web artifact; remote archive hashes are separate.
 
 The existing WorkspaceBoundary recovery test deliberately throws a caught
 render error; its expected log does not mean the suite failed. The first new
@@ -85,6 +97,13 @@ remaining evidence: rc.2 Windows/macOS manual workflows and artifact hashes,
 review and final publication/Pages verification. No participant rows, reviewer
 identities, accepted comparisons, measured flights or platform results were
 invented. Stable promotion waits for an evidence-backed qualification decision.
+
+On 2026-11-05 the owner reported having no Windows/Mac test machines or
+independent physics/observed-trial contacts, and asked the agent to do the work.
+Automated hosted builds, launch checks, source research and reproducible
+comparisons proceed within that authority. Real participant observations,
+manual platform workflows and independent physical-model acceptance remain
+unavailable; they were not waived or relabeled as passed.
 
 The retained drogue sampling/ranking policies remain disclosed. M7 model
 changes, M8 Python integration and M9 expansion remain behind their evidence

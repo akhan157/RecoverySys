@@ -1,0 +1,164 @@
+{
+  "candidate": "1.3.0-rc.2",
+  "recordedAt": "2026-11-05",
+  "repositoryRootRelativeApp": "RecoverySys/",
+  "branch": "release/qualify-1.3.0-rc2",
+  "baseSha": "3592a95a70d1b5e634fe41517df7f15972a577db",
+  "reviewedSha": "e7a9f3b783fa74938fb0f5cc10289aa730e298a7",
+  "applicationSourceSha": "3bef5116a67031de33ff183c1f225dc42e1cdc19",
+  "recordScope": "Later documentation-only commits do not change the built application. PASS is bounded to each row text, not stable acceptance.",
+  "externalEvidenceRoot": "../RecoverySys-artifacts/1.3.0-rc.2/",
+  "localWebArchive": {
+    "path": "../RecoverySys-artifacts/1.3.0-rc.2/RecoverySys-web-1.3.0-rc.2.zip",
+    "sha256": "f088bbadf5a007fe36dfbe6ab3817f75c3f3dfd3c698232ad17e43ccbf62a393",
+    "bytes": 298389
+  },
+  "corpus": {
+    "version": "0.3.0",
+    "reviewOnly": 21,
+    "acceptedComparisons": 0,
+    "realFlightCases": 0
+  },
+  "gates": [
+    {
+      "id": "local-node22",
+      "status": "PASS",
+      "scope": "Final application source: npm run check, 481 tests and all gates passed."
+    },
+    {
+      "id": "local-node24",
+      "status": "PASS",
+      "scope": "Reviewed core: separate npm ci and full check, 481 tests. Final follow-up awaits remote matrix."
+    },
+    {
+      "id": "local-node26",
+      "status": "PASS",
+      "scope": "Reviewed core: separate npm ci and full check, 481 tests. Final follow-up awaits remote matrix."
+    },
+    {
+      "id": "browser-contracts",
+      "status": "PASS",
+      "scope": "Reviewed core 94/94 full suite; final source 34/34 full-parity and print-notification subset."
+    },
+    {
+      "id": "identity-and-audit",
+      "status": "PASS",
+      "scope": "Final build identity passed; full and production audits zero advisories at reviewed dependency lock."
+    },
+    {
+      "id": "independent-code-review",
+      "status": "PASS",
+      "scope": "Different-family review passed e7a9f3b only; later follow-up author-verified, see REVIEW.md."
+    },
+    {
+      "id": "local-web-package",
+      "status": "PASS",
+      "scope": "Final source web ZIP CRC and SHA-256 verified; local Linux artifact only."
+    },
+    {
+      "id": "online-source-staging",
+      "status": "PASS",
+      "scope": "Bounded packet: six category records, fourteen proposals; no full refresh or engineering approval."
+    },
+    {
+      "id": "remote-matrix-and-portables",
+      "status": "in_progress",
+      "scope": "Workflow prepared for final branch: Node22/24/26, full96 browser workflows, Windows/macOS build and launch checks. Remote results pending."
+    },
+    {
+      "id": "windows-manual-workflow",
+      "status": "blocked",
+      "scope": "No test host available. Unblocks with exact archive/hash and actual Windows workflow observations in platform template."
+    },
+    {
+      "id": "macos-manual-workflow",
+      "status": "blocked",
+      "scope": "No test host available. Unblocks with exact archive/hash and per-architecture macOS workflow observations."
+    },
+    {
+      "id": "observed-rocketeer-trials",
+      "status": "blocked",
+      "scope": "No participants/observer available. Requires 10-15 actual observed participants, anonymized observations and issue dispositions."
+    },
+    {
+      "id": "independent-physics-acceptance",
+      "status": "blocked",
+      "scope": "Requires qualified independent units/source/tolerance/model review and recorded acceptance; no accepted or real-flight cases currently."
+    },
+    {
+      "id": "catalog-field-approval",
+      "status": "in_progress",
+      "scope": "Exact variant/source conflicts remain unresolved. Staged differences require individual source-backed decisions before production changes."
+    },
+    {
+      "id": "stable-promotion",
+      "status": "in_progress",
+      "scope": "Depends on required evidence and explicit qualification decision. No stable tag, merge, release or deployment performed."
+    }
+  ],
+  "counts": {
+    "PASS": 8,
+    "in_progress": 3,
+    "blocked": 4
+  },
+  "rawEvidence": [
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-e2e-final.log",
+      "sha256": "458b02b0d9f2f96db31df0cee2b79d17879b7e22dd49651d82b5f18b90b831f4"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-e2e-rc2.log",
+      "sha256": "10e0c239939c56759e9f2d64c859111457aed61ec4d4ec2ec70aa890dbc48d0c"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-final-node22.log",
+      "sha256": "6e49a63d93396827c55f7b677d38f13f79ccc2aba02b30cba49a5fa26b579d51"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-final-node24.log",
+      "sha256": "34a3c9948caefd2c1d85a13829d030d3171272511c279608994de71cb4e519d3"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-final-node26.log",
+      "sha256": "f4ad15deb9a4cf10963797dcb2a8101417f761746ad0f4e7c5043d61dcae0c4c"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-integration-e2e.log",
+      "sha256": "48e48190f4dc30c616b179fd0e5e399544da6fa188444e5d62fa94b95c1f0c19"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-integration-final-node22.log",
+      "sha256": "d2e83eeda83e4f5ef86ae883a746848f2d562987719e7cb200e561b93f64737b"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-live-baseline.log",
+      "sha256": "337ac372c68163d097483c41691f51c0be0a764fa42dc98edf6164e57c255a22"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-print-final.log",
+      "sha256": "eebfd0de8dba18f028b757fef0668be16b7c02b0f0654555999c0419352b20b4"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-audit-production-rc2.json",
+      "sha256": "f833407c39b0f4daaa84f8b2c1a90b07481ddf76739f510475e9e3318f599211"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-audit-rc2.json",
+      "sha256": "f833407c39b0f4daaa84f8b2c1a90b07481ddf76739f510475e9e3318f599211"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-benchmarks-final.json",
+      "sha256": "fbc9e0cda0493943dd2f72ccf03bd04ece0b74d95dc386da22cdcac40aa59c2e"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-corpus-final.json",
+      "sha256": "caf15558c74c441f3e25492315a3ac627e8b2b1d25aff4c5dad1c43fe01a6898"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-provenance-final.json",
+      "sha256": "7a33626c97ab5b7391b73c4cd29c3057f49a36c47a45a2b2ddf93d9a8ce7e819"
+    }
+  ],
+  "ownerSteering": "Owner has no Windows/Mac test machines or independent reviewer/trial contacts and asked the agent to do the work itself. Continue hosted automation/research; unavailable observations are not waived.",
+  "nextAction": "Publish draft PR and execute hosted CI; inspect final SHA results/artifact hashes. Stable promotion remains pending."
+}

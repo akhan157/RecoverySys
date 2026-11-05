@@ -15,8 +15,16 @@ for actual results. The published rc.1 remains a separate artifact.
 | macOS workflow | OPEN: actual rc.2 archive SHA-256, macOS version, architecture, reviewer/date, launch and same workflows. Record each tested architecture separately; an arm64 launch does not qualify Intel. |
 | Observed field trials | OPEN: 10–15 actual participants using `v1-field-trial.md`, anonymized results in `field-trial-results.csv`; no synthetic participant rows. |
 | Physics comparisons | OPEN: 21 review-only cases, zero accepted comparisons/real-flight cases. Reviewer checks units, source, tolerance, model identity, scope; records decision and identity before promotion. |
-| Engineering catalog | OPEN: source packet rechecks three pages; remaining 37-record/35-difference historical packet and exact variant identities need field-by-field decisions. No engineering values silently changed. |
+| Engineering catalog | OPEN: six new category records/fourteen proposals from three primary product pages; the historical 37-record/35-difference packet and exact variant identities need field-by-field decisions. No engineering values silently changed. |
 | Stable promotion | OPEN until required qualification is recorded: final clean commit, remote checks, platform scope stated, changelog/notes matching artifact, stable tag, web/portable archives, SHA256SUMS.txt, published hashes verified, live Pages identity verified. |
+
+The owner has no available Windows/Mac hosts or independent reviewer/trial
+contacts (2026-11-05), and asked the agent to continue autonomously. Hosted
+Windows/macOS packaging and process-alive checks are the next platform evidence.
+They do not satisfy the manual rows. Physical trials and independent model
+acceptance remain blocked by missing real observations/reviewer, while online
+research and software qualification continue. The machine-readable gate register
+is `history/release-rc2-2026-11-05/EVIDENCE.json`.
 
 ## Manual platform evidence template
 

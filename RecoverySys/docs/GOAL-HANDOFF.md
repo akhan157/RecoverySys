@@ -1,0 +1,52 @@
+# RecoverySys qualification checkpoint — 2026-11-05
+
+App directory: `RecoverySys/` relative to git root. Branch:
+`release/qualify-1.3.0-rc2`, based on `3592a95a70d1b5e634fe41517df7f15972a577db`.
+Current application source: `3bef5116a67031de33ff183c1f225dc42e1cdc19`.
+The later records-only commit is found with `git log` rather than a self SHA.
+
+1.3.0-rc.2 is a qualification candidate. Core code received independent PASS
+at `e7a9f3b783fa74938fb0f5cc10289aa730e298a7`. Two low findings were fixed
+afterward; the print-notification follow-up is separately author-verified.
+Review route: Antigravity `claude-opus-4-6-thinking`, high; author:
+Codex `gpt-6.1-sol`, high. No independent physics acceptance is implied.
+
+Measured: clean-install full checks on Node 22/24/26 passed 481 tests each at
+the reviewed core. Final source passed Node 22's full check and 34 production
+browser workflows. Full browser suite at the reviewed core passed 94/94;
+the final suite has 96 cases and awaits hosted CI. The added two cases cover
+active notification suppression on both print surfaces, desktop and mobile.
+The final subset also repeats all 32 full-parity workflows.
+
+Register: **15 rows: 8 PASS, 3 in_progress, 4 blocked, 0 not_run, 0 FAIL**.
+Each PASS has bounded scope in
+`history/release-rc2-2026-11-05/EVIDENCE.json`.
+In progress: remote matrix/platform artifacts, catalog field approval, stable
+promotion. Blocked: Windows manual workflow, macOS manual workflow, actual
+observed rocketeer trials, independent physics acceptance.
+
+The owner said no test hosts or independent reviewer/trial contacts were
+available and directed autonomous continuation. Use hosted platform builds,
+launch checks and primary online sources; do not ask for the same contacts
+again or substitute synthetic participants. Real missing observations remain
+open. Twenty-one corpus cases are review-only; zero accepted/real-flight cases.
+Catalog packet: six new category records/fourteen staged proposals, with
+variant/source conflicts and a rate-limited bulk fetch; no engineering overwrite.
+
+Raw logs, before/after print screenshots, browser report, ZIP/hash and file
+manifest are outside git at `../RecoverySys-artifacts/1.3.0-rc.2/` relative to
+repository root. Local web SHA-256:
+`f088bbadf5a007fe36dfbe6ab3817f75c3f3dfd3c698232ad17e43ccbf62a393`.
+Remote platform/archive hashes must be recorded separately.
+
+Next action: push this branch, open/link a draft PR and execute the hosted
+Node22/24/26 plus Windows/macOS checks. Inspect failed jobs or downloaded
+artifact evidence at the exact PR SHA. Do not promote stable on build/launch
+smoke alone. Current public Pages is separately verified rc.1; rc.2 has not
+been deployed. M7 sampling policies are retained; M8 Python remains research;
+M9 engineering ingestion remains behind identity/provenance decisions.
+
+No self-approval. The historical packet records process deviation, review,
+failed attempts and scoped evidence. Temporary browser/server processes were
+closed after local checks. Work pauses next at hosted results or actual external
+evidence, rather than claiming the entire release roadmap complete.
