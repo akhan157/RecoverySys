@@ -26,7 +26,7 @@
           "absolute": 1,
           "basis": "analyst-derived"
         },
-        "notes": "Total drift under 15 mph wind from South: 916.67 + 550.0 = 1466.67 ft"
+        "notes": "Total drift under 15 mph wind FROM South (180 deg): drogue time = 2500/60 = 41.6667s (drift 916.6667 ft), main time = 500/20 = 25s (drift 550.0 ft), total drift = 1466.6667 ft (rounds to 1467 ft)"
       },
       {
         "name": "bearing_deg",
@@ -36,7 +36,7 @@
           "absolute": 0.1,
           "basis": "source-stated"
         },
-        "notes": "Drift is opposite to 180 deg South wind: (180 + 180) mod 360 = 0 deg"
+        "notes": "Drift is opposite to 180 deg South wind: (180 + 180) mod 360 = 0 deg (True North)"
       }
     ],
     "notes": "Cardinal wind direction and drift vector verification"
@@ -46,7 +46,7 @@
     "title": "Information about wind barbs (NOAA NWS)",
     "accessed": "2026-11-05",
     "citation": "NOAA National Weather Service. Information about wind barbs.",
-    "derivation": "drift_bearing = (wind_direction + 180) mod 360; drift = v_wind * (t_drogue + t_main)"
+    "derivation": "drift_bearing = (wind_direction + 180) mod 360; drift = v_wind * (t_drogue + t_main) where v_wind = 15 * 5280 / 3600 = 22 fps"
   },
   "model": {
     "id": "browser-js-recovery",
@@ -56,7 +56,7 @@
   },
   "comparison": {
     "method": "absolute",
-    "decisionRule": "Bearing must equal 0 deg and drift must equal rounded 1467 ft"
+    "decisionRule": "Bearing must equal 0 deg and drift must equal rounded 1467 ft (within 1 ft of unrounded 1466.6667 ft)"
   },
-  "notes": "Proposed Gate 1 review case"
+  "notes": "Approved bounded analytic benchmark 3: constant 15mph wind from South drift"
 }

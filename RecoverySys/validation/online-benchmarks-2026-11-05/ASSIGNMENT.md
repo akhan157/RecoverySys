@@ -72,3 +72,23 @@ Upon completion of Gate 1 research and design:
    - Gate 1 validation design summary and next executable increment proposal.
    - Exact physical constraints, conventions, and missing/unresolved data.
    - Stop and await parent review.
+
+## 7. Implementation Phase Pin & Amended Scope (2026-11-05)
+- **Isolated Worktree:** `/home/ak/.t3/worktrees/RecoverySys/t3-21aac8dd`
+- **Branch:** `t3/implement-online-physics-benchmarks`
+- **Pinned Base Commit (HEAD):** `0149dcc026e719831f540c1b1a780e726b35cc60`
+- **Author:** Google Antigravity `gemini-3.8-flash` (high thinking)
+- **Reviewer:** Parent agent / Codex `gpt-6.1-sol` (independent review; author cannot self-accept)
+- **Authoritative Amended Design:** `RecoverySys/docs/history/online-validation-2026-11-05/PHYSICS-GATE-1.md`
+- **Approved Scope:**
+  - Implement four reachable independent analytic benchmarks:
+    1. 2500m matched-coordinate atmosphere T/P/rho ($T=271.9\text{ K}$, corrected pressure $74682.53\text{ Pa}$, $R^*=8314.32 / M_0=28.9644 = 287.053072\text{ J/(kg}\cdot\text{K)}$).
+    2. 48-inch nominal area, 5 kg, sea-level, Cd 0.8 terminal rate ($A=1.16745403\text{ m}^2$, $v_{term}\approx 30.374731\text{ fps}$, $KE\approx 214.286504\text{ J}$).
+    3. Constant 15 mph wind from South drift with apogee 3000 ft, deploy 500 ft, drogue 60 fps, main 20 fps ($1466.666...\text{ ft}$ North, bearing $0^\circ$).
+    4. Secant linear-elastic snatch arithmetic ($1500\text{ lb} / 20\text{ ft} / 25\% / 6\text{ kg} / 65\text{ fps}$; mathematical proxy validation only).
+  - Standalone read-only runner (`run-benchmarks.js`) and independent reference calculator (`reference_calculator.py`).
+  - Meaningful negative controls: altered reference value, wrong unit, reversed wind, wrong drag coefficient, and malformed/nonfinite data.
+  - Fix research objections: placeholder SHA strings to null/uncaptured metadata with explicit limits; Juno directory hash to individual file records; pin mutable GitHub URLs to commits; correct unsupported constants, contradictory height bounds, unsourced sensor tolerances, and generic opening conservatism claims; separate source facts, assumptions, and derived values.
+  - Coast testcase retained as not-executable-against-current-production-API; flight case blocked on unverified configuration/environment provenance and unsourced uncertainty.
+  - JSON benchmark report output to sibling `../RecoverySys-artifacts/online-validation-2026-11-05/physics/online-benchmarks-report.json`.
+

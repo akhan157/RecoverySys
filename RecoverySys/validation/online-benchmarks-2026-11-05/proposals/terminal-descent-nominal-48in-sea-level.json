@@ -15,33 +15,33 @@
     "metrics": [
       {
         "name": "descent_rate_fps",
-        "value": 30.3737,
+        "value": 30.374731,
         "unit": "ft/s",
         "tolerance": {
           "relative": 0.0001,
           "basis": "analyst-derived"
         },
-        "notes": "Calculated from v_term = sqrt(2*m*g / (rho * Cd * A))"
+        "notes": "Calculated from v_term = sqrt(2*m*g / (rho * Cd * S0)) using exact inch 0.0254m: S0 = pi * 0.6096^2 = 1.16745403 m^2, v_term = 9.258218 m/s = 30.374731 fps"
       },
       {
         "name": "landing_energy_J",
-        "value": 214.27,
+        "value": 214.286504,
         "unit": "J",
         "tolerance": {
-          "relative": 0.0005,
+          "relative": 0.0002,
           "basis": "analyst-derived"
         },
-        "notes": "0.5 * m * v^2"
+        "notes": "0.5 * m * v_mps^2 = 0.5 * 5 * 9.258218^2 = 214.286504 J under rho = 1.225 kg/m^3"
       }
     ],
-    "notes": "Flat circular parachute nominal area descent rate"
+    "notes": "Flat circular parachute nominal area descent rate at sea level"
   },
   "source": {
     "url": "https://archive.org/details/DTIC_ADA247666",
     "title": "Parachute Recovery Systems Design Manual (Knacke 1992)",
     "accessed": "2026-11-05",
     "citation": "T. W. Knacke. Parachute Recovery Systems Design Manual. NWC TP 6575, Chapter 5.",
-    "derivation": "v_term = sqrt(2 * m * g / (rho * Cd * S0)) using S0 = pi * r^2, Cd = 0.80",
+    "derivation": "v_term = sqrt(2 * m * g / (rho * Cd * S0)) using exact inch conversion D = 48 * 0.0254 = 1.2192 m, S0 = pi * (D/2)^2 = 1.16745403 m^2, Cd = 0.80",
     "artifact": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/DTIC_ADA247666_Knacke_Parachute_Manual.pdf",
     "artifactSha256": "138d001f515328a36ef3cddc234b40b4b84c19ad2ea1ac204bd60f555f9ab0c8"
   },
@@ -53,7 +53,7 @@
   },
   "comparison": {
     "method": "relative",
-    "decisionRule": "Relative error must remain <= 0.01% against closed-form terminal velocity formula"
+    "decisionRule": "Descent velocity must match independent first-principles derivation within 0.01% and kinetic energy within 0.02%"
   },
-  "notes": "Proposed Gate 1 review case"
+  "notes": "Approved bounded analytic benchmark 2: 48in nominal area terminal descent at sea level"
 }

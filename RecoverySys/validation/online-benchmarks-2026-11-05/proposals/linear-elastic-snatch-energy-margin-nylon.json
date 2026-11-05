@@ -31,6 +31,16 @@
   "expected": {
     "metrics": [
       {
+        "name": "peak_force_proxy_lbs",
+        "value": 721.925,
+        "unit": "lbf",
+        "tolerance": {
+          "relative": 0.001,
+          "basis": "analyst-derived"
+        },
+        "notes": "secant stiffness times predicted extension: (4377.9528 N/m * 0.733476 m) / 4.448 N/lbf = 721.925 lbf"
+      },
+      {
         "name": "rating_margin",
         "value": 2.078,
         "unit": "dimensionless",
@@ -38,17 +48,7 @@
           "relative": 0.001,
           "basis": "analyst-derived"
         },
-        "notes": "F_rated / F_peak_proxy = 1500 / 721.90 = 2.078"
-      },
-      {
-        "name": "peak_force_proxy_lbs",
-        "value": 721.9,
-        "unit": "lbf",
-        "tolerance": {
-          "relative": 0.001,
-          "basis": "analyst-derived"
-        },
-        "notes": "secant stiffness times predicted extension"
+        "notes": "F_rated / F_peak_proxy = 1500 / 721.925 = 2.078"
       },
       {
         "name": "energy_margin",
@@ -58,10 +58,10 @@
           "relative": 0.001,
           "basis": "analyst-derived"
         },
-        "notes": "capacity_energy_J / event_energy_J = 5084.1 / 1177.55"
+        "notes": "capacity_energy_J / event_energy_J = 5084.064 / 1177.5452 = 4.318"
       }
     ],
-    "notes": "Linear-elastic snatch energy proxy invariant"
+    "notes": "Secant linear-elastic snatch energy proxy invariant"
   },
   "source": {
     "url": "https://archive.org/details/DTIC_ADA247666",
@@ -80,5 +80,5 @@
     "method": "relative",
     "decisionRule": "Rating margin and peak force proxy must match secant elasticity derivation within 0.1%"
   },
-  "notes": "Proposed Gate 1 review case"
+  "notes": "Approved bounded analytic benchmark 4: secant linear-elastic snatch arithmetic proxy (generic mathematical proxy only, no material/structural cert)"
 }

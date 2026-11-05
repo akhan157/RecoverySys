@@ -11,17 +11,26 @@
       "url": "https://ntrs.nasa.gov/citations/19770009539",
       "downloadUrl": "https://ntrs.nasa.gov/api/citations/19770009539/downloads/19770009539.pdf",
       "accessed": "2026-11-05",
-      "claims": [
+      "facts": [
         "Defines standard troposphere layer from sea level to 11,000 geopotential meters (H = 0 to 11,000 m')",
-        "Standard sea level temperature T0 = 288.15 K (15.0 °C)",
+        "Standard sea level temperature T0 = 288.15 K (15.0 \u00b0C)",
         "Standard sea level pressure P0 = 101,325 Pa (1,013.25 hPa)",
         "Standard sea level mass density rho0 = 1.2250 kg/m^3",
         "Standard sea level acceleration of gravity g0 = 9.80665 m/s^2",
         "Troposphere standard temperature lapse rate L = -0.0065 K/m' (-6.5 K/km)",
-        "Specific gas constant for dry air R = 287.05287 J/(kg*K) (derived from universal gas constant R* = 8314.32 J/(kmol*K) and mean molecular weight M0 = 28.9644 kg/kmol)",
+        "Specific gas constant for dry air R = 287.053072 J/(kg*K), derived from universal gas constant R* = 8314.32 J/(kmol*K) and mean molecular weight M0 = 28.9644 kg/kmol (NASA-TM-X-74335 p. 4 Table 2)",
         "Ratio of specific heats gamma = 1.40 (dimensionless)",
         "Speed of sound equation a = sqrt(gamma * R * T)",
         "Geopotential altitude H related to geometric altitude Z via H = (r0 * Z) / (r0 + Z) where r0 = 6,356,766 m"
+      ],
+      "derivedValues": [
+        "Standard barometric exponent n = (g0 * M0) / (R* * (-L)) = (9.80665 * 28.9644) / (8314.32 * 0.0065) = 5.255876113...",
+        "At 2500 m matched coordinate: T = 288.15 - 0.0065 * 2500 = 271.9 K",
+        "At 2500 m standard pressure P = 101325 * (271.9 / 288.15)^5.255876113 = 74682.53366 Pa",
+        "At 2500 m standard density rho = P / (R * T) = 74682.53366 / (287.053072 * 271.9) = 0.95687002 kg/m^3"
+      ],
+      "assumptions": [
+        "RecoverySys treats input altitude as geometric coordinate without geopotential correction below 11,000 m (0.039% difference at 2500 m)"
       ],
       "units": {
         "temperature": "Kelvin (K)",
@@ -32,8 +41,8 @@
         "gasConstant": "J/(kg*K)"
       },
       "conventions": {
-        "heightReference": "Geopotential altitude H vs geometric altitude Z. At 11,000 geometric meters, geopotential altitude is 10,981 m' (0.17% discrepancy). RecoverySys and typical rocketry software treat altitude as geometric without geopotential correction below 15 km.",
-        "gasConstantDiscrepancy": "NASA 1976 uses R = 287.05287 J/(kg*K); RecoverySys uses R = 287.058 J/(kg*K) (0.0018% difference). Troposphere exponent (g0 / (R * L)) is 5.255877 in 1976 standard, while RecoverySys uses 5.2559."
+        "heightReference": "NASA-TM-X-74335 tabulates standard properties by geopotential altitude H. At 2500 m, geometric altitude Z = 2500 m corresponds to H = 2499.017 m' (0.039% difference). Benchmark uses matched 2500 m coordinate.",
+        "gasConstantDiscrepancy": "NASA 1976 uses R = 287.053072 J/(kg*K); RecoverySys uses R = 287.058 J/(kg*K) (0.0017% difference). Formula exponent in 1976 standard is 5.255876..., while RecoverySys uses 5.2559 (0.00014% difference). Preset tolerance 0.01% accounts for these explicit numeric differences without physical accuracy claims."
       },
       "artifact": {
         "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/NASA-TM-X-74335-US-Standard-Atmosphere-1976.pdf",
@@ -49,16 +58,26 @@
       "url": "https://archive.org/details/DTIC_ADA247666",
       "downloadUrl": "https://archive.org/download/DTIC_ADA247666/DTIC_ADA247666.pdf",
       "accessed": "2026-11-05",
-      "claims": [
-        "Aerodynamic parachute drag equation: Drag = 0.5 * rho * v^2 * (Cd * S)",
-        "Reference area conventions: Nominal/constructed canopy area S0 = (pi / 4) * D0^2 based on flat canopy diameter D0; projected frontal area Sp = (pi / 4) * Dp^2 based on inflated projected diameter Dp",
-        "Drag area equivalence: (Cd * S) is the invariant aerodynamic drag quantity; C_D0 is referenced to S0, while C_Dp is referenced to Sp. Typically Dp ~ 0.65 to 0.70 * D0, so C_Dp ~ 2.0 to 2.2 * C_D0",
-        "Flat circular solid canopy drag coefficient C_D0 ranges between 0.75 and 0.80 based on nominal surface area S0",
-        "Terminal descent velocity v_term = sqrt((2 * m * g) / (rho * Cd * S))",
-        "Parachute opening shock force Fo = Cx * (Cd * S) * q, where q = 0.5 * rho * v^2 and Cx is the opening-force coefficient (Pflanz method / Knacke shock factor)",
-        "Typical opening-force coefficients Cx: Flat circular ~1.6 to 1.8; Conical ~1.4 to 1.5; Cruciform ~1.1 to 1.2 (reefed/controlled) up to ~2.0+ (uncontrolled); Ringslot ~1.05 to 1.20",
-        "Snatch force kinematics: Occurs at canopy line-stretch before canopy inflation, caused by accelerating parachute mass to forebody velocity. Minimized by deployment bags and line-first staging.",
-        "Shock cord linear elastic energy capacity: Capacity_J = 0.5 * k * (Delta_L_max)^2, where k = F_rated / Delta_L_max"
+      "facts": [
+        "Aerodynamic parachute drag equation: Drag = 0.5 * rho * v^2 * (Cd * S) (Knacke 1992 p. 5-2)",
+        "Nominal/constructed canopy area S0 = (pi / 4) * D0^2 based on flat canopy diameter D0 (p. 5-3)",
+        "Projected frontal area Sp = (pi / 4) * Dp^2 based on inflated projected diameter Dp (p. 5-3)",
+        "Drag area equivalence: (Cd * S) is invariant; CD0 references S0 while CDp references Sp. Typically Dp ~ 0.65 to 0.70 * D0, so CDp ~ 2.0 to 2.2 * CD0",
+        "Flat circular solid canopy drag coefficient CD0 ranges between 0.75 and 0.80 based on nominal surface area S0 (p. 5-3)",
+        "Terminal descent velocity v_term = sqrt((2 * m * g) / (rho * Cd * S)) (p. 5-5)",
+        "Parachute opening shock force Fo = Cx * (Cd * S) * q, where q = 0.5 * rho * v^2 and Cx is opening-force coefficient (p. 5-3, Eq 5.4)",
+        "Typical opening-force coefficients Cx: Flat circular ~1.6 to 1.8; Conical ~1.4 to 1.5; Cruciform ~1.1 to 2.2 (Table 5-1)",
+        "Shock cord linear elastic energy capacity: Capacity_J = 0.5 * k * (Delta_L_max)^2, where k = F_rated / Delta_L_max (Section 7.3)"
+      ],
+      "derivedValues": [
+        "48-inch canopy area from exact inch conversion (0.0254 m/in): D = 1.2192 m, r = 0.6096 m, S0 = pi * 0.6096^2 = 1.16745403 m^2",
+        "Under m = 5 kg, Cd = 0.8, rho = 1.225 kg/m^3: v_term = sqrt(2 * 5 * 9.80665 / (1.225 * 0.8 * 1.16745403)) = 9.258218 m/s = 30.374731 fps",
+        "Kinetic energy at 30.374731 fps: KE = 0.5 * 5 * 9.258218^2 = 214.286504 J",
+        "Secant linear-elastic cord (1500 lbf, 20 ft, 25%, 6 kg, 65 fps): break extension = 1.524 m, stiffness = 4377.95 N/m, peak proxy force = 721.925 lbf, rating margin = 2.078, energy margin = 4.318"
+      ],
+      "assumptions": [
+        "RecoverySys computeOpeningShockLoad computes force as Cx * 0.5 * rho * v^2 * S without separate Cd; this is a lumped empirical proxy, not a universal conservative upper bound or material certification",
+        "Linear elasticity assumes secant modulus up to rupture; real nylon exhibits strain-hardening above ~10% elongation"
       ],
       "units": {
         "force": "Pounds-force (lbf) and Newtons (N)",
@@ -67,8 +86,8 @@
         "density": "slugs/ft^3 and kg/m^3"
       },
       "conventions": {
-        "areaAmbiguity": "Rocketry hobbyists and vendors frequently quote parachute diameter without specifying whether Cd is referenced to flat constructed area S0 or inflated projected area Sp. Using Sp-based Cd (~1.5) with flat diameter D0 overestimates drag area by ~2.2x.",
-        "openingShockCd": "Knacke defines opening shock as Fo = Cx * (Cd * S) * q. RecoverySys's computeOpeningShockLoad computes force as Cx * 0.5 * rho * v^2 * S without multiplying by Cd, effectively defining Cx as a lumped shock-drag coefficient assuming Cd = 1.0."
+        "areaAmbiguity": "Parachute ratings often omit whether Cd references nominal area S0 or projected area Sp. Using Sp-based Cd (~1.5) with flat diameter D0 overestimates drag area by ~2.2x.",
+        "screeningProxy": "Knacke opening shock and snatch calculations are implemented as generic mathematical screening proxies, not structural or material certifications."
       },
       "artifact": {
         "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/DTIC_ADA247666_Knacke_Parachute_Manual.pdf",
@@ -83,12 +102,18 @@
       "title": "Flight Equations with Drag (Beginner's Guide to Aeronautics)",
       "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/flight-equations-with-drag/",
       "accessed": "2026-11-05",
-      "claims": [
+      "facts": [
         "Closed-form analytical solution for vertical 1-DOF ascent coasting with quadratic drag under constant gravity and density",
         "Coast apogee altitude equation: y_max = (Vt^2 / (2 * g)) * ln(1 + (V0^2 / Vt^2))",
         "Coast time to apogee equation: t_apogee = (Vt / g) * arctan(V0 / Vt)",
-        "Analytical terminal velocity Vt = sqrt((2 * m * g) / (Cd * rho * A))",
-        "Provides exact, non-iterative numerical benchmark reference with zero quadrature step error"
+        "Analytical terminal velocity Vt = sqrt((2 * m * g) / (Cd * rho * A))"
+      ],
+      "derivedValues": [
+        "For V0 = 150 m/s, m = 4 kg, A = 0.01 m^2, Cd = 0.45, rho = 1.225 kg/m^3: Vt = 119.066 m/s, y_max = 688.007 m, t_apogee = 10.935 s"
+      ],
+      "assumptions": [
+        "Constant air density rho and constant vehicle drag coefficient Cd across the coast trajectory",
+        "Excluded from execution against current production API because production integrateAscent models powered ascent with varying density and mass depletion; unpowered coast is not exposed as a public API seam"
       ],
       "units": {
         "velocity": "m/s or ft/s",
@@ -98,11 +123,12 @@
       },
       "conventions": {
         "coordinateSystem": "Vertical 1-DOF (+y upward, gravity downward). Drag always opposes velocity vector.",
-        "assumptions": "Constant atmospheric density rho and constant vehicle drag coefficient Cd. Applicable for low-altitude coast verification where density change is negligible or bounded."
+        "status": "Excluded from gating; benchmark proposal retained as not-executable-against-current-production-API."
       },
-      "artifact": {
-        "relativePath": "docs/online-evidence-2026-11-05.md",
-        "sha256": "primary-html-cached-in-session-brain"
+      "artifact": null,
+      "uncapturedMetadata": {
+        "status": "uncaptured-with-limits",
+        "reason": "Public HTML page consulted online at URL; raw HTML bytes not persisted as offline disk artifact. Usage strictly limited to mathematical derivation of closed-form coast equations."
       },
       "reuseConstraints": "Public domain work of the United States Government."
     },
@@ -112,23 +138,28 @@
       "title": "Earth Atmosphere Equation - Metric (Beginner's Guide to Aeronautics)",
       "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/earth-atmosphere-equation-metric/",
       "accessed": "2026-11-05",
-      "claims": [
-        "Confirms 11,000 meter boundary for Earth troposphere and constant -56.46 °C temperature in lower stratosphere (11-25 km)",
-        "Educational piecewise curve fits: T = 15.04 - 0.00649*h (°C), p = 101.29 * ((T + 273.1)/288.08)^5.256 (kPa)",
+      "facts": [
+        "Confirms 11,000 meter boundary for Earth troposphere and constant -56.46 \u00b0C temperature in lower stratosphere (11-25 km)",
+        "Educational piecewise curve fits: T = 15.04 - 0.00649*h (\u00b0C), p = 101.29 * ((T + 273.1)/288.08)^5.256 (kPa)",
         "Gas law density equation: rho = p / (0.2869 * (T + 273.1)) (kg/m^3)"
       ],
+      "derivedValues": [],
+      "assumptions": [
+        "Constants differ from official ISA 1976 (T0=15.04 vs 15.00 \u00b0C, P0=101.29 vs 101.325 kPa, exponent 5.256 vs 5.255876). Must not be conflated with official ISA 1976 standards."
+      ],
       "units": {
-        "temperature": "Degrees Celsius (°C)",
+        "temperature": "Degrees Celsius (\u00b0C)",
         "pressure": "Kilopascals (kPa)",
         "density": "kg/m^3",
         "altitude": "meters (m)"
       },
       "conventions": {
-        "conflict": "Constants differ from official ISA 1976 (T0=15.04 vs 15.00, P0=101.29 vs 101.325 kPa, exponent 5.256 vs 5.255877). RecoverySys must maintain explicit distinction and not use Glenn educational fits as true ISA standard."
+        "conflict": "Educational curve fits are non-standard; production uses standard ISA 1976 formulations."
       },
-      "artifact": {
-        "relativePath": "docs/online-evidence-2026-11-05.md",
-        "sha256": "primary-html-cached-in-session-brain"
+      "artifact": null,
+      "uncapturedMetadata": {
+        "status": "uncaptured-with-limits",
+        "reason": "Public educational HTML page consulted online at URL; raw HTML bytes not persisted as offline disk artifact. Distinct from official ISA 1976 standard."
       },
       "reuseConstraints": "Public domain work of the United States Government."
     },
@@ -138,22 +169,33 @@
       "title": "Information About Wind Barbs",
       "url": "https://www.weather.gov/hfo/windbarbinfo",
       "accessed": "2026-11-05",
-      "claims": [
+      "facts": [
         "Meteorological wind direction strictly indicates the direction FROM which the wind is blowing",
-        "Direction is specified on a 36-point compass (degrees clockwise from True North, 0° to 360°)",
-        "A West wind (270°) blows eastward; an East wind (90°) blows westward",
-        "Parachute drift direction is opposite to wind direction: drift_bearing = (wind_direction + 180°) mod 360°"
+        "Direction is specified on a 360-degree compass (degrees clockwise from True North, 0\u00b0 to 360\u00b0)",
+        "A South wind (180\u00b0) blows northward (toward 0\u00b0 / 360\u00b0); a West wind (270\u00b0) blows eastward (toward 90\u00b0)",
+        "Drift direction opposite to wind direction: drift_bearing = (wind_direction + 180\u00b0) mod 360\u00b0"
+      ],
+      "derivedValues": [
+        "Under constant 15 mph wind FROM South (180\u00b0): wind speed = 15 * 5280 / 3600 = 22.0 fps",
+        "For apogee 3000 ft, deploy 500 ft, drogue 60 fps, main 20 fps:",
+        "Drogue phase time = (3000 - 500) / 60 = 41.6667 s; drogue drift = 22 * 41.6667 = 916.6667 ft North",
+        "Main phase time = 500 / 20 = 25.0 s; main drift = 22 * 25 = 550.0 ft North",
+        "Total descent time = 66.6667 s; total drift = 1466.6667 ft North (bearing 0\u00b0)"
+      ],
+      "assumptions": [
+        "Parachute instant wind coupling without horizontal inertia (standard rocketry drift approximation)"
       ],
       "units": {
-        "direction": "Degrees (°), 0 to 360 clockwise from True North",
-        "speed": "Knots (converted to mph or m/s via standard conversion factors: 1 knot = 1.15078 mph = 0.514444 m/s)"
+        "direction": "Degrees (\u00b0), 0 to 360 clockwise from True North",
+        "speed": "Miles per hour (mph) and feet per second (ft/s)"
       },
       "conventions": {
-        "signConvention": "Cartesian wind velocity vector is [ -v * sin(theta), -v * cos(theta) ]. Inverted wind signs would cause rockets to drift upwind, a critical physical falsifier."
+        "signConvention": "Cartesian drift displacement: dx = drift * sin(drift_bearing), dy = drift * cos(drift_bearing). Inverted wind direction is a critical physical falsifier."
       },
-      "artifact": {
-        "relativePath": "docs/online-evidence-2026-11-05.md",
-        "sha256": "primary-html-cached-in-session-brain"
+      "artifact": null,
+      "uncapturedMetadata": {
+        "status": "uncaptured-with-limits",
+        "reason": "Public educational HTML page consulted online at URL; raw HTML bytes not persisted as offline disk artifact. Usage limited to meteorological wind direction convention."
       },
       "reuseConstraints": "Public domain work of the United States Government."
     },
@@ -164,12 +206,16 @@
       "url": "https://openrocket.info/documentation.html",
       "downloadUrl": "https://github.com/openrocket/openrocket/releases/download/OpenRocket_technical_documentation-v13.05/OpenRocket_technical_documentation-v13.05.pdf",
       "accessed": "2026-11-05",
-      "claims": [
+      "facts": [
         "OpenRocket 6-DOF simulation framework and extended Barrowman aerodynamic drag model",
         "Runge-Kutta 4th order (RK4) integration with dynamic time-stepping",
         "Parachute model: Parachute.java implements constant drag coefficient (DEFAULT_CD = 0.8) and area getArea() = pi * (diameter / 2)^2",
         "Streamer model: Streamer.java implements aspect-ratio and fabric-density dependent Cd (max 0.40, default 0.60)",
         "Flight event state machine: Launch rod clearance, motor burnout, apogee, recovery device deployment, ground hit"
+      ],
+      "derivedValues": [],
+      "assumptions": [
+        "CLI headless automation requires virtual framebuffer (Xvfb) or JPype scripting due to SwingStartup headless check in mainline OpenRocket 23.09"
       ],
       "units": {
         "length": "meters (m)",
@@ -179,8 +225,7 @@
         "force": "Newtons (N)"
       },
       "conventions": {
-        "exportFormat": "CSV export via CSVExport.java exports time series with explicit SI units. Simulation summaries stored in zipped XML format (.ork).",
-        "headlessLimitation": "OpenRocket mainline (through 23.09) lacks a native CLI headless mode in SwingStartup.java (checks GraphicsEnvironment.isHeadless() and exits). CLI automation requires virtual framebuffer (Xvfb), JPype scripting, or parsing saved .ork simulation runs."
+        "exportFormat": "CSV export via CSVExport.java exports time series with explicit SI units. Simulation summaries stored in zipped XML format (.ork)."
       },
       "artifact": {
         "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/OpenRocket_technical_documentation-v13.05.pdf",
@@ -193,14 +238,19 @@
       "id": "openrocket-rasaero-motors-eng",
       "organization": "OpenRocket Project / ThrustCurve.org / National Association of Rocketry (NAR)",
       "title": "OpenRocket 23.09 Motor Thrust Curves Database (RASAero_Motors.eng)",
-      "url": "https://raw.githubusercontent.com/openrocket/openrocket/release-23.09/core/resources/datafiles/thrustcurves/RASAero/RASAero_Motors.eng",
-      "downloadUrl": "https://raw.githubusercontent.com/openrocket/openrocket/release-23.09/core/resources/datafiles/thrustcurves/RASAero/RASAero_Motors.eng",
+      "url": "https://raw.githubusercontent.com/openrocket/openrocket/d6ff2a7e75da7dbeaa6bc799f2b84ebbc59e8633/core/resources/datafiles/thrustcurves/RASAero/RASAero_Motors.eng",
+      "downloadUrl": "https://raw.githubusercontent.com/openrocket/openrocket/d6ff2a7e75da7dbeaa6bc799f2b84ebbc59e8633/core/resources/datafiles/thrustcurves/RASAero/RASAero_Motors.eng",
+      "pinnedCommit": "d6ff2a7e75da7dbeaa6bc799f2b84ebbc59e8633",
       "accessed": "2026-11-05",
-      "claims": [
+      "facts": [
         "Certified commercial solid rocket motor thrust curves measured and published by NAR Standards & Testing (S&T)",
         "Standard RASP .ENG format: header with designation, diameter (mm), length (mm), delays, propellant mass (kg), total mass (kg), manufacturer",
         "Contains discrete time (s) vs thrust (N) data pairs for piecewise linear interpolation",
         "Covers motors across classes A through M with certified total impulse and burn durations"
+      ],
+      "derivedValues": [],
+      "assumptions": [
+        "Propellant mass depletes proportionally to delivered impulse (Tsiolkovsky mass depletion)"
       ],
       "units": {
         "time": "seconds (s)",
@@ -209,8 +259,7 @@
         "mass": "kilograms (kg)"
       },
       "conventions": {
-        "interpolation": "Piecewise linear interpolation between recorded test points. Total impulse is trapezoidal numerical integral of curve.",
-        "massDepletion": "Propellant mass is assumed to deplete proportionally to cumulative delivered impulse (Tsiolkovsky mass depletion)."
+        "interpolation": "Piecewise linear interpolation between recorded test points. Total impulse is trapezoidal numerical integral of curve."
       },
       "artifact": {
         "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/OpenRocket-23.09-RASAero_Motors.eng",
@@ -223,19 +272,27 @@
       "id": "prometheus-telemetrum-flight-telemetry",
       "organization": "University Rocketry Team / RocketPy Project",
       "title": "Prometheus High-Power Rocket TeleMetrum Dual-Deploy Flight Telemetry (2022-06-24)",
-      "url": "https://raw.githubusercontent.com/RocketPy-Team/RocketPy/master/data/rockets/prometheus/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
-      "downloadUrl": "https://raw.githubusercontent.com/RocketPy-Team/RocketPy/master/data/rockets/prometheus/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
+      "url": "https://raw.githubusercontent.com/RocketPy-Team/RocketPy/96f9a0c47d636dbdf1daeb8a9ca8915b2c75a408/data/rockets/prometheus/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
+      "downloadUrl": "https://raw.githubusercontent.com/RocketPy-Team/RocketPy/96f9a0c47d636dbdf1daeb8a9ca8915b2c75a408/data/rockets/prometheus/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
+      "pinnedCommit": "96f9a0c47d636dbdf1daeb8a9ca8915b2c75a408",
       "accessed": "2026-11-05",
-      "claims": [
+      "facts": [
         "First-party measured dual-deploy rocketry flight recorded at 100 Hz by commercial COTS avionics (Altus Metrum TeleMetrum v6, serial 5115)",
-        "Full flight envelope: Boost (t=-0.3 to 4.96 s), Coast (t=4.96 to 29.93 s), Drogue deploy at apogee (t=29.93 s, altitude 3,888.7 m AGL), Main deploy (t=157.97 s, altitude 448.9 m AGL), Touchdown (t=237.94 s)",
-        "Peak apogee: 3,903.8 m AGL (12,807.6 ft)",
-        "Peak speed: 317.9 m/s (1,042.9 ft/s, Mach 0.93)",
-        "Observed drogue descent rate: 26.9 m/s (88.2 ft/s) over 128.0 s duration",
-        "Observed main descent rate: 5.61 m/s (18.4 ft/s) over 79.97 s duration",
-        "Observed GPS pad position: 32.9395046° N, -106.9114515° W (Spaceport America, NM)",
-        "Observed GPS landing position: 32.9494937° N, -106.9154488° W",
-        "Observed total ground drift: 1,171.7 m (3,844.1 ft) at bearing 341.4° (NNW)"
+        "Flight envelope recorded: Boost (t=-0.3 to 4.96 s), Coast (t=4.96 to 29.93 s), Drogue deploy at apogee (t=29.93 s, altitude 3,888.7 m AGL), Main deploy (t=157.97 s, altitude 448.9 m AGL), Touchdown (t=237.94 s)",
+        "Peak apogee recorded: 3,903.8 m AGL (12,807.6 ft)",
+        "Peak speed recorded: 317.9 m/s (1,042.9 ft/s, Mach 0.93)",
+        "Observed GPS pad position: 32.9395046\u00b0 N, -106.9114515\u00b0 W (Spaceport America, NM)",
+        "Observed GPS landing position: 32.9494937\u00b0 N, -106.9154488\u00b0 W"
+      ],
+      "derivedValues": [
+        "Mean drogue descent velocity: 26.9 m/s (88.2 ft/s) over 128.0 s duration (derived from altitude and timestamp intervals)",
+        "Mean main descent velocity: 5.61 m/s (18.4 ft/s) over 79.97 s duration",
+        "Net ground drift: 1,171.7 m (3,844.1 ft) at bearing 341.4\u00b0 (NNW)"
+      ],
+      "assumptions": [
+        "Vehicle dry mass 14.5 kg, drogue diameter 24 in, and main diameter 120 in are unverified assumptions lacking provenance in the supplied CSV header",
+        "Local atmospheric conditions (temperature, pressure, surface/aloft winds) at Spaceport America on launch date are not recorded in the CSV",
+        "A proposed \u00b115% acceptance band is an analyst choice, not a source-stated tolerance standard. Flight comparison is blocked pending vehicle and environmental provenance."
       ],
       "units": {
         "time": "seconds (s)",
@@ -243,33 +300,39 @@
         "altitude": "meters (m)",
         "speed": "meters per second (m/s)",
         "acceleration": "meters per second squared (m/s^2)",
-        "temperature": "Degrees Celsius (°C)",
+        "temperature": "Degrees Celsius (\u00b0C)",
         "voltage": "Volts (V)",
         "coordinates": "decimal degrees"
       },
       "conventions": {
-        "sensorUncertainty": "Barometric pressure sensor resolution +/- 1 Pa (~0.1 m near ground, ~0.8 m near 4000 m). Sensor sampling at 100 Hz subjected to pyrotechnic bay pressurization spikes during drogue and main deployment charges. GPS horizontal position error ~2.5 m CEP (HDOP < 2.0)."
+        "status": "BLOCKED from gating. Not treated as matched flight validation.",
+        "sensorUncertainty": "CSV header does not record sensor accuracy or calibration records. Barometric readings undergo pyrotechnic pressurization transients at deployment events."
       },
       "artifact": {
         "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
         "sha256": "9fe8d17a25e7944267b34a45ed955303afd5818b3f18479a5f7ffb31a574cecf",
         "byteSize": 2641687
       },
-      "reuseConstraints": "MIT License. Publicly available open-source research dataset."
+      "reuseConstraints": "RocketPy software is licensed under MIT; third-party telemetry dataset in repository lacks an independent license header and is used for research observation without broad licensing assumption."
     },
     {
       "id": "juno3-spaceport-america-cots-telemetry",
-      "organization": "Projeto Jupiter (Universidade de São Paulo) / RocketPy Team",
+      "organization": "Projeto Jupiter (Universidade de S\u00e3o Paulo) / RocketPy Team",
       "title": "Juno III Spaceport America Cup 2023 Measured Flight Dataset",
-      "url": "https://github.com/RocketPy-Team/RocketPy/tree/master/data/rockets/juno3",
-      "downloadUrl": "https://raw.githubusercontent.com/RocketPy-Team/RocketPy/master/data/rockets/juno3/cots_altimeter.csv",
+      "url": "https://github.com/RocketPy-Team/RocketPy/tree/96f9a0c47d636dbdf1daeb8a9ca8915b2c75a408/data/rockets/juno3",
+      "downloadUrl": "https://raw.githubusercontent.com/RocketPy-Team/RocketPy/96f9a0c47d636dbdf1daeb8a9ca8915b2c75a408/data/rockets/juno3/cots_altimeter.csv",
+      "pinnedCommit": "96f9a0c47d636dbdf1daeb8a9ca8915b2c75a408",
       "accessed": "2026-11-05",
-      "claims": [
+      "facts": [
         "First-party measured flight data from Spaceport America Cup 2023 (10k Solid SRAD category, June 23, 2023)",
         "Registered flight card apogee: 3,213 m",
         "COTS barometric altimeter (Missile Works RRC3 Sport) and COTS GNSS logged simultaneously",
-        "Real-world recovery failure mode: Main parachute failed to deploy; drogue descent continued from apogee (3,116 m) all the way to ground impact",
-        "Captures authentic recovery event pressure pulse: avionics bay pressure abruptly spikes from 580 hPa to 191 hPa transient during ejection charge before stabilizing"
+        "Real-world recovery failure mode: README.txt explicitly records 'Flight performance: Only the drogue chute was ejected' (main parachute failed to deploy)",
+        "Drogue descent continued from apogee (3,116 m) all the way to ground impact"
+      ],
+      "derivedValues": [],
+      "assumptions": [
+        "Captures pressure pulse transient during ejection charge before stabilizing, but cannot serve as nominal dual-deployment benchmark"
       ],
       "units": {
         "time": "seconds (s)",
@@ -278,14 +341,35 @@
         "velocity": "meters per second (m/s)"
       },
       "conventions": {
-        "sensorUncertainty": "RRC3 barometric altitude calculated via standard atmosphere formula; barometric lag and transonic port pressure anomalies present during boost; ejection charge gas ingress alters barometric pressure reading for ~0.2 s."
+        "status": "BLOCKED. Useful qualitative failure observation; not a matched-input benchmark.",
+        "sensorUncertainty": "RRC3 barometric altitude calculated via standard atmosphere formula; sensor subject to transonic aerodynamic effects and ejection gas ingress (~0.2 s)."
       },
       "artifact": {
-        "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/juno3/",
-        "sha256": "eef81b3bcc4c285667727c1e2c9ca502a67cb374f5e31bc4f87ed76b8a04c1ee",
-        "byteSize": 28537
+        "directoryPath": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/juno3/",
+        "files": [
+          {
+            "filename": "cots_altimeter.csv",
+            "sha256": "eef81b3bcc4c285667727c1e2c9ca502a67cb374f5e31bc4f87ed76b8a04c1ee",
+            "byteSize": 28537
+          },
+          {
+            "filename": "cots_GNSS.csv",
+            "sha256": "557c80be4c0d9a5e6a5493177a9adfaa3b02c11b8ff814ed238b53540ac9f062",
+            "byteSize": 18596
+          },
+          {
+            "filename": "drag_curve.csv",
+            "sha256": "02711cd44cd877427b6b951ffe792253526149c2afeb17097e398cb7d8fd6511",
+            "byteSize": 1542
+          },
+          {
+            "filename": "README.txt",
+            "sha256": "4b29eceff1eedb237ec337ee5e158e07c3ed9ed579399af08ce0d5336310ef47",
+            "byteSize": 873
+          }
+        ]
       },
-      "reuseConstraints": "MIT License. Explicitly released by avionics lead Juliana Carloni for community validation."
+      "reuseConstraints": "Shared by Juliana Carloni (Projeto Jupiter) with RocketPy team in 2023 for community validation. Dataset permission acknowledged per README.txt."
     }
   ]
 }
