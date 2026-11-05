@@ -1,5 +1,18 @@
 # RecoverySys qualification checkpoint — 2026-11-05
 
+## New online-validation work
+
+The owner requested Antigravity research and validation design. Integration
+branch is now `evidence/online-validation-2026-11-05`, based on the final
+qualified head `725d8a0446b9225fbb24a70f1b0065d5cdf70f9f`. The Antigravity
+Opus physics assignment failed on quota before producing research or edits;
+the separate Gemini catalog assignment remains outstanding at this checkpoint.
+No provider/model substitution or acceptance is claimed. See
+`history/online-validation-2026-11-05/ORCHESTRATION.md` for routing and next
+actions. Wait for catalog completion and owner direction on the physics route.
+
+## Qualified release-candidate checkpoint
+
 App directory: `RecoverySys/` relative to git root. Branch:
 `release/qualify-1.3.0-rc2`, based on `3592a95a70d1b5e634fe41517df7f15972a577db`.
 Current application source: `3bef5116a67031de33ff183c1f225dc42e1cdc19`.
