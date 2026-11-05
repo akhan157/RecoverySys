@@ -143,7 +143,6 @@ function buildInitialState() {
     simulation: null,
     inputRevision: 0,
     simRunning: false,
-    warnings: [],
     toasts: [],
     saveState: SAVE_STATES.IDLE,
     shareState: SHARE_STATES.IDLE,
@@ -191,8 +190,6 @@ function reducer(state, action) {
       return { ...state, customMotor: null, inputRevision: state.inputRevision + 1 }
     case 'SET_CATEGORY':
       return { ...state, activeCategory: action.category }
-    case 'SET_WARNINGS':
-      return { ...state, warnings: action.warnings }
     case 'START_SIM':
       return { ...state, simRunning: true }
     case 'SET_SIM':
@@ -203,7 +200,6 @@ function reducer(state, action) {
       return {
         ...state,
         specs: { ...state.specs, ...action.specs },
-        warnings: [],
         openRocketImport: null,
         importedSource: action.source,
         inputRevision: state.inputRevision + 1,
@@ -240,9 +236,6 @@ function reducer(state, action) {
         openRocketImport: null,
         importedSource: action.importedSource ?? null,
         simulation: null,
-        // Discard legacy cached findings. The rendered view derives findings
-        // synchronously from the replacement inputs.
-        warnings: [],
         inputRevision: state.inputRevision + 1,
       }
 
@@ -256,7 +249,6 @@ function reducer(state, action) {
         openRocketImport: null,
         importedSource: null,
         simulation: null,
-        warnings: [],
       }
     default:
       return state

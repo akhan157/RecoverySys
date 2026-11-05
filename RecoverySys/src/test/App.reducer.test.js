@@ -7,7 +7,6 @@ const previousState = {
   customMotor: { designation: 'old-motor' },
   simulation: { apogee_ft: 1200 },
   inputRevision: 7,
-  warnings: [{ code: 'OLD_WARNING', message: 'Old configuration warning' }],
   activeCategory: 'main_chute',
   toasts: [],
   saveState: 'idle',
@@ -33,7 +32,6 @@ describe('reducer imported-state replacement', () => {
     expect(nextState.specs).toBe(importedSpecs)
     expect(nextState.customMotor).toBe(importedMotor)
     expect(nextState.simulation).toBeNull()
-    expect(nextState.warnings).toEqual([])
     expect(nextState.inputRevision).toBe(8)
     expect(nextState.activeCategory).toBe('main_chute')
   })

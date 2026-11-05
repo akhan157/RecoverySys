@@ -18,6 +18,9 @@ transfer inputs; receivers must rerun simulation before showing current
 estimates. Flight/candidate evidence preserves its original prediction identity
 and remains unreviewed evidence rather than accepted corpus material.
 
+Transient notifications stay visible on screen and are excluded from both
+printed artifacts.
+
 The supported development majors are Node 22, 24 and 26, with a matching CI
 matrix. OpenRocket XML structure is traversed once and test concurrency is
 bounded. Release versions are checked across package/web/Tauri/Cargo identities.

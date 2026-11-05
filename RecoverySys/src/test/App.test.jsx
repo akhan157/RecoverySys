@@ -306,13 +306,12 @@ describe('App — rejected share-link import', () => {
 })
 
 describe('App — imported state freshness', () => {
-  it('clears warnings from the replaced local configuration before current-input derivation', () => {
+  it('replaces local inputs and invalidates the prior simulation atomically', () => {
     const previousState = {
       config: { drogue_chute: { id: 'old-drogue' } },
       specs: { rocket_mass_g: '2500' },
       customMotor: null,
       simulation: { apogee_ft: 2200 },
-      warnings: [{ slot: 'drogue_chute', message: 'Old configuration warning' }],
       inputRevision: 4,
     }
     const importedConfig = { main_chute: { id: 'new-main' } }
@@ -327,7 +326,6 @@ describe('App — imported state freshness', () => {
     expect(nextState.config).toBe(importedConfig)
     expect(nextState.specs).toEqual({ rocket_mass_g: '3000' })
     expect(nextState.simulation).toBeNull()
-    expect(nextState.warnings).toEqual([])
     expect(nextState.inputRevision).toBe(5)
   })
 })
@@ -336,7 +334,6 @@ describe('App — OpenRocket snapshot freshness', () => {
     const previousState = {
       specs: { rocket_mass_g: '2500', airframe_id_in: '3.9' },
       simulation: { apogee_ft: 2200 },
-      warnings: [{ slot: 'main_chute', message: 'Old warning' }],
       openRocketImport: { source: { sourceFilename: 'rocket.ork' } },
       importedSource: null,
       inputRevision: 7,
@@ -354,7 +351,6 @@ describe('App — OpenRocket snapshot freshness', () => {
       bay_length_in: '18',
     })
     expect(nextState.simulation).toBe(previousState.simulation)
-    expect(nextState.warnings).toEqual([])
     expect(nextState.openRocketImport).toBeNull()
     expect(nextState.importedSource).toMatchObject({ formatVersion: '1.10' })
     expect(nextState.inputRevision).toBe(8)

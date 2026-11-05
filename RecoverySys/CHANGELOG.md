@@ -12,6 +12,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Screen quick links and swivels against the shared snatch proxies, and swivels against opening shock. Previously a 400 lb swivel could show a 0.88× margin without a compatibility finding. New findings use stable codes and existing exact thresholds.
 - Derive current compatibility findings synchronously: fast run/export actions can no longer omit findings during the prior 300 ms debounce window.
 - Include model identity, result state and mission-envelope checks in both printed artifacts; exercise JSON/share/saved-reload in fresh browser contexts.
+- Hide transient app notifications from both printed artifacts while preserving them on screen.
 - Traverse OpenRocket structure once and use direct XML child lookups; bound heavy jsdom test concurrency without relaxing corpus timeouts.
 - Define Node 22/24/26 CI checks and bounded supported majors; patch fast-uri to 3.1.9.
 - Expand the review-only corpus from 14 to 21 cases; collect primary online references and stage six catalog source records/fourteen proposed differences for review.
