@@ -1,0 +1,63 @@
+{
+  "id": "prometheus-telemetrum-dual-deploy-flight-descent",
+  "kind": "real-flight",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "vehicle_mass_dry_kg": 14.5,
+    "drogue_diameter_in": 24,
+    "main_diameter_in": 120,
+    "drogue_deploy_alt_ft_msl": 12800,
+    "main_deploy_alt_ft_agl": 1470,
+    "pad_location": {
+      "lat": 32.9395,
+      "lon": -106.9115,
+      "alt_m_msl": 1390
+    }
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "drogue_descent_fps",
+        "value": 88.2,
+        "unit": "ft/s",
+        "tolerance": {
+          "relative": 0.15,
+          "basis": "source-stated"
+        },
+        "notes": "Empirical mean descent velocity recorded by TeleMetrum flight 5115"
+      },
+      {
+        "name": "main_descent_fps",
+        "value": 18.4,
+        "unit": "ft/s",
+        "tolerance": {
+          "relative": 0.15,
+          "basis": "source-stated"
+        },
+        "notes": "Empirical mean descent velocity recorded by TeleMetrum flight 5115"
+      }
+    ],
+    "notes": "Measured rocketry flight dual-deploy descent reference from Spaceport America"
+  },
+  "source": {
+    "url": "https://github.com/RocketPy-Team/RocketPy/blob/master/data/rockets/prometheus/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
+    "title": "High-Power Rocket Flight TeleMetrum Log (Prometheus 2022-06-24)",
+    "accessed": "2026-11-05",
+    "citation": "Altus Metrum TeleMetrum v6 flight recording at Spaceport America, 2022-06-24",
+    "derivation": "Mean steady-state vertical descent speed calculated between deployment triggers and touchdown",
+    "artifact": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
+    "artifactSha256": "9fe8d17a25e7944267b34a45ed955303afd5818b3f18479a5f7ffb31a574cecf"
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "RecoverySys end-to-end descent simulation"
+  },
+  "comparison": {
+    "method": "relative",
+    "decisionRule": "Descent rates must match measured avionics telemetry within 15% physical flight tolerance band"
+  },
+  "notes": "Proposed Gate 1 real-flight comparison case (review status, zero accepted flight cases)"
+}

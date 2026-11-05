@@ -1,0 +1,59 @@
+{
+  "id": "terminal-descent-nominal-48in-sea-level",
+  "kind": "analytic",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "chuteSpecs": {
+      "diameter_in": 48,
+      "cd": 0.8
+    },
+    "mass_kg": 5,
+    "altitude_ft": 0
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "descent_rate_fps",
+        "value": 30.3737,
+        "unit": "ft/s",
+        "tolerance": {
+          "relative": 0.0001,
+          "basis": "analyst-derived"
+        },
+        "notes": "Calculated from v_term = sqrt(2*m*g / (rho * Cd * A))"
+      },
+      {
+        "name": "landing_energy_J",
+        "value": 214.27,
+        "unit": "J",
+        "tolerance": {
+          "relative": 0.0005,
+          "basis": "analyst-derived"
+        },
+        "notes": "0.5 * m * v^2"
+      }
+    ],
+    "notes": "Flat circular parachute nominal area descent rate"
+  },
+  "source": {
+    "url": "https://archive.org/details/DTIC_ADA247666",
+    "title": "Parachute Recovery Systems Design Manual (Knacke 1992)",
+    "accessed": "2026-11-05",
+    "citation": "T. W. Knacke. Parachute Recovery Systems Design Manual. NWC TP 6575, Chapter 5.",
+    "derivation": "v_term = sqrt(2 * m * g / (rho * Cd * S0)) using S0 = pi * r^2, Cd = 0.80",
+    "artifact": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/DTIC_ADA247666_Knacke_Parachute_Manual.pdf",
+    "artifactSha256": "138d001f515328a36ef3cddc234b40b4b84c19ad2ea1ac204bd60f555f9ab0c8"
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "RecoverySys computeDescentRate"
+  },
+  "comparison": {
+    "method": "relative",
+    "decisionRule": "Relative error must remain <= 0.01% against closed-form terminal velocity formula"
+  },
+  "notes": "Proposed Gate 1 review case"
+}
