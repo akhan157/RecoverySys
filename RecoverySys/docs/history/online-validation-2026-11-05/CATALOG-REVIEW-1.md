@@ -37,6 +37,11 @@ that result does not establish the broader claimed protections below.
    claims and implement a bounded read-only packet auditor with meaningful
    negative tests before presenting it as validation coverage. Hash actual
    bytes, derive counts, and anchor git common-dir paths explicitly.
+   Reproduced integration failure: running the delivered auditor from primary
+   repository root yields **47 passed / 18 failed**. Git returns relative
+   `../../../../.git` for its nested cwd, but the script resolves that against
+   the caller's cwd instead of the git invocation cwd. All six external
+   artifacts actually exist/hash-match; this is a path-resolution defect.
 4. **Low: unnecessary mass-policy gate.** A catalog-wide precision decision is
    not needed to resolve 88 g versus source 87.9 g. Parent direction: retain
    the existing rounded 88 g and document equivalence. Do not introduce a
