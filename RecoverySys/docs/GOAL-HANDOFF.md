@@ -17,7 +17,10 @@ actions. Gemini high physics research is assigned. The catalog packet at
 independent review found unsupported Iris identity/rating claims and gaps in
 the claimed validation coverage. See CATALOG-REVIEW-1.md in that history
 directory. No production edits/acceptance. Dispatch the bounded catalog
-revision, receive physics design, then independently review before integration.
+revision. Physics design `96d4252fe4fe07062982c5d68c56b141660b78f9` is now
+merged for revision. PHYSICS-GATE-1.md records arithmetic/provenance objections
+and authorizes four bounded executable analytic checks; coast/flight are
+excluded or blocked. Implement and independently verify the amended scope.
 Do not ask again before choosing another available Antigravity model.
 
 ## Qualified release-candidate checkpoint
