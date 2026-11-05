@@ -10,7 +10,8 @@
     "artifact": {
       "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-cfc-30-n-standard.md",
       "sha256": "38d6c353ab835a8523d6086d29a60a8eb8be4bfab7a7939a7ab2dfdbb537a54f",
-      "captureFormat": "full-article-markdown"
+      "captureFormat": "normalized-markdown",
+      "reuseLimits": "Copyright © Fruity Chutes Inc. Technical specifications referenced for engineering evaluation and catalog review under fair use."
     },
     "specs": {
       "diameter_nominal_in": 30,
@@ -28,12 +29,13 @@
       "shroud_line_rating_lb": 220,
       "shroud_line_type": "220 lb nylon",
       "swivel_rating_lb": 1000,
+      "hardware_rating_convention": "unknown",
       "gores": 8,
       "rating_vehicle_load_lb": 3.3,
       "rating_velocity_fps": 20
     },
     "candidateCatalogIds": ["cfc-030-n"],
-    "notes": "Classic elliptical standard nylon line. Cd is published as a range (1.5-1.6); current catalog uses midpoint 1.55. Line rating (220 lb) is per-shroud breaking strength, not whole recovery chain rating."
+    "notes": "Classic elliptical standard nylon line. Cd is published as a range (1.5-1.6); current catalog uses midpoint 1.55. Line rating (220 lb) is an individual suspension-line rating, not the whole recovery chain rating. Swivel rating (1000 lb) convention is unknown (vendor does not state whether it is ultimate breaking load, proof test, or working load limit)."
   },
   {
     "sourceId": "fruitychutes-ifc-30-sul-ultralight",
@@ -46,7 +48,8 @@
     "artifact": {
       "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-ifc-30-sul-ultralight.md",
       "sha256": "a58bbac41e333da174b7ef4c0a6e46ed6b8b5d37038b06066c12fc7caec036a9",
-      "captureFormat": "full-article-markdown"
+      "captureFormat": "normalized-markdown",
+      "reuseLimits": "Copyright © Fruity Chutes Inc. Technical specifications referenced for engineering evaluation and catalog review under fair use."
     },
     "specs": {
       "diameter_nominal_in": 30,
@@ -63,12 +66,13 @@
       "shroud_line_rating_lb": 200,
       "shroud_line_type": "200 lb Spectra",
       "bridle": "Spectra Loop (no swivel)",
+      "hardware_rating_convention": "unknown",
       "gores": 8,
       "rating_vehicle_load_lb": 2.6,
       "rating_velocity_fps": 15
     },
-    "candidateCatalogIds": ["ifc-030-sul (new/staged variant, distinct from catalog ifc-030-sl)"],
-    "notes": "Iris Ultralight (SUL) line. Distinct from IFC-30-SL (Light) and IFC-30-S (Ultra Compact). Dimensions assume deployment bag packing density. Shroud rating is 200 lb Spectra per line."
+    "candidateCatalogIds": [],
+    "notes": "Iris Ultralight (SUL) line. Distinct from IFC-30-SL (Light) and IFC-30-S (Ultra Compact). Does not match catalog part ifc-030-sl (45 g, 1.9 x 3.2 in). Mapping of ifc-030-sl to IFC-30-SL is an unconfirmed hypothesis: primary manufacturer source for IFC-30-SL was omitted from captures; distributor lists 46 g, catalog lists 45 g; 45.4 g claim was arithmetic conversion from 1.6 oz. Individual shroud rating is 200 lb Spectra per line, not total vehicle load rating. Hardware rating convention is unknown."
   },
   {
     "sourceId": "fruitychutes-ifc-30-s-compact",
@@ -81,7 +85,8 @@
     "artifact": {
       "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-ifc-30-s-compact.md",
       "sha256": "f0b4436486fd2952ed6c28c6b497bf6f5a558dad454f6434a4994d6a3cb7b06a",
-      "captureFormat": "full-article-markdown"
+      "captureFormat": "normalized-markdown",
+      "reuseLimits": "Copyright © Fruity Chutes Inc. Technical specifications referenced for engineering evaluation and catalog review under fair use."
     },
     "specs": {
       "diameter_nominal_in": 30,
@@ -97,12 +102,13 @@
       "material_shroud": "Spectra",
       "shroud_line_rating_lb": 200,
       "bridle": "725 lb Spectra loop (no swivel)",
+      "hardware_rating_convention": "unknown",
       "gores": 8,
       "rating_vehicle_load_lb": 5.0,
       "rating_velocity_fps": 20
     },
     "candidateCatalogIds": ["ifc-030-s"],
-    "notes": "Iris Ultra Compact (S) line. Exactly matches catalog ifc-030-s (53 g, 1.9 in diam x 3.7 in len, Cd 2.2)."
+    "notes": "Iris Ultra Compact (S) line. Exactly matches catalog ifc-030-s (53 g, 1.9 in diam x 3.7 in len, Cd 2.2). Shroud line rating (200 lb) is per individual line. Bridle rating convention (725 lb) is unknown (vendor does not specify breaking vs proof vs working limit)."
   },
   {
     "sourceId": "fruitychutes-cfc-30-s-compact",
@@ -115,7 +121,8 @@
     "artifact": {
       "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-cfc-30-s-compact.md",
       "sha256": "14b04c142289ca09977cab1c565fc17067d867e417148e5823fb939c507116ea",
-      "captureFormat": "full-article-markdown"
+      "captureFormat": "normalized-markdown",
+      "reuseLimits": "Copyright © Fruity Chutes Inc. Technical specifications referenced for engineering evaluation and catalog review under fair use."
     },
     "specs": {
       "diameter_nominal_in": 30,
@@ -132,12 +139,13 @@
       "material_shroud": "Spectra",
       "shroud_line_rating_lb": 400,
       "swivel_rating_lb": 600,
+      "hardware_rating_convention": "unknown",
       "gores": 8,
       "rating_vehicle_load_lb": 3.3,
       "rating_velocity_fps": 20
     },
     "candidateCatalogIds": ["cfc-030-s"],
-    "notes": "Classic Compact Elliptical (Spectra) line. Closely matches catalog cfc-030-s (catalog: 60 g, 1.9 in diam x 4.1 in len; manufacturer: 59 g / 2.1 oz, 1.9 in diam x 4.1 in len)."
+    "notes": "Classic Compact Elliptical (Spectra) line. Closely matches catalog cfc-030-s (catalog: 60 g, 1.9 in diam x 4.1 in len; manufacturer: 59 g / 2.1 oz, 1.9 in diam x 4.1 in len). Shroud line (400 lb) is per line. Swivel rating (600 lb) convention is unknown."
   },
   {
     "sourceId": "rocketman-hp-cd22-standard",
@@ -150,13 +158,15 @@
     "artifact": {
       "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/rocketman-hp-cd22-standard.md",
       "sha256": "c605770dbd6a773d442e3f7c8ece01f6e5e76d9f42c380e15887f43688c7285a",
-      "captureFormat": "full-article-markdown"
+      "captureFormat": "normalized-markdown",
+      "reuseLimits": "Copyright © Rocketman Parachutes. Technical specifications referenced for engineering evaluation and catalog review under fair use."
     },
     "specs": {
       "material_canopy": "1.1 oz Mil-Spec Ripstop Nylon (20 Denier, zero porosity)",
       "material_shroud": "1/4\" flat-braided nylon (250 lb rated, 8 lines)",
       "material_center_bridle": "3/8\" nylon",
       "swivel_rating_lb": 1500,
+      "hardware_rating_convention": "unknown",
       "cd": 2.2,
       "shape": "Toroidal / Annular / Iris",
       "variants": {
@@ -198,7 +208,7 @@
       }
     },
     "candidateCatalogIds": [],
-    "notes": "Standard 1.1 oz line. DOES NOT MATCH catalog lp-024 (20 g, 1.38x1.57) or lp-036 (43 g, 1.38x3.08). Crucially, the 36 in standard page contains an unresolved internal conflict: descent rate table specifies 7.4 lb at 20 fps, while the text line specifies 'Rating: 7lb @ 20fps'."
+    "notes": "Standard 1.1 oz line. DOES NOT MATCH catalog lp-024 (20 g, 1.38x1.57) or lp-036 (43 g, 1.38x3.08). The 36 in standard page contains an unresolved internal conflict: descent rate table specifies 7.4 lb at 20 fps, while the text line specifies 'Rating: 7lb @ 20fps'. Swivel rating (1500 lb) convention is unknown. Shroud lines (250 lb) are individual flat-braided lines."
   },
   {
     "sourceId": "rocketman-hp-cd22-ultralight",
@@ -211,12 +221,14 @@
     "artifact": {
       "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/rocketman-hp-cd22-ultralight.md",
       "sha256": "b71e6d7200a2a5aee90bc4f0a910773b695c14a70de190ec5a7b963afc9de2bd",
-      "captureFormat": "full-article-markdown"
+      "captureFormat": "normalized-markdown",
+      "reuseLimits": "Copyright © Rocketman Parachutes. Technical specifications referenced for engineering evaluation and catalog review under fair use."
     },
     "specs": {
       "material_canopy": "0.66 oz Mil-Spec Ripstop Nylon",
       "material_shroud": "220 lb - 0.039\" Spectra (8 lines)",
       "material_center_line": "350 lb - 0.070\" Spectra",
+      "hardware_rating_convention": "unknown",
       "cd": 2.2,
       "shape": "Toroidal / Annular / Iris",
       "variants": {
@@ -260,6 +272,36 @@
       }
     },
     "candidateCatalogIds": ["lp-024", "lp-036"],
-    "notes": "Ultra-Light line. Exact physical match for catalog lp-024 (20 g, 1.38 x 1.57 in) and lp-036 (43 g, 1.38 x 3.08 in). Unlike the standard page, this page has NO conflicting 7 lb rating line; the descent table specifies 7.4 lb @ 20 fps."
+    "notes": "Ultra-Light line. Exact physical match for catalog lp-024 (20 g, 1.38 x 1.57 in) and lp-036 (43 g, 1.38 x 3.08 in). Unlike the standard page, this page has NO conflicting 7 lb rating line; the descent table specifies 7.4 lb @ 20 fps. Line ratings are individual line strength; overall rating convention is unknown."
+  },
+  {
+    "sourceId": "fruitychutes-how-to-make-a-parachute",
+    "manufacturer": "Fruity Chutes",
+    "productTitle": "Parachute Manufacturers for Drones, UAV, Rockets, Research (How to Make a Parachute Tutorial)",
+    "manufacturerSKU": "Tutorial-Construction-Overview",
+    "url": "https://fruitychutes.com/help_for_parachutes/drone-parachute-tutorials/how_to_make_a_parachute",
+    "accessed": "2026-11-05",
+    "sourceType": "manufacturer-spec",
+    "artifact": {
+      "relativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-how-to-make-a-parachute.md",
+      "sha256": "b04fa352b2d131f192603c61f389a09b843f220de14a4e9891f86a264ce7221b",
+      "captureFormat": "normalized-markdown",
+      "reuseLimits": "Copyright © 2019 Fruity Chutes Inc. Technical article and tutorial referenced for engineering background under fair use."
+    },
+    "specs": {
+      "topics_covered": [
+        "Toroidal pull-down apex design",
+        "Peregrine UAV deployment",
+        "Harrier launcher",
+        "Skycat bundle",
+        "Classic elliptical geometry"
+      ],
+      "mentions_iris_toroidal_design": true,
+      "mentions_ifc_30_sl_sku": false,
+      "mentions_ifc_30_sl_dimensions_mass": false,
+      "hardware_rating_convention": "unknown"
+    },
+    "candidateCatalogIds": [],
+    "notes": "Primary manufacturer construction and tutorial page. Mentions Iris toroidal parachute families and general construction, but omits specific SKU dimensions and weights for IFC-30-SL. Can support limited general construction claims only; does not establish exact IFC-30-SL catalog specs."
   }
 ]

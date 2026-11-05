@@ -1,11 +1,13 @@
 {
   "lane": "online-2026-11-05",
   "baseSha": "725d8a0446b9225fbb24a70f1b0065d5cdf70f9f",
-  "authorSelfAcceptance": "PROHIBITED_BY_CONTRACT (Parent orchestrator/reviewer integrates and decides)",
+  "revisionPin": "c759cbf989d5b3d81ae3a91545fad71fdcbf55b2",
+  "authorSelfAcceptance": "PROHIBITED_BY_CONTRACT (Author proposes recommendations only; parent orchestrator/reviewer integrates and decides)",
   "summary": {
     "total_proposals_evaluated": 14,
-    "proposed_reject_count": 12,
-    "proposed_hold_count": 2,
+    "proposed_reject_count": 6,
+    "proposed_hold_count": 6,
+    "proposed_retain_rounded_count": 2,
     "proposed_accept_count": 0
   },
   "proposals": [
@@ -31,9 +33,9 @@
       "identityConfidence": "HIGH",
       "identityRationale": "Exact match for Fruity Chutes Classic Elliptical 30\" standard nylon parachute (CFC-30-N-ST). Both catalog and source cite 30 in diameter, elliptical geometry, 2.6 in packed diameter, 3.0 in packed length.",
       "conflicts": "None on identity. Current catalog uses integer rounding 88 g; manufacturer published 3.1 oz (87.9 g). Catalog Cd 1.55 is midpoint of manufacturer stated range 1.5-1.6.",
-      "proposedDisposition": "hold",
-      "dispositionEvidence": "Manufacturer explicitly states 3.1 oz (87.9 grams). Current catalog value 88 g is standard integer rounding (87.8835 g rounded to nearest integer). Changing to 87.9 g requires a catalog-wide floating-point precision policy decision for parachute mass; otherwise it creates inconsistent precision across parts.js.",
-      "rollbackRequirements": "Prior value 88 g must be preserved in catalog provenance history if 87.9 g is adopted upon reviewer approval."
+      "proposedDisposition": "retain-rounded",
+      "dispositionEvidence": "Parent direction: retain existing 88 g as the rounded equivalent of published 87.9 g (3.1 oz * 28.3495 = 87.8835 g rounded to nearest integer 88 g). The invented catalog-wide precision policy blocker is removed. Recommendation is retain-rounded / no change, preserving existing catalog value. Actual parent acceptance is recorded separately.",
+      "rollbackRequirements": "Existing value 88 g is retained in parts.js."
     },
     {
       "proposalId": "PROP-20261105-02",
@@ -55,11 +57,11 @@
         "artifactSha256": "38d6c353ab835a8523d6086d29a60a8eb8be4bfab7a7939a7ab2dfdbb537a54f"
       },
       "identityConfidence": "HIGH",
-      "identityRationale": "Exact match for Fruity Chutes Classic Elliptical 30\" standard nylon parachute (CFC-30-N-ST) used in drogue role.",
-      "conflicts": "Same rounding difference: integer 88 g vs float 87.9 g.",
-      "proposedDisposition": "hold",
-      "dispositionEvidence": "Same as PROP-20261105-01. Awaits reviewer decision on mass field precision convention.",
-      "rollbackRequirements": "Prior value 88 g must be preserved in catalog provenance history."
+      "identityRationale": "Exact match for Fruity Chutes Classic Elliptical 30\" standard nylon parachute (CFC-30-N-ST) evaluated in drogue role.",
+      "conflicts": "Same rounding equivalence: integer 88 g vs float 87.9 g from 3.1 oz.",
+      "proposedDisposition": "retain-rounded",
+      "dispositionEvidence": "Same as PROP-20261105-01. Parent direction: retain existing 88 g as rounded equivalent of published 87.9 g. Recommendation is retain-rounded / no change. Actual parent acceptance is separate.",
+      "rollbackRequirements": "Existing value 88 g is retained in parts.js."
     },
     {
       "proposalId": "PROP-20261105-03",
@@ -70,7 +72,7 @@
       "currentUnit": "in",
       "proposedValue": 1.5,
       "proposedUnit": "in",
-      "manufacturerSKU": "IFC-30-SUL-OB (conflated) vs IFC-30-SL (actual)",
+      "manufacturerSKU": "IFC-30-SUL-OB (staged) vs IFC-30-SL (unconfirmed)",
       "manufacturerMaterial": "0.7 oz ripstop nylon, 200 lb Spectra shroud lines, Spectra Loop bridle",
       "nominalSize": "30 in diameter, 8 gores",
       "source": {
@@ -80,12 +82,12 @@
         "artifactRelativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-ifc-30-sul-ultralight.md",
         "artifactSha256": "a58bbac41e333da174b7ef4c0a6e46ed6b8b5d37038b06066c12fc7caec036a9"
       },
-      "identityConfidence": "REJECT_VARIANT_MISMATCH",
-      "identityRationale": "The source cited in the proposal is for IFC-30-SUL (Iris Ultralight). However, catalog part ifc-030-sl with packed_diam 1.9 in, packed_length 3.2 in, and weight 45 g corresponds to manufacturer model IFC-30-SL (Iris Light, 46 g, 1.9 in x 3.2 in). IFC-30-SUL is a distinct 38 g, 1.5 in x 4.2 in model.",
-      "conflicts": "Conflation of two distinct manufacturer lines: 'Iris Light' (IFC-30-SL) and 'Iris Ultralight' (IFC-30-SUL). In addition, the 1.5 in x 4.2 in dimensions assume deployment bag packing density (0.18 oz/cu in); traditional fold is 0.13 oz/cu in.",
-      "proposedDisposition": "reject",
-      "dispositionEvidence": "Applying 1.5 in to ifc-030-sl overwrites the valid dimensions of the IFC-30-SL part with dimensions from the IFC-30-SUL variant. IFC-30-SUL should be introduced as a separate catalog part if desired, rather than destroying ifc-030-sl.",
-      "rollbackRequirements": "Retain existing value 1.9 in. Invariant check must prevent cross-variant overwrites."
+      "identityConfidence": "UNCONFIRMED_HYPOTHESIS",
+      "identityRationale": "Primary sources captured omit IFC-30-SL. The proposed 1.5 in dimension was extracted from the IFC-30-SUL (Iris Ultralight) product page. Catalog part ifc-030-sl specifies 1.9 in packed diameter, 3.2 in packed length, and 45 g mass. Mapping ifc-030-sl to IFC-30-SL is an unconfirmed hypothesis: the primary manufacturer construction tutorial page mentions Iris annular parachutes but does not establish SKU dimensions or weight. A third-party distributor lists 46 g, while the catalog lists 45 g; 45.4 g was an arithmetic conversion from 1.6 oz rather than an asserted primary source spec. Renaming or overwriting ifc-030-sl based on inference is prohibited.",
+      "conflicts": "Conflation of Iris Ultralight (IFC-30-SUL) with catalog record ifc-030-sl. In addition, 1.5 in x 4.2 in dimensions assume deployment bag packing density (0.18 oz/cu in); traditional fold is ~0.13 oz/cu in.",
+      "proposedDisposition": "hold",
+      "dispositionEvidence": "Proposal is placed on HOLD. SUL dimensions (1.5 in x 4.2 in) diverge from catalog record (1.9 in x 3.2 in), and a primary manufacturer source for IFC-30-SL is not captured. Overwriting or renaming ifc-030-sl from inference is prohibited.",
+      "rollbackRequirements": "Retain existing catalog value 1.9 in. Prohibit overwrite."
     },
     {
       "proposalId": "PROP-20261105-04",
@@ -96,7 +98,7 @@
       "currentUnit": "in",
       "proposedValue": 4.2,
       "proposedUnit": "in",
-      "manufacturerSKU": "IFC-30-SUL-OB (conflated) vs IFC-30-SL (actual)",
+      "manufacturerSKU": "IFC-30-SUL-OB (staged) vs IFC-30-SL (unconfirmed)",
       "manufacturerMaterial": "0.7 oz ripstop nylon, 200 lb Spectra shroud lines",
       "nominalSize": "30 in diameter, 8 gores",
       "source": {
@@ -106,12 +108,12 @@
         "artifactRelativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-ifc-30-sul-ultralight.md",
         "artifactSha256": "a58bbac41e333da174b7ef4c0a6e46ed6b8b5d37038b06066c12fc7caec036a9"
       },
-      "identityConfidence": "REJECT_VARIANT_MISMATCH",
-      "identityRationale": "Same variant mismatch as PROP-20261105-03. Catalog 3.2 in matches IFC-30-SL (1.9 in x 3.2 in); proposed 4.2 in is for IFC-30-SUL.",
-      "conflicts": "Variant mismatch between IFC-30-SL and IFC-30-SUL.",
-      "proposedDisposition": "reject",
-      "dispositionEvidence": "Overwrites IFC-30-SL packed length with IFC-30-SUL packed length.",
-      "rollbackRequirements": "Retain existing value 3.2 in."
+      "identityConfidence": "UNCONFIRMED_HYPOTHESIS",
+      "identityRationale": "Same unconfirmed mapping hypothesis as PROP-20261105-03. Catalog packed length is 3.2 in; proposed 4.2 in is from IFC-30-SUL. Primary manufacturer source for IFC-30-SL is missing.",
+      "conflicts": "Divergence between IFC-30-SUL specs and catalog ifc-030-sl record.",
+      "proposedDisposition": "hold",
+      "dispositionEvidence": "Held pending valid primary source for IFC-30-SL. Prohibit overwriting with SUL dimensions.",
+      "rollbackRequirements": "Retain existing catalog value 3.2 in."
     },
     {
       "proposalId": "PROP-20261105-05",
@@ -122,7 +124,7 @@
       "currentUnit": "g",
       "proposedValue": 38,
       "proposedUnit": "g",
-      "manufacturerSKU": "IFC-30-SUL-OB (conflated) vs IFC-30-SL (actual)",
+      "manufacturerSKU": "IFC-30-SUL-OB (staged) vs IFC-30-SL (unconfirmed)",
       "manufacturerMaterial": "0.7 oz ripstop nylon vs 1.1 oz ripstop nylon",
       "nominalSize": "30 in diameter, 8 gores",
       "source": {
@@ -132,12 +134,12 @@
         "artifactRelativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-ifc-30-sul-ultralight.md",
         "artifactSha256": "a58bbac41e333da174b7ef4c0a6e46ed6b8b5d37038b06066c12fc7caec036a9"
       },
-      "identityConfidence": "REJECT_VARIANT_MISMATCH",
-      "identityRationale": "Catalog ifc-030-sl mass 45 g corresponds to IFC-30-SL (1.6 oz = 45.36 g -> 45 g). Proposed 38 g is for IFC-30-SUL (1.34 oz = 37.99 g -> 38 g).",
-      "conflicts": "Replacing IFC-30-SL weight with IFC-30-SUL weight.",
-      "proposedDisposition": "reject",
-      "dispositionEvidence": "Wrong-variant substitution. 45 g represents IFC-30-SL.",
-      "rollbackRequirements": "Retain existing value 45 g."
+      "identityConfidence": "UNCONFIRMED_HYPOTHESIS",
+      "identityRationale": "Catalog part ifc-030-sl lists 45 g. Proposed 38 g is from IFC-30-SUL (1.34 oz = 37.99 g -> 38 g). Primary sources omit IFC-30-SL. Distributor lists 46 g, catalog lists 45 g, and 45.4 g was arithmetic conversion from 1.6 oz. Do not turn similarity or arithmetic conversion into source assertion. Retain source discrepancies and exact units.",
+      "conflicts": "Divergence between SUL (38 g), catalog (45 g), and distributor (46 g).",
+      "proposedDisposition": "hold",
+      "dispositionEvidence": "Held pending valid primary source proving exact SKU and specs for IFC-30-SL. Prohibit overwriting with SUL mass.",
+      "rollbackRequirements": "Retain existing catalog value 45 g."
     },
     {
       "proposalId": "PROP-20261105-06",
@@ -148,7 +150,7 @@
       "currentUnit": "in",
       "proposedValue": 1.5,
       "proposedUnit": "in",
-      "manufacturerSKU": "IFC-30-SUL-OB (conflated) vs IFC-30-SL (actual)",
+      "manufacturerSKU": "IFC-30-SUL-OB (staged) vs IFC-30-SL (unconfirmed)",
       "manufacturerMaterial": "0.7 oz ripstop nylon",
       "nominalSize": "30 in diameter, 8 gores",
       "source": {
@@ -158,12 +160,12 @@
         "artifactRelativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-ifc-30-sul-ultralight.md",
         "artifactSha256": "a58bbac41e333da174b7ef4c0a6e46ed6b8b5d37038b06066c12fc7caec036a9"
       },
-      "identityConfidence": "REJECT_VARIANT_MISMATCH",
-      "identityRationale": "Same as PROP-20261105-03 (drogue category entry).",
-      "conflicts": "Variant mismatch.",
-      "proposedDisposition": "reject",
-      "dispositionEvidence": "Wrong-variant substitution.",
-      "rollbackRequirements": "Retain existing value 1.9 in."
+      "identityConfidence": "UNCONFIRMED_HYPOTHESIS",
+      "identityRationale": "Same as PROP-20261105-03 (drogue category entry). Mapping to IFC-30-SL is unconfirmed hypothesis; primary SL source is missing.",
+      "conflicts": "Variant divergence.",
+      "proposedDisposition": "hold",
+      "dispositionEvidence": "Held pending primary source. Prohibit overwrite.",
+      "rollbackRequirements": "Retain existing catalog value 1.9 in."
     },
     {
       "proposalId": "PROP-20261105-07",
@@ -174,7 +176,7 @@
       "currentUnit": "in",
       "proposedValue": 4.2,
       "proposedUnit": "in",
-      "manufacturerSKU": "IFC-30-SUL-OB (conflated) vs IFC-30-SL (actual)",
+      "manufacturerSKU": "IFC-30-SUL-OB (staged) vs IFC-30-SL (unconfirmed)",
       "manufacturerMaterial": "0.7 oz ripstop nylon",
       "nominalSize": "30 in diameter, 8 gores",
       "source": {
@@ -184,12 +186,12 @@
         "artifactRelativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-ifc-30-sul-ultralight.md",
         "artifactSha256": "a58bbac41e333da174b7ef4c0a6e46ed6b8b5d37038b06066c12fc7caec036a9"
       },
-      "identityConfidence": "REJECT_VARIANT_MISMATCH",
+      "identityConfidence": "UNCONFIRMED_HYPOTHESIS",
       "identityRationale": "Same as PROP-20261105-04 (drogue category entry).",
-      "conflicts": "Variant mismatch.",
-      "proposedDisposition": "reject",
-      "dispositionEvidence": "Wrong-variant substitution.",
-      "rollbackRequirements": "Retain existing value 3.2 in."
+      "conflicts": "Variant divergence.",
+      "proposedDisposition": "hold",
+      "dispositionEvidence": "Held pending primary source.",
+      "rollbackRequirements": "Retain existing catalog value 3.2 in."
     },
     {
       "proposalId": "PROP-20261105-08",
@@ -200,7 +202,7 @@
       "currentUnit": "g",
       "proposedValue": 38,
       "proposedUnit": "g",
-      "manufacturerSKU": "IFC-30-SUL-OB (conflated) vs IFC-30-SL (actual)",
+      "manufacturerSKU": "IFC-30-SUL-OB (staged) vs IFC-30-SL (unconfirmed)",
       "manufacturerMaterial": "0.7 oz ripstop nylon",
       "nominalSize": "30 in diameter, 8 gores",
       "source": {
@@ -210,12 +212,12 @@
         "artifactRelativePath": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/fruitychutes-ifc-30-sul-ultralight.md",
         "artifactSha256": "a58bbac41e333da174b7ef4c0a6e46ed6b8b5d37038b06066c12fc7caec036a9"
       },
-      "identityConfidence": "REJECT_VARIANT_MISMATCH",
+      "identityConfidence": "UNCONFIRMED_HYPOTHESIS",
       "identityRationale": "Same as PROP-20261105-05 (drogue category entry).",
-      "conflicts": "Variant mismatch.",
-      "proposedDisposition": "reject",
-      "dispositionEvidence": "Wrong-variant substitution.",
-      "rollbackRequirements": "Retain existing value 45 g."
+      "conflicts": "Variant divergence.",
+      "proposedDisposition": "hold",
+      "dispositionEvidence": "Held pending primary source. Prohibit overwrite.",
+      "rollbackRequirements": "Retain existing catalog value 45 g."
     },
     {
       "proposalId": "PROP-20261105-09",
@@ -237,11 +239,11 @@
         "artifactSha256": "c605770dbd6a773d442e3f7c8ece01f6e5e76d9f42c380e15887f43688c7285a"
       },
       "identityConfidence": "REJECT_VARIANT_MISMATCH",
-      "identityRationale": "Catalog part lp-024 has packed diameter 1.38 in, packed length 1.57 in, and mass 20 g, which corresponds exactly to the Rocketman Ultra-Light High-Performance CD 2.2 (0.66 oz nylon, 0.7 oz = 19.84 g, 1.375 in D x 1.569 in L). The proposal extracted 2.0 in from the Standard 1.1 oz nylon product page.",
+      "identityRationale": "Catalog part lp-024 (packed diameter 1.38 in, packed length 1.57 in, mass 20 g) matches Rocketman Ultra-Light line (0.66 oz nylon, 0.7 oz = 19.84 g -> 20 g, 1.375 in D x 1.569 in L). The proposal extracted 2.0 in from the Standard 1.1 oz nylon page. Overwriting ultralight specs with standard specs is rejected based on primary physical and material evidence.",
       "conflicts": "Standard line versus Ultra-Light line mismatch. Fabric weight differs by 67% (1.1 oz vs 0.66 oz); line material differs (nylon vs Spectra).",
       "proposedDisposition": "reject",
       "dispositionEvidence": "Rocketman manufactures two distinct product lines: 'Standard High Performance CD 2.2' and 'Ultra-Light High-Performance CD 2.2'. Catalog lp-024 is the Ultra-Light variant. Overwriting it with standard specs is a destructive error.",
-      "rollbackRequirements": "Retain existing value 1.38 in."
+      "rollbackRequirements": "Retain existing value 1.38 in. Prohibit overwrite."
     },
     {
       "proposalId": "PROP-20261105-10",
@@ -266,7 +268,7 @@
       "identityRationale": "Same variant mismatch as PROP-20261105-09. Catalog 1.57 in is 1.569 in from Ultra-Light line; proposed 2.75 in is from Standard line.",
       "conflicts": "Standard vs Ultra-Light line mismatch.",
       "proposedDisposition": "reject",
-      "dispositionEvidence": "Wrong-variant substitution.",
+      "dispositionEvidence": "Wrong-variant substitution rejected based on physical material evidence.",
       "rollbackRequirements": "Retain existing value 1.57 in."
     },
     {
@@ -289,10 +291,10 @@
         "artifactSha256": "c605770dbd6a773d442e3f7c8ece01f6e5e76d9f42c380e15887f43688c7285a"
       },
       "identityConfidence": "REJECT_VARIANT_MISMATCH",
-      "identityRationale": "Catalog lp-024 weight 20 g is rounded from 0.7 oz (19.84 g) of the Ultra-Light line. The proposed value 87.88 g is 3.1 oz of the Standard line (over 4x heavier!).",
+      "identityRationale": "Catalog lp-024 weight 20 g is rounded from 0.7 oz (19.84 g) of the Ultra-Light line. The proposed value 87.88 g is 3.1 oz of the Standard line (over 4x heavier).",
       "conflicts": "Severe mass discrepancy (+339%) due to comparing standard nylon against ultralight.",
       "proposedDisposition": "reject",
-      "dispositionEvidence": "Replacing a 20 g ultralight chute with an 88 g standard chute would ruin payload mass budgets and recovery sizing.",
+      "dispositionEvidence": "Replacing a 20 g ultralight chute with an 88 g standard chute would invalidate vehicle recovery sizing.",
       "rollbackRequirements": "Retain existing value 20 g."
     },
     {
@@ -315,8 +317,8 @@
         "artifactSha256": "c605770dbd6a773d442e3f7c8ece01f6e5e76d9f42c380e15887f43688c7285a"
       },
       "identityConfidence": "REJECT_VARIANT_MISMATCH",
-      "identityRationale": "Catalog lp-036 packed diameter 1.38 in, packed length 3.08 in, and mass 43 g match the Rocketman Ultra-Light line (1.5 oz = 42.52 g, 1.375 in D x 3.08 in L). Proposed 2.6 in is from the Standard 1.1 oz line (2.6 in D x 4.52 in L).",
-      "conflicts": "Standard line versus Ultra-Light line mismatch. Additionally, the Standard 36 in page has an internal conflict between descent table (7.4 lb @ 20 fps) and text line (Rating: 7lb @ 20fps).",
+      "identityRationale": "Catalog lp-036 packed diameter 1.38 in, packed length 3.08 in, and mass 43 g match the Rocketman Ultra-Light line (1.5 oz = 42.52 g, 1.375 in D x 3.08 in L). Proposed 2.6 in is from the Standard 1.1 oz line (2.6 in D x 4.52 in L). Additionally, the Standard 36 in page has an internal conflict between descent table (7.4 lb @ 20 fps) and text line (Rating: 7lb @ 20fps).",
+      "conflicts": "Standard line versus Ultra-Light line mismatch. Standard page internal conflict between 7.4 lb and 7.0 lb.",
       "proposedDisposition": "reject",
       "dispositionEvidence": "Standard line specifications cannot be applied to an Ultra-Light catalog entry.",
       "rollbackRequirements": "Retain existing value 1.38 in."
@@ -344,7 +346,7 @@
       "identityRationale": "Same variant mismatch as PROP-20261105-12. Catalog 3.08 in exactly matches the Ultra-Light manufacturer spec (1.375 in D x 3.08 in L). Proposed 4.52 in is from Standard line.",
       "conflicts": "Standard vs Ultra-Light line mismatch.",
       "proposedDisposition": "reject",
-      "dispositionEvidence": "Wrong-variant substitution.",
+      "dispositionEvidence": "Wrong-variant substitution rejected based on physical material evidence.",
       "rollbackRequirements": "Retain existing value 3.08 in."
     },
     {
