@@ -5,22 +5,26 @@
 The owner requested Antigravity research and validation design. Integration
 branch is now `evidence/online-validation-2026-11-05`, based on the final
 qualified head `725d8a0446b9225fbb24a70f1b0065d5cdf70f9f`. The Antigravity
-Opus physics assignment failed on quota before producing research or edits;
-the separate Gemini catalog assignment remains outstanding at this checkpoint.
-The owner has now authorized selection of other working Antigravity models;
-Sonnet also failed on quota without research. The next physics route is Gemini
-high, while the disjoint catalog assignment remains Gemini medium.
-No evidence acceptance is claimed. See
+Opus and Sonnet physics assignments failed on quota without research. The owner
+authorized other working Antigravity models; Gemini is now used for the
+bounded source/implementation assignments. See
 `history/online-validation-2026-11-05/ORCHESTRATION.md` for routing and next
-actions. Gemini high physics research is assigned. The catalog packet at
-`25fcc470531159d6e15767877319f151fb818900` was merged for revision after
-independent review found unsupported Iris identity/rating claims and gaps in
-the claimed validation coverage. See CATALOG-REVIEW-1.md in that history
-directory. No production edits/acceptance. Dispatch the bounded catalog
-revision. Physics design `96d4252fe4fe07062982c5d68c56b141660b78f9` is now
+actions. Catalog revision `91be050a5b5e6f773b550f6936ba9ca474e2f0b0` is
+integrated; follow-up checker `9393744ec7dfb2825ee3073fe616f5e90008638a`
+passes 243 assertions from three primary-checkout working directories and 11
+tests. CATALOG-REVIEW-2.md / CATALOG-EVIDENCE.json record six rejected
+substitutions, two retained rounded values and six Iris holds: eight resolved
+recent rows, zero new engineering values accepted. The broader catalog gate
+remains open. Small checker follow-ups are author-verified, without a new
+independent final-checker verdict.
+
+Physics design `96d4252fe4fe07062982c5d68c56b141660b78f9` is now
 merged for revision. PHYSICS-GATE-1.md records arithmetic/provenance objections
 and authorizes four bounded executable analytic checks; coast/flight are
-excluded or blocked. Implement and independently verify the amended scope.
+excluded or blocked. Gemini high analytic implementation and a separate
+version-pinned OpenRocket execution attempt are outstanding. Next: receive,
+review and independently verify those outputs; then publish the bounded
+validation increment. No production physics or catalog values have changed.
 Do not ask again before choosing another available Antigravity model.
 
 ## Qualified release-candidate checkpoint

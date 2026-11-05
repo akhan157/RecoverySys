@@ -44,8 +44,17 @@ recorded model switch after provider error, not evidence acceptance.
 Physics Gemini high completed at `96d4252fe4fe07062982c5d68c56b141660b78f9`.
 Parent review in PHYSICS-GATE-1.md requires corrected arithmetic/provenance
 and excludes unaligned coast/flight claims. Four reachable analytic checks
-are approved for executable implementation in that packet. A separate,+disjoint OpenRocket reference lane may establish an actual version-pinned
+are approved for executable implementation in that packet. A separate,
+disjoint OpenRocket reference lane may establish an actual version-pinned
 simulator run with isolated user-local Java/prebuilt artifacts, bounded memory
 and two jobs; no global installation or production engine changes. Raw logs,
 tools and binaries stay outside git. Parent reviews both outputs and retains
 all unavailable/mismatched inputs rather than inventing parity.
+
+Catalog revision `91be050a5b5e6f773b550f6936ba9ca474e2f0b0` is integrated.
+Parent review/decisions in CATALOG-REVIEW-2.md and CATALOG-EVIDENCE.json resolve
+eight recent rows and retain six Iris holds. Small checker follow-up `9393744`
+is author-verified: 243 assertions from three primary checkout working
+directories and 11 tests pass. No production engineering changes or final
+independent checker verdict is claimed. Physics and OpenRocket execution
+assignments remain outstanding; no result has been received at this checkpoint.

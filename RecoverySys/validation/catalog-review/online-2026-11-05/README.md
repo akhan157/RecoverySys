@@ -1,5 +1,14 @@
 # Online Catalog Evidence, Variant Resolution & Validation Design (Revision 2)
 
+Integrated follow-up: checker source `9393744ec7dfb2825ee3073fe616f5e90008638a`
+passes **243 assertions and 11 tests**. It also checks proposal/capture hash
+agreement, matching source URL/path, declared units and category-specific
+catalog records. The Revision 2 execution results below describe its earlier
+215-assertion/7-test worker run. See the parent's
+`docs/history/online-validation-2026-11-05/CATALOG-REVIEW-2.md` and
+`CATALOG-EVIDENCE.json` for current scope and dispositions. These small later
+checker changes are author-verified; no engineering acceptance is implied.
+
 **Date:** 2026-11-05  
 **Lane Directory:** `RecoverySys/validation/catalog-review/online-2026-11-05/`  
 **Base Pin:** `725d8a0446b9225fbb24a70f1b0065d5cdf70f9f`  
