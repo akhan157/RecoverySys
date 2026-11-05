@@ -1,0 +1,57 @@
+{
+  "id": "ascent-insufficient-thrust-edge",
+  "domain": "ascent",
+  "kind": "analytic",
+  "status": "review",
+  "inputs": {
+    "specs": {
+      "rocket_mass_g": "2000",
+      "motor_total_impulse_ns": "1",
+      "burn_time_s": "5",
+      "airframe_id_in": "6",
+      "drag_cd": "0.5",
+      "main_deploy_alt_ft": "500"
+    },
+    "config": {
+      "main_chute": {
+        "specs": {
+          "diameter_in": 36,
+          "cd": 1.5
+        }
+      }
+    },
+    "customMotor": null
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "result_available",
+        "value": 0,
+        "unit": "boolean",
+        "tolerance": {
+          "basis": "analyst-derived",
+          "absolute": 0
+        },
+        "notes": "Exact algebraic or categorical invariant; no measurement uncertainty is implied."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/flight-equations-with-drag/",
+    "title": "NASA Glenn vertical force balance",
+    "accessed": "2026-11-05",
+    "citation": "NASA Glenn vertical force balance",
+    "derivation": "Average thrust 1 Ns / 5 s =0.2 N is below initial 2kg*9.80665 weight; no valid flight should clear the 500ft main deployment altitude."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "The browser JavaScript production estimator. Each case records the exact model and assumptions identity that it exercises."
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Report the stated invariant or analytic difference; acceptance requires a separate independent review."
+  },
+  "notes": "This checks model rejection, not rail behavior or a thrust-to-weight launch criterion. Review-only; no flight validation or acceptance is claimed."
+}

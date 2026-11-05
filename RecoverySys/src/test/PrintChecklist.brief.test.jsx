@@ -21,7 +21,11 @@ describe('PrintChecklist recovery brief', () => {
       />
     )
     expect(screen.getByText(/STALE_RESULT/)).toBeInTheDocument()
-    expect(screen.getByText(/Insufficient confidence/)).toBeInTheDocument()
+    const provenance = screen
+      .getByRole('heading', { name: 'Evidence and model provenance' })
+      .closest('section')
+    expect(provenance).toHaveTextContent('Result state: stale')
+    expect(provenance).toHaveTextContent('Evidence posture: Insufficient confidence')
     expect(screen.getByText('Rerun before use.')).toBeInTheDocument()
     expect(screen.getByText('This brief does not authorize launch.')).toBeInTheDocument()
   })
@@ -49,6 +53,10 @@ describe('PrintChecklist recovery brief', () => {
       />
     )
     expect(container.querySelector('.print-checklist--checklist')).toBeInTheDocument()
+    expect(container.querySelector('.print-shared-provenance')).not.toHaveClass(
+      'print-artifact--brief'
+    )
+    expect(container.querySelector('.print-shared-review')).not.toHaveClass('print-artifact--brief')
     expect(
       screen.getByRole('heading', { name: 'RecoverySys Recovery Checklist' })
     ).toBeInTheDocument()

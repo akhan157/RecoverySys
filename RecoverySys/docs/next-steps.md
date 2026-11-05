@@ -1,12 +1,25 @@
 # RecoverySys next steps
 
+Working candidate: **1.3.0-rc.2** (2026-11-05; qualification in progress).
+Published candidate: **1.3.0-rc.1**. Stable promotion remains open.
+
+Current execution records:
+- [Release gates and manual platform template](release-gates-1.3.0.md)
+- [Current qualification](release-qualification-2026-11-05.md)
+- [Primary-source research](online-evidence-2026-11-05.md)
+
 Tagged test candidate: **1.3.0-rc.1**, 2026-10-19. See the release qualification record for measured results. Historical implementation notes are in `history/next-steps-through-2026-10-19.md`.
 
-## Recovery-chain additions (2026-11-04, local main, not pushed or deployed)
+## Recovery-chain additions (2026-11-04; integrated and deployed at `3a98e9a`)
 
-Three presentation features merged on local `main` (`a5f81e1`), each built in its own lane, reviewed and fixed by the orchestrator: recovery hardware mass roll-up, deployment sequence, and whole-chain load-path margins. Checks on the merged tree: 469 unit/component tests in 48 files, format/lint/catalog/corpus/build/build-identity, and 92/92 desktop/mobile browser workflows against the production build. Records: `history/lanes-2026-11-04/`.
+Three presentation features merged on `main` (`a5f81e1`), each built in its own lane, reviewed and fixed by the orchestrator: recovery hardware mass roll-up, deployment sequence, and whole-chain load-path margins. Checks on the merged tree: 469 unit/component tests in 48 files, format/lint/catalog/corpus/build/build-identity, and 92/92 desktop/mobile browser workflows against the production build. Records: `history/lanes-2026-11-04/`.
 
-Open decision: the load-path view shows elements that no compatibility rule checks against some load cases (quick links and swivel vs the elongation-amplified snatch and the main snatch proxy; swivel vs opening shock). A 2.5 kg dual-deploy fixture puts a 400 lb swivel at 0.88x the snatch proxy. Adding rules would change warning output and needs an owner decision.
+The owner authorized completion on 2026-11-05. The working rc.2 adds series-chain
+warnings for quick links/swivel versus elongation snatch and the main-snatch
+proxy, and for swivel versus opening shock. Existing thresholds are retained. Compatibility findings now derive synchronously
+from current inputs, closing the prior fast-run/export warning gap.
+See [release gates](release-gates-1.3.0.md) and the
+[2026-11-05 qualification](release-qualification-2026-11-05.md).
 
 ## Post-candidate main (2026-10-31, not yet a release)
 
@@ -17,7 +30,7 @@ The current `main` contains unreleased review fixes beyond the tagged rc.1 artif
 - New browser coverage: supplier budgeting, custom-part CRUD, motor search, simulation failure, JSON source identity, flight-log dedupe/evidence/delete, storage migration, corrupt-store preservation, demo Save protection, share-link Save/Start-Fresh, packing not-evaluated, and unmatched-value reload behavior.
 - Known retained limitations: compatibility samples drogue descent at a fixed 5,000 ft while simulation samples the phase midpoint; drogue-only landing energy uses the mid-phase rate while compatibility samples ground level; the suggestion panel ranks drogue rates at sea level. These are disclosed model choices, not accepted evidence.
 - The supplier workflow was manually disabled on 2026-10-23 and re-enabled on 2026-10-31. A manual dispatch then refreshed all 103 offers for all three suppliers with zero failures; the remaining freshness risk is workflow availability plus GitHub raw-content cache delay.
-- The deployed Pages build tracks `main` (`b4853cb`) and still carries the rc.1 version label; it is not a qualification of these changes. `npm run verify:pages` passes against the live site, and the deploy workflow runs the same check after publishing.
+- The latest verified application deployment is `3a98e9a` (2026-11-04; supplier-only commits followed) and carries the rc.1 version label; it is not a qualification of these changes. `npm run verify:pages` passes against the live site, and the deploy workflow runs the same check after publishing.
 
 Implemented in this candidate:
 - Bounded OpenRocket 1.4–1.11 import, with accepted source identity preserved through storage, JSON and share links.
@@ -34,8 +47,8 @@ Verified candidate preparation:
 
 Remaining external/review evidence:
 1. Manual Windows/macOS workflow trials and 10–15 observed rocketeer workflows using `v1-field-trial.md`.
-2. Independent physics review: the existing 14 cases remain review-only; zero accepted comparison cases and zero real-flight cases. Review the new standalone analytic report, including its tolerance findings.
+2. Independent physics review: the current 21 cases remain review-only; zero accepted comparison cases and zero real-flight cases. Review the new standalone analytic report, including its tolerance findings.
 3. Review 37 manufacturer engineering candidates / 35 proposed field differences before any catalog change. Expand supplier coverage only when exact product/variant identity is established.
-4. Recheck the development dependency advisories before stable promotion. After upgrading to `vite@7.3.7` the 2026-11-02 audit reports zero high/critical and seven moderate development-only findings (eslint tooling, `fast-uri`, `minimatch`); the production dependency audit reports zero. Tailwind is no longer the advisory source.
+4. Recheck dependency advisories immediately before stable promotion. The 2026-11-05 rc.2 lockfile patches `fast-uri` to 3.1.9; full and production npm audits report zero advisories.
 
 Model changes and a Python-engine decision remain evidence-led follow-up work. Browser JavaScript remains authoritative. Revisit visualization only after a useful assembly-review task and prototype have been reviewed.

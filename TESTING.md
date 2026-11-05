@@ -53,3 +53,18 @@ The Pages workflow runs it after deployment.
 - When adding error handling → add a test that triggers the error.
 - When adding an if/else → add tests for both paths.
 - Never commit code that makes existing tests fail.
+
+## 1.3 qualification matrix (2026-11-05)
+
+Supported majors are Node 22, 24 and 26. CI runs the full check independently
+on all three; browser and portable jobs use Node 22. Vitest uses two workers
+because XML corpus/component suites are memory-heavy; fixture timeouts remain
+unchanged. A passing latest patch run does not imply every older patch has been
+individually exercised.
+
+`e2e/full-parity.spec.js` includes a fresh-context matrix for JSON, share-link and
+saved-reload transfers, regenerated estimates, findings, both print modes,
+model/input identity, stale withholding and candidate evidence. The full suite
+also covers custom motors/parts, OpenRocket source identity, invalid payloads,
+Flight Log deduplication and preserved corrupt storage. These automated Linux
+browser workflows do not close manual Windows/macOS or observed-user gates.

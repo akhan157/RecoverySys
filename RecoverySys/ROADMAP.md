@@ -1,8 +1,9 @@
 # RecoverySys Product Roadmap
 
-**Roadmap revision:** 2026-10-19
-**Current branch:** `main`
-**Current candidate:** `1.3.0-rc.1` (2026-10-19; local and remote CI passed; manual/user evidence open)
+**Roadmap revision:** 2026-11-05
+**Release target:** `main`
+**Working candidate:** `1.3.0-rc.2` (2026-11-05; see dated qualification; manual/user evidence open)
+**Published candidate:** `1.3.0-rc.1` (2026-10-19)
 
 This is the high-level source of truth for product direction and progress. The
 detailed implementation plans remain useful, but they are subordinate to this
@@ -107,7 +108,7 @@ fully qualified v2/v3 release.
 
 ### Not Yet Complete
 
-- Fourteen review-only validation cases now exist, including scalar and curve representative end-to-end plans plus descent unit-conversion, invalid-input edge, and metamorphic coverage. There are no accepted comparison cases or real-flight evidence cases.
+- Twenty-one review-only validation cases now exist, including scalar and curve representative end-to-end plans plus descent unit-conversion, invalid-input edge, and metamorphic coverage. There are no accepted comparison cases or real-flight evidence cases.
 - Catalog provenance is still primarily manufacturer-level and unverified; per-part source review is not complete.
 - The Analysis tab now has the integrated cause-to-consequence review surface, canonical semantic support, stale-result closure, and responsive/accessibility behavior. Broader application redesign remains deferred.
 - `DetailsTab.jsx` and `MethodDetailsTab.jsx` remain snapshot/prototype work outside the GuidedReview integration.
@@ -201,7 +202,7 @@ stronger product claims.
 
 Work:
 
-- Expand the corpus beyond the current 14 review cases with explicit atmosphere,
+- Expand the corpus beyond the current 21 review cases with explicit atmosphere,
   ascent-domain, additional unit-conversion, edge-case, metamorphic, and
   representative end-to-end coverage.
 - ~~Add deterministic machine-readable case summaries and coverage by output domain.~~
@@ -382,7 +383,7 @@ verification above:
 
 - **Independent evidence:** no accepted comparison cases, independent reviewer
   identity, trusted simulator artifact, manufacturer/test dataset, or traceable
-  real-flight observation has been supplied. The 14 current corpus cases remain
+  real-flight observation has been supplied. The 21 current corpus cases remain
   review-only.
 - **Windows release artifact:** CI builds and asserts archive contents, but the
   integrated checkpoint still requires a fresh Windows launch and hash check.
@@ -561,7 +562,7 @@ and M2.
 
 ### Step 2: Finish M1 - Validation, Evidence, And Catalog Provenance
 
-1. Expand the validation corpus beyond the current 14 review cases.
+1. Expand the validation corpus beyond the current 21 review cases.
 2. ~~Add deterministic machine-readable case summaries and coverage by output domain.~~
 3. ~~Complete seeded dispersion coverage and make stochastic fixtures reproducible.~~ Broader stochastic fixture coverage remains incomplete.
 4. Document tolerance derivation, input equivalence, units, model identity, and scope for every case.
@@ -690,3 +691,14 @@ manufacturer guidance, field procedures, range rules, or validated flight
 simulation.
 
 Current candidate evidence supersedes historical snapshots: see `docs/release-qualification-2026-10-19.md` and `docs/next-steps.md`. Commercial coverage is 103 distinct IDs across three manufacturers; engineering proposals remain unaccepted.
+
+## 2026-11-05 release preparation
+
+Series-chain warning closure, bounded XML test execution, cross-transfer/print
+qualification, corpus 0.3.0 (21 review-only cases), primary-source research and
+rc.2 identity preparation are recorded in
+[the current qualification](docs/release-qualification-2026-11-05.md).
+[Release gates](docs/release-gates-1.3.0.md) distinguish code checks from
+Windows/macOS manual trials, independent comparison acceptance, observed user
+workflows and per-part catalog decisions. M0–M6 remain partial until their
+evidence gates close; M7–M9 remain evidence-led follow-up tracks.

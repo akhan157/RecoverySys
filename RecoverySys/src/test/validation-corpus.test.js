@@ -3,148 +3,50 @@ import { validateCorpus } from '../../scripts/validate-corpus.js'
 
 describe('validation corpus gate', () => {
   it('validates the checked-in corpus and production model identity', () => {
-    expect(validateCorpus()).toMatchObject({ valid: true, diagnostics: [], cases: 14 })
+    expect(validateCorpus()).toMatchObject({ valid: true, diagnostics: [], cases: 21 })
   })
 
   it('reports deterministic output-domain coverage without promoting review cases', () => {
     const result = validateCorpus()
     expect(validateCorpus()).toEqual(result)
 
-    expect(result.domainCoverage).toEqual([
-      {
-        domain: 'ascent',
-        caseCount: 1,
-        caseIds: ['ascent-apogee-scalar-2kg-2000ns'],
-        outputMetrics: ['apogee_ft', 'apogee_t_s', 'burnout_t_s'],
-        statusCounts: {
-          draft: 0,
-          review: 1,
-          'accepted-for-comparison': 0,
-          superseded: 0,
-          rejected: 0,
-        },
-        acceptedCaseIds: [],
-        unreviewedCaseIds: ['ascent-apogee-scalar-2kg-2000ns'],
-      },
-      {
-        domain: 'atmosphere',
-        caseCount: 2,
-        caseIds: ['isa-density-5000m', 'isa-density-sea-level'],
-        outputMetrics: ['density_kg_m3'],
-        statusCounts: {
-          draft: 0,
-          review: 2,
-          'accepted-for-comparison': 0,
-          superseded: 0,
-          rejected: 0,
-        },
-        acceptedCaseIds: [],
-        unreviewedCaseIds: ['isa-density-5000m', 'isa-density-sea-level'],
-      },
-      {
-        domain: 'descent',
-        caseCount: 6,
-        caseIds: [
-          'recovery-descent-main-2kg-500ft',
-          'terminal-descent-36in-main-sea-level',
-          'terminal-descent-altitude-ft-unit-conversion',
-          'terminal-descent-diameter-doubling-metamorphic',
-          'terminal-descent-invalid-chute-edge',
-          'terminal-descent-mass-doubling-metamorphic',
-        ],
-        outputMetrics: ['descent_rate_fps', 'descent_rate_ratio'],
-        statusCounts: {
-          draft: 0,
-          review: 6,
-          'accepted-for-comparison': 0,
-          superseded: 0,
-          rejected: 0,
-        },
-        acceptedCaseIds: [],
-        unreviewedCaseIds: [
-          'recovery-descent-main-2kg-500ft',
-          'terminal-descent-36in-main-sea-level',
-          'terminal-descent-altitude-ft-unit-conversion',
-          'terminal-descent-diameter-doubling-metamorphic',
-          'terminal-descent-invalid-chute-edge',
-          'terminal-descent-mass-doubling-metamorphic',
-        ],
-      },
-      {
-        domain: 'drift',
-        caseCount: 1,
-        caseIds: ['layered-wind-linear-interpolation-drift'],
-        outputMetrics: ['bearing_deg', 'drift_ft'],
-        statusCounts: {
-          draft: 0,
-          review: 1,
-          'accepted-for-comparison': 0,
-          superseded: 0,
-          rejected: 0,
-        },
-        acceptedCaseIds: [],
-        unreviewedCaseIds: ['layered-wind-linear-interpolation-drift'],
-      },
-      {
-        domain: 'end-to-end',
-        caseCount: 2,
-        caseIds: ['end-to-end-curve-2kg-main-500ft', 'end-to-end-scalar-2kg-main-500ft'],
-        outputMetrics: [
-          'apogee_ft',
-          'apogee_t_s',
-          'burnout_t_s',
-          'deploy_ft',
-          'landing_ke_ftlbf',
-          'total_time_s',
-        ],
-        statusCounts: {
-          draft: 0,
-          review: 2,
-          'accepted-for-comparison': 0,
-          superseded: 0,
-          rejected: 0,
-        },
-        acceptedCaseIds: [],
-        unreviewedCaseIds: ['end-to-end-curve-2kg-main-500ft', 'end-to-end-scalar-2kg-main-500ft'],
-      },
-      {
-        domain: 'landing-energy',
-        caseCount: 1,
-        caseIds: ['landing-energy-36in-main-sea-level'],
-        outputMetrics: ['landing_ke_ftlbf'],
-        statusCounts: {
-          draft: 0,
-          review: 1,
-          'accepted-for-comparison': 0,
-          superseded: 0,
-          rejected: 0,
-        },
-        acceptedCaseIds: [],
-        unreviewedCaseIds: ['landing-energy-36in-main-sea-level'],
-      },
-      {
-        domain: 'shock-load',
-        caseCount: 1,
-        caseIds: ['static-ejection-load-nylon-screening'],
-        outputMetrics: ['peak_load_lbs', 'safety_factor', 'strain_energy_J'],
-        statusCounts: {
-          draft: 0,
-          review: 1,
-          'accepted-for-comparison': 0,
-          superseded: 0,
-          rejected: 0,
-        },
-        acceptedCaseIds: [],
-        unreviewedCaseIds: ['static-ejection-load-nylon-screening'],
-      },
+    expect(result.domainCoverage.map(({ domain, caseCount }) => ({ domain, caseCount }))).toEqual([
+      { domain: 'ascent', caseCount: 3 },
+      { domain: 'atmosphere', caseCount: 3 },
+      { domain: 'descent', caseCount: 7 },
+      { domain: 'dispersion', caseCount: 1 },
+      { domain: 'drift', caseCount: 3 },
+      { domain: 'end-to-end', caseCount: 2 },
+      { domain: 'landing-energy', caseCount: 1 },
+      { domain: 'shock-load', caseCount: 1 },
     ])
+    for (const domain of result.domainCoverage) {
+      expect(domain.acceptedCaseIds).toEqual([])
+      expect(domain.statusCounts.review).toBe(domain.caseCount)
+      expect(domain.unreviewedCaseIds).toEqual(domain.caseIds)
+      expect(domain.outputMetrics.length).toBeGreaterThan(0)
+    }
+    const byId = new Map(result.caseSummaries.map((entry) => [entry.id, entry]))
+    for (const id of [
+      'isa-density-11000m',
+      'terminal-descent-cd-quadrupling-metamorphic',
+      'constant-wind-drift-east-1000ft',
+      'constant-wind-drift-west-1000ft',
+      'ascent-insufficient-thrust-edge',
+      'ascent-drag-increase-metamorphic',
+      'seeded-dispersion-repeatability',
+    ]) {
+      const summary = byId.get(id)
+      expect(summary.status).toBe('review')
+      expect(summary.metrics.every((metric) => metric.pass)).toBe(true)
+    }
   })
 
   it('emits deterministic per-case summaries with observed values and review-only posture', () => {
     const result = validateCorpus()
     expect(validateCorpus()).toEqual(result) // deterministic across two consecutive runs
 
-    expect(result.caseSummaries).toHaveLength(14)
+    expect(result.caseSummaries).toHaveLength(21)
     const byId = new Map(result.caseSummaries.map((summary) => [summary.id, summary]))
     expect([...byId.keys()].sort()).toEqual(
       [...result.domainCoverage.flatMap((d) => d.caseIds)].sort()

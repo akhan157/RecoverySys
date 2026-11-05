@@ -503,3 +503,207 @@ test('rapidly leaving the dispersion map does not raise runtime errors', async (
   await guardedPage.getByRole('tab', { name: 'DISPERSION' }).click()
   await expect(guardedPage.locator('.leaflet-container')).toBeVisible()
 })
+
+// One plan crosses each transfer boundary in a fresh browser context. Inputs
+// transfer; numerical authority must be regenerated before any current result.
+test('fresh-context transfer matrix preserves estimates, findings, print and evidence identity', async ({
+  browser,
+  guardedPage,
+}, testInfo) => {
+  test.setTimeout(120_000)
+  guardedPage.setDefaultTimeout(15_000)
+  await openDashboard(guardedPage)
+  await configureRocket(guardedPage)
+  await simulate(guardedPage)
+  await guardedPage.getByRole('tab', { name: 'RECOVERY_BRIEF' }).click()
+  const brief = guardedPage.getByRole('tabpanel')
+  const sourceEstimates = await brief.locator('#brief-estimates-title').locator('..').innerText()
+  const metricValues = await brief
+    .locator('#brief-estimates-title')
+    .locator('..')
+    .locator('dd')
+    .allTextContents()
+  const sourceChecks = await brief.locator('#brief-checks-title').locator('..').innerText()
+  const checkCodes = await brief
+    .locator('#brief-checks-title')
+    .locator('..')
+    .locator('strong')
+    .allTextContents()
+  const identity = (await brief.locator('#brief-provenance-title').locator('..').innerText()).match(
+    /sim-[a-f0-9]+/
+  )[0]
+  const model = 'browser-js-recovery'
+  await expect(brief).toContainText(model)
+  await expect(brief).toContainText('No accepted comparison or flight evidence')
+
+  await guardedPage.getByRole('tab', { name: 'EXPORT' }).click()
+  const downloadPromise = guardedPage.waitForEvent('download')
+  await guardedPage.getByRole('button', { name: /DOWNLOAD_JSON/ }).click()
+  const jsonPath = await (await downloadPromise).path()
+  const payload = JSON.parse(await readFile(jsonPath, 'utf8'))
+  expect(payload.simulation).toBeUndefined()
+  await guardedPage.getByRole('button', { name: /COPY_SHARE_LINK/ }).click()
+  await expect
+    .poll(() => guardedPage.evaluate(() => navigator.clipboard.readText()))
+    .toContain('?c=')
+  const shareUrl = await guardedPage.evaluate(() => navigator.clipboard.readText())
+
+  for (const transfer of ['json', 'share', 'reload']) {
+    const { viewport, userAgent, deviceScaleFactor, isMobile, hasTouch } = testInfo.project.use
+    const context = await browser.newContext({
+      viewport,
+      userAgent,
+      deviceScaleFactor,
+      isMobile,
+      hasTouch,
+    })
+    try {
+      const page = await context.newPage()
+      page.setDefaultTimeout(15_000)
+      const errors = []
+      page.on('pageerror', (error) => errors.push(error.message))
+      await installDeterministicRouting(page)
+      await openDashboard(page)
+      if (transfer === 'json') {
+        await page.getByRole('tab', { name: 'EXPORT' }).click()
+        await page.getByRole('button', { name: /IMPORT_JSON/ }).click()
+        await page.locator('input[type="file"][accept=".json"]').setInputFiles(jsonPath)
+      } else {
+        await page.goto(shareUrl)
+        if (transfer === 'reload') {
+          await page.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
+          await page.getByRole('button', { name: /Save Config/ }).click()
+          await page.reload()
+        }
+      }
+      await page.getByRole('tab', { name: 'RECOVERY_BRIEF' }).click()
+      await expect(page.getByRole('tabpanel').getByRole('status')).toContainText(
+        'NO CURRENT RESULT'
+      )
+      await expect(page.locator('#brief-estimates-title').locator('..')).not.toContainText('Apogee')
+      await simulate(page)
+      await page.getByRole('tab', { name: 'RECOVERY_BRIEF' }).click()
+      const current = page.getByRole('tabpanel')
+      await expect(current.getByRole('status')).toContainText('CURRENT RESULT')
+      expect(await current.locator('#brief-estimates-title').locator('..').innerText()).toBe(
+        sourceEstimates
+      )
+      expect(await current.locator('#brief-checks-title').locator('..').innerText()).toBe(
+        sourceChecks
+      )
+      await expect(current.locator('#brief-provenance-title').locator('..')).toContainText(identity)
+
+      await page.getByRole('tab', { name: 'EXPORT' }).click()
+      await page.evaluate(() => {
+        window.print = () => {}
+      })
+      for (const mode of ['RECOVERY_BRIEF', 'CHECKLIST']) {
+        await page.getByRole('button', { name: new RegExp(`PRINT_${mode}`) }).click()
+        await page.emulateMedia({ media: 'print' })
+        const artifact = page.locator('.print-checklist')
+        await expect(artifact.locator('.print-shared-provenance')).toBeVisible()
+        await expect(artifact.locator('.print-shared-provenance')).toContainText(identity)
+        await expect(artifact.locator('.print-shared-provenance')).toContainText(model)
+        await expect(artifact.locator('.print-shared-provenance')).toContainText(
+          'Result state: current'
+        )
+        await expect(artifact.locator('.print-shared-review')).toBeVisible()
+        for (const code of checkCodes)
+          await expect(artifact.locator('.print-shared-review')).toContainText(code)
+        const estimates = artifact
+          .getByRole('heading', {
+            name: mode === 'RECOVERY_BRIEF' ? 'Current key estimates' : 'Simulation Results',
+            exact: true,
+          })
+          .locator('..')
+        for (const value of metricValues) await expect(estimates).toContainText(value)
+        await expect(artifact.locator('.print-shared-provenance')).toContainText(
+          'isa-apogee-descent-v1'
+        )
+        await expect(artifact.locator('.print-shared-provenance')).toContainText(
+          'recovery-assumptions-v1'
+        )
+        await page.emulateMedia({ media: 'screen' })
+      }
+      await page.getByRole('tab', { name: 'FLIGHT_LOG' }).click()
+      await page.getByRole('button', { name: /LOG_FLIGHT/ }).click()
+      const evidencePromise = page.waitForEvent('download')
+      await page.getByRole('button', { name: 'EXPORT_CANDIDATE_EVIDENCE' }).click()
+      const evidencePath = await (await evidencePromise).path()
+      const evidence = JSON.parse(await readFile(evidencePath, 'utf8'))
+      expect(evidence.entries[0]).toMatchObject({
+        predictionIdentity: identity,
+        corpusEvidence: false,
+        reviewerStatus: 'unreviewed',
+        simulationProvenance: { modelId: model },
+        units: { main_fps: 'ft/s', apogee_ft: 'ft' },
+      })
+      const recordsPromise = page.waitForEvent('download')
+      await page.getByRole('button', { name: 'EXPORT_RECORDS' }).click()
+      const recordsPath = await (await recordsPromise).path()
+      for (const [label, path] of [
+        ['IMPORT_RECORDS', recordsPath],
+        ['IMPORT_CANDIDATE_EVIDENCE', evidencePath],
+      ]) {
+        const intake = await browser.newContext({
+          viewport,
+          userAgent,
+          deviceScaleFactor,
+          isMobile,
+          hasTouch,
+        })
+        try {
+          const receiver = await intake.newPage()
+          receiver.setDefaultTimeout(15_000)
+          await installDeterministicRouting(receiver)
+          await openDashboard(receiver)
+          await receiver.getByRole('tab', { name: 'FLIGHT_LOG' }).click()
+          await receiver.getByLabel(label, { exact: true }).setInputFiles(path)
+          await expect(receiver.getByText('History (1 flight)')).toBeVisible()
+          const reexportPromise = receiver.waitForEvent('download')
+          await receiver.getByRole('button', { name: 'EXPORT_CANDIDATE_EVIDENCE' }).click()
+          const imported = JSON.parse(await readFile(await (await reexportPromise).path(), 'utf8'))
+            .entries[0]
+          expect(imported.predictionIdentity).toBe(identity)
+          expect(imported.predicted).toEqual(evidence.entries[0].predicted)
+          expect(imported.units).toEqual(evidence.entries[0].units)
+          expect(imported.reviewerStatus).toBe('unreviewed')
+          expect(imported.corpusEvidence).toBe(false)
+          await receiver.getByRole('tab', { name: 'RECOVERY_BRIEF' }).click()
+          await expect(receiver.getByRole('tabpanel').getByRole('status')).toContainText(
+            'NO CURRENT RESULT'
+          )
+          await expect(receiver.locator('#brief-estimates-title').locator('..')).not.toContainText(
+            'Apogee'
+          )
+        } finally {
+          await intake.close()
+        }
+      }
+      await page.getByRole('tab', { name: 'ROCKET_SPECS' }).click()
+      await page.locator('#mass').fill('2600')
+      await page.getByRole('tab', { name: 'RECOVERY_BRIEF' }).click()
+      await expect(page.getByRole('tabpanel').getByRole('status')).toContainText('STALE RESULT')
+      await expect(page.locator('#brief-estimates-title').locator('..')).not.toContainText('Apogee')
+      await page.getByRole('tab', { name: 'EXPORT' }).click()
+      for (const mode of ['RECOVERY_BRIEF', 'CHECKLIST']) {
+        await page.getByRole('button', { name: new RegExp(`PRINT_${mode}`) }).click()
+        await page.emulateMedia({ media: 'print' })
+        await expect(page.locator('.print-shared-provenance')).toContainText('Result state: stale')
+        await expect(page.locator('.print-checklist')).toContainText('RESULT_STALE')
+        const staleEstimates = page
+          .locator('.print-checklist')
+          .getByRole('heading', {
+            name: mode === 'RECOVERY_BRIEF' ? 'Current key estimates' : 'Simulation Results',
+            exact: true,
+          })
+          .locator('..')
+        await expect(staleEstimates.locator('table')).toHaveCount(0)
+        await page.emulateMedia({ media: 'screen' })
+      }
+      expect(errors).toEqual([])
+    } finally {
+      await context.close()
+    }
+  }
+})

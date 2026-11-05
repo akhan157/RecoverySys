@@ -247,6 +247,29 @@ describe('OpenRocket exchange parser', () => {
       exchange.vehicleCandidates.some((candidate) => candidate.targetField === 'airframe_id_in')
     ).toBe(false)
   })
+  it('keeps direct XML fields separate from nested metadata and branch events', () => {
+    const exchange = parseOpenRocketArchive(
+      strToU8(`
+      <openrocket version="1.10"><rocket><name>Direct rocket</name>
+      <motorconfiguration configid="direct"/><subcomponents><stage><name>Stage</name>
+      <subcomponents><bodytube><name>Tube</name><radius>0.02</radius><thickness>0.001</thickness>
+      <length>0.4</length><metadata><name>Nested name</name><motorconfiguration configid="nested"/></metadata>
+      </bodytube></subcomponents></stage></subcomponents></rocket>
+      <simulations><simulation status="uptodate"><name>Direct simulation</name>
+      <conditions><configid>direct</configid></conditions><flightdata>
+      <databranch name="Main" types="Time,Mass"><datapoint>0,2.5</datapoint>
+      <event type="apogee" time="10"/><metadata><datapoint>0,999</datapoint>
+      <event type="groundhit" time="999"/></metadata></databranch>
+      </flightdata></simulation></simulations></openrocket>`)
+    )
+    expect(exchange.project.configurations.map(({ id }) => id)).toEqual(['direct'])
+    expect(exchange.vehicleCandidates[0].tube.componentName).toBe('Tube')
+    expect(exchange.massCandidates[0].normalizedValue).toBe(2500)
+    expect(exchange.externalResults[0].typedFlightData.branches[0].datapointCount).toBe(1)
+    expect(exchange.externalResults[0].events).toEqual([
+      { type: 'apogee', timeS: 10, sourceId: null },
+    ])
+  })
   it.each(
     JSON.parse(readFileSync(`${fixtureRoot}/manifest.json`, 'utf8')).fixtures.filter((record) =>
       record.file.startsWith('corpus-')

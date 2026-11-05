@@ -130,13 +130,13 @@ export default function PrintChecklist({
         </p>
         <p>{recoveryBrief?.authorization}</p>
       </section>
-      <section className="print-artifact--brief">
+      <section className="print-shared-review">
         <h2>Mission envelope and unresolved checks</h2>
         <p>Envelope status: {recoveryBrief?.missionEnvelope?.status || 'not evaluated'}</p>
         <ul>
           {(recoveryBrief?.unresolvedChecks || []).map((check, index) => (
             <li key={`${check.code}-${index}`}>
-              {check.message}
+              <strong>{check.code}:</strong> {check.message}
               {check.remediation ? ` Review: ${check.remediation}` : ''}
             </li>
           ))}
@@ -145,8 +145,12 @@ export default function PrintChecklist({
           <p>No unresolved checks recorded.</p>
         )}
       </section>
-      <section className="print-artifact--brief">
+      <section className="print-shared-provenance">
         <h2>Evidence and model provenance</h2>
+        <p>
+          Application: {VERSION} · Result state: {resultStatus} · Evidence posture:{' '}
+          {recoveryBrief?.confidence?.label || 'Insufficient confidence'}
+        </p>
         <p>{recoveryBrief?.confidence?.evidenceNote}</p>
         <p>
           Model: {recoveryBrief?.provenance?.modelId || 'Not available'} · Version:{' '}

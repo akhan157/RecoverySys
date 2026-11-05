@@ -1,0 +1,145 @@
+{
+  "mode": "dry-run",
+  "changes": [
+    {
+      "partId": "cfc-030-n",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 88,
+      "proposed": 87.9,
+      "url": "https://shop.fruitychutes.com/products/30-elliptical-parachute-3-3lb-20fps",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "cfc-030-n",
+      "category": "drogue_chute",
+      "field": "weight_g",
+      "old": 88,
+      "proposed": 87.9,
+      "url": "https://shop.fruitychutes.com/products/30-elliptical-parachute-3-3lb-20fps",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "main_chute",
+      "field": "packed_diam_in",
+      "old": 1.9,
+      "proposed": 1.5,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "main_chute",
+      "field": "packed_length_in",
+      "old": 3.2,
+      "proposed": 4.2,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 45,
+      "proposed": 38,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "drogue_chute",
+      "field": "packed_diam_in",
+      "old": 1.9,
+      "proposed": 1.5,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "drogue_chute",
+      "field": "packed_length_in",
+      "old": 3.2,
+      "proposed": 4.2,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "ifc-030-sl",
+      "category": "drogue_chute",
+      "field": "weight_g",
+      "old": 45,
+      "proposed": 38,
+      "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "lp-024",
+      "category": "main_chute",
+      "field": "packed_diam_in",
+      "old": 1.38,
+      "proposed": 2,
+      "url": "https://www.the-rocketman.com/products/rocketman-high-performance-cd-2-2-parachutes",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "lp-024",
+      "category": "main_chute",
+      "field": "packed_length_in",
+      "old": 1.57,
+      "proposed": 2.75,
+      "url": "https://www.the-rocketman.com/products/rocketman-high-performance-cd-2-2-parachutes",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "lp-024",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 20,
+      "proposed": 87.883521688,
+      "url": "https://www.the-rocketman.com/products/rocketman-high-performance-cd-2-2-parachutes",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "lp-036",
+      "category": "main_chute",
+      "field": "packed_diam_in",
+      "old": 1.38,
+      "proposed": 2.6,
+      "url": "https://www.the-rocketman.com/products/rocketman-high-performance-cd-2-2-parachutes",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "lp-036",
+      "category": "main_chute",
+      "field": "packed_length_in",
+      "old": 3.08,
+      "proposed": 4.52,
+      "url": "https://www.the-rocketman.com/products/rocketman-high-performance-cd-2-2-parachutes",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    },
+    {
+      "partId": "lp-036",
+      "category": "main_chute",
+      "field": "weight_g",
+      "old": 43,
+      "proposed": 136.077711,
+      "url": "https://www.the-rocketman.com/products/rocketman-high-performance-cd-2-2-parachutes",
+      "accessed": "2026-11-05",
+      "status": "requires-human-review"
+    }
+  ]
+}

@@ -1,0 +1,41 @@
+{
+  "id": "isa-density-11000m",
+  "domain": "atmosphere",
+  "kind": "analytic",
+  "status": "review",
+  "inputs": {
+    "altitude_m": 11000
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "density_kg_m3",
+        "value": 0.3639176481016034,
+        "unit": "kg/m^3",
+        "tolerance": {
+          "basis": "analyst-derived",
+          "relative": 0.0001
+        },
+        "notes": "0.01% numerical allowance covers rounded production gas constant/exponent; not atmospheric accuracy."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://ntrs.nasa.gov/citations/19770009539",
+    "title": "U.S. Standard Atmosphere 1976 (NASA/NOAA/USAF)",
+    "accessed": "2026-11-05",
+    "citation": "U.S. Standard Atmosphere 1976 (NASA/NOAA/USAF)",
+    "derivation": "At the troposphere ceiling use T=288.15-0.0065h, P=101325(T/288.15)^(g/(RL)), rho=P/(RT), g=9.80665, R=287.05287."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "The browser JavaScript production estimator. Each case records the exact model and assumptions identity that it exercises."
+  },
+  "comparison": {
+    "method": "relative",
+    "decisionRule": "Report the stated invariant or analytic difference; acceptance requires a separate independent review."
+  },
+  "notes": "Geopotential-height convention and rounded constants require independent review. Review-only; no flight validation or acceptance is claimed."
+}

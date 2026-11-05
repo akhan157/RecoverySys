@@ -2,6 +2,8 @@
 
 ### Build a recovery plan you can review.
 
+Working source prepares **1.3.0-rc.2**; the published download remains rc.1 until qualification completes. See [qualification](RecoverySys/docs/release-qualification-2026-11-05.md).
+
 A local-first recovery-planning tool for high-power rocketry. Bring in a rocket, choose recovery hardware, explore flight estimates, and keep the inputs, assumptions and unresolved findings together. No account or application backend required.
 
 **[Open the app](https://akhan157.github.io/RecoverySys/)** · **[Explore the overview](https://akhan157.github.io/RecoverySys/landing/)** · **[Download v1.3.0-rc.1](https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.1)**
@@ -45,7 +47,7 @@ RecoverySys is a planning aid. Results depend on simplified models and input qua
 
 ## Run locally
 
-Use Node 22 for the CI-qualified development path. The package supports Node `^20.19.0 || ^22.13.0 || >=24.0.0` and npm `>=10`.
+Use Node 22 for the CI-qualified development path. The package supports Node `^22.13.0 || ^24.0.0 || ^26.0.0` and npm `>=10`.
 
 ```bash
 cd RecoverySys

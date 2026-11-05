@@ -13,6 +13,7 @@ import {
   computeDrift,
   computeShockLoad,
   runSimulation,
+  summarizeDispersionRun,
 } from '../src/lib/simulation.js'
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
@@ -67,6 +68,46 @@ const compare = (actual, expected, tolerance) => {
 }
 
 const evaluators = Object.freeze({
+  'isa-density-11000m': (inputs) => ({ density_kg_m3: airDensity(inputs.altitude_m) }),
+  'terminal-descent-cd-quadrupling-metamorphic': (inputs) => ({
+    descent_rate_ratio:
+      computeDescentRate(
+        inputs.transformed.chuteSpecs,
+        inputs.transformed.mass_kg,
+        inputs.transformed.altitude_ft
+      ) / computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
+  }),
+  'constant-wind-drift-east-1000ft': (inputs) => {
+    const result = computeDrift(inputs)
+    return result ? { drift_ft: result.drift_ft, bearing_deg: result.bearing_deg } : {}
+  },
+  'constant-wind-drift-west-1000ft': (inputs) => {
+    const result = computeDrift(inputs)
+    return result ? { drift_ft: result.drift_ft, bearing_deg: result.bearing_deg } : {}
+  },
+  'ascent-insufficient-thrust-edge': (inputs) => ({
+    result_available: Number(runSimulation(inputs) !== null),
+  }),
+  'ascent-drag-increase-metamorphic': (inputs) => {
+    const base = runSimulation(inputs.base)
+    const transformed = runSimulation(inputs.transformed)
+    return {
+      apogee_decreases: Number(
+        base?.apogee_ft > transformed?.apogee_ft && transformed?.apogee_ft > 0
+      ),
+    }
+  },
+  'seeded-dispersion-repeatability': (inputs) => {
+    const first = summarizeDispersionRun(inputs)
+    const second = summarizeDispersionRun(inputs)
+    if (!first || !second) return {}
+    return {
+      maximum_absolute_difference: Math.max(
+        ...Object.keys(first).map((key) => Math.abs(first[key] - second[key]))
+      ),
+      landing_points: first.landingPoints,
+    }
+  },
   'isa-density-sea-level': (inputs) => ({ density_kg_m3: airDensity(inputs.altitude_m) }),
   'isa-density-5000m': (inputs) => ({ density_kg_m3: airDensity(inputs.altitude_m) }),
   'terminal-descent-36in-main-sea-level': (inputs) => ({
@@ -130,8 +171,7 @@ const evaluators = Object.freeze({
         inputs.transformed.chuteSpecs,
         inputs.transformed.mass_kg,
         inputs.transformed.altitude_ft
-      ) /
-      computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
+      ) / computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
   }),
   'terminal-descent-altitude-ft-unit-conversion': (inputs) => ({
     descent_rate_fps: computeDescentRate(inputs.chuteSpecs, inputs.mass_kg, inputs.altitude_ft),
@@ -145,8 +185,7 @@ const evaluators = Object.freeze({
         inputs.transformed.chuteSpecs,
         inputs.transformed.mass_kg,
         inputs.transformed.altitude_ft
-      ) /
-      computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
+      ) / computeDescentRate(inputs.base.chuteSpecs, inputs.base.mass_kg, inputs.base.altitude_ft),
   }),
   'static-ejection-load-nylon-screening': (inputs) => {
     const result = computeShockLoad(inputs.cordSpecs, inputs.mass_kg, inputs.g_factor)
@@ -219,7 +258,9 @@ export function validateCorpus() {
     for (const metric of testCase.expected.metrics) {
       const actual = observed[metric.name]
       const finite = Number.isFinite(actual)
-      const result = finite ? compare(actual, metric.value, metric.tolerance) : { difference: null, pass: false }
+      const result = finite
+        ? compare(actual, metric.value, metric.tolerance)
+        : { difference: null, pass: false }
       const gatesAgreement = testCase.status === 'accepted-for-comparison'
       metrics.push({
         name: metric.name,

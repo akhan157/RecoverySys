@@ -54,8 +54,8 @@ export const PHYSICS = Object.freeze({
 
 // Build/version metadata. Single string owned here so the UI brand badge,
 // CHANGELOG, and any future telemetry share one truth.
-export const VERSION = '1.3.0-rc.1'
-export const VERSION_DISPLAY = 'V1.3 RC1'
+export const VERSION = '1.3.0-rc.2'
+export const VERSION_DISPLAY = 'V1.3 RC2'
 
 // Share links copied from the desktop shell must point at the public web app;
 // the Tauri webview origin (tauri://localhost, http://tauri.localhost) is not

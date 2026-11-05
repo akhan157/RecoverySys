@@ -11,6 +11,9 @@ export default defineConfig({
       },
     },
     globals: true,
+    // XML corpus parsing and jsdom component suites are memory-heavy. Bound
+    // contention independently of host CPU count so CI and local runs agree.
+    maxWorkers: 2,
     setupFiles: ['./src/test/setup.js'],
     include: ['src/test/**/*.{test,spec}.{js,jsx}'],
   },

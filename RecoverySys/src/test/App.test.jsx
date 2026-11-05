@@ -149,11 +149,6 @@ describe('App — status bar warning badge', () => {
       screen.getByRole('tab', { name: 'DASHBOARD' }).click()
     })
 
-    // Advance past the 300ms compatibility debounce and flush React updates
-    await act(async () => {
-      vi.advanceTimersByTime(400)
-    })
-
     // Dashboard tab shows validation badge when compatibility errors exist
     const badge = document.querySelector('.mc-validation--warn, .mc-validation--error')
     expect(badge).toBeInTheDocument()
@@ -311,7 +306,7 @@ describe('App — rejected share-link import', () => {
 })
 
 describe('App — imported state freshness', () => {
-  it('clears warnings from the replaced local configuration before debounce refresh', () => {
+  it('clears warnings from the replaced local configuration before current-input derivation', () => {
     const previousState = {
       config: { drogue_chute: { id: 'old-drogue' } },
       specs: { rocket_mass_g: '2500' },

@@ -1,0 +1,78 @@
+{
+  "id": "ascent-drag-increase-metamorphic",
+  "domain": "ascent",
+  "kind": "metamorphic",
+  "status": "review",
+  "inputs": {
+    "base": {
+      "specs": {
+        "rocket_mass_g": "2000",
+        "motor_total_impulse_ns": "2000",
+        "burn_time_s": "5",
+        "airframe_id_in": "6",
+        "drag_cd": "0.5",
+        "main_deploy_alt_ft": "500"
+      },
+      "config": {
+        "main_chute": {
+          "specs": {
+            "diameter_in": 36,
+            "cd": 1.5
+          }
+        }
+      },
+      "customMotor": null
+    },
+    "transformed": {
+      "specs": {
+        "rocket_mass_g": "2000",
+        "motor_total_impulse_ns": "2000",
+        "burn_time_s": "5",
+        "airframe_id_in": "6",
+        "drag_cd": "0.8",
+        "main_deploy_alt_ft": "500"
+      },
+      "config": {
+        "main_chute": {
+          "specs": {
+            "diameter_in": 36,
+            "cd": 1.5
+          }
+        }
+      },
+      "customMotor": null
+    }
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "apogee_decreases",
+        "value": 1,
+        "unit": "boolean",
+        "tolerance": {
+          "basis": "analyst-derived",
+          "absolute": 0
+        },
+        "notes": "Exact algebraic or categorical invariant; no measurement uncertainty is implied."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/flight-equations-with-drag/",
+    "title": "NASA Glenn ascent drag equation",
+    "accessed": "2026-11-05",
+    "citation": "NASA Glenn ascent drag equation",
+    "derivation": "For this fixed-motor, fixed-mass vertical case, increasing positive drag from Cd=0.5 to 0.8 must reduce apogee. Comparator returns 1 only for two finite positive results with strictly lower transformed apogee."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "The browser JavaScript production estimator. Each case records the exact model and assumptions identity that it exercises."
+  },
+  "comparison": {
+    "method": "metamorphic",
+    "decisionRule": "Report the stated invariant or analytic difference; acceptance requires a separate independent review."
+  },
+  "notes": "Bounded synthetic case; does not generalize to all transonic shapes or real vehicles. Review-only; no flight validation or acceptance is claimed."
+}

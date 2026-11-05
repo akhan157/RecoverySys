@@ -1,0 +1,60 @@
+{
+  "id": "constant-wind-drift-east-1000ft",
+  "domain": "drift",
+  "kind": "analytic",
+  "status": "review",
+  "inputs": {
+    "simulation": {
+      "apogee_ft": 1000,
+      "deploy_ft": 1000,
+      "drogue_fps": 10,
+      "main_fps": 10
+    },
+    "specs": {
+      "wind_speed_mph": "10",
+      "wind_direction_deg": "270"
+    }
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "drift_ft",
+        "value": 1467,
+        "unit": "ft",
+        "tolerance": {
+          "basis": "analyst-derived",
+          "absolute": 0
+        },
+        "notes": "1000/10 seconds times 10*5280/3600 ft/s =1466.666... ft, rounded to integer."
+      },
+      {
+        "name": "bearing_deg",
+        "value": 90,
+        "unit": "deg",
+        "tolerance": {
+          "basis": "analyst-derived",
+          "absolute": 0
+        },
+        "notes": "Exact algebraic or categorical invariant; no measurement uncertainty is implied."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www.weather.gov/hfo/windbarbinfo",
+    "title": "NOAA NWS wind direction convention",
+    "accessed": "2026-11-05",
+    "citation": "NOAA NWS wind direction convention",
+    "derivation": "Meteorological wind FROM direction plus 180 degrees gives drift TOWARD direction; constant phase velocity gives displacement=wind*height/descent_rate."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "The browser JavaScript production estimator. Each case records the exact model and assumptions identity that it exercises."
+  },
+  "comparison": {
+    "method": "absolute",
+    "decisionRule": "Report the stated invariant or analytic difference; acceptance requires a separate independent review."
+  },
+  "notes": "Checks units and opposite cardinal directions under instantaneous wind coupling. Review-only; no flight validation or acceptance is claimed."
+}

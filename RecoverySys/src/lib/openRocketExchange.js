@@ -56,8 +56,21 @@ function asBytes(input) {
   throw importError('INVALID_INPUT', 'OpenRocket import requires an ArrayBuffer or byte array.')
 }
 
+// These are XML child lookups, not descendant searches. Avoid :scope selectors:
+// selector engines can repeatedly scan large saved-flight datapoint subtrees.
+function childrenOf(parent, tagName) {
+  return Array.from(parent?.children || []).filter((child) => child.tagName === tagName)
+}
+
+function childOf(parent, tagName) {
+  for (let child = parent?.firstElementChild; child; child = child.nextElementSibling) {
+    if (child.tagName === tagName) return child
+  }
+  return null
+}
+
 function textOf(parent, tagName) {
-  return parent?.querySelector(`:scope > ${tagName}`)?.textContent?.trim() || ''
+  return childOf(parent, tagName)?.textContent?.trim() || ''
 }
 
 function numberOf(value) {
@@ -149,13 +162,17 @@ function walkElements(node, path, callback, state, stage = null) {
   })
 }
 
-function parseStages(root) {
+function inspectStructure(root) {
   const stages = []
+  const tubes = []
+  const motors = []
   const state = { count: 0 }
   walkElements(
     root,
     '/openrocket',
     (node, path, stage) => {
+      if (node.tagName === 'bodytube') tubes.push({ node, path, stage })
+      if (node.tagName === 'motor') motors.push({ node, path })
       if (
         node.tagName !== 'stage' ||
         node.parentElement?.tagName !== 'subcomponents' ||
@@ -171,198 +188,176 @@ function parseStages(root) {
     },
     state
   )
-  return { stages, nodeCount: state.count }
+  return { stages, tubes, motors, nodeCount: state.count }
 }
 function parseConfigurations(root) {
-  return Array.from(root.querySelectorAll('rocket > motorconfiguration')).map((node, index) => ({
+  return childrenOf(childOf(root, 'rocket'), 'motorconfiguration').map((node, index) => ({
     id: node.getAttribute('configid') || `configuration-${index + 1}`,
     default: node.getAttribute('default') === 'true',
-    stages: Array.from(node.querySelectorAll(':scope > stage')).map((stage) => ({
+    stages: childrenOf(node, 'stage').map((stage) => ({
       number: numberOf(stage.getAttribute('number')),
       active: stage.getAttribute('active') !== 'false',
     })),
   }))
 }
 
-function parseTubeCandidates(root) {
+function parseTubeCandidates(tubes) {
   const candidates = []
-  const state = { count: 0 }
-
-  walkElements(
-    root,
-    '/openrocket',
-    (node, path, stage) => {
-      if (node.tagName !== 'bodytube') return
-
-      const rawRadius = textOf(node, 'radius')
-      const rawThickness = textOf(node, 'thickness')
-      const radius = parseRadius(rawRadius)
-      if (radius.mode === 'auto' && radius.meters == null) {
-        // Legacy files omit the resolved automatic radius. Only use directly
-        // adjacent, explicit external-component radii when they agree.
-        const siblings = Array.from(node.parentElement?.children || []).filter((child) =>
-          ['nosecone', 'bodytube', 'transition'].includes(child.tagName)
-        )
-        const index = siblings.indexOf(node)
-        const adjacentRadius = (component, end) => {
-          if (!component) return null
-          const raw = textOf(
-            component,
-            component.tagName === 'bodytube' ? 'radius' : `${end}radius`
-          )
-          const parsed = parseRadius(raw)
-          return parsed.mode === 'explicit' && parsed.meters > 0 ? parsed.meters : null
-        }
-        const values = [
-          adjacentRadius(siblings[index - 1], 'aft'),
-          adjacentRadius(siblings[index + 1], 'fore'),
-        ].filter((value) => value != null)
-        if (values.length && values.every((value) => Math.abs(value - values[0]) < 1e-9))
-          radius.meters = values[0]
+  for (const { node, path, stage } of tubes) {
+    const rawRadius = textOf(node, 'radius')
+    const rawThickness = textOf(node, 'thickness')
+    const radius = parseRadius(rawRadius)
+    if (radius.mode === 'auto' && radius.meters == null) {
+      // Legacy files omit the resolved automatic radius. Only use directly
+      // adjacent, explicit external-component radii when they agree.
+      const siblings = Array.from(node.parentElement?.children || []).filter((child) =>
+        ['nosecone', 'bodytube', 'transition'].includes(child.tagName)
+      )
+      const index = siblings.indexOf(node)
+      const adjacentRadius = (component, end) => {
+        if (!component) return null
+        const raw = textOf(component, component.tagName === 'bodytube' ? 'radius' : `${end}radius`)
+        const parsed = parseRadius(raw)
+        return parsed.mode === 'explicit' && parsed.meters > 0 ? parsed.meters : null
       }
-      const thickness = parseThickness(rawThickness)
-      const lengthMeters = numberOf(textOf(node, 'length'))
-      const innerDiameterMeters =
-        radius.meters != null && thickness.meters != null
-          ? 2 * (radius.meters - thickness.meters)
-          : null
-      const innerDiameterIn =
-        innerDiameterMeters != null && innerDiameterMeters > 0
-          ? innerDiameterMeters * 39.37007874015748
-          : null
-      const lengthIn =
-        lengthMeters != null && lengthMeters > 0 ? lengthMeters * 39.37007874015748 : null
-      const componentId = textOf(node, 'id') || null
-      const componentName = textOf(node, 'name') || 'Unnamed body tube'
-      const groupId = componentId || path
-      const reason =
-        radius.mode === 'auto'
-          ? 'OpenRocket marks the outer radius automatic; confirm the nominal derived diameter.'
-          : thickness.mode === 'filled'
-            ? 'A filled component has no wall-thickness subtraction for inner diameter.'
-            : 'OpenRocket does not identify the intended recovery bay.'
+      const values = [
+        adjacentRadius(siblings[index - 1], 'aft'),
+        adjacentRadius(siblings[index + 1], 'fore'),
+      ].filter((value) => value != null)
+      if (values.length && values.every((value) => Math.abs(value - values[0]) < 1e-9))
+        radius.meters = values[0]
+    }
+    const thickness = parseThickness(rawThickness)
+    const lengthMeters = numberOf(textOf(node, 'length'))
+    const innerDiameterMeters =
+      radius.meters != null && thickness.meters != null
+        ? 2 * (radius.meters - thickness.meters)
+        : null
+    const innerDiameterIn =
+      innerDiameterMeters != null && innerDiameterMeters > 0
+        ? innerDiameterMeters * 39.37007874015748
+        : null
+    const lengthIn =
+      lengthMeters != null && lengthMeters > 0 ? lengthMeters * 39.37007874015748 : null
+    const componentId = textOf(node, 'id') || null
+    const componentName = textOf(node, 'name') || 'Unnamed body tube'
+    const groupId = componentId || path
+    const reason =
+      radius.mode === 'auto'
+        ? 'OpenRocket marks the outer radius automatic; confirm the nominal derived diameter.'
+        : thickness.mode === 'filled'
+          ? 'A filled component has no wall-thickness subtraction for inner diameter.'
+          : 'OpenRocket does not identify the intended recovery bay.'
 
-      if (innerDiameterIn != null) {
-        candidates.push({
-          id: `${groupId}:airframe_id_in`,
-          groupId,
-          kind: 'tube',
-          targetField: 'airframe_id_in',
-          sourcePath: `${path}/radius`,
-          sourceValue: { radius: rawRadius, thickness: rawThickness },
-          sourceUnit: 'm',
-          normalizedValue: innerDiameterIn,
-          normalizedUnit: 'in',
-          semantic:
-            'Nominal body-tube inner diameter derived from outer radius and wall thickness.',
-          status: 'needs-confirmation',
-          reason,
-          confidence:
-            radius.mode === 'explicit' && thickness.mode === 'explicit' ? 'medium' : 'low',
-          tube: {
-            componentId,
-            componentName,
-            lengthIn,
-            radiusMode: radius.mode,
-            thicknessMode: thickness.mode,
-            stage,
-          },
-        })
-      }
+    if (innerDiameterIn != null) {
+      candidates.push({
+        id: `${groupId}:airframe_id_in`,
+        groupId,
+        kind: 'tube',
+        targetField: 'airframe_id_in',
+        sourcePath: `${path}/radius`,
+        sourceValue: { radius: rawRadius, thickness: rawThickness },
+        sourceUnit: 'm',
+        normalizedValue: innerDiameterIn,
+        normalizedUnit: 'in',
+        semantic: 'Nominal body-tube inner diameter derived from outer radius and wall thickness.',
+        status: 'needs-confirmation',
+        reason,
+        confidence: radius.mode === 'explicit' && thickness.mode === 'explicit' ? 'medium' : 'low',
+        tube: {
+          componentId,
+          componentName,
+          lengthIn,
+          radiusMode: radius.mode,
+          thicknessMode: thickness.mode,
+          stage,
+        },
+      })
+    }
 
-      if (lengthIn != null) {
-        candidates.push({
-          id: `${groupId}:bay_length_in`,
-          groupId,
-          kind: 'tube',
-          targetField: 'bay_length_in',
-          sourcePath: `${path}/length`,
-          sourceValue: lengthMeters,
-          sourceUnit: 'm',
-          normalizedValue: lengthIn,
-          normalizedUnit: 'in',
-          semantic: 'Nominal body-tube length; usable recovery-bay length requires confirmation.',
-          status: 'needs-confirmation',
-          reason: 'OpenRocket does not identify obstructions or usable recovery-bay boundaries.',
-          confidence: 'medium',
-          tube: {
-            componentId,
-            componentName,
-            lengthIn,
-            radiusMode: radius.mode,
-            thicknessMode: thickness.mode,
-            stage,
-          },
-        })
-      }
+    if (lengthIn != null) {
+      candidates.push({
+        id: `${groupId}:bay_length_in`,
+        groupId,
+        kind: 'tube',
+        targetField: 'bay_length_in',
+        sourcePath: `${path}/length`,
+        sourceValue: lengthMeters,
+        sourceUnit: 'm',
+        normalizedValue: lengthIn,
+        normalizedUnit: 'in',
+        semantic: 'Nominal body-tube length; usable recovery-bay length requires confirmation.',
+        status: 'needs-confirmation',
+        reason: 'OpenRocket does not identify obstructions or usable recovery-bay boundaries.',
+        confidence: 'medium',
+        tube: {
+          componentId,
+          componentName,
+          lengthIn,
+          radiusMode: radius.mode,
+          thicknessMode: thickness.mode,
+          stage,
+        },
+      })
+    }
 
-      if (innerDiameterIn == null && lengthIn == null) {
-        candidates.push({
-          id: `${groupId}:unavailable`,
-          groupId,
-          kind: 'tube',
-          targetField: null,
-          sourcePath: path,
-          sourceValue: {
-            radius: rawRadius,
-            thickness: rawThickness,
-            length: textOf(node, 'length'),
-          },
-          sourceUnit: 'm',
-          normalizedValue: null,
-          normalizedUnit: null,
-          semantic: 'Body-tube geometry is incomplete or non-finite.',
-          status: 'unavailable',
-          reason: 'The source does not provide enough valid numeric geometry.',
-          confidence: 'none',
-          tube: {
-            componentId,
-            componentName,
-            lengthIn,
-            radiusMode: radius.mode,
-            thicknessMode: thickness.mode,
-            stage,
-          },
-        })
-      }
-    },
-    state
-  )
-
-  return { candidates, nodeCount: state.count }
+    if (innerDiameterIn == null && lengthIn == null) {
+      candidates.push({
+        id: `${groupId}:unavailable`,
+        groupId,
+        kind: 'tube',
+        targetField: null,
+        sourcePath: path,
+        sourceValue: {
+          radius: rawRadius,
+          thickness: rawThickness,
+          length: textOf(node, 'length'),
+        },
+        sourceUnit: 'm',
+        normalizedValue: null,
+        normalizedUnit: null,
+        semantic: 'Body-tube geometry is incomplete or non-finite.',
+        status: 'unavailable',
+        reason: 'The source does not provide enough valid numeric geometry.',
+        confidence: 'none',
+        tube: {
+          componentId,
+          componentName,
+          lengthIn,
+          radiusMode: radius.mode,
+          thicknessMode: thickness.mode,
+          stage,
+        },
+      })
+    }
+  }
+  return candidates
 }
 
-function parseMotorContext(root) {
+function parseMotorContext(nodes) {
   const motors = []
-  const state = { count: 0 }
-  walkElements(
-    root,
-    '/openrocket',
-    (node, path) => {
-      if (node.tagName !== 'motor') return
-      const configId = node.getAttribute('configid') || null
-      motors.push({
-        id: `${configId || 'unassigned'}:${path}`,
-        configId,
-        sourcePath: path,
-        manufacturer: textOf(node, 'manufacturer') || null,
-        designation: textOf(node, 'designation') || null,
-        type: textOf(node, 'type') || null,
-        digest: textOf(node, 'digest') || null,
-        diameterM: numberOf(textOf(node, 'diameter')),
-        lengthM: numberOf(textOf(node, 'length')),
-        delays: textOf(node, 'delay') || null,
-        status: 'metadata-only',
-        embeddedCurve: false,
-      })
-    },
-    state
-  )
+  for (const { node, path } of nodes) {
+    const configId = node.getAttribute('configid') || null
+    motors.push({
+      id: `${configId || 'unassigned'}:${path}`,
+      configId,
+      sourcePath: path,
+      manufacturer: textOf(node, 'manufacturer') || null,
+      designation: textOf(node, 'designation') || null,
+      type: textOf(node, 'type') || null,
+      digest: textOf(node, 'digest') || null,
+      diameterM: numberOf(textOf(node, 'diameter')),
+      lengthM: numberOf(textOf(node, 'length')),
+      delays: textOf(node, 'delay') || null,
+      status: 'metadata-only',
+      embeddedCurve: false,
+    })
+  }
   return motors
 }
 
 function parseEvents(flightData) {
-  return Array.from(flightData.querySelectorAll(':scope > event'))
+  return childrenOf(flightData, 'event')
     .map((event) => ({
       type: event.getAttribute('type') || 'unknown',
       timeS: numberOf(event.getAttribute('time')),
@@ -380,32 +375,32 @@ function parseSummary(flightData) {
 }
 
 function parseBranchPresence(flightData) {
-  return Array.from(flightData.querySelectorAll(':scope > databranch')).map((branch) => ({
+  return childrenOf(flightData, 'databranch').map((branch) => ({
     name: branch.getAttribute('name') || 'Unnamed branch',
     series: (branch.getAttribute('types') || '')
       .split(',')
       .map((value) => value.trim())
       .filter(Boolean),
-    datapointCount: branch.querySelectorAll(':scope > datapoint').length,
+    datapointCount: childrenOf(branch, 'datapoint').length,
     events: parseEvents(branch),
   }))
 }
 
 function parseMassCandidate(simulation, flightData, simulationPath, configIds) {
-  const branches = Array.from(flightData.querySelectorAll(':scope > databranch'))
+  const branches = childrenOf(flightData, 'databranch')
   for (const [branchIndex, branch] of branches.entries()) {
     const types = (branch.getAttribute('types') || '').split(',').map((value) => value.trim())
     const timeIndex = types.indexOf('Time')
     const massIndex = types.indexOf('Mass')
     if (timeIndex < 0 || massIndex < 0) continue
 
-    const firstPoint = branch.querySelector(':scope > datapoint')?.textContent?.trim()
+    const firstPoint = childOf(branch, 'datapoint')?.textContent?.trim()
     const values = firstPoint?.split(',').map((value) => numberOf(value.trim())) || []
     const timeS = values[timeIndex]
     const massKg = values[massIndex]
     if (timeS !== 0 || massKg == null || massKg <= 0) continue
 
-    const configId = textOf(simulation.querySelector(':scope > conditions'), 'configid') || null
+    const configId = textOf(childOf(simulation, 'conditions'), 'configid') || null
     const configKnown = configId != null && configIds.has(configId)
     const status =
       simulation.getAttribute('status') === 'uptodate' && configKnown
@@ -443,12 +438,12 @@ function parseMassCandidate(simulation, flightData, simulationPath, configIds) {
 function parseExternalResults(root, configIds) {
   const results = []
   const massCandidates = []
-  const simulations = root.querySelectorAll('simulations > simulation')
+  const simulations = childrenOf(childOf(root, 'simulations'), 'simulation')
 
   simulations.forEach((simulation, simulationIndex) => {
     const simulationPath = `/openrocket/simulations/simulation[${simulationIndex + 1}]`
-    const flightData = simulation.querySelector(':scope > flightdata')
-    const conditions = simulation.querySelector(':scope > conditions')
+    const flightData = childOf(simulation, 'flightdata')
+    const conditions = childOf(simulation, 'conditions')
     if (!flightData) return
 
     const configId = textOf(conditions, 'configid') || null
@@ -593,11 +588,11 @@ export function parseOpenRocketArchive(input, { sourceFilename = '' } = {}) {
     )
   }
 
-  const { stages, nodeCount } = parseStages(root)
+  const { stages, tubes, motors, nodeCount } = inspectStructure(root)
   const configurations = parseConfigurations(root)
   const configIds = new Set(configurations.map((configuration) => configuration.id))
-  const { candidates: tubeCandidates } = parseTubeCandidates(root)
-  const motorContext = parseMotorContext(root)
+  const tubeCandidates = parseTubeCandidates(tubes)
+  const motorContext = parseMotorContext(motors)
   const external = parseExternalResults(root, configIds)
   const curveMembers = thrustcurveNames
   const warnings = []
@@ -642,10 +637,8 @@ export function parseOpenRocketArchive(input, { sourceFilename = '' } = {}) {
     contractVersion: 1,
     project: {
       name:
-        textOf(root.querySelector(':scope > rocket'), 'name') ||
-        sourceFilename ||
-        'Imported OpenRocket project',
-      rocketId: textOf(root.querySelector(':scope > rocket'), 'id') || null,
+        textOf(childOf(root, 'rocket'), 'name') || sourceFilename || 'Imported OpenRocket project',
+      rocketId: textOf(childOf(root, 'rocket'), 'id') || null,
       selectedConfiguration: null,
       selectedStage: null,
       configurations,

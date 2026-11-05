@@ -1,4 +1,4 @@
-import { useReducer, useEffect, useCallback, useRef, useState } from 'react'
+import { useReducer, useEffect, useCallback, useRef, useState, useMemo } from 'react'
 import { PARTS, SLOT_IDS, EMPTY_CONFIG } from './data/parts.js'
 import { runSimulation } from './lib/simulation.js'
 import {
@@ -9,7 +9,7 @@ import {
 } from './lib/storage.js'
 import useDarkMode from './hooks/useDarkMode.js'
 import useCustomParts from './hooks/useCustomParts.js'
-import useCompatibilityWatcher from './hooks/useCompatibilityWatcher.js'
+import { checkCompatibility } from './lib/compatibility.js'
 import useShareLinkLoader from './hooks/useShareLinkLoader.js'
 import useDemoMode from './hooks/useDemoMode.js'
 import usePersistence from './hooks/usePersistence.js'
@@ -240,8 +240,8 @@ function reducer(state, action) {
         openRocketImport: null,
         importedSource: action.importedSource ?? null,
         simulation: null,
-        // Imported state replaces the inputs immediately; clear the previous
-        // compatibility result before the debounced watcher evaluates them.
+        // Discard legacy cached findings. The rendered view derives findings
+        // synchronously from the replacement inputs.
         warnings: [],
         inputRevision: state.inputRevision + 1,
       }
@@ -323,8 +323,13 @@ export default function App() {
     onLoadError: handleCustomPartsError,
   })
 
-  // Debounced compatibility re-evaluation on config/specs change.
-  useCompatibilityWatcher({ config: state.config, specs: state.specs, dispatch })
+  // Warnings are derived data. A timer allowed a current simulation or print
+  // to omit findings for 300 ms after edits/import. All surfaces now receive
+  // the same current-input findings in the same render, with no timer window.
+  const warnings = useMemo(
+    () => checkCompatibility({ config: state.config, specs: state.specs }),
+    [state.config, state.specs]
+  )
 
   // Demo mode: ?demo=1 or first-visit (no saved config, no visited flag) seeds a
   // sample L3 config + sim so first-time visitors see the tool populated.
@@ -599,7 +604,7 @@ export default function App() {
       {demoMode && <DemoBanner onExit={exitDemo} />}
       <WorkspaceBoundary>
         <MissionControlLayout
-          state={state}
+          state={{ ...state, warnings }}
           demoMode={demoMode}
           onExitDemo={exitDemo}
           allParts={allParts}

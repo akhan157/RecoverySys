@@ -3,6 +3,9 @@
 RecoverySys is a local-first recovery-bay configuration and flight-estimation tool for high-power rocketry. It helps you assemble recovery hardware, review configuration warnings, and explore simulated flight and landing behavior before a launch.
 
 **Current test candidate: [1.3.0-rc.1](https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.1)**
+
+Working source prepares **1.3.0-rc.2**; the published download remains rc.1 until qualification completes. See [qualification](docs/release-qualification-2026-11-05.md).
+
 The complete product strategy, requirements outline, feature breakdown, acceptance criteria, metrics, risks, release strategy, and six-phase roadmap are in [`PRODUCT-STRATEGY-BRIEF.md`](PRODUCT-STRATEGY-BRIEF.md).
 
 ## Capabilities
@@ -27,8 +30,8 @@ deferred-only; it is not used by the application or release builds.
 
 ## Local development
 
-RecoverySys supports Node.js `^20.19.0 || ^22.13.0 || >=24.0.0` and npm `>=10`.
-CI runs on Node 22.
+RecoverySys supports Node.js `^22.13.0 || ^24.0.0 || ^26.0.0` and npm `>=10`.
+CI checks Node 22, 24 and 26; production-browser and portable packaging jobs use Node 22.
 
 From this directory:
 

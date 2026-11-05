@@ -1,0 +1,116 @@
+[
+  {
+    "partId": "cfc-030-n",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/30-elliptical-parachute-3-3lb-20fps",
+    "accessed": "2026-11-05",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 3.0,
+      "weight_g": 87.9
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g",
+      "cd": "dimensionless"
+    },
+    "sourceCapture": "Primary product-page text inspected through web tool; no raw-page hash claimed.",
+    "status": "requires-human-review",
+    "notes": "CFC-30-N-ST manufacturer page. Tight-pack assumption; Cd is a 1.5–1.6 range, so no single Cd is extracted."
+  },
+  {
+    "partId": "cfc-030-n",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/30-elliptical-parachute-3-3lb-20fps",
+    "accessed": "2026-11-05",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 3.0,
+      "weight_g": 87.9
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g",
+      "cd": "dimensionless"
+    },
+    "sourceCapture": "Primary product-page text inspected through web tool; no raw-page hash claimed.",
+    "status": "requires-human-review",
+    "notes": "CFC-30-N-ST manufacturer page. Tight-pack assumption; Cd is a 1.5–1.6 range, so no single Cd is extracted."
+  },
+  {
+    "partId": "ifc-030-sl",
+    "category": "main_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+    "accessed": "2026-11-05",
+    "specs": {
+      "packed_diam_in": 1.5,
+      "packed_length_in": 4.2,
+      "weight_g": 38,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g",
+      "cd": "dimensionless"
+    },
+    "sourceCapture": "Primary product-page text inspected through web tool; no raw-page hash claimed.",
+    "status": "requires-human-review",
+    "notes": "IFC-30-SUL-OB manufacturer page. Dimensions assume the stated deployment-bag packing density; traditional folding differs. Catalog -sl identity must still be independently matched to manufacturer SUL variant."
+  },
+  {
+    "partId": "ifc-030-sl",
+    "category": "drogue_chute",
+    "url": "https://shop.fruitychutes.com/products/iris-30-ultra-light-parachute-2-6lbs-15fps",
+    "accessed": "2026-11-05",
+    "specs": {
+      "packed_diam_in": 1.5,
+      "packed_length_in": 4.2,
+      "weight_g": 38,
+      "cd": 2.2
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "g",
+      "cd": "dimensionless"
+    },
+    "sourceCapture": "Primary product-page text inspected through web tool; no raw-page hash claimed.",
+    "status": "requires-human-review",
+    "notes": "IFC-30-SUL-OB manufacturer page. Dimensions assume the stated deployment-bag packing density; traditional folding differs. Catalog -sl identity must still be independently matched to manufacturer SUL variant."
+  },
+  {
+    "partId": "lp-024",
+    "category": "main_chute",
+    "url": "https://www.the-rocketman.com/products/rocketman-high-performance-cd-2-2-parachutes",
+    "accessed": "2026-11-05",
+    "specs": {
+      "packed_diam_in": 2,
+      "packed_length_in": 2.75,
+      "weight_g": 87.883521688
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "sourceCapture": "Manufacturer page text inspected through web tool; no raw-page hash claimed.",
+    "status": "requires-human-review",
+    "notes": "24 in High Performance CD 2.2 standard nylon variant. Published 3.1 oz converted exactly to grams; source shape Toroidal / Annular / Iris. The large difference from catalog weight/packing may indicate a standard versus ultralight identity mismatch. Name/size alone does not establish identity. No automatic update or shape normalization. The 36 in page also states 7.4 lb at 20 fps in the descent table and 7 lb at 20 fps as a rating; this conflict is unresolved and neither is converted into engineering data."
+  },
+  {
+    "partId": "lp-036",
+    "category": "main_chute",
+    "url": "https://www.the-rocketman.com/products/rocketman-high-performance-cd-2-2-parachutes",
+    "accessed": "2026-11-05",
+    "specs": {
+      "packed_diam_in": 2.6,
+      "packed_length_in": 4.52,
+      "weight_g": 136.077711
+    },
+    "sourceUnits": {
+      "packed_dimensions": "in",
+      "weight": "oz; 28.349523125 g/oz"
+    },
+    "sourceCapture": "Manufacturer page text inspected through web tool; no raw-page hash claimed.",
+    "status": "requires-human-review",
+    "notes": "36 in High Performance CD 2.2 standard nylon variant. Published 4.8 oz converted exactly to grams; source shape Toroidal / Annular / Iris. The large difference from catalog weight/packing may indicate a standard versus ultralight identity mismatch. Name/size alone does not establish identity. No automatic update or shape normalization. The 36 in page also states 7.4 lb at 20 fps in the descent table and 7 lb at 20 fps as a rating; this conflict is unresolved and neither is converted into engineering data."
+  }
+]

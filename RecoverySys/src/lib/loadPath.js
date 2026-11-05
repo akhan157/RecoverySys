@@ -18,7 +18,8 @@ import { CRITERION_IDS, evaluateCriterion } from './criteria.js'
  *   - main snatch proxy  → recoveryLoad's computeMainSnatchLoad (via the context)
  *   - main opening shock → compatibility's computeOpeningShockForContext
  *
- * It adds no compatibility warnings and changes no thresholds: margin
+ * Compatibility also screens series-chain links and swivels against these
+ * forces. This view adds no warnings and changes no thresholds: margin
  * categories come from the shared STRENGTH_MARGIN criterion, except opening
  * shock, which uses OPENING_SHOCK_RATIO exactly as rule_openingShock does.
  */
