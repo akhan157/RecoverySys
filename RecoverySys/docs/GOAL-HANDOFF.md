@@ -8,7 +8,8 @@ qualified head `725d8a0446b9225fbb24a70f1b0065d5cdf70f9f`. The Antigravity
 Opus physics assignment failed on quota before producing research or edits;
 the separate Gemini catalog assignment remains outstanding at this checkpoint.
 The owner has now authorized selection of other working Antigravity models;
-the next physics route is Sonnet high, while catalog research remains Gemini.
+Sonnet also failed on quota without research. The next physics route is Gemini
+high, while the disjoint catalog assignment remains Gemini medium.
 No evidence acceptance is claimed. See
 `history/online-validation-2026-11-05/ORCHESTRATION.md` for routing and next
 actions. Dispatch the replacement physics assignment and receive both research

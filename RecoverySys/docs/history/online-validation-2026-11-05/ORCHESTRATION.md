@@ -33,3 +33,10 @@ also fails, other available Antigravity models may be selected without another
 provider-choice question. Actual failures and resolved models must be recorded
 separately; catalog availability does not prove any model has remaining quota.
 The failed Opus task is settled with task_cancel before replacement.
+
+Sonnet `claude-sonnet-4-6` high also failed immediately on quota at
+2026-11-05T23:11:40Z, reporting the same reset interval. It produced no research,
+edits or verdict. Its task was settled with task_cancel. The next authorized
+physics attempt uses Antigravity `gemini-3.8-flash`, high thinking, on the same
+bounded Gate1 source/design scope in a fresh isolated checkout. This is a
+recorded model switch after provider error, not evidence acceptance.
