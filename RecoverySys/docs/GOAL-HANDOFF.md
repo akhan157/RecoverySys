@@ -12,8 +12,13 @@ Sonnet also failed on quota without research. The next physics route is Gemini
 high, while the disjoint catalog assignment remains Gemini medium.
 No evidence acceptance is claimed. See
 `history/online-validation-2026-11-05/ORCHESTRATION.md` for routing and next
-actions. Dispatch the replacement physics assignment and receive both research
-packets; do not ask again before choosing another available Antigravity model.
+actions. Gemini high physics research is assigned. The catalog packet at
+`25fcc470531159d6e15767877319f151fb818900` was merged for revision after
+independent review found unsupported Iris identity/rating claims and gaps in
+the claimed validation coverage. See CATALOG-REVIEW-1.md in that history
+directory. No production edits/acceptance. Dispatch the bounded catalog
+revision, receive physics design, then independently review before integration.
+Do not ask again before choosing another available Antigravity model.
 
 ## Qualified release-candidate checkpoint
 
