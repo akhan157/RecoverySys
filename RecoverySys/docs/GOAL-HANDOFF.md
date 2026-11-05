@@ -14,15 +14,23 @@ Codex `gpt-6.1-sol`, high. No independent physics acceptance is implied.
 Measured: clean-install full checks on Node 22/24/26 passed 481 tests each at
 the reviewed core. Final source passed Node 22's full check and 34 production
 browser workflows. Full browser suite at the reviewed core passed 94/94;
-the final suite has 96 cases and awaits hosted CI. The added two cases cover
+the final suite has 96 cases. The added two cases cover
 active notification suppression on both print surfaces, desktop and mobile.
 The final subset also repeats all 32 full-parity workflows.
 
-Register: **15 rows: 8 PASS, 3 in_progress, 4 blocked, 0 not_run, 0 FAIL**.
+Hosted run `42123690801` passed all five jobs at PR head
+`dafec8d1985d863169d1ba275c46ea74a7da4ea3`: 481 tests on each of Node
+22.23.4 / 24.22.2 / 26.13.0, 96/96 browser workflows with zero skipped,
+Windows portable build/launch, universal Mac build/signature/slices/arm64 launch.
+Launch checks prove only that the process stayed alive for 15 seconds.
+Downloaded archive CRCs and runner hashes match. Hosted web payloads are
+byte-identical to the local archive's 20 files; compressed ZIP hashes differ.
+
+Register: **15 rows: 9 PASS, 2 in_progress, 4 blocked, 0 not_run, 0 FAIL**.
 Each PASS has bounded scope in
 `history/release-rc2-2026-11-05/EVIDENCE.json`.
-In progress: remote matrix/platform artifacts, catalog field approval, stable
-promotion. Blocked: Windows manual workflow, macOS manual workflow, actual
+In progress: catalog field approval, stable promotion.
+Blocked: Windows manual workflow, macOS manual workflow, actual
 observed rocketeer trials, independent physics acceptance.
 
 The owner said no test hosts or independent reviewer/trial contacts were
@@ -37,16 +45,20 @@ Raw logs, before/after print screenshots, browser report, ZIP/hash and file
 manifest are outside git at `../RecoverySys-artifacts/1.3.0-rc.2/` relative to
 repository root. Local web SHA-256:
 `f088bbadf5a007fe36dfbe6ab3817f75c3f3dfd3c698232ad17e43ccbf62a393`.
-Remote platform/archive hashes must be recorded separately.
+Hosted logs/archives and a local verification report are retained in
+`remote-42123690801/` beneath that directory. Their hashes are recorded in
+`EVIDENCE.json` and `REMOTE-CI.md` in the historical packet.
 
-Next action: push this branch, open/link a draft PR and execute the hosted
-Node22/24/26 plus Windows/macOS checks. Inspect failed jobs or downloaded
-artifact evidence at the exact PR SHA. Do not promote stable on build/launch
-smoke alone. Current public Pages is separately verified rc.1; rc.2 has not
+[Draft PR #16](https://github.com/akhan157/RecoverySys/pull/16) contains the
+candidate. The latest update only records hosted evidence; it does not alter
+application source. Next action: inspect its documentation-only CI rerun,
+then preserve the draft and exact artifacts until the remaining real evidence
+is available. Do not promote stable on build/launch smoke alone.
+Current public Pages is separately verified rc.1; rc.2 has not
 been deployed. M7 sampling policies are retained; M8 Python remains research;
 M9 engineering ingestion remains behind identity/provenance decisions.
 
 No self-approval. The historical packet records process deviation, review,
 failed attempts and scoped evidence. Temporary browser/server processes were
-closed after local checks. Work pauses next at hosted results or actual external
-evidence, rather than claiming the entire release roadmap complete.
+closed after local checks. After the records-only CI run, work pauses at actual
+external evidence, rather than claiming the entire release roadmap complete.

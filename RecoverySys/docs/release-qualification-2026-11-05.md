@@ -58,7 +58,7 @@ contention. Earlier checks are explicitly distinguished from final checks.
 | Full and production npm audits | Zero advisories, 2026-11-05. |
 | Benchmark/provenance reports | Generated successfully; no acceptance decisions. |
 | Live published baseline | Original main verifier passes against public rc.1: 10 tabs, referenced assets and landing. rc.2 deployment remains pending. |
-| Remote rc.2 matrix/portable jobs | Pending branch publication and workflow execution. |
+| Remote rc.2 matrix/portable jobs | PASS at `dafec8d`, run `42123690801`: all five jobs, 481 tests per runtime and 96/96 browser workflows. Windows/macOS archives downloaded and hashes/CRC verified; 15-second launch smoke only. See historical packet `REMOTE-CI.md`. |
 
 The local web archive was built from application source at
 `3bef5116a67031de33ff183c1f225dc42e1cdc19`. Its SHA-256 is

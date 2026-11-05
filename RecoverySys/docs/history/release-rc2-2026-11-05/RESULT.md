@@ -47,3 +47,11 @@ deployment is declared by this result.
 No self-approval: measured automated results and a bounded independent code
 verdict are recorded separately. Register arithmetic and next action are in
 `EVIDENCE.json` and the project handoff.
+
+Hosted follow-up at `dafec8d1985d863169d1ba275c46ea74a7da4ea3`: all five
+jobs passed, with 481 tests on each supported Node major and 96/96 browser
+workflows. Windows and universal Mac archives passed packaging and 15-second
+launch checks (Mac arm64 only). Downloaded hashes/CRC and Mac executable/slices
+were verified locally. The web archive contains exactly the same 20 payload
+files as the local build. See `REMOTE-CI.md`; manual and physical gates remain
+open. Register is now 9 PASS, 2 in_progress and 4 blocked across 15 rows.

@@ -28,17 +28,17 @@
     {
       "id": "local-node24",
       "status": "PASS",
-      "scope": "Reviewed core: separate npm ci and full check, 481 tests. Final follow-up awaits remote matrix."
+      "scope": "Reviewed core: separate npm ci and full check, 481 tests. Final application follow-up also passed the hosted matrix at dafec8d (see hostedQualification)."
     },
     {
       "id": "local-node26",
       "status": "PASS",
-      "scope": "Reviewed core: separate npm ci and full check, 481 tests. Final follow-up awaits remote matrix."
+      "scope": "Reviewed core: separate npm ci and full check, 481 tests. Final application follow-up also passed the hosted matrix at dafec8d (see hostedQualification)."
     },
     {
       "id": "browser-contracts",
       "status": "PASS",
-      "scope": "Reviewed core 94/94 full suite; final source 34/34 full-parity and print-notification subset."
+      "scope": "Reviewed core 94/94 full suite; final source 34/34 full-parity and print-notification subset. Hosted final application full96/96 passed at dafec8d, zero skipped/failures."
     },
     {
       "id": "identity-and-audit",
@@ -62,8 +62,8 @@
     },
     {
       "id": "remote-matrix-and-portables",
-      "status": "in_progress",
-      "scope": "Workflow prepared for final branch: Node22/24/26, full96 browser workflows, Windows/macOS build and launch checks. Remote results pending."
+      "status": "PASS",
+      "scope": "All five hosted jobs passed at dafec8d: Node22/24/26 each481 tests, full96 browser tests, Windows and universal Mac packaging +15second process launch. Downloaded hashes/CRC verified; arm64 Mac launch only. Manual workflows remain blocked."
     },
     {
       "id": "windows-manual-workflow",
@@ -97,9 +97,9 @@
     }
   ],
   "counts": {
-    "PASS": 8,
-    "in_progress": 3,
-    "blocked": 4
+    "PASS": 9,
+    "blocked": 4,
+    "in_progress": 2
   },
   "rawEvidence": [
     {
@@ -157,8 +157,72 @@
     {
       "path": "../RecoverySys-artifacts/1.3.0-rc.2/evidence/recoverysys-provenance-final.json",
       "sha256": "7a33626c97ab5b7391b73c4cd29c3057f49a36c47a45a2b2ddf93d9a8ce7e819"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/remote-42123690801/run.json",
+      "sha256": "ea4fff0a553d8efff502f1731a0e865ca19a9a47a6946edd36af17d3a515875f"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/remote-42123690801/verification.json",
+      "sha256": "a24a59fffc61ea02ae34d7dda6222d2bcf386c4100bd249f86befd7e4fe27035"
+    },
+    {
+      "path": "../RecoverySys-artifacts/1.3.0-rc.2/remote-42123690801/workflow.log",
+      "sha256": "18582704a5e3fdeca634c01c78d1429c815f5148f71365e230a9ee15fb267af4"
     }
   ],
   "ownerSteering": "Owner has no Windows/Mac test machines or independent reviewer/trial contacts and asked the agent to do the work itself. Continue hosted automation/research; unavailable observations are not waived.",
-  "nextAction": "Publish draft PR and execute hosted CI; inspect final SHA results/artifact hashes. Stable promotion remains pending."
+  "nextAction": "Hosted application qualification is complete. Preserve draft status; remaining work requires actual manual platform/trial/independent physics evidence and exact catalog decisions. Documentation-only evidence commit may rerun CI; no stable promotion.",
+  "pullRequest": "https://github.com/akhan157/RecoverySys/pull/16",
+  "hostedQualification": {
+    "headSha": "dafec8d1985d863169d1ba275c46ea74a7da4ea3",
+    "runId": 42123690801,
+    "url": "https://github.com/akhan157/RecoverySys/actions/runs/42123690801",
+    "conclusion": "success",
+    "checksPassed": 5,
+    "nodeVersions": [
+      "22.23.4",
+      "24.22.2",
+      "26.13.0"
+    ],
+    "unitTestsPerRuntime": 481,
+    "browserTests": 96,
+    "browserFailures": 0,
+    "browserSkipped": 0,
+    "windowsRunnerImage": "windows-2025-vs2026",
+    "macRunnerImage": "macos-26-arm64",
+    "macSlices": [
+      "x86_64",
+      "arm64"
+    ],
+    "macLaunchArchitecture": "arm64",
+    "launchSmokeSeconds": 15,
+    "localWebPayloadByteIdentical": true,
+    "archives": [
+      {
+        "kind": "web",
+        "path": "../RecoverySys-artifacts/1.3.0-rc.2/remote-42123690801/web-candidate-42123690801/RecoverySys-web.zip",
+        "sha256": "775381299b1abad67429c0dff13d5ea450a12e10302c23c93aa05df3bfbc4538",
+        "bytes": 297550,
+        "crcVerified": true,
+        "runnerHashMatched": true
+      },
+      {
+        "kind": "windows",
+        "path": "../RecoverySys-artifacts/1.3.0-rc.2/remote-42123690801/windows-portable-42123690801/RecoverySys-Portable.zip",
+        "sha256": "ba06af039213b18fe4c4219e92fb78dbecec581aaaa395af03e0053e75185399",
+        "bytes": 2733669,
+        "crcVerified": true,
+        "runnerHashMatched": true
+      },
+      {
+        "kind": "macos",
+        "path": "../RecoverySys-artifacts/1.3.0-rc.2/remote-42123690801/macos-portable-42123690801/RecoverySys-macos-universal.zip",
+        "sha256": "b09d19741ba461683a96929880edbe06fe11d26a9fb05be30a9f3dbb7ce37c1b",
+        "bytes": 5965736,
+        "crcVerified": true,
+        "runnerHashMatched": true
+      }
+    ]
+  }
 }
