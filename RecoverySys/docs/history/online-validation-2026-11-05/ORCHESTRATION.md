@@ -40,3 +40,12 @@ edits or verdict. Its task was settled with task_cancel. The next authorized
 physics attempt uses Antigravity `gemini-3.8-flash`, high thinking, on the same
 bounded Gate1 source/design scope in a fresh isolated checkout. This is a
 recorded model switch after provider error, not evidence acceptance.
+
+Physics Gemini high completed at `96d4252fe4fe07062982c5d68c56b141660b78f9`.
+Parent review in PHYSICS-GATE-1.md requires corrected arithmetic/provenance
+and excludes unaligned coast/flight claims. Four reachable analytic checks
+are approved for executable implementation in that packet. A separate,+disjoint OpenRocket reference lane may establish an actual version-pinned
+simulator run with isolated user-local Java/prebuilt artifacts, bounded memory
+and two jobs; no global installation or production engine changes. Raw logs,
+tools and binaries stay outside git. Parent reviews both outputs and retains
+all unavailable/mismatched inputs rather than inventing parity.
