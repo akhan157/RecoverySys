@@ -27,8 +27,11 @@ Four checks (ten comparisons), five mutation-control groups and eleven guard
 tests pass; three cwd invocations retain distinct clean-source reports. See
 ANALYTIC-REVIEW.md / ANALYTIC-EVIDENCE.json for exact scope and paths. A new
 Node22 CI step is prepared but has not run remotely. No canonical corpus case
-was promoted. The separate version-pinned OpenRocket execution attempt is
-outstanding. Next: receive/review/reproduce it, then publish the bounded
+was promoted. The separate version-pinned OpenRocket attempt produced raw
+outputs but failed initial review: clocks and deployed canopy states differ,
+the Java driver ignores its manifest, and evidence controls need correction.
+OPENROCKET-REVIEW-1.md records the findings and preserved initial artifacts.
+Next: correct/review/reproduce the OpenRocket comparison, then publish the bounded
 validation increment and inspect CI. Production physics/catalog are unchanged.
 Do not ask again before choosing another available Antigravity model.
 
