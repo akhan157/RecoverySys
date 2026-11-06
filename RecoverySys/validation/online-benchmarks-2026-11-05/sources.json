@@ -18,7 +18,7 @@
         "Standard sea level mass density rho0 = 1.2250 kg/m^3",
         "Standard sea level acceleration of gravity g0 = 9.80665 m/s^2",
         "Troposphere standard temperature lapse rate L = -0.0065 K/m' (-6.5 K/km)",
-        "Specific gas constant for dry air R = 287.053072 J/(kg*K), derived from universal gas constant R* = 8314.32 J/(kmol*K) and mean molecular weight M0 = 28.9644 kg/kmol (NASA-TM-X-74335 p. 4 Table 2)",
+        "Specific gas constant for dry air R = 287.053072 J/(kg*K), derived from universal gas constant R* = 8314.32 J/(kmol*K) and mean molecular weight M0 = 28.9644 kg/kmol (NASA-TM-X-74335 printed pp. 2-3, Tables 2-4; mean sea-level molecular weight as used by the standard)",
         "Ratio of specific heats gamma = 1.40 (dimensionless)",
         "Speed of sound equation a = sqrt(gamma * R * T)",
         "Geopotential altitude H related to geometric altitude Z via H = (r0 * Z) / (r0 + Z) where r0 = 6,356,766 m"
@@ -277,7 +277,7 @@
       "pinnedCommit": "96f9a0c47d636dbdf1daeb8a9ca8915b2c75a408",
       "accessed": "2026-11-05",
       "facts": [
-        "First-party measured dual-deploy rocketry flight recorded at 100 Hz by commercial COTS avionics (Altus Metrum TeleMetrum v6, serial 5115)",
+        "First-party measured dual-deploy rocketry flight recorded at 100 Hz by commercial COTS avionics (Altus Metrum TeleMetrum CSV (version field 6; hardware revision unverified), serial 5115)",
         "Flight envelope recorded: Boost (t=-0.3 to 4.96 s), Coast (t=4.96 to 29.93 s), Drogue deploy at apogee (t=29.93 s, altitude 3,888.7 m AGL), Main deploy (t=157.97 s, altitude 448.9 m AGL), Touchdown (t=237.94 s)",
         "Peak apogee recorded: 3,903.8 m AGL (12,807.6 ft)",
         "Peak speed recorded: 317.9 m/s (1,042.9 ft/s, Mach 0.93)",
@@ -342,7 +342,7 @@
       },
       "conventions": {
         "status": "BLOCKED. Useful qualitative failure observation; not a matched-input benchmark.",
-        "sensorUncertainty": "RRC3 barometric altitude calculated via standard atmosphere formula; sensor subject to transonic aerodynamic effects and ejection gas ingress (~0.2 s)."
+        "sensorUncertainty": "No source-backed sensor uncertainty or disturbance duration is established by this packet. Altitude and pressure require event and calibration review before quantitative validation."
       },
       "artifact": {
         "directoryPath": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/juno3/",

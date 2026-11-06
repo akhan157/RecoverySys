@@ -10,13 +10,19 @@
  * and provides comparison logic using preset tolerances.
  */
 
-import { isa, airDensity } from '../../src/lib/atmosphere.js'
+import { isDeepStrictEqual } from 'node:util'
+import { isa } from '../../src/lib/atmosphere.js'
 import { computeDescentRate, computeDrift } from '../../src/lib/simulation.js'
 import { computeMainSnatchLoad } from '../../src/lib/recoveryLoad.js'
+import {
+  SIMULATION_MODEL_ID,
+  SIMULATION_MODEL_VERSION,
+  SIMULATION_ASSUMPTIONS_VERSION,
+} from '../../src/lib/constants.js'
 
-export const PRODUCTION_MODEL_ID = 'browser-js-recovery'
-export const PRODUCTION_MODEL_VERSION = 'isa-apogee-descent-v1'
-export const PRODUCTION_ASSUMPTIONS_VERSION = 'recovery-assumptions-v1'
+export const PRODUCTION_MODEL_ID = SIMULATION_MODEL_ID
+export const PRODUCTION_MODEL_VERSION = SIMULATION_MODEL_VERSION
+export const PRODUCTION_ASSUMPTIONS_VERSION = SIMULATION_ASSUMPTIONS_VERSION
 
 const FT_PER_M = 3.28084
 
@@ -25,6 +31,10 @@ const FT_PER_M = 3.28084
  * Tolerance can have 'relative' (e.g. 0.0001) or 'absolute' (e.g. 1.0).
  */
 export function compareMetric(observed, expected, tolerance) {
+  const bounds = [tolerance?.relative, tolerance?.absolute].filter((value) => value != null)
+  if (bounds.length === 0 || bounds.some((value) => !Number.isFinite(value) || value < 0)) {
+    return { observed, expected, pass: false, reason: 'missing-or-invalid-tolerance' }
+  }
   if (observed == null || !Number.isFinite(observed)) {
     return {
       observed: null,
@@ -52,7 +62,12 @@ export function compareMetric(observed, expected, tolerance) {
   }
 
   if (tolerance?.relative != null) {
-    const diff = Math.abs(observed - expected) / Math.abs(expected)
+    const diff =
+      expected === 0
+        ? observed === 0
+          ? 0
+          : Infinity
+        : Math.abs(observed - expected) / Math.abs(expected)
     const threshold = tolerance.relative
     const pass = diff <= threshold
     return {
@@ -94,6 +109,38 @@ export function compareMetric(observed, expected, tolerance) {
   }
 }
 
+/** Check the frozen proposal against the separately calculated reference. */
+export function compareProposalReference(proposal, reference) {
+  const errors = []
+  if (proposal?.id !== reference.benchmarkId) errors.push('id')
+  if (!isDeepStrictEqual(proposal?.inputs, reference.inputs)) errors.push('inputs')
+  if (
+    proposal?.model?.id !== PRODUCTION_MODEL_ID ||
+    proposal?.model?.version !== PRODUCTION_MODEL_VERSION ||
+    proposal?.model?.assumptionsVersion !== PRODUCTION_ASSUMPTIONS_VERSION
+  )
+    errors.push('model')
+  const declared = proposal?.expected?.metrics ?? []
+  if (
+    declared.length !== Object.keys(reference.metrics).length ||
+    new Set(declared.map((metric) => metric.name)).size !== declared.length
+  )
+    errors.push('metric-set')
+  for (const [name, metric] of Object.entries(reference.metrics)) {
+    const entry = declared.find((item) => item.name === name)
+    if (!entry || entry.unit !== metric.unit) {
+      errors.push(`${name}:unit-or-missing`)
+      continue
+    }
+    if (!compareMetric(metric.value, entry.value, metric.tolerance).pass)
+      errors.push(`${name}:value`)
+    for (const bound of ['relative', 'absolute']) {
+      if (entry.tolerance?.[bound] !== metric.tolerance[bound]) errors.push(`${name}:tolerance`)
+    }
+  }
+  return { pass: errors.length === 0, errors }
+}
+
 /**
  * Benchmark 1: 2,500m Atmosphere evaluation.
  */
@@ -119,7 +166,6 @@ export function evaluateAtmosphere(inputs) {
     return { status: 'error', reason: err.message, metrics: {} }
   }
 }
-
 
 /**
  * Benchmark 2: 48-inch nominal area terminal descent evaluation.

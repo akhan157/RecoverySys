@@ -56,7 +56,7 @@ export function runNegativeControls(referenceData) {
     const expectedTempK = 271.9 // At 2500 m
     const cmp = compareMetric(observedFeet.metrics.temperature_K, expectedTempK, {
       absolute: 0.01,
-      basis: 'source-stated',
+      basis: 'analyst-derived',
     })
 
     const detected = cmp.pass === false && cmp.difference > 5.0
@@ -93,7 +93,7 @@ export function runNegativeControls(referenceData) {
     const expectedBearing = 0.0 // Expected True North under South wind
     const cmp = compareMetric(observedReversed.metrics.bearing_deg, expectedBearing, {
       absolute: 0.1,
-      basis: 'source-stated',
+      basis: 'analyst-derived',
     })
 
     const detected = cmp.pass === false && Math.abs(cmp.difference - 180.0) < 0.01
@@ -155,7 +155,8 @@ export function runNegativeControls(referenceData) {
       {
         subId: 'NC5b_negative_mass',
         desc: 'Negative mass in descent rate',
-        run: () => evaluateTerminalDescent({ chuteSpecs: { diameter_in: 48, cd: 0.8 }, mass_kg: -5 }),
+        run: () =>
+          evaluateTerminalDescent({ chuteSpecs: { diameter_in: 48, cd: 0.8 }, mass_kg: -5 }),
         expectedPass: false,
       },
       {
@@ -216,7 +217,8 @@ export function runNegativeControls(referenceData) {
     results.push({
       id: 'NC5_malformed_nonfinite_data',
       name: 'Malformed and Non-Finite Data Detection',
-      mutation: 'Suite of 5 invalid/non-finite edge cases (NaN altitude, -5kg mass, null wind dir, missing cord, 0% elongation)',
+      mutation:
+        'Suite of 5 invalid/non-finite edge cases (NaN altitude, -5kg mass, null wind dir, missing cord, 0% elongation)',
       subtests: subtestOutcomes,
       detected: allDetected,
       verdict: allDetected ? 'PASS' : 'FAIL',

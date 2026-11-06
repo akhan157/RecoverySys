@@ -23,7 +23,7 @@ def compute_isa_2500m():
       R_star = 8314.32 J/(kmol*K)
       M0 = 28.9644 kg/kmol
       L = -0.0065 K/m'
-      R = R_star / M0 = 287.05307204775516 J/(kg*K)
+      R = R_star / M0 = 287.05307204706463 J/(kg*K)
       exponent n = (g0 * M0) / (R_star * (-L)) = 5.255876113278519
     """
     h_m = 2500.0
@@ -59,7 +59,7 @@ def compute_isa_2500m():
                 "value": T,
                 "rounded": round(T, 4),
                 "unit": "K",
-                "tolerance": {"absolute": 0.01, "basis": "source-stated"},
+                "tolerance": {"absolute": 0.01, "basis": "analyst-derived"},
             },
             "pressure_Pa": {
                 "value": P,
@@ -84,7 +84,7 @@ def compute_terminal_descent_48in():
     Exact inch = 0.0254 m.
     D = 48 * 0.0254 = 1.2192 m
     radius = 0.6096 m
-    Area = pi * r^2 = 1.167454032599... m^2
+    Area = pi * r^2 = 1.167454031840... m^2
     Sea level rho = 1.225 kg/m^3
     v_term = sqrt(2 * m * g / (rho * Cd * S0))
     """
@@ -195,7 +195,7 @@ def compute_cardinal_wind_drift_3000ft():
                 "value": bearing_deg,
                 "rounded": round(bearing_deg, 1),
                 "unit": "deg",
-                "tolerance": {"absolute": 0.1, "basis": "source-stated"},
+                "tolerance": {"absolute": 0.1, "basis": "analyst-derived"},
             },
         },
     }
@@ -203,23 +203,12 @@ def compute_cardinal_wind_drift_3000ft():
 
 def compute_secant_snatch_arithmetic():
     """
-    Benchmark 4: Secant linear-elastic snatch arithmetic.
-    Declared parameters: 1500 lb, 20 ft, 25%, 6 kg, 65 fps.
-    Constants:
-      N_PER_LBF = 4.448
-      FT_PER_M = 3.28084
-    Formulas:
-      break_extension_m = length_ft * 0.3048 * (elongation_pct / 100) = 1.524 m
-      strength_N = strength_lbs * 4.448 = 6672.0 N
-      k = strength_N / break_extension_m = 4377.9528 N/m
-      v_mps = 65.0 / 3.28084 = 19.8120 m/s
-      event_energy_J = 0.5 * 6.0 * v_mps^2 = 1177.5452 J
-      capacity_energy_J = 0.5 * k * break_extension_m^2 = 5084.064 J
-      predicted_extension_m = sqrt(2 * event_energy_J / k) = 0.733476 m
-      peak_force_proxy_N = k * predicted_extension_m = 3211.1227 N
-      peak_force_proxy_lbs = peak_force_proxy_N / 4.448 = 721.925 lbf
-      rating_margin = strength_lbs / peak_force_proxy_lbs = 2.078
-      energy_margin = capacity_energy_J / event_energy_J = 4.318
+    Generic secant linear-elastic screening arithmetic.
+    Declared compatibility constants: 4.448 N/lbf and 3.28084 ft/m.
+    These rounded conversions are not exact SI or measured material properties.
+    Energy is 0.5*m*v**2; stiffness is rated_force/break_extension.
+    Proxy peak force follows from equating event energy and elastic energy.
+    Numerical results are emitted by calculation, not prose.
     """
     strength_lbs = 1500.0
     length_ft = 20.0

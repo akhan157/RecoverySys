@@ -14,7 +14,7 @@
         "unit": "K",
         "tolerance": {
           "absolute": 0.01,
-          "basis": "source-stated"
+          "basis": "analyst-derived"
         },
         "notes": "T = 288.15 - 0.0065 * 2500 K (exact lapse rate)"
       },

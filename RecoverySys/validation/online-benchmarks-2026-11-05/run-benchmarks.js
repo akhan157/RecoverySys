@@ -25,6 +25,7 @@ import {
   PRODUCTION_MODEL_VERSION,
   PRODUCTION_ASSUMPTIONS_VERSION,
   compareMetric,
+  compareProposalReference,
   evaluateAtmosphere,
   evaluateTerminalDescent,
   evaluateDrift,
@@ -106,7 +107,6 @@ async function loadAjv(paths) {
     path.join(paths.appDir, 'node_modules/ajv/dist/2020.js'),
     path.join(paths.primaryRepo, 'RecoverySys/node_modules/ajv/dist/2020.js'),
     path.join(paths.primaryRepo, 'node_modules/ajv/dist/2020.js'),
-    '/home/ak/RecoverySys/RecoverySys/node_modules/ajv/dist/2020.js',
   ]
 
   for (const cand of candidatePaths) {
@@ -153,11 +153,14 @@ async function main() {
     .sort()
 
   const schemaResults = []
+  const proposalsById = new Map()
   let allSchemasValid = true
 
   for (const file of proposalFiles) {
     const fullPath = path.join(paths.proposalsDir, file)
     const content = JSON.parse(fs.readFileSync(fullPath, 'utf8'))
+    if (proposalsById.has(content.id)) throw new Error(`Duplicate proposal: ${content.id}`)
+    proposalsById.set(content.id, content)
     const valid = validateSchema(content)
     schemaResults.push({
       file,
@@ -181,6 +184,17 @@ async function main() {
     encoding: 'utf8',
   })
   const referenceData = JSON.parse(refOutputRaw)
+  const proposalReferenceChecks = Object.entries(referenceData.references).map(
+    ([id, reference]) => ({
+      id,
+      ...compareProposalReference(proposalsById.get(id), reference),
+    })
+  )
+  if (proposalReferenceChecks.some((check) => !check.pass)) {
+    throw new Error(
+      `Proposal/reference mismatch: ${JSON.stringify(proposalReferenceChecks.filter((check) => !check.pass))}`
+    )
+  }
   console.log(`Computed 4 independent analytical references via ${referenceData.calculator}.\n`)
 
   // C. Execute 4 Reachable Benchmarks
@@ -376,6 +390,12 @@ async function main() {
   const sourcesData = JSON.parse(fs.readFileSync(paths.sourcesPath, 'utf8'))
   const report = {
     timestamp: new Date().toISOString(),
+    sourceCommit: execSync('git rev-parse HEAD', { cwd: paths.ownedDir, encoding: 'utf8' }).trim(),
+    sourceWorkingTreeDirty:
+      execFileSync('git', ['status', '--porcelain', '--', '.', '../../src'], {
+        cwd: paths.ownedDir,
+        encoding: 'utf8',
+      }).trim().length > 0,
     executionEnvironment: {
       platform: os.platform(),
       arch: os.arch(),
@@ -411,6 +431,7 @@ async function main() {
       allValid: allSchemasValid,
       results: schemaResults,
     },
+    proposalReferenceChecks,
     reachableBenchmarks: {
       total: benchmarksEvaluated.length,
       passed: benchmarksEvaluated.filter((b) => b.verdict === 'PASS').length,
@@ -434,9 +455,11 @@ async function main() {
   }
 
   // G. Write Output Report & Raw Run Log Outside Git
-  if (fs.existsSync(paths.artifactsDir)) {
-    const reportPath = path.join(paths.artifactsDir, 'online-benchmarks-report.json')
-    const logPath = path.join(paths.artifactsDir, 'online-benchmarks-run.log')
+  fs.mkdirSync(paths.artifactsDir, { recursive: true })
+  const runDir = fs.mkdtempSync(path.join(paths.artifactsDir, 'run-'))
+  {
+    const reportPath = path.join(runDir, 'online-benchmarks-report.json')
+    const logPath = path.join(runDir, 'online-benchmarks-run.log')
 
     fs.writeFileSync(reportPath, JSON.stringify(report, null, 2))
 
@@ -455,8 +478,6 @@ async function main() {
     console.log('--- Step 5: Reports written outside git ---')
     console.log(`Report JSON: ${reportPath}`)
     console.log(`Run Log: ${logPath}`)
-  } else {
-    console.warn(`WARNING: Artifacts directory not found at ${paths.artifactsDir}`)
   }
 
   console.log('=================================================================')

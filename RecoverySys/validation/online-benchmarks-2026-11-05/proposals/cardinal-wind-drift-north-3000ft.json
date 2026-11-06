@@ -34,7 +34,7 @@
         "unit": "deg",
         "tolerance": {
           "absolute": 0.1,
-          "basis": "source-stated"
+          "basis": "analyst-derived"
         },
         "notes": "Drift is opposite to 180 deg South wind: (180 + 180) mod 360 = 0 deg (True North)"
       }
