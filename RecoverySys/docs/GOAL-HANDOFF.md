@@ -27,12 +27,19 @@ Four checks (ten comparisons), five mutation-control groups and eleven guard
 tests pass; three cwd invocations retain distinct clean-source reports. See
 ANALYTIC-REVIEW.md / ANALYTIC-EVIDENCE.json for exact scope and paths. A new
 Node22 CI step is prepared but has not run remotely. No canonical corpus case
-was promoted. The separate version-pinned OpenRocket attempt produced raw
-outputs but failed initial review: clocks and deployed canopy states differ,
-the Java driver ignores its manifest, and evidence controls need correction.
-OPENROCKET-REVIEW-1.md records the findings and preserved initial artifacts.
-Next: correct/review/reproduce the OpenRocket comparison, then publish the bounded
-validation increment and inspect CI. Production physics/catalog are unchanged.
+was promoted. The corrected OpenRocket reference implementation
+`532550c` is integrated with parent hardening `a97d803` and control fix
+`cb706dd06e2974a95a4901854e76239554ce7810`. The parent reran the guarded
+runner from the committed clean tree: 20/20 controls, both controlled-Cd and
+native-aero executions, fresh external run evidence and output hashes
+(OPENROCKET-REVIEW-2.md). Controlled-Cd apogee agrees within about 0.01% on
+this fixture; native aerodynamics differ by about 3%; the main-descent gap is
+a confirmed structural difference (OpenRocket retains both canopies). This is
+a bounded diagnostic simulator comparison — not accepted-for-comparison, not
+flight validation, no physics/catalog/release decision. All three Antigravity
+lanes (catalog, analytic, OpenRocket) are now delivered, parent-verified and
+recorded. Production physics/catalog are unchanged; the branch remains
+evidence-only ahead of qualified rc.2.
 Do not ask again before choosing another available Antigravity model.
 
 ## Qualified release-candidate checkpoint
