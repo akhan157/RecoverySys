@@ -1,7 +1,7 @@
 # OpenRocket Reference Validation Correction Assignment
 
 ## 1. Worktree & Identity Confirmation
-- **Worktree Root:** `/home/ak/.t3/worktrees/RecoverySys/t3-d9078928`
+- **Worktree Root:** `<prepared isolated worktree>`
 - **Application Directory:** `RecoverySys/` (relative to repository root)
 - **Branch:** `t3/openrocket-reference-correction`
 - **Pinned Base Commit (HEAD):** `df5e0fe9154b3e24f2194d7a23407e123cd0f30d`
@@ -11,7 +11,7 @@
 
 ## 2. Motivation & Citations
 - **Context:** Following the initial uncommitted OpenRocket reference attempt (`9a96110e`), parent review in `RecoverySys/docs/history/online-validation-2026-11-05/OPENROCKET-REVIEW-1.md` recorded **rework required; no acceptance**.
-- **Initial Evidence Preservation:** Initial packet and outputs were preserved read-only at `/home/ak/RecoverySys-artifacts/online-validation-2026-11-05/openrocket/initial-uncommitted-9a96110e/` and are not overwritten. Raw JAR (`OpenRocket-23.09.jar`) and motor (`I200W.eng`) remain in `/home/ak/RecoverySys-artifacts/online-validation-2026-11-05/openrocket/`.
+- **Initial Evidence Preservation:** Initial packet and outputs were preserved read-only at `../RecoverySys-artifacts/online-validation-2026-11-05/openrocket/initial-uncommitted-9a96110e/` and are not overwritten. Raw JAR (`OpenRocket-23.09.jar`) and motor (`I200W.eng`) remain in `../RecoverySys-artifacts/online-validation-2026-11-05/openrocket/`.
 - **Review Findings Addressed:**
   1. *Clock mismatch:* `compare.mjs` labeled `runSimulation.total_time_s` as total flight duration, when RecoverySys computes descent-only duration (~48 s). Comparing 48 s with OpenRocket's launch-to-landing time (~61.23 s) produced an invalid 21.61% flight-time delta. Clocks must be separated: descent-only vs launch-to-landing (estimated flight = `apogee_t_s + total_time_s` with rounding limits) and event-derived OpenRocket ascent/descent/landing.
   2. *Recovery configuration mismatch:* In OpenRocket dual deployment, both drogue and main canopies remain deployed after main deployment. In RecoverySys `runSimulation`, the main descent phase uses main alone. Touchdown velocity (5.32 m/s) matches aggregate canopy area ($A_{\text{sum}} = 0.8209\text{ m}^2$) at burned-out mass. Both-canopies-remain-deployed must be preserved as an explicit model difference without silent alteration or claimed phase equivalence.

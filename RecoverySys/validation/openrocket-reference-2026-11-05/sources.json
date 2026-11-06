@@ -27,7 +27,8 @@
       "vendor": "Eclipse Adoptium",
       "configuration": "Configurable via JAVA_HOME, JAVA_BIN, and JAVAC_BIN environment variables (no committed hostpaths)",
       "license": "GPLv2 with Classpath Exception",
-      "notes": "Verified Java 17 toolchain on host; meets OpenRocket 23.09 Java 17 runtime baseline without requiring global system installation or root privileges."
+      "notes": "Verified Java 17 toolchain on host; meets OpenRocket 23.09 Java 17 runtime baseline without requiring global system installation or root privileges.",
+      "provenance_limitation": "Runtime -version observed; original download archive/checksum not independently preserved."
     },
     {
       "id": "aerotech-i200w-motor",
@@ -37,8 +38,8 @@
       "file_name": "I200W.eng",
       "byte_size": 509,
       "sha256": "927f60b020cc4f7181925871578319a2e5ddc0500e05c4c124cc709bdd419781",
-      "provenance": "Tripoli Motor Testing (1999) certified data, hosted on ThrustCurve.org, bundled in OpenRocket 23.09 official distribution.",
-      "license": "Public rocket motor data / Tripoli Motor Testing certification record",
+      "provenance": "Extracted record header states copyright Tripoli Motor Testing 1999; provided by ThrustCurve.org. Parent ENG came from pinned OpenRocket source; equivalence to JAR bundled library not independently verified.",
+      "license": "unknown; copyright notice does not establish redistribution permission",
       "parameters": {
         "designation": "I200W",
         "diameter_mm": 29,
@@ -50,7 +51,8 @@
         "total_impulse_ns": 326.7849,
         "peak_thrust_n": 303.951,
         "data_points": 27
-      }
+      },
+      "parent_source_url": "https://raw.githubusercontent.com/openrocket/openrocket/d6ff2a7e75da7dbeaa6bc799f2b84ebbc59e8633/core/resources/datafiles/thrustcurves/RASAero/RASAero_Motors.eng"
     },
     {
       "id": "us-standard-atmosphere-1976",

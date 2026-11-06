@@ -56,85 +56,33 @@ if [ ! -f "$OR_JAR" ]; then
   echo "ERROR: OpenRocket 23.09 JAR not found at $OR_JAR" >&2
   exit 1
 fi
-ACTUAL_JAR_SHA=$(sha256sum "$OR_JAR" | awk '{print $1}')
-if [ "$ACTUAL_JAR_SHA" != "$EXPECTED_JAR_SHA" ]; then
-  echo "ERROR: OpenRocket JAR SHA-256 mismatch!" >&2
-  echo "  Expected: $EXPECTED_JAR_SHA" >&2
-  echo "  Actual:   $ACTUAL_JAR_SHA" >&2
-  exit 1
-fi
-
-if [ ! -f "$MOTOR_ENG" ]; then
-  echo "ERROR: Motor profile I200W.eng not found at $MOTOR_ENG" >&2
-  exit 1
-fi
-ACTUAL_MOTOR_SHA=$(sha256sum "$MOTOR_ENG" | awk '{print $1}')
-if [ "$ACTUAL_MOTOR_SHA" != "$EXPECTED_MOTOR_SHA" ]; then
-  echo "ERROR: Motor profile SHA-256 mismatch!" >&2
-  echo "  Expected: $EXPECTED_MOTOR_SHA" >&2
-  echo "  Actual:   $ACTUAL_MOTOR_SHA" >&2
-  exit 1
-fi
+node "$SCRIPT_DIR/guards.mjs" asset "$OR_JAR" "$EXPECTED_JAR_SHA"
+node "$SCRIPT_DIR/guards.mjs" asset "$MOTOR_ENG" "$EXPECTED_MOTOR_SHA"
+node "$SCRIPT_DIR/guards.mjs" manifest "$SCRIPT_DIR/reference-vehicle.json" "$MOTOR_ENG"
+ACTUAL_JAR_SHA="$EXPECTED_JAR_SHA"
+ACTUAL_MOTOR_SHA="$EXPECTED_MOTOR_SHA"
 echo "Verified inputs:     JAR SHA-256: ${ACTUAL_JAR_SHA:0:16}... Motor SHA-256: ${ACTUAL_MOTOR_SHA:0:16}..."
 
 # 5. Create Unique External Run Directory (Never overwrite initial or shared evidence)
-RUN_DIR="${OUT_DIR:-$(mktemp -d /tmp/or-reference-run-XXXXXX)}"
+mkdir -p "${RUNS_DIR:-$SHARED_ARTIFACTS_DIR}"
+RUN_DIR="$(mktemp -d "${RUNS_DIR:-$SHARED_ARTIFACTS_DIR}/run-XXXXXX")"
+exec > >(tee "$RUN_DIR/execution.log") 2>&1
 CLASSES_DIR="$RUN_DIR/classes"
 mkdir -p "$CLASSES_DIR"
 echo "External Run Dir:    $RUN_DIR"
 
-# Cleanup trap to ensure background Xvfb processes are terminated
-cleanup() {
-  # Terminate any stray Xvfb instances started in this process group if needed
-  true
-}
-trap cleanup EXIT
-
-# 6. Capture Reproduction Manifest & Environment Metadata
-GIT_HEAD="$(git rev-parse HEAD 2>/dev/null || echo "UNKNOWN")"
-GIT_DIRTY="clean"
-if [ -n "$(git status --porcelain 2>/dev/null)" ]; then
-  GIT_DIRTY="dirty"
-fi
-
-cat <<EOF > "$RUN_DIR/reproduction-manifest.json"
-{
-  "timestamp": "$(date -u +"%Y-%m-%dT%H:%M:%SZ")",
-  "git_commit": "$GIT_HEAD",
-  "git_status": "$GIT_DIRTY",
-  "runtime_identity": {
-    "node_version": "$(node -v)",
-    "java_version": "$JAVA_VERSION_STR",
-    "os": "$(uname -srm)"
-  },
-  "provenance_and_limitations": {
-    "openrocket_upstream_tag": "release-23.09",
-    "openrocket_upstream_commit": "6c89a3c60118226e562e19625d8fd439854b1246",
-    "openrocket_jar_observed_sha256": "$ACTUAL_JAR_SHA",
-    "openrocket_jar_bytes": 71758139,
-    "openrocket_release_api_digest": null,
-    "openrocket_release_note": "Local observed byte identity; GitHub release API returns digest=null",
-    "motor_provenance": "AeroTech I200W from Tripoli Motor Testing certified record on ThrustCurve.org / OpenRocket bundled library",
-    "motor_sha256": "$ACTUAL_MOTOR_SHA"
-  },
-  "input_file_hashes": {
-    "manifest": "$(sha256sum "$SCRIPT_DIR/reference-vehicle.json" | awk '{print $1}')",
-    "driver_java": "$(sha256sum "$SCRIPT_DIR/OpenRocketDriver.java" | awk '{print $1}')",
-    "compare_mjs": "$(sha256sum "$SCRIPT_DIR/compare.mjs" | awk '{print $1}')",
-    "controls_test": "$(sha256sum "$SCRIPT_DIR/controls.test.mjs" | awk '{print $1}')"
-  }
-}
-EOF
+# 6. Serialize metadata with a JSON encoder (runtime strings contain quotes).
+JAVA_BIN="$JAVA_BIN" node "$SCRIPT_DIR/metadata.mjs" "$RUN_DIR" "$OR_JAR" "$MOTOR_ENG"
 
 # 7. Compile OpenRocketDriver into isolated classes directory (max 2 jobs, -Xmx512m)
 echo -n "Compiling OpenRocketDriver.java... "
-"$JAVAC_BIN" -J-Xmx512m -cp "$OR_JAR" -d "$CLASSES_DIR" "$SCRIPT_DIR/OpenRocketDriver.java"
+"$JAVAC_BIN" -J-Xmx512m -J-XX:ActiveProcessorCount=2 -cp "$OR_JAR" -d "$CLASSES_DIR" "$SCRIPT_DIR/OpenRocketDriver.java"
 echo "Done."
 
 # 8. Execute Comprehensive Controls Suite
 echo -e "\n--- Executing Controls & Invariant Checks ---"
-JAVA_BIN="$JAVA_BIN" JAVAC_BIN="$JAVAC_BIN" ARTIFACTS_DIR="$SHARED_ARTIFACTS_DIR" \
-  node --test "$SCRIPT_DIR/controls.test.mjs"
+JAVA_BIN="$JAVA_BIN" JAVAC_BIN="$JAVAC_BIN" ARTIFACTS_DIR="$SHARED_ARTIFACTS_DIR" CONTROLS_DIR="$RUN_DIR" \
+  node --test --test-concurrency=2 "$SCRIPT_DIR/controls.test.mjs"
 
 # 9. Execute Run 1: Controlled Cd = 0.50
 echo -e "\n--- Executing OpenRocket Run 1: Controlled Cd = 0.50 ---"
@@ -165,7 +113,7 @@ node "$SCRIPT_DIR/compare.mjs" --artifacts-dir "$RUN_DIR"
 # 12. Record Output Hashes in Run Directory
 echo -n "Recording output artifact hashes... "
 cd "$RUN_DIR"
-sha256sum or-reference-controlled-cd* or-reference-native-aero* comparison-results.json > output-hashes.txt 2>/dev/null || true
+sha256sum or-reference-controlled-cd* or-reference-native-aero* comparison-results.json > output-hashes.txt
 cd "$SCRIPT_DIR"
 echo "Done."
 

@@ -4,17 +4,17 @@
   "description": "Standardized single-stage high-power rocket with dual-deployment recovery for input-aligned cross-simulator verification",
   "version": "1.0.0",
   "geometry": {
-    "outer_diameter_m": 0.10,
+    "outer_diameter_m": 0.1,
     "outer_diameter_in": 3.937007874015748,
     "reference_area_m2": 0.007853981633974483,
-    "total_length_m": 1.50,
+    "total_length_m": 1.5,
     "nose_cone": {
       "shape": "OGIVE",
-      "length_m": 0.50,
+      "length_m": 0.5,
       "base_radius_m": 0.05
     },
     "body_tube": {
-      "length_m": 1.00,
+      "length_m": 1.0,
       "outer_radius_m": 0.05,
       "inner_radius_m": 0.048
     },
@@ -23,13 +23,13 @@
       "shape": "TRAPEZOIDAL",
       "root_chord_m": 0.15,
       "tip_chord_m": 0.08,
-      "height_m": 0.10,
-      "sweep_m": 0.10,
+      "height_m": 0.1,
+      "sweep_m": 0.1,
       "thickness_m": 0.003
     }
   },
   "mass": {
-    "vehicle_dry_mass_kg": 2.000,
+    "vehicle_dry_mass_kg": 2.0,
     "motor_initial_mass_kg": 0.357504,
     "motor_propellant_mass_kg": 0.181888,
     "motor_casing_mass_kg": 0.175616,
@@ -40,7 +40,7 @@
     "dry_cg_location_m": 0.65
   },
   "aerodynamics": {
-    "baseline_subsonic_cd": 0.50,
+    "baseline_subsonic_cd": 0.5,
     "case_1_mode": "controlled_cd_override",
     "case_2_mode": "native_barrowman_aerodynamics"
   },
@@ -52,49 +52,130 @@
     "total_impulse_ns": 326.7849,
     "propellant_mass_kg": 0.181888,
     "thrust_curve_points": [
-      { "t": 0.0, "thrust_N": 0.0 },
-      { "t": 0.033, "thrust_N": 303.951 },
-      { "t": 0.103, "thrust_N": 273.452 },
-      { "t": 0.174, "thrust_N": 276.061 },
-      { "t": 0.245, "thrust_N": 271.625 },
-      { "t": 0.316, "thrust_N": 268.233 },
-      { "t": 0.386, "thrust_N": 258.449 },
-      { "t": 0.457, "thrust_N": 252.48 },
-      { "t": 0.528, "thrust_N": 246.642 },
-      { "t": 0.599, "thrust_N": 242.304 },
-      { "t": 0.67, "thrust_N": 237.737 },
-      { "t": 0.741, "thrust_N": 234.769 },
-      { "t": 0.811, "thrust_N": 233.171 },
-      { "t": 0.882, "thrust_N": 230.66 },
-      { "t": 0.953, "thrust_N": 224.985 },
-      { "t": 1.024, "thrust_N": 221.658 },
-      { "t": 1.095, "thrust_N": 214.548 },
-      { "t": 1.166, "thrust_N": 177.365 },
-      { "t": 1.236, "thrust_N": 154.208 },
-      { "t": 1.307, "thrust_N": 119.146 },
-      { "t": 1.378, "thrust_N": 91.586 },
-      { "t": 1.449, "thrust_N": 65.33 },
-      { "t": 1.52, "thrust_N": 32.877 },
-      { "t": 1.591, "thrust_N": 28.702 },
-      { "t": 1.661, "thrust_N": 22.211 },
-      { "t": 1.732, "thrust_N": 15.558 },
-      { "t": 1.803, "thrust_N": 0.0 }
+      {
+        "t": 0.0,
+        "thrust_N": 0.0
+      },
+      {
+        "t": 0.033,
+        "thrust_N": 303.951
+      },
+      {
+        "t": 0.103,
+        "thrust_N": 273.452
+      },
+      {
+        "t": 0.174,
+        "thrust_N": 276.061
+      },
+      {
+        "t": 0.245,
+        "thrust_N": 271.625
+      },
+      {
+        "t": 0.316,
+        "thrust_N": 268.233
+      },
+      {
+        "t": 0.386,
+        "thrust_N": 258.449
+      },
+      {
+        "t": 0.457,
+        "thrust_N": 252.48
+      },
+      {
+        "t": 0.528,
+        "thrust_N": 246.642
+      },
+      {
+        "t": 0.599,
+        "thrust_N": 242.304
+      },
+      {
+        "t": 0.67,
+        "thrust_N": 237.737
+      },
+      {
+        "t": 0.741,
+        "thrust_N": 234.769
+      },
+      {
+        "t": 0.811,
+        "thrust_N": 233.171
+      },
+      {
+        "t": 0.882,
+        "thrust_N": 230.66
+      },
+      {
+        "t": 0.953,
+        "thrust_N": 224.985
+      },
+      {
+        "t": 1.024,
+        "thrust_N": 221.658
+      },
+      {
+        "t": 1.095,
+        "thrust_N": 214.548
+      },
+      {
+        "t": 1.166,
+        "thrust_N": 177.365
+      },
+      {
+        "t": 1.236,
+        "thrust_N": 154.208
+      },
+      {
+        "t": 1.307,
+        "thrust_N": 119.146
+      },
+      {
+        "t": 1.378,
+        "thrust_N": 91.586
+      },
+      {
+        "t": 1.449,
+        "thrust_N": 65.33
+      },
+      {
+        "t": 1.52,
+        "thrust_N": 32.877
+      },
+      {
+        "t": 1.591,
+        "thrust_N": 28.702
+      },
+      {
+        "t": 1.661,
+        "thrust_N": 22.211
+      },
+      {
+        "t": 1.732,
+        "thrust_N": 15.558
+      },
+      {
+        "t": 1.803,
+        "thrust_N": 0.0
+      }
     ]
   },
   "recovery": {
     "drogue": {
       "diameter_m": 0.4572,
       "diameter_in": 18.0,
-      "cd": 1.50,
-      "nominal_area_m2": 0.1641731676237996,
+      "cd": 1.5,
+      "nominal_area_m2": 0.16417322322758926,
       "deploy_event": "APOGEE",
       "deploy_delay_s": 0.0
     },
     "main": {
       "diameter_m": 0.9144,
       "diameter_in": 36.0,
-      "cd": 1.50,
-      "nominal_area_m2": 0.6566926704951984,
+      "cd": 1.5,
+      "nominal_area_m2": 0.656692892910357,
       "deploy_event": "ALTITUDE",
       "deploy_altitude_m": 60.96,
       "deploy_altitude_ft": 200.0,

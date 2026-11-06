@@ -75,6 +75,9 @@ public class OpenRocketDriver {
             }
         }
 
+        if (!mode.equals("controlled_cd") && !mode.equals("native_aero")) {
+            System.err.println("ERROR: Unsupported simulation mode"); System.exit(2);
+        }
         Path artifactsPath = Paths.get(artifactsDir).toAbsolutePath().normalize();
         Path manifestFile = Paths.get(manifestPath).toAbsolutePath().normalize();
 
@@ -189,15 +192,11 @@ public class OpenRocketDriver {
         } else if (Files.exists(manifestFile.getParent().resolve(motorFileName))) {
             motorPath = manifestFile.getParent().resolve(motorFileName);
         } else {
-            Path sharedArtifactsMotor = Paths.get("/home/ak/RecoverySys-artifacts/online-validation-2026-11-05/openrocket").resolve(motorFileName);
-            if (Files.exists(sharedArtifactsMotor)) {
-                motorPath = sharedArtifactsMotor;
-            } else {
-                System.err.println("ERROR: Motor file '" + motorFileName + "' not found in artifacts or manifest directory.");
-                System.exit(2);
-                return;
-            }
+            System.err.println("ERROR: Motor file not found; supply --motor explicitly.");
+            System.exit(2);
+            return;
         }
+
         System.out.println("Resolved Motor File: " + motorPath);
 
         try {
@@ -353,10 +352,13 @@ public class OpenRocketDriver {
             FlightEvent apogeeEv = branch.getFirstEvent(FlightEvent.Type.APOGEE);
             FlightEvent groundHitEv = branch.getFirstEvent(FlightEvent.Type.GROUND_HIT);
 
+            if (burnoutEv == null || apogeeEv == null || groundHitEv == null) {
+                throw new IllegalStateException("Missing required burnout/apogee/ground event");
+            }
             double observedApogeeM = data.getMaxAltitude();
-            double observedApogeeTimeS = apogeeEv != null ? apogeeEv.getTime() : data.getTimeToApogee();
-            double observedBurnoutTimeS = burnoutEv != null ? burnoutEv.getTime() : 1.803;
-            double observedLandingTimeS = groundHitEv != null ? groundHitEv.getTime() : data.getFlightTime();
+            double observedApogeeTimeS = apogeeEv.getTime();
+            double observedBurnoutTimeS = burnoutEv.getTime();
+            double observedLandingTimeS = groundHitEv.getTime();
             double observedTouchdownVelMps = data.getGroundHitVelocity();
 
             double observedLaunchMassKg = massCol != null && !massCol.isEmpty() ? massCol.get(0) : Double.NaN;
@@ -367,9 +369,6 @@ public class OpenRocketDriver {
                     observedBurnoutMassKg = massCol.get(r);
                     break;
                 }
-            }
-            if (Double.isNaN(observedBurnoutMassKg) && massCol != null && !massCol.isEmpty()) {
-                observedBurnoutMassKg = observedLandingMassKg;
             }
 
             // Identify deployment times and altitudes from events
@@ -391,7 +390,7 @@ public class OpenRocketDriver {
                     }
                 }
             }
-            if (drogueDeployTimeS < 0) drogueDeployTimeS = observedApogeeTimeS;
+            if (drogueDeployTimeS < 0 || mainDeployTimeS < 0) throw new IllegalStateException("Missing required recovery deployment event");
 
             // Find altitudes and velocities at deployment events
             int mainDeployIndex = -1;
@@ -405,20 +404,9 @@ public class OpenRocketDriver {
                     observedMainDeployAltM = altCol.get(r);
                 }
             }
-            if (observedDrogueDeployAltM < 0) observedDrogueDeployAltM = observedApogeeM;
-            if (mainDeployTimeS < 0) {
-                // Altitude fallback if event missing
-                for (int r = 0; r < dataLength; r++) {
-                    if (timeCol.get(r) > observedApogeeTimeS && altCol.get(r) <= mainDeployAltM) {
-                        mainDeployIndex = r;
-                        mainDeployTimeS = timeCol.get(r);
-                        observedMainDeployAltM = altCol.get(r);
-                        break;
-                    }
-                }
-            }
+            if (observedDrogueDeployAltM < 0 || mainDeployIndex < 2) throw new IllegalStateException("Missing deployment samples");
 
-            // Terminal velocities
+            // Sampled velocities; not a proof of terminal equilibrium
             double drogueTerminalVelMps = 0.0;
             if (mainDeployIndex > 1 && vzCol != null) {
                 drogueTerminalVelMps = Math.abs(vzCol.get(mainDeployIndex - 1));
@@ -439,6 +427,12 @@ public class OpenRocketDriver {
             // Phase and total clocks
             double observedDescentDurationS = observedLandingTimeS - observedApogeeTimeS;
             double observedFlightDurationS = observedLandingTimeS;
+
+            for (double value : new double[]{observedApogeeM, observedApogeeTimeS, observedBurnoutTimeS,
+                observedLandingTimeS, observedTouchdownVelMps, observedLaunchMassKg, observedBurnoutMassKg,
+                observedLandingMassKg, observedDescentDurationS, drogueTerminalVelMps, mainTerminalVelMps}) {
+                if (!Double.isFinite(value) || value <= 0) throw new IllegalStateException("Invalid required observation: " + value);
+            }
 
             // 4. Write Raw Flight Time-Series CSV
             Files.createDirectories(artifactsPath);
@@ -461,10 +455,23 @@ public class OpenRocketDriver {
             }
             System.out.println("Wrote raw flight time-series to: " + csvPath);
 
+            try (PrintWriter pw = new PrintWriter(Files.newBufferedWriter(artifactsPath.resolve(outputPrefix + "-events.csv")))) {
+                pw.println("time_s,type,source");
+                for (FlightEvent ev : branch.getEvents()) {
+                    pw.printf(Locale.US, "%.8f,%s,%s%n", ev.getTime(), ev.getType(),
+                        ev.getSource() == null ? "" : ev.getSource().getName().replace(",", " "));
+                }
+            }
+
             // 5. Write Comprehensive Summary Properties
             Path summaryPath = artifactsPath.resolve(outputPrefix + "-summary.properties");
             Properties props = new Properties();
             props.setProperty("simulator", "OpenRocket");
+            props.setProperty("velocity_definition", "Legacy terminal keys contain pre-main / pre-landing samples; equilibrium not asserted");
+            props.setProperty("drogue_sample_time_s", Double.toString(timeCol.get(mainDeployIndex - 1)));
+            props.setProperty("drogue_sample_altitude_m", Double.toString(altCol.get(mainDeployIndex - 1)));
+            props.setProperty("main_sample_time_s", Double.toString(timeCol.get(dataLength - 2)));
+            props.setProperty("main_sample_altitude_m", Double.toString(altCol.get(dataLength - 2)));
             props.setProperty("version", "23.09");
             props.setProperty("git_commit", "6c89a3c60118226e562e19625d8fd439854b1246");
             props.setProperty("mode", mode);

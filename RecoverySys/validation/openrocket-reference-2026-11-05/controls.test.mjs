@@ -2,7 +2,7 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import fs from 'node:fs'
 import path from 'node:path'
-import crypto from 'node:crypto'
+import { verifyFileSha256, validateManifest } from './guards.mjs'
 import os from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
@@ -19,7 +19,7 @@ if (!artifactsBase) {
     const primaryRoot = path.dirname(path.resolve(__dirname, commonDir))
     artifactsBase = path.resolve(primaryRoot, '../RecoverySys-artifacts/online-validation-2026-11-05/openrocket')
   } catch {
-    artifactsBase = '/home/ak/RecoverySys-artifacts/online-validation-2026-11-05/openrocket'
+    throw new Error('Cannot resolve artifact directory')
   }
 }
 const orJarPath = path.resolve(artifactsBase, 'OpenRocket-23.09.jar')
@@ -28,19 +28,6 @@ const manifestPath = path.resolve(__dirname, 'reference-vehicle.json')
 
 const javaBin = process.env.JAVA_BIN || (process.env.JAVA_HOME ? path.join(process.env.JAVA_HOME, 'bin/java') : 'java')
 const javacBin = process.env.JAVAC_BIN || (process.env.JAVA_HOME ? path.join(process.env.JAVA_HOME, 'bin/javac') : 'javac')
-
-// Utility to verify SHA-256 through actual hashing
-export function verifyFileSha256(filePath, expectedSha256) {
-  if (!fs.existsSync(filePath)) {
-    throw new Error(`File does not exist: ${filePath}`)
-  }
-  const fileBytes = fs.readFileSync(filePath)
-  const actualSha256 = crypto.createHash('sha256').update(fileBytes).digest('hex')
-  if (actualSha256.toLowerCase() !== expectedSha256.toLowerCase()) {
-    throw new Error(`Checksum verification failed for ${path.basename(filePath)}: expected ${expectedSha256}, got ${actualSha256}`)
-  }
-  return { valid: true, sha256: actualSha256, size: fileBytes.length }
-}
 
 test('Control Group 1: RecoverySys Valid Baseline then Negative Mass / Guard Rejection', async (t) => {
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
@@ -109,7 +96,7 @@ test('Control Group 1: RecoverySys Valid Baseline then Negative Mass / Guard Rej
 })
 
 test('Control Group 2: OpenRocket Checksum Integrity Guard (Actual Routine vs Tautology)', async (t) => {
-  await t.test('2A: Actual JAR byte hashing matches official release byte SHA-256', () => {
+  await t.test('2A: Actual JAR byte hashing matches observed pinned SHA-256', () => {
     const expectedJarSha = '65cc0ab68a536fc33fc02a84c416725523a82745e100356efd9ff890b43bfcd0'
     const result = verifyFileSha256(orJarPath, expectedJarSha)
     assert.equal(result.valid, true)
@@ -132,14 +119,14 @@ test('Control Group 2: OpenRocket Checksum Integrity Guard (Actual Routine vs Ta
 })
 
 test('Control Group 3: OpenRocketDriver Input Guards (Negative Mass & Missing Motor)', async (t) => {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'or-ctrl-'))
+  const tmpDir = fs.mkdtempSync(path.join(process.env.CONTROLS_DIR || os.tmpdir(), 'or-ctrl-'))
   const classesDir = path.join(tmpDir, 'classes')
   fs.mkdirSync(classesDir, { recursive: true })
 
   // Compile OpenRocketDriver once for controls
   const compile = spawnSync(
     javacBin,
-    ['-J-Xmx512m', '-cp', orJarPath, '-d', classesDir, path.resolve(__dirname, 'OpenRocketDriver.java')],
+    ['-J-Xmx512m', '-J-XX:ActiveProcessorCount=2', '-cp', orJarPath, '-d', classesDir, path.resolve(__dirname, 'OpenRocketDriver.java')],
     { stdio: 'pipe', encoding: 'utf8' }
   )
   assert.equal(compile.status, 0, `OpenRocketDriver compilation failed: ${compile.stderr}`)
@@ -204,18 +191,18 @@ test('Control Group 3: OpenRocketDriver Input Guards (Negative Mass & Missing Mo
   })
 
   // Clean up
-  fs.rmSync(tmpDir, { recursive: true, force: true })
+  if (!process.env.CONTROLS_DIR) fs.rmSync(tmpDir, { recursive: true, force: true })
 })
 
 test('Control Group 4: Manifest Mutation Demonstrably Changes Java Engine Input & Output', async () => {
-  const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'or-mutation-'))
+  const tmpDir = fs.mkdtempSync(path.join(process.env.CONTROLS_DIR || os.tmpdir(), 'or-mutation-'))
   const classesDir = path.join(tmpDir, 'classes')
   fs.mkdirSync(classesDir, { recursive: true })
 
   // Compile driver
   const compile = spawnSync(
     javacBin,
-    ['-J-Xmx512m', '-cp', orJarPath, '-d', classesDir, path.resolve(__dirname, 'OpenRocketDriver.java')],
+    ['-J-Xmx512m', '-J-XX:ActiveProcessorCount=2', '-cp', orJarPath, '-d', classesDir, path.resolve(__dirname, 'OpenRocketDriver.java')],
     { stdio: 'pipe', encoding: 'utf8' }
   )
   assert.equal(compile.status, 0)
@@ -225,6 +212,9 @@ test('Control Group 4: Manifest Mutation Demonstrably Changes Java Engine Input 
   mutatedManifest.mass.vehicle_dry_mass_kg = 3.500
   mutatedManifest.mass.total_launch_mass_kg = 3.857504
   mutatedManifest.mass.burned_out_mass_kg = 3.675616
+  mutatedManifest.mass.total_launch_mass_g = 3857.504
+  mutatedManifest.mass.burned_out_mass_g = 3675.616
+  validateManifest(mutatedManifest,fs.readFileSync(motorPath,'utf8'))
   const mutatedPath = path.join(tmpDir, 'mutated-manifest.json')
   fs.writeFileSync(mutatedPath, JSON.stringify(mutatedManifest))
 
@@ -276,7 +266,7 @@ test('Control Group 4: Manifest Mutation Demonstrably Changes Java Engine Input 
   )
 
   // Clean up
-  fs.rmSync(tmpDir, { recursive: true, force: true })
+  if (!process.env.CONTROLS_DIR) fs.rmSync(tmpDir, { recursive: true, force: true })
 })
 
 test('Control Group 5: Summary Validation & Non-Finite Value Rejection', async (t) => {
@@ -311,4 +301,27 @@ test('Control Group 5: Summary Validation & Non-Finite Value Rejection', async (
       /Non-finite numeric property for key 'observed_apogee_m': Infinity/
     )
   })
+})
+
+test('Shared manifest guard rejects unit, motor and unsupported environment mutations', () => {
+  const source = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+  const motor = fs.readFileSync(motorPath, 'utf8')
+  assert.doesNotThrow(() => validateManifest(source, motor))
+  for (const mutate of [
+    m => { m.recovery.main.diameter_in = .9144 },
+    m => { m.mass.total_launch_mass_g = 2.357504 },
+    m => { m.motor.thrust_curve_points[1].thrust_N += 10 },
+    m => { m.environment.wind_speed_mph = 10 },
+    m => { m.recovery.main.deploy_delay_s = 1 },
+  ]) {
+    const m = structuredClone(source); mutate(m)
+    assert.throws(() => validateManifest(m, motor))
+  }
+})
+
+test('Summary numbers reject trailing units and blank values; percentages reject zero denominators', () => {
+  for (const bad of ['3m', '', '  ', 'NaN', 'Infinity']) {
+    assert.throws(() => validateNumericProps({value: bad}, ['value']))
+  }
+  assert.throws(() => pctDelta(3, 0))
 })

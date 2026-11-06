@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
+import { validateManifest } from './guards.mjs'
 import { runSimulation, computeDescentRate } from '../../src/lib/simulation.js'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
@@ -42,7 +43,7 @@ export function validateNumericProps(props, requiredKeys) {
     if (!(key in props)) {
       throw new Error(`Missing required property key: ${key}`)
     }
-    const val = parseFloat(props[key])
+    const val = String(props[key]).trim() === '' ? NaN : Number(props[key])
     if (!Number.isFinite(val)) {
       throw new Error(`Non-finite numeric property for key '${key}': ${props[key]}`)
     }
@@ -50,7 +51,7 @@ export function validateNumericProps(props, requiredKeys) {
 }
 
 export function pctDelta(valA, valB) {
-  if (valB === 0) return 0
+  if (!Number.isFinite(valA) || !Number.isFinite(valB) || valB === 0) throw new Error('Invalid percentage operands')
   return ((valA - valB) / valB) * 100
 }
 
@@ -62,7 +63,7 @@ export function runComparison({
   if (!fs.existsSync(manifestPath)) {
     throw new Error(`Manifest file not found: ${manifestPath}`)
   }
-  const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+  const manifest = validateManifest(JSON.parse(fs.readFileSync(manifestPath, 'utf8')))
 
   // 1. Prepare RecoverySys Inputs from Shared Manifest
   const specs = {
@@ -121,7 +122,7 @@ export function runComparison({
   // B. Dry mass aggregate dual-chute evaluation (matching OpenRocket dual-deployed state)
   const drogueDiamIn = manifest.recovery.drogue.diameter_in
   const mainDiamIn = manifest.recovery.main.diameter_in
-  const aggregateDiamIn = Math.sqrt(drogueDiamIn * drogueDiamIn + mainDiamIn * mainDiamIn)
+  const aggregateDiamIn = Math.sqrt(drogueDiamIn**2 * manifest.recovery.drogue.cd / manifest.recovery.main.cd + mainDiamIn**2)
   const aggregateChuteSpecs = {
     diameter_in: aggregateDiamIn,
     cd: manifest.recovery.main.cd,
@@ -140,6 +141,11 @@ export function runComparison({
   const orNativeProps = parseProperties(nativePropsPath)
 
   const requiredProps = [
+    'observed_apogee_ft',
+    'observed_max_velocity_m_s',
+    'observed_max_mach',
+    'observed_drogue_terminal_velocity_fps',
+    'observed_main_terminal_velocity_fps',
     'observed_apogee_m',
     'observed_apogee_time_s',
     'observed_burnout_time_s',
@@ -155,22 +161,22 @@ export function runComparison({
   validateNumericProps(orNativeProps, requiredProps)
 
   const parseOrData = (props) => ({
-    apogee_m: parseFloat(props.observed_apogee_m || props.apogee_m),
-    apogee_ft: parseFloat(props.observed_apogee_ft || props.apogee_ft),
-    time_to_apogee_s: parseFloat(props.observed_apogee_time_s || props.time_to_apogee_s),
-    burnout_time_s: parseFloat(props.observed_burnout_time_s || props.burnout_time_s),
-    launch_mass_kg: parseFloat(props.observed_launch_mass_kg || props.launch_mass_kg),
-    burnout_mass_kg: parseFloat(props.observed_burnout_mass_kg || props.burnout_mass_kg),
-    max_velocity_m_s: parseFloat(props.observed_max_velocity_m_s || props.max_velocity_m_s),
-    max_mach: parseFloat(props.observed_max_mach || props.max_mach),
-    drogue_terminal_velocity_m_s: parseFloat(props.observed_drogue_terminal_velocity_m_s || props.drogue_terminal_velocity_m_s),
-    drogue_terminal_velocity_fps: parseFloat(props.observed_drogue_terminal_velocity_fps || props.drogue_terminal_velocity_fps),
-    main_terminal_velocity_m_s: parseFloat(props.observed_main_terminal_velocity_m_s || props.main_terminal_velocity_m_s),
-    main_terminal_velocity_fps: parseFloat(props.observed_main_terminal_velocity_fps || props.main_terminal_velocity_fps),
-    touchdown_velocity_m_s: parseFloat(props.observed_touchdown_velocity_m_s || props.main_terminal_velocity_m_s),
-    descent_duration_s: parseFloat(props.observed_descent_duration_s || (parseFloat(props.landing_time_s) - parseFloat(props.time_to_apogee_s)).toString()),
-    flight_duration_s: parseFloat(props.observed_flight_duration_s || props.landing_time_s),
-    warnings: props.warnings || 'None',
+    apogee_m: Number(props.observed_apogee_m),
+    apogee_ft: Number(props.observed_apogee_ft),
+    time_to_apogee_s: Number(props.observed_apogee_time_s),
+    burnout_time_s: Number(props.observed_burnout_time_s),
+    launch_mass_kg: Number(props.observed_launch_mass_kg),
+    burnout_mass_kg: Number(props.observed_burnout_mass_kg),
+    max_velocity_m_s: Number(props.observed_max_velocity_m_s),
+    max_mach: Number(props.observed_max_mach),
+    drogue_terminal_velocity_m_s: Number(props.observed_drogue_terminal_velocity_m_s),
+    drogue_terminal_velocity_fps: Number(props.observed_drogue_terminal_velocity_fps),
+    main_terminal_velocity_m_s: Number(props.observed_main_terminal_velocity_m_s),
+    main_terminal_velocity_fps: Number(props.observed_main_terminal_velocity_fps),
+    touchdown_velocity_m_s: Number(props.observed_touchdown_velocity_m_s),
+    descent_duration_s: Number(props.observed_descent_duration_s),
+    flight_duration_s: Number(props.observed_flight_duration_s),
+    warnings: props.warnings,
   })
 
   const orControlled = parseOrData(orControlledProps)
@@ -188,7 +194,7 @@ export function runComparison({
       delta_controlled_pct: pctDelta(rsResult.apogee_ft / 3.28084, orControlled.apogee_m),
       or_native: orNative.apogee_m,
       delta_native_pct: pctDelta(rsResult.apogee_ft / 3.28084, orNative.apogee_m),
-      notes: 'Controlled Cd=0.50 aligns 1-DOF point mass with 6-DOF Barrowman drag rise.',
+      notes: 'Diagnostic comparison of rounded public apogee with OR maximum altitude; different integrators and mass schedules remain.',
     },
     {
       metric: 'Apogee Altitude (ft)',
@@ -241,17 +247,17 @@ export function runComparison({
       notes: 'Launch-to-landing clock. RecoverySys estimated flight = apogee_t_s + total_time_s.',
     },
     {
-      metric: 'Drogue Descent Velocity (m/s)',
+      metric: 'Drogue phase rate vs pre-main sample (m/s)',
       unit: 'm/s',
       rs_value: rsResult.drogue_fps / 3.28084,
       or_controlled: orControlled.drogue_terminal_velocity_m_s,
       delta_controlled_pct: pctDelta(rsResult.drogue_fps / 3.28084, orControlled.drogue_terminal_velocity_m_s),
       or_native: orNative.drogue_terminal_velocity_m_s,
       delta_native_pct: pctDelta(rsResult.drogue_fps / 3.28084, orNative.drogue_terminal_velocity_m_s),
-      notes: 'Public runSimulation drogue rate evaluated at launch mass for conservative drift analysis.',
+      notes: 'Rounded public launch-mass mid-altitude rate versus OR pre-main sampled speed at depleted mass and a different altitude.',
     },
     {
-      metric: 'Main Touchdown Velocity (m/s)',
+      metric: 'Main phase rate vs pre-landing sample (m/s)',
       unit: 'm/s',
       rs_value: rsResult.main_fps / 3.28084,
       or_controlled: orControlled.main_terminal_velocity_m_s,
@@ -271,7 +277,7 @@ export function runComparison({
       rs_predicted_fps: rsMainFpsDrySeaLevel,
       or_observed_mps: orControlled.main_terminal_velocity_m_s,
       delta_pct: pctDelta(rsMainFpsDrySeaLevel / 3.28084, orControlled.main_terminal_velocity_m_s),
-      finding: 'RecoverySys main-alone speed (5.95 m/s) is 11.8% higher than OpenRocket (5.32 m/s) because drogue is assumed disconnected.',
+      finding: 'Single-main dry-mass sea-level diagnostic; OR retains both deployed canopies.',
     },
     {
       diagnostic_check: 'Burned-Out Dry Mass, Sea Level, Aggregate Dual Chutes (36 in + 18 in)',
@@ -280,7 +286,7 @@ export function runComparison({
       rs_predicted_fps: rsAggregateFpsDrySeaLevel,
       or_observed_mps: orControlled.main_terminal_velocity_m_s,
       delta_pct: pctDelta(rsAggregateFpsDrySeaLevel / 3.28084, orControlled.main_terminal_velocity_m_s),
-      finding: 'Aggregate-area prediction (5.32 m/s) matches OpenRocket touchdown speed to within -0.01%, confirming dual-deployed canopy drag.',
+      finding: 'Aggregate Cd-area diagnostic; compare with sampled OR pre-landing speed. Numerical proximity supports the canopy-state explanation.',
     },
     {
       diagnostic_check: 'Total Launch Mass, Sea Level, Single Main Chute (36 in)',
@@ -289,7 +295,7 @@ export function runComparison({
       rs_predicted_fps: rsMainFpsLaunchSeaLevel,
       or_observed_mps: orControlled.main_terminal_velocity_m_s,
       delta_pct: pctDelta(rsMainFpsLaunchSeaLevel / 3.28084, orControlled.main_terminal_velocity_m_s),
-      finding: 'RecoverySys conservative launch-mass drift rate (6.19 m/s, rounded to 20.3 fps).',
+      finding: 'Supplemental launch-mass sea-level rate, separate from the public deploy-altitude rate.',
     },
     {
       diagnostic_check: 'Burned-Out Dry Mass, Mid-Drogue Altitude, Single Drogue Chute (18 in)',
@@ -298,7 +304,7 @@ export function runComparison({
       rs_predicted_fps: rsDrogueFpsDryMid,
       or_observed_mps: orControlled.drogue_terminal_velocity_m_s,
       delta_pct: pctDelta(rsDrogueFpsDryMid / 3.28084, orControlled.drogue_terminal_velocity_m_s),
-      finding: 'Density-corrected drogue speed at ~300 m altitude (12.11 m/s) matches OpenRocket pre-main terminal speed (11.93 m/s) within 1.5%.',
+      finding: 'Mid-altitude analytic rate versus a pre-main sample at another altitude; diagnostic only.',
     },
   ]
 
@@ -334,14 +340,14 @@ export function runComparison({
     recovery_configuration_clarification: {
       recoverysys_main_phase: 'Single main parachute alone (below_deploy_fps = main_fps ?? drogue_fps)',
       openrocket_main_phase: 'Dual canopies simultaneously active (drogue remains deployed alongside main)',
-      aerodynamic_verification: 'OpenRocket touchdown velocity of 5.32 m/s perfectly matches aggregate canopy area (A_main + A_drogue = 0.8209 m²) at dry mass (5.3189 m/s). Single main chute gives 5.95 m/s.',
+      aerodynamic_verification: 'Supplemental Cd-area calculation tests the retained-canopy explanation; sampled speeds are not independently certified terminal rates.',
       status: 'Preserved as an explicit model difference; no phase equivalence or tuning claimed.',
     },
   }
 
   // Save JSON
   const savePath = outputPath || path.resolve(targetArtifactsDir, 'comparison-results.json')
-  fs.writeFileSync(savePath, JSON.stringify(outputData, null, 2))
+  fs.writeFileSync(savePath, JSON.stringify(outputData, null, 2), {flag: 'wx'})
   console.log('Saved comparison results to: ' + savePath)
 
   // Print Formatted Markdown Tables
