@@ -1,0 +1,88 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "lane": "RecoverySys/validation/openrocket-reference-2026-11-05/",
+  "generated_at": "2026-11-05T19:25:00-05:00",
+  "base_commit_pin": "df5e0fe9154b3e24f2194d7a23407e123cd0f30d",
+  "sources": [
+    {
+      "id": "openrocket-23.09-jar",
+      "type": "binary-executable-asset",
+      "name": "OpenRocket 23.09 Release Standalone Fat JAR",
+      "official_release_tag": "release-23.09",
+      "git_commit": "6c89a3c60118226e562e19625d8fd439854b1246",
+      "download_url": "https://github.com/openrocket/openrocket/releases/download/release-23.09/OpenRocket-23.09.jar",
+      "release_api_url": "https://api.github.com/repos/openrocket/openrocket/releases/tags/release-23.09",
+      "file_name": "OpenRocket-23.09.jar",
+      "byte_size": 71758139,
+      "sha256": "65cc0ab68a536fc33fc02a84c416725523a82745e100356efd9ff890b43bfcd0",
+      "provenance_limitation": "Observed local byte identity; GitHub release API returns digest=null",
+      "license": "GNU General Public License v3.0 (GPLv3)",
+      "notes": "Official upstream binary asset compiled with Java 17; includes core simulation engine, Barrowman aerodynamics, numerical integrators, atmosphere models, bundled javax.json parser, and packaged component presets."
+    },
+    {
+      "id": "temurin-jdk-17",
+      "type": "java-runtime-environment",
+      "name": "Eclipse Temurin OpenJDK 17 (HotSpot 64-Bit Server VM)",
+      "version": "17.0.21+9",
+      "vendor": "Eclipse Adoptium",
+      "configuration": "Configurable via JAVA_HOME, JAVA_BIN, and JAVAC_BIN environment variables (no committed hostpaths)",
+      "license": "GPLv2 with Classpath Exception",
+      "notes": "Verified Java 17 toolchain on host; meets OpenRocket 23.09 Java 17 runtime baseline without requiring global system installation or root privileges.",
+      "provenance_limitation": "Runtime -version observed; original download archive/checksum not independently preserved."
+    },
+    {
+      "id": "aerotech-i200w-motor",
+      "type": "motor-thrust-curve",
+      "name": "AeroTech I200W RASP Motor Profile",
+      "parent_corpus_file": "OpenRocket-23.09-RASAero_Motors.eng",
+      "file_name": "I200W.eng",
+      "byte_size": 509,
+      "sha256": "927f60b020cc4f7181925871578319a2e5ddc0500e05c4c124cc709bdd419781",
+      "provenance": "Extracted record header states copyright Tripoli Motor Testing 1999; provided by ThrustCurve.org. Parent ENG came from pinned OpenRocket source; equivalence to JAR bundled library not independently verified.",
+      "license": "unknown; copyright notice does not establish redistribution permission",
+      "parameters": {
+        "designation": "I200W",
+        "diameter_mm": 29,
+        "length_mm": 333,
+        "delays": "0 (plugged/electronic ejection)",
+        "propellant_mass_kg": 0.181888,
+        "total_motor_mass_kg": 0.357504,
+        "burn_time_s": 1.803,
+        "total_impulse_ns": 326.7849,
+        "peak_thrust_n": 303.951,
+        "data_points": 27
+      },
+      "parent_source_url": "https://raw.githubusercontent.com/openrocket/openrocket/d6ff2a7e75da7dbeaa6bc799f2b84ebbc59e8633/core/resources/datafiles/thrustcurves/RASAero/RASAero_Motors.eng"
+    },
+    {
+      "id": "us-standard-atmosphere-1976",
+      "type": "physical-standard",
+      "name": "U.S. Standard Atmosphere 1976 (NASA-TM-X-74335 / NOAA-S/T 76-1562)",
+      "standard_constants": {
+        "p0_pa": 101325.0,
+        "t0_k": 288.15,
+        "rho0_kg_m3": 1.225,
+        "g0_m_s2": 9.80665,
+        "gamma": 1.4,
+        "lapse_rate_k_per_m": -0.0065
+      },
+      "notes": "Both RecoverySys (via src/lib/atmosphere.js) and OpenRocket 23.09 (via BasicAtmosphericConditions / ISA options) implement the standard tropospheric barometric lapse model."
+    },
+    {
+      "id": "recoverysys-simulation-api",
+      "type": "production-api",
+      "name": "RecoverySys Public Simulation & Descent Rate APIs",
+      "source_files": [
+        "RecoverySys/src/lib/simulation.js",
+        "RecoverySys/src/lib/atmosphere.js"
+      ],
+      "exported_functions": [
+        "runSimulation",
+        "computeDescentRate",
+        "airDensity",
+        "isa"
+      ],
+      "notes": "RecoverySys implements 4th-order Runge-Kutta 1-DOF ascent integration (dt = 0.02 s) with Mach-dependent drag and Tsiolkovsky mass depletion, coupled to steady-state descent rate calculations."
+    }
+  ]
+}

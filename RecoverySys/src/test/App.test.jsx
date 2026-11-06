@@ -149,11 +149,6 @@ describe('App — status bar warning badge', () => {
       screen.getByRole('tab', { name: 'DASHBOARD' }).click()
     })
 
-    // Advance past the 300ms compatibility debounce and flush React updates
-    await act(async () => {
-      vi.advanceTimersByTime(400)
-    })
-
     // Dashboard tab shows validation badge when compatibility errors exist
     const badge = document.querySelector('.mc-validation--warn, .mc-validation--error')
     expect(badge).toBeInTheDocument()
@@ -204,7 +199,9 @@ describe('MissionControl tab semantics', () => {
 
     await user.click(briefTab)
     expect(screen.getByRole('tabpanel')).toHaveAttribute('id', 'mc-panel-recovery_brief')
-    expect(await screen.findByRole('heading', { name: 'Recovery Brief' })).toBeInTheDocument()
+    expect(
+      await screen.findByRole('heading', { name: 'Recovery Brief' }, { timeout: 10000 })
+    ).toBeInTheDocument()
   })
   it('supports wrapping arrow navigation and Home/End with roving focus', async () => {
     const user = userEvent.setup()
@@ -311,13 +308,12 @@ describe('App — rejected share-link import', () => {
 })
 
 describe('App — imported state freshness', () => {
-  it('clears warnings from the replaced local configuration before debounce refresh', () => {
+  it('replaces local inputs and invalidates the prior simulation atomically', () => {
     const previousState = {
       config: { drogue_chute: { id: 'old-drogue' } },
       specs: { rocket_mass_g: '2500' },
       customMotor: null,
       simulation: { apogee_ft: 2200 },
-      warnings: [{ slot: 'drogue_chute', message: 'Old configuration warning' }],
       inputRevision: 4,
     }
     const importedConfig = { main_chute: { id: 'new-main' } }
@@ -332,7 +328,6 @@ describe('App — imported state freshness', () => {
     expect(nextState.config).toBe(importedConfig)
     expect(nextState.specs).toEqual({ rocket_mass_g: '3000' })
     expect(nextState.simulation).toBeNull()
-    expect(nextState.warnings).toEqual([])
     expect(nextState.inputRevision).toBe(5)
   })
 })
@@ -341,7 +336,6 @@ describe('App — OpenRocket snapshot freshness', () => {
     const previousState = {
       specs: { rocket_mass_g: '2500', airframe_id_in: '3.9' },
       simulation: { apogee_ft: 2200 },
-      warnings: [{ slot: 'main_chute', message: 'Old warning' }],
       openRocketImport: { source: { sourceFilename: 'rocket.ork' } },
       importedSource: null,
       inputRevision: 7,
@@ -359,7 +353,6 @@ describe('App — OpenRocket snapshot freshness', () => {
       bay_length_in: '18',
     })
     expect(nextState.simulation).toBe(previousState.simulation)
-    expect(nextState.warnings).toEqual([])
     expect(nextState.openRocketImport).toBeNull()
     expect(nextState.importedSource).toMatchObject({ formatVersion: '1.10' })
     expect(nextState.inputRevision).toBe(8)

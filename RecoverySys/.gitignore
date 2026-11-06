@@ -3,6 +3,7 @@ node_modules/
 
 # Build outputs
 dist/
+release-artifacts/
 .vite/
 
 # Dev cruft — ad-hoc browser-automation scripts, scratch screenshots,

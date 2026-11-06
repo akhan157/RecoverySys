@@ -9,6 +9,25 @@ const versionDisplay = constants.match(/VERSION_DISPLAY\s*=\s*'([^']+)'/)?.[1]
 const version = constants.match(/export const VERSION\s*=\s*'([^']+)'/)?.[1]
 if (!versionDisplay || !version) throw new Error('Could not read VERSION_DISPLAY/VERSION')
 
+const identities = {
+  VERSION: (await read('VERSION')).trim(),
+  'package.json': JSON.parse(await read('package.json')).version,
+  'package-lock.json': JSON.parse(await read('package-lock.json')).version,
+  'package-lock.json root': JSON.parse(await read('package-lock.json')).packages[''].version,
+  'src-tauri/tauri.conf.json': JSON.parse(await read('src-tauri/tauri.conf.json')).version,
+  'src-tauri/Cargo.toml': (await read('src-tauri/Cargo.toml')).match(/^version = "([^"]+)"/m)?.[1],
+  'src-tauri/Cargo.lock': (await read('src-tauri/Cargo.lock')).match(
+    /name = "recoverysys"\nversion = "([^"]+)"/
+  )?.[1],
+}
+for (const [file, identity] of Object.entries(identities)) {
+  if (identity !== version) throw new Error(`${file} version ${identity} does not match ${version}`)
+}
+const prerelease = /-rc\.(\d+)$/.exec(version)
+if (prerelease && !versionDisplay.endsWith(`RC${prerelease[1]}`)) {
+  throw new Error(`Display ${versionDisplay} does not match release candidate ${version}`)
+}
+
 const sourceIndex = await read('index.html')
 const skeletonBrand = sourceIndex.match(/class="s-brand">([^<]+)</)?.[1]
 if (skeletonBrand !== `RECOVERYSYS_${versionDisplay}`) {

@@ -43,3 +43,15 @@ opening shock. Author fixture (2.5 kg, dual deploy, 400 lb swivel): swivel at
 view-only; (b) add series-chain rules (changes warning output for existing
 plans). Recommendation: (b) in its own lane, after the owner accepts the
 warning-output change.
+
+## Owner decision resolved — 2026-11-05
+
+The owner instructed completion of the release/evidence plan, including the
+recommended series-chain rules. The rc.2 preparation implements option (b):
+links/swivel against elongation-amplified snatch and the main-snatch proxy;
+swivel also against opening shock. Exact existing criterion boundaries remain.
+The 400 lb / 0.88× main-snatch swivel now raises an authored error finding,
+with consumer and boundary regressions. This changes warning output for
+existing plans and does not promote the load proxies into measured evidence.
+See `../../release-qualification-2026-11-05.md` for qualification results and
+remaining external gates.

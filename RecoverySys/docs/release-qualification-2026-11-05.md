@@ -1,0 +1,110 @@
+# Release qualification — 2026-11-05
+
+Working candidate: `1.3.0-rc.2`. This record supersedes current-state statements
+in the historical rc.1 qualification; historical evidence remains tied to rc.1.
+No stable release or manual/flight qualification is declared here.
+
+Starting application commit: `3a98e9a`; source branch fast-forwarded through the
+two supplier-only updates to `3592a95`. Latest previously observed Node checks
+and Pages deployment both succeeded at `3a98e9a` (runs `41914063998` and
+`41914063989`). Those remote runs do not qualify the rc.2 changes.
+
+## Changes under qualification
+
+- OpenRocket import indexes geometry/motor/stage nodes during one structural
+  traversal, uses direct XML child fields and retains the structural limit.
+  Corpus timeouts are unchanged; jsdom suites use two workers on every host.
+- Series-chain findings close links/swivel snatch and swivel opening-shock
+  coverage. The owner authorized the warning-output change on 2026-11-05.
+  Exact existing 1/1.5 strength-margin and 0.7/1 opening-load boundaries remain.
+- The full transfer matrix exposed a 300 ms warning gap after input changes.
+  Findings are now memoized synchronously from current inputs before rendering,
+  with initial-render/edit regression tests that advance no timers.
+- Brief and checklist print artifacts share provenance, result state, evidence
+  posture and mission-envelope/unresolved-check content.
+- Production-print inspection found a restore notification overlaying the
+  artifact. Both print modes now suppress notifications; screen messages remain.
+- Supported runtime majors are bounded to 22/24/26 and CI defines all three.
+- rc.2 package/web/Tauri/Cargo/display identities agree; build verification
+  checks every file and the display candidate number.
+- fast-uri updated to 3.1.9; full/production npm audits report zero advisories.
+- Corpus 0.3.0 has 21 review-only cases, including seven new analytic or
+  metamorphic cases. Numeric metrics require explicit tolerance bounds.
+- Primary-source research and six manufacturer category records/fourteen staged
+  differences are recorded in `online-evidence-2026-11-05.md` and
+  `validation/catalog-review/README.md`. The bulk feed returned HTTP 429;
+  no complete catalog refresh is claimed.
+
+## Measured local checks
+
+Linux x86_64. Official Node 22.23.4 and 24.22.2 binaries downloaded from
+nodejs.org and verified against their published SHA-256 lists. Native Node
+26.11.1 is the development runtime. Runs are serialized to avoid cross-runtime
+contention. Earlier checks are explicitly distinguished from final checks.
+
+| Check | Observed result |
+| --- | --- |
+| Clean dependency installs | Separate `npm ci` passed on Node 22.23.4, 24.22.2 and 26.11.1; 425 installed packages on each run. |
+| Focused regression checks | Node 22: OpenRocket + load-path, 66/66 passed. |
+| Initial Node 22 full check | 50 files / 479 tests passed; format/catalog/corpus/lint/build/identity passed. This run preceded corpus expansion and final print changes. |
+| Node 24 full check | 50 files / 479 tests passed; 21-case corpus, format/catalog/lint/build/identity passed. |
+| Final clean-install Node 22 check | Pass: 51 files / 481 tests; format/catalog/corpus/lint/build/identity pass. |
+| Final clean-install Node 24 check | Pass: 51 files / 481 tests; all check gates pass. |
+| Final clean-install Node 26 check | Pass: 51 files / 481 tests; all check gates pass. |
+| Full production browser suite at `e7a9f3b` | 94/94 passed in 6.6 minutes, including the fresh-context transfer matrix, on Chromium desktop/mobile. |
+| Integration check at `3bef511` | Node 22: 51 files / 481 tests; format/catalog/corpus/lint/build/identity pass after cache cleanup and print suppression. |
+| Integration browser checks at `3bef511` | 34/34 full-parity and print-notification workflows passed in 1.7 minutes on desktop/mobile. The complete local 94-test run predates this small follow-up; final CI has 96 workflows. |
+| Independent code review | PASS at exact pin `e7a9f3b783fa74938fb0f5cc10289aa730e298a7`; 79 focused tests and two low findings. Dispositions and follow-up scope in the historical packet. |
+| Full and production npm audits | Zero advisories, 2026-11-05. |
+| Benchmark/provenance reports | Generated successfully; no acceptance decisions. |
+| Live published baseline | Original main verifier passes against public rc.1: 10 tabs, referenced assets and landing. rc.2 deployment remains pending. |
+| Remote rc.2 matrix/portable jobs | PASS at `dafec8d`, run `42123690801`: all five jobs, 481 tests per runtime and 96/96 browser workflows. Windows/macOS archives downloaded and hashes/CRC verified; 15-second launch smoke only. See historical packet `REMOTE-CI.md`. |
+
+The local web archive was built from application source at
+`3bef5116a67031de33ff183c1f225dc42e1cdc19`. Its SHA-256 is
+`f088bbadf5a007fe36dfbe6ab3817f75c3f3dfd3c698232ad17e43ccbf62a393`.
+Archive, raw logs and screenshots live outside git at
+`../RecoverySys-artifacts/1.3.0-rc.2/` relative to the repository root.
+This is a local Linux-built web artifact; remote archive hashes are separate.
+
+The existing WorkspaceBoundary recovery test deliberately throws a caught
+render error; its expected log does not mean the suite failed. The first new
+browser-matrix attempt used a nonexistent spaced share-button label; that test
+locator was corrected to the actual Export label before final qualification. The broader run then
+exposed the real debounced-warning race described above; that implementation
+was corrected before repeating the complete suite.
+
+## Parity scope
+
+The new workflow transfers one deterministic plan through JSON, share-link and
+saved reload in fresh contexts. Receivers withhold current estimates before
+rerun, then compare values/units, unresolved findings and input identity to the
+source. Fresh record and candidate-evidence intake contexts preserve historical
+prediction values, units and identity without creating a current plan result.
+Both print modes expose model/input identity, current/stale status and
+shared checks. Candidate evidence retains prediction identity, units and
+unreviewed posture. Editing mass withholds stale estimates and marks print.
+Existing browser workflows cover custom motor/part/source transfer, Flight Log
+intake/dedupe, invalid payloads, demo protection and corrupt-store preservation.
+This is representative contract qualification, not every possible combination
+of inputs, browsers, printers or physical assemblies.
+
+## Open release gates
+
+[Release gates and platform template](release-gates-1.3.0.md) defines concrete
+remaining evidence: rc.2 Windows/macOS manual workflows and artifact hashes,
+10–15 observed user trials, independent physics comparisons, per-part catalog
+review and final publication/Pages verification. No participant rows, reviewer
+identities, accepted comparisons, measured flights or platform results were
+invented. Stable promotion waits for an evidence-backed qualification decision.
+
+On 2026-11-05 the owner reported having no Windows/Mac test machines or
+independent physics/observed-trial contacts, and asked the agent to do the work.
+Automated hosted builds, launch checks, source research and reproducible
+comparisons proceed within that authority. Real participant observations,
+manual platform workflows and independent physical-model acceptance remain
+unavailable; they were not waived or relabeled as passed.
+
+The retained drogue sampling/ranking policies remain disclosed. M7 model
+changes, M8 Python integration and M9 expansion remain behind their evidence
+and architecture gates.

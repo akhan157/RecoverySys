@@ -1,0 +1,63 @@
+{
+  "id": "prometheus-telemetrum-dual-deploy-flight-descent",
+  "kind": "real-flight",
+  "domain": "descent",
+  "status": "review",
+  "inputs": {
+    "vehicle_mass_dry_kg": 14.5,
+    "drogue_diameter_in": 24,
+    "main_diameter_in": 120,
+    "drogue_deploy_alt_ft_msl": 12800,
+    "main_deploy_alt_ft_agl": 1470,
+    "pad_location": {
+      "lat": 32.9395,
+      "lon": -106.9115,
+      "alt_m_msl": 1390
+    }
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "drogue_descent_fps",
+        "value": 88.2,
+        "unit": "ft/s",
+        "tolerance": {
+          "relative": 0.15,
+          "basis": "analyst-derived"
+        },
+        "notes": "Empirical mean descent velocity recorded by TeleMetrum flight 5115; +/- 15% tolerance is an analyst choice, not a source-stated acceptance standard"
+      },
+      {
+        "name": "main_descent_fps",
+        "value": 18.4,
+        "unit": "ft/s",
+        "tolerance": {
+          "relative": 0.15,
+          "basis": "analyst-derived"
+        },
+        "notes": "Empirical mean descent velocity recorded by TeleMetrum flight 5115; +/- 15% tolerance is an analyst choice, not a source-stated acceptance standard"
+      }
+    ],
+    "notes": "Measured rocketry flight dual-deploy descent reference from Spaceport America"
+  },
+  "source": {
+    "url": "https://raw.githubusercontent.com/RocketPy-Team/RocketPy/96f9a0c47d636dbdf1daeb8a9ca8915b2c75a408/data/rockets/prometheus/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
+    "title": "High-Power Rocket Flight TeleMetrum Log (Prometheus 2022-06-24)",
+    "accessed": "2026-11-05",
+    "citation": "Altus Metrum TeleMetrum v6 flight recording at Spaceport America, 2022-06-24",
+    "derivation": "Mean steady-state vertical descent speed calculated between deployment triggers and touchdown",
+    "artifact": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/2022-06-24-serial-5115-flight-0001-TeleMetrum.csv",
+    "artifactSha256": "9fe8d17a25e7944267b34a45ed955303afd5818b3f18479a5f7ffb31a574cecf"
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "RecoverySys flight comparison"
+  },
+  "comparison": {
+    "method": "relative",
+    "decisionRule": "Blocked on unverified 14.5 kg dry mass, 24/120-inch configuration, launch pad environment, and sensor uncertainty evidence"
+  },
+  "notes": "Blocked case: not treated as matched flight validation"
+}

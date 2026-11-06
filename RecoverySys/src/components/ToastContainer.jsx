@@ -46,6 +46,7 @@ export default function ToastContainer({ toasts, onRemove }) {
   return (
     <div
       aria-label="Notifications"
+      className="app-notifications"
       style={{
         position: 'fixed',
         bottom: '20px',

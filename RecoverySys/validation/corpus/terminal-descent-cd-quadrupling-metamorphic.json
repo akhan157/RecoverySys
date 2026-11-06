@@ -1,0 +1,56 @@
+{
+  "id": "terminal-descent-cd-quadrupling-metamorphic",
+  "domain": "descent",
+  "kind": "metamorphic",
+  "status": "review",
+  "inputs": {
+    "base": {
+      "chuteSpecs": {
+        "diameter_in": 36,
+        "cd": 1.5
+      },
+      "mass_kg": 2,
+      "altitude_ft": 500
+    },
+    "transformed": {
+      "chuteSpecs": {
+        "diameter_in": 36,
+        "cd": 6
+      },
+      "mass_kg": 2,
+      "altitude_ft": 500
+    }
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "descent_rate_ratio",
+        "value": 0.5,
+        "unit": "ratio",
+        "tolerance": {
+          "basis": "analyst-derived",
+          "absolute": 1e-12
+        },
+        "notes": "Exact algebraic or categorical invariant; no measurement uncertainty is implied."
+      }
+    ]
+  },
+  "source": {
+    "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/flight-equations-with-drag/",
+    "title": "NASA Glenn flight equations with drag",
+    "accessed": "2026-11-05",
+    "citation": "NASA Glenn flight equations with drag",
+    "derivation": "Terminal speed is proportional to Cd^(-1/2). Quadrupling Cd at fixed mass, area, and density halves speed; 1e-12 allows floating-point arithmetic."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "The browser JavaScript production estimator. Each case records the exact model and assumptions identity that it exercises."
+  },
+  "comparison": {
+    "method": "metamorphic",
+    "decisionRule": "Report the stated invariant or analytic difference; acceptance requires a separate independent review."
+  },
+  "notes": "Synthetic Cd=6 is an algebra test, not a catalog recommendation. Review-only; no flight validation or acceptance is claimed."
+}

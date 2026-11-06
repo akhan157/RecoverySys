@@ -1,0 +1,57 @@
+{
+  "id": "unpowered-vertical-coast-apogee-analytic",
+  "kind": "analytic",
+  "domain": "ascent",
+  "status": "review",
+  "inputs": {
+    "burnout_velocity_mps": 150,
+    "burnout_altitude_m": 0,
+    "vehicle_mass_kg": 4,
+    "reference_area_m2": 0.01,
+    "drag_coefficient_cd": 0.45,
+    "constant_air_density_kg_m3": 1.225
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "coast_apogee_m",
+        "value": 688.007,
+        "unit": "m",
+        "tolerance": {
+          "relative": 0.005,
+          "basis": "analyst-derived"
+        },
+        "notes": "Exact NASA Glenn closed-form formula: (Vt^2/(2*g)) * ln(1 + V0^2/Vt^2)"
+      },
+      {
+        "name": "coast_duration_s",
+        "value": 10.935,
+        "unit": "s",
+        "tolerance": {
+          "relative": 0.005,
+          "basis": "analyst-derived"
+        },
+        "notes": "Exact NASA Glenn closed-form formula: (Vt/g) * arctan(V0/Vt)"
+      }
+    ],
+    "notes": "Independent non-oracle analytical reference for vertical coast with drag"
+  },
+  "source": {
+    "url": "https://www1.grc.nasa.gov/beginners-guide-to-aeronautics/flight-equations-with-drag/",
+    "title": "Flight Equations with Drag (NASA Glenn)",
+    "accessed": "2026-11-05",
+    "citation": "NASA Glenn Research Center. Flight Equations with Drag. Beginners Guide to Aeronautics.",
+    "derivation": "Analytic integration of m dv/dt = -mg - 0.5*rho*Cd*A*v^2"
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "RecoverySys integrateAscent"
+  },
+  "comparison": {
+    "method": "relative",
+    "decisionRule": "Marked not-executable-against-current-productionAPI: production integrateAscent models powered ascent with varying density and APCP mass depletion; unpowered coast is not exposed as a public API seam"
+  },
+  "notes": "Excluded from execution against current production API; retained as reference design only"
+}

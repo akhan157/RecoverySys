@@ -362,3 +362,105 @@ describe('opening shock margin parity with rule_openingShock', () => {
     expect(margin.severity).toBe('warn')
   })
 })
+
+describe('series-chain compatibility closure', () => {
+  const seriesWarnings = (config, enteredSpecs = specs) =>
+    checkCompatibility({ config, specs: enteredSpecs }).filter(
+      (warning) => warning.rule === 'series-chain-loads'
+    )
+
+  it('raises the previously missing 400 lb swivel / main snatch proxy finding', async () => {
+    const warnings = checkCompatibility({ config: fullConfig, specs })
+    const warning = warnings.find(
+      (item) => item.code === 'compatibility.swivel.series-main-snatch-below-rating'
+    )
+    expect(warning).toMatchObject({ level: 'error', slot: 'swivel', loadCaseId: 'main-snatch' })
+    expect(warning.message).toContain('margin 0.88×')
+    expect(warning.inputPaths[0]).toBe('config.swivel')
+    expect(warning.inputPaths).toContain('specs.rocket_mass_g')
+
+    const { buildRecoveryBrief } = await import('../lib/recoveryBrief.js')
+    const { summarizeReviewFindings } = await import('../lib/analysisReview.js')
+    const brief = buildRecoveryBrief({ config: fullConfig, specs, warnings, sensitivity: false })
+    expect(brief.unresolvedChecks.find((item) => item.code === warning.code)).toMatchObject({
+      message: warning.message,
+      level: 'error',
+      path: 'config.swivel',
+    })
+    expect(
+      summarizeReviewFindings({ warnings }).findings.find((item) => item.code === warning.code)
+    ).toMatchObject({ message: warning.message, state: 'error', slot: 'swivel' })
+  })
+
+  it.each(['quick_links', 'swivel'])('matches exact snatch boundaries for %s', (slot) => {
+    const field = slot === 'swivel' ? 'rated_lbs' : 'strength_lbs'
+    for (const caseId of ['ejection-snatch', 'main-snatch']) {
+      const force = caseById(computeLoadPath({ config: fullConfig, specs }), caseId).force_lbs
+      for (const [multiple, severity] of [
+        [0.999, 'error'],
+        [1, 'warn'],
+        [1.499, 'warn'],
+        [1.5, null],
+      ]) {
+        const config = {
+          ...fullConfig,
+          [slot]: {
+            ...fullConfig[slot],
+            specs: { ...fullConfig[slot].specs, [field]: force * multiple },
+          },
+        }
+        const warning = seriesWarnings(config).find(
+          (item) => item.slot === slot && item.loadCaseId === caseId
+        )
+        const margin = marginByCase(elementBySlot(computeLoadPath({ config, specs }), slot), caseId)
+        expect(warning?.level ?? null).toBe(severity)
+        expect(margin.severity).toBe(severity ?? 'none')
+      }
+    }
+  })
+
+  it('matches opening-shock boundaries for the swivel without duplicating link checks', () => {
+    const force = caseById(
+      computeLoadPath({ config: fullConfig, specs }),
+      'opening-shock'
+    ).force_lbs
+    for (const [loadRatio, severity] of [
+      [0.7, null],
+      [0.701, 'warn'],
+      [1, 'warn'],
+      [1.001, 'error'],
+    ]) {
+      const config = {
+        ...fullConfig,
+        swivel: { ...swivel, specs: { rated_lbs: force / loadRatio } },
+      }
+      const warnings = seriesWarnings(config)
+      expect(
+        warnings.find((item) => item.slot === 'swivel' && item.loadCaseId === 'opening-shock')
+          ?.level ?? null
+      ).toBe(severity)
+      expect(
+        warnings.some((item) => item.slot === 'quick_links' && item.loadCaseId === 'opening-shock')
+      ).toBe(false)
+    }
+  })
+
+  it('withholds unavailable loads and marks selected unrated hardware as not evaluated', () => {
+    expect(seriesWarnings(fullConfig, {})).toEqual([])
+    const config = {
+      ...fullConfig,
+      drogue_chute: null,
+      swivel: { name: 'Unrated swivel', specs: {} },
+    }
+    const warnings = seriesWarnings(config)
+    expect(warnings.find((item) => item.slot === 'swivel')).toMatchObject({
+      code: 'compatibility.swivel.series-rating-unavailable',
+      state: 'not-evaluated',
+      evaluated: false,
+    })
+    expect(
+      warnings.some((item) => ['main-snatch', 'opening-shock'].includes(item.loadCaseId))
+    ).toBe(false)
+    expect(seriesWarnings({ ...fullConfig, quick_links: null, swivel: null })).toEqual([])
+  })
+})

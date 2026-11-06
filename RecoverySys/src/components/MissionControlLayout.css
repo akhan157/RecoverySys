@@ -2682,8 +2682,9 @@
 }
 
 @media print {
-  /* Hide the app UI, show only the checklist */
-  .mc {
+  /* Keep interactive chrome and transient messages out of both artifacts. */
+  .mc,
+  .app-notifications {
     display: none !important;
   }
 

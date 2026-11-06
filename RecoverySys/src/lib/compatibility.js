@@ -197,8 +197,8 @@ const INPUT_PATHS = {
 
 function normalizeWarning(warning) {
   const classification = warning.slot === 'bay_volume' ? 'heuristic' : 'calculation'
-  const inputPaths = INPUT_PATHS[warning.slot] ?? [`config.${warning.slot}`]
-  const partRefs = [warning.slot]
+  const inputPaths = warning.inputPaths ?? INPUT_PATHS[warning.slot] ?? [`config.${warning.slot}`]
+  const partRefs = warning.affectedPartIds ?? [warning.slot]
   const finding = normalizeFinding({
     ...warning,
     rule: warning.rule ?? warning.message,
@@ -529,6 +529,86 @@ function rule_mainSnatchAvailability(ctx) {
   ]
 }
 
+// The selected links and swivel are in series with the cord. Apply the same
+// screening forces and exact criteria used by the load-path view. The existing
+// opening-shock rule already checks cord/links; this closes swivel coverage.
+function rule_seriesChainLoads(ctx) {
+  if (!ctx.mass_kg) return []
+  const snatch = computeEjectionSnatchLoad(ctx)
+  const { opening } = computeOpeningShockForContext(ctx)
+  const cases = [
+    { id: 'ejection-snatch', label: 'Elongation-amplified snatch', force: snatch?.force_lbs },
+    {
+      id: 'main-snatch',
+      label: 'Main snatch proxy',
+      force:
+        ctx.main_snatch?.status !== 'unavailable' ? ctx.main_snatch?.peak_force_proxy_lbs : null,
+    },
+    {
+      id: 'opening-shock',
+      label: 'Main opening shock',
+      force: opening?.status === 'evaluated' ? opening.force_lbs : null,
+    },
+  ].filter(({ force }) => Number.isFinite(force) && force > 0)
+  const out = []
+  for (const [slot, field, label] of [
+    ['quick_links', 'strength_lbs', 'Quick links'],
+    ['swivel', 'rated_lbs', 'Swivel'],
+  ]) {
+    if (!ctx.config[slot] || !cases.length) continue
+    const rating = Number(ctx.config[slot].specs?.[field])
+    const metadata = {
+      rule: 'series-chain-loads',
+      inputPaths: [
+        `config.${slot}`,
+        'config.shock_cord',
+        'config.drogue_chute',
+        'config.main_chute',
+        'specs.rocket_mass_g',
+        'specs.main_deploy_alt_ft',
+        'specs.ejection_g_factor',
+      ],
+      affectedPartIds: [slot],
+    }
+    if (!Number.isFinite(rating) || rating <= 0) {
+      out.push(
+        warn(
+          slot,
+          `${label} series-chain load screening not evaluated: a positive published rating is unavailable.`,
+          {
+            ...metadata,
+            code: `compatibility.${slot}.series-rating-unavailable`,
+            state: 'not-evaluated',
+          }
+        )
+      )
+      continue
+    }
+    for (const load of cases) {
+      if (slot === 'quick_links' && load.id === 'opening-shock') continue
+      const criterion =
+        load.id === 'opening-shock'
+          ? evaluateCriterion(CRITERION_IDS.OPENING_SHOCK_RATIO, load.force / rating)
+          : evaluateCriterion(CRITERION_IDS.STRENGTH_MARGIN, rating / load.force)
+      if (criterion.severity === 'none') continue
+      const build = criterion.severity === 'error' ? err : warn
+      out.push(
+        build(
+          slot,
+          `${label}: ${load.label} screening ~${Math.round(load.force)} lbs against ${rating} lbs published rating (margin ${(rating / load.force).toFixed(2)}×); ${criterion.severity === 'error' ? 'load exceeds rating' : 'margin needs review'}. Series-chain assumption; proxy load, not measured flight load.`,
+          {
+            ...metadata,
+            code: `compatibility.${slot}.series-${load.id}-${criterion.category}`,
+            criterion,
+            loadCaseId: load.id,
+          }
+        )
+      )
+    }
+  }
+  return out
+}
+
 function rule_chuteCordMaterialMismatch(ctx) {
   const { config } = ctx
   if (
@@ -815,6 +895,7 @@ const RULES = [
   rule_openingShock,
   rule_shockCordStrength,
   rule_mainSnatchAvailability,
+  rule_seriesChainLoads,
   rule_chuteCordMaterialMismatch,
   rule_chuteProtector,
   rule_quickLinksEjectionLoad,

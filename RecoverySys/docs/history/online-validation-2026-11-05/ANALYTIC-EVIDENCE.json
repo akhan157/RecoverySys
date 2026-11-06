@@ -1,0 +1,79 @@
+{
+  "implementationAuthor": "Antigravity gemini-3.8-flash high",
+  "reviewedPin": "90b8ce19f557e74e5b8b3f4bc46557135560c6b8",
+  "reviewer": "Codex gpt-6.1-sol high",
+  "followupPin": "4fa4e7187cfaa8a715cdd00d10467b306ff4147c",
+  "followupReviewScope": "Small runner/metadata guard fixes are author-verified; no independent final-runner verdict claimed.",
+  "benchmarks": {
+    "passed": 4,
+    "failed": 0,
+    "metricComparisons": 10,
+    "adapterDerivedMetrics": [
+      "terminal-descent-nominal-48in-sea-level.landing_energy_J"
+    ]
+  },
+  "negativeControlGroups": {
+    "detected": 5,
+    "total": 5,
+    "invalidInputSubcases": 5
+  },
+  "nodeGuardTests": {
+    "passed": 11,
+    "failed": 0,
+    "skipped": 0
+  },
+  "capturedFilesHashVerified": 9,
+  "uncapturedHtmlSourceRecords": 3,
+  "cwdVerified": [
+    "primary repository root",
+    "application directory",
+    "packet directory"
+  ],
+  "runs": [
+    {
+      "report": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/run-dP6eOC/online-benchmarks-report.json",
+      "sha256": "fc195d5c777fae10c37825c5c7deea9de7f747e5f052261d953e56e34977b8a5",
+      "sourceCommit": "4fa4e7187cfaa8a715cdd00d10467b306ff4147c",
+      "workingTreeDirty": false
+    },
+    {
+      "report": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/run-30GR2T/online-benchmarks-report.json",
+      "sha256": "e0b430ef947563e72660f347d37d0bfd3e1571e12278bb04eaed01565f1e89ad",
+      "sourceCommit": "4fa4e7187cfaa8a715cdd00d10467b306ff4147c",
+      "workingTreeDirty": false
+    },
+    {
+      "report": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/run-C2pzJZ/online-benchmarks-report.json",
+      "sha256": "fdde2f4d98e01d2660371af8edfd57aa0332660e24ccea51edb232d9bc3e4f38",
+      "sourceCommit": "4fa4e7187cfaa8a715cdd00d10467b306ff4147c",
+      "workingTreeDirty": false
+    }
+  ],
+  "commandLogs": [
+    {
+      "path": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/review-4fa4e71/recoverysys-analytic-final-root.log",
+      "sha256": "f0a02597ef07b1ecd93ee01a2dbfd8386ddeb4867bdf5b193035d94616741895"
+    },
+    {
+      "path": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/review-4fa4e71/recoverysys-analytic-final-app.log",
+      "sha256": "78a0a9e5bd5a3438891d8896d0ed745057b91ccd83fe89897cfca7d4ada3fb9a"
+    },
+    {
+      "path": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/review-4fa4e71/recoverysys-analytic-final-packet.log",
+      "sha256": "3bb3528c24ae05d4325cab0faa88f629363bcdd6a09c1a427d960fcd288368cd"
+    },
+    {
+      "path": "../RecoverySys-artifacts/online-validation-2026-11-05/physics/review-4fa4e71/recoverysys-analytic-final-tests.log",
+      "sha256": "c604568814b3006b42c98c51f96f21d99f25320119508485fe2ef2cdf512499b"
+    }
+  ],
+  "excluded": [
+    "constant-density coast: no matched production API seam"
+  ],
+  "blocked": [
+    "Prometheus flight: unverified vehicle/environment/uncertainty"
+  ],
+  "canonicalCorpusPromotions": 0,
+  "productionPhysicsChanges": 0,
+  "next": "Execute these checks in CI; receive/review separate OpenRocket execution; physical/engineering acceptance remains open."
+}

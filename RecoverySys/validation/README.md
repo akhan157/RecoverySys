@@ -48,6 +48,14 @@ dispersion now has a stable scalar summary contract
 (`summarizeDispersionRun` in `src/lib/simulation.js`): a seeded run reduces to
 deterministic scalar metrics — landing-point count, centroid, mean/p95/max
 drift from the centroid, and the confidence-ellipse axes — regression-checked
-by unit tests. It remains an API/unit-test reproducibility concern rather than
-a corpus case because a corpus case requires an independent reference, and
-none is claimed; no accepted comparison or real-flight metadata is implied.
+by unit tests. Corpus 0.3.0 adds a review-only same-seed reproducibility case. It uses an
+internal computational invariant rather than an external numerical reference;
+no dispersion uncertainty, accepted comparison or real-flight evidence is
+implied.
+
+The 2026-11-05 expansion brings the corpus to 21 review-only cases: a sourced
+11 km atmospheric reference, Cd scaling, two constant-wind cardinal cases,
+no-liftoff rejection, a fixed-case ascent drag invariant, and seeded dispersion
+repeatability. See [online evidence](../docs/online-evidence-2026-11-05.md) for
+sources and tolerance rationale. Schema validation now requires nonempty
+numeric metrics with an explicit absolute or relative bound.

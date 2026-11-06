@@ -1,0 +1,62 @@
+{
+  "id": "seeded-dispersion-repeatability",
+  "domain": "dispersion",
+  "kind": "metamorphic",
+  "status": "review",
+  "inputs": {
+    "simulation": {
+      "apogee_ft": 3000,
+      "deploy_ft": 500,
+      "drogue_fps": 60,
+      "main_fps": 18
+    },
+    "specs": {
+      "wind_speed_mph": "10",
+      "wind_direction_deg": "270",
+      "launch_lat": "35.3456",
+      "launch_lon": "-117.8083"
+    },
+    "iterations": 100,
+    "seed": 1976
+  },
+  "expected": {
+    "metrics": [
+      {
+        "name": "maximum_absolute_difference",
+        "value": 0,
+        "unit": "mixed-numeric-summary",
+        "tolerance": {
+          "basis": "analyst-derived",
+          "absolute": 0
+        },
+        "notes": "Identical inputs and seed must reproduce every numeric summary exactly; never an uncertainty or flight-accuracy tolerance."
+      },
+      {
+        "name": "landing_points",
+        "value": 100,
+        "unit": "count",
+        "tolerance": {
+          "basis": "analyst-derived",
+          "absolute": 0
+        },
+        "notes": "Exact algebraic or categorical invariant; no measurement uncertainty is implied."
+      }
+    ]
+  },
+  "source": {
+    "title": "RecoverySys seeded dispersion reproducibility protocol",
+    "citation": "RecoverySys seeded dispersion reproducibility protocol",
+    "derivation": "Run the browser Monte Carlo summary twice with the same safe-integer seed; compare all numeric fields. The expected equality and sample count are computational invariants, not external simulator outputs."
+  },
+  "model": {
+    "id": "browser-js-recovery",
+    "version": "isa-apogee-descent-v1",
+    "assumptionsVersion": "recovery-assumptions-v1",
+    "description": "The browser JavaScript production estimator. Each case records the exact model and assumptions identity that it exercises."
+  },
+  "comparison": {
+    "method": "metamorphic",
+    "decisionRule": "Report the stated invariant or analytic difference; acceptance requires a separate independent review."
+  },
+  "notes": "Computational metamorphic invariant with no external numerical reference. Gaussian perturbation assumptions remain unqualified. Review-only; no flight validation or acceptance is claimed."
+}

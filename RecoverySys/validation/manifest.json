@@ -1,5 +1,5 @@
 {
-  "corpusVersion": "0.2.0",
+  "corpusVersion": "0.3.0",
   "model": {
     "id": "browser-js-recovery",
     "version": "isa-apogee-descent-v1",
@@ -21,7 +21,14 @@
     "static-ejection-load-nylon-screening",
     "ascent-apogee-scalar-2kg-2000ns",
     "end-to-end-scalar-2kg-main-500ft",
-    "end-to-end-curve-2kg-main-500ft"
+    "end-to-end-curve-2kg-main-500ft",
+    "isa-density-11000m",
+    "terminal-descent-cd-quadrupling-metamorphic",
+    "constant-wind-drift-east-1000ft",
+    "constant-wind-drift-west-1000ft",
+    "ascent-insufficient-thrust-edge",
+    "ascent-drag-increase-metamorphic",
+    "seeded-dispersion-repeatability"
   ],
   "scopeLimitations": [
     "These initial analytic cases are in review; no benchmark is accepted-for-comparison or flight validated.",

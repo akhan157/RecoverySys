@@ -1,6 +1,6 @@
 # RecoverySys stored and transferred contract inventory
 
-**Status:** Maintained — M0 reconciliation (2026-08-13)
+**Status:** Maintained — release reconciliation (2026-11-05)
 **Scope:** every shape that is persisted locally or transferred across a
 boundary (URL, file, print, or storage), with its owner, version identity,
 migration rule, and limits. This inventory is the executable reference for
@@ -16,7 +16,7 @@ Single source: `src/lib/constants.js` (app/simulation) and `src/lib/schema.js`
 
 | Identity | Value | Owner |
 |---|---|---|
-| App release | `1.2.0.1` | `src/lib/constants.js`, `package.json` |
+| App release | `1.3.0-rc.2` | `src/lib/constants.js`, `package.json` |
 | Payload schema | `1` (`SCHEMA_VERSION`) | `src/lib/schema.js` |
 | Simulation schema | `1` (`SIMULATION_SCHEMA_VERSION`) | `src/lib/constants.js` |
 | Simulation model | `browser-js-recovery` / `isa-apogee-descent-v1` | `src/lib/constants.js` |
@@ -24,7 +24,7 @@ Single source: `src/lib/constants.js` (app/simulation) and `src/lib/schema.js`
 | Simulation method | `deterministic-physics` | `src/lib/constants.js` |
 | Recovery Brief | `recovery-brief-v1` | `src/lib/recoveryBrief.js` |
 | Criteria policy | `recovery-criteria-v1` | `src/lib/criteria.js` |
-| Validation corpus | `0.2.0` | `validation/manifest.json` |
+| Validation corpus | `0.3.0` | `validation/manifest.json` |
 | Confidence rules | *(no exported version — open gate)* | `src/lib/confidence.js` |
 
 The manifest and checked-in corpus cases record the same browser model,

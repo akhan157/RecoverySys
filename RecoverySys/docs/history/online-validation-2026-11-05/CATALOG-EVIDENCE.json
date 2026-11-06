@@ -1,0 +1,118 @@
+{
+  "packet": "online-2026-11-05",
+  "sourceAuthor": "Antigravity gemini-3.8-flash high",
+  "sourcePin": "91be050a5b5e6f773b550f6936ba9ca474e2f0b0",
+  "reviewer": "Codex gpt-6.1-sol high",
+  "checkerFollowupPin": "9393744ec7dfb2825ee3073fe616f5e90008638a",
+  "checkerFollowupScope": "Author-verified small fixes; no independent final-checker verdict claimed.",
+  "sourceCaptures": 7,
+  "decisions": [
+    {
+      "proposalId": "PROP-20261105-01",
+      "reviewerDecision": "retain-rounded",
+      "reason": "Published 87.9 g rounds to existing 88 g; no catalog edit."
+    },
+    {
+      "proposalId": "PROP-20261105-02",
+      "reviewerDecision": "retain-rounded",
+      "reason": "Published 87.9 g rounds to existing 88 g; no catalog edit."
+    },
+    {
+      "proposalId": "PROP-20261105-03",
+      "reviewerDecision": "hold",
+      "reason": "Exact Iris variant unconfirmed in captured primary sources; no rename/overwrite."
+    },
+    {
+      "proposalId": "PROP-20261105-04",
+      "reviewerDecision": "hold",
+      "reason": "Exact Iris variant unconfirmed in captured primary sources; no rename/overwrite."
+    },
+    {
+      "proposalId": "PROP-20261105-05",
+      "reviewerDecision": "hold",
+      "reason": "Exact Iris variant unconfirmed in captured primary sources; no rename/overwrite."
+    },
+    {
+      "proposalId": "PROP-20261105-06",
+      "reviewerDecision": "hold",
+      "reason": "Exact Iris variant unconfirmed in captured primary sources; no rename/overwrite."
+    },
+    {
+      "proposalId": "PROP-20261105-07",
+      "reviewerDecision": "hold",
+      "reason": "Exact Iris variant unconfirmed in captured primary sources; no rename/overwrite."
+    },
+    {
+      "proposalId": "PROP-20261105-08",
+      "reviewerDecision": "hold",
+      "reason": "Exact Iris variant unconfirmed in captured primary sources; no rename/overwrite."
+    },
+    {
+      "proposalId": "PROP-20261105-09",
+      "reviewerDecision": "reject",
+      "reason": "Standard-line source does not match the independently checked ultralight dimensions/material/mass; reject this substitution."
+    },
+    {
+      "proposalId": "PROP-20261105-10",
+      "reviewerDecision": "reject",
+      "reason": "Standard-line source does not match the independently checked ultralight dimensions/material/mass; reject this substitution."
+    },
+    {
+      "proposalId": "PROP-20261105-11",
+      "reviewerDecision": "reject",
+      "reason": "Standard-line source does not match the independently checked ultralight dimensions/material/mass; reject this substitution."
+    },
+    {
+      "proposalId": "PROP-20261105-12",
+      "reviewerDecision": "reject",
+      "reason": "Standard-line source does not match the independently checked ultralight dimensions/material/mass; reject this substitution."
+    },
+    {
+      "proposalId": "PROP-20261105-13",
+      "reviewerDecision": "reject",
+      "reason": "Standard-line source does not match the independently checked ultralight dimensions/material/mass; reject this substitution."
+    },
+    {
+      "proposalId": "PROP-20261105-14",
+      "reviewerDecision": "reject",
+      "reason": "Standard-line source does not match the independently checked ultralight dimensions/material/mass; reject this substitution."
+    }
+  ],
+  "counts": {
+    "reject": 6,
+    "hold": 6,
+    "retain-rounded": 2,
+    "newEngineeringValuesAccepted": 0
+  },
+  "verification": [
+    {
+      "command": "node RecoverySys/validation/catalog-review/online-2026-11-05/validate-catalog-decisions.mjs",
+      "passed": 243,
+      "failed": 0,
+      "log": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/review/recoverysys-catalog-final-audit.log",
+      "sha256": "c5f4a4c00abebc6346f5cc3fb9054b18267585c339eb7b4955fe8770761f746f"
+    },
+    {
+      "command": "node --test --test-concurrency=2 RecoverySys/validation/catalog-review/online-2026-11-05/validate-catalog-decisions.test.mjs",
+      "passed": 11,
+      "failed": 0,
+      "log": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/review/recoverysys-catalog-final-tests.log",
+      "sha256": "676f62786f26a5073de93613877a07e6f0dcf081bebcfc8738679c04d0a9dfab"
+    },
+    {
+      "command": "From RecoverySys/: node validation/catalog-review/online-2026-11-05/validate-catalog-decisions.mjs",
+      "passed": 243,
+      "failed": 0,
+      "log": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/review/recoverysys-catalog-final-app-cwd.log",
+      "sha256": "c5f4a4c00abebc6346f5cc3fb9054b18267585c339eb7b4955fe8770761f746f"
+    },
+    {
+      "command": "From packet/: node validate-catalog-decisions.mjs",
+      "passed": 243,
+      "failed": 0,
+      "log": "../RecoverySys-artifacts/online-validation-2026-11-05/catalog/review/recoverysys-catalog-final-packet-cwd.log",
+      "sha256": "c5f4a4c00abebc6346f5cc3fb9054b18267585c339eb7b4955fe8770761f746f"
+    }
+  ],
+  "scope": "14 recent proposals only. Broader historical packet/225-part field review remains open. No production catalog or physics values changed."
+}
