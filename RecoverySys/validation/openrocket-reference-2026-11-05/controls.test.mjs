@@ -6,8 +6,9 @@ import { verifyFileSha256, validateManifest } from './guards.mjs'
 import os from 'node:os'
 import { spawnSync } from 'node:child_process'
 import { fileURLToPath } from 'node:url'
+import crypto from 'node:crypto'
 import { runSimulation, computeDescentRate } from '../../src/lib/simulation.js'
-import { validateNumericProps, parseProperties, pctDelta } from './compare.mjs'
+import { validateNumericProps, parseProperties, pctDelta, validateRunIdentity, runComparison } from './compare.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
@@ -194,7 +195,7 @@ test('Control Group 3: OpenRocketDriver Input Guards (Negative Mass & Missing Mo
   if (!process.env.CONTROLS_DIR) fs.rmSync(tmpDir, { recursive: true, force: true })
 })
 
-test('Control Group 4: Manifest Mutation Demonstrably Changes Java Engine Input & Output', async () => {
+test('Control Group 4: Manifest Mutation Changes Mass, Trajectory and Unequal Fin Geometry', async () => {
   const tmpDir = fs.mkdtempSync(path.join(process.env.CONTROLS_DIR || os.tmpdir(), 'or-mutation-'))
   const classesDir = path.join(tmpDir, 'classes')
   fs.mkdirSync(classesDir, { recursive: true })
@@ -214,6 +215,8 @@ test('Control Group 4: Manifest Mutation Demonstrably Changes Java Engine Input 
   mutatedManifest.mass.burned_out_mass_kg = 3.675616
   mutatedManifest.mass.total_launch_mass_g = 3857.504
   mutatedManifest.mass.burned_out_mass_g = 3675.616
+  mutatedManifest.geometry.fins.sweep_m = 0.12
+  mutatedManifest.geometry.fins.height_m = 0.08
   validateManifest(mutatedManifest,fs.readFileSync(motorPath,'utf8'))
   const mutatedPath = path.join(tmpDir, 'mutated-manifest.json')
   fs.writeFileSync(mutatedPath, JSON.stringify(mutatedManifest))
@@ -250,6 +253,8 @@ test('Control Group 4: Manifest Mutation Demonstrably Changes Java Engine Input 
 
   // 1. Verify Java ingested the mutated manifest parameter
   assert.equal(props.nominal_vehicle_dry_mass_kg, '3.500000', 'Java engine must record mutated dry mass')
+  assert.equal(Number(props.configured_fin_sweep_m), 0.12, 'Actual engine sweep must match manifest')
+  assert.equal(Number(props.configured_fin_height_m), 0.08, 'Actual engine height must match manifest')
 
   // 2. Verify Java engine mass curve reflected the mutated mass
   const observedBurnoutMass = parseFloat(props.observed_burnout_mass_kg)
@@ -324,4 +329,42 @@ test('Summary numbers reject trailing units and blank values; percentages reject
     assert.throws(() => validateNumericProps({value: bad}, ['value']))
   }
   assert.throws(() => pctDelta(3, 0))
+})
+
+test('Comparison identity rejects stale manifests, swapped modes, motors and mixed runs', () => {
+  const source = JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
+  const sha = crypto.createHash('sha256').update(fs.readFileSync(manifestPath)).digest('hex')
+  const metadata = {run_id:'fixture-run', input_hashes:{'reference-vehicle.json':sha, motor:'motor-hash'}}
+  const props = {
+    run_id:'fixture-run', manifest_sha256:sha, motor_sha256:'motor-hash',
+    mode:'controlled_cd', simulator:'OpenRocket', version:'23.09',
+    git_commit:'6c89a3c60118226e562e19625d8fd439854b1246',
+  }
+  assert.doesNotThrow(() => validateRunIdentity(metadata,props,'controlled_cd',sha))
+  for (const change of [
+    {manifest_sha256:'stale'}, {mode:'native_aero'}, {motor_sha256:'different'},
+    {run_id:'other-run'}, {version:'different'}, {simulator:'different'},
+  ]) assert.throws(() => validateRunIdentity(metadata,{...props,...change},'controlled_cd',sha),/run identity mismatch/)
+  assert.throws(() => validateRunIdentity({...metadata,input_hashes:{}},props,'controlled_cd',sha),/run identity mismatch/)
+
+  // Reproduce the review finding through the public comparison entry point.
+  const tmp = fs.mkdtempSync(path.join(os.tmpdir(),'or-stale-review-'))
+  try {
+    source.mass.vehicle_dry_mass_kg=3.5
+    source.mass.total_launch_mass_kg=3.857504
+    source.mass.total_launch_mass_g=3857.504
+    source.mass.burned_out_mass_kg=3.675616
+    source.mass.burned_out_mass_g=3675.616
+    validateManifest(source)
+    const heavier=path.join(tmp,'heavier.json')
+    fs.writeFileSync(heavier,JSON.stringify(source))
+    fs.writeFileSync(path.join(tmp,'reproduction-manifest.json'),JSON.stringify(metadata))
+    for (const [mode,prefix] of [['controlled_cd','controlled-cd'],['native_aero','native-aero']]) {
+      fs.writeFileSync(path.join(tmp,`or-reference-${prefix}-summary.properties`),
+        Object.entries({...props,mode}).map(([k,v])=>`${k}=${v}`).join('\n'))
+    }
+    const outputPath=path.join(tmp,'comparison.json')
+    assert.throws(() => runComparison({manifestPath:heavier,targetArtifactsDir:tmp,outputPath}),/run identity mismatch/)
+    assert.equal(fs.existsSync(outputPath),false,'Reject before writing misleading output')
+  } finally { fs.rmSync(tmp,{recursive:true,force:true}) }
 })

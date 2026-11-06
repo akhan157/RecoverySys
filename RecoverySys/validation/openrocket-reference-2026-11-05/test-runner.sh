@@ -73,6 +73,7 @@ echo "External Run Dir:    $RUN_DIR"
 
 # 6. Serialize metadata with a JSON encoder (runtime strings contain quotes).
 JAVA_BIN="$JAVA_BIN" node "$SCRIPT_DIR/metadata.mjs" "$RUN_DIR" "$OR_JAR" "$MOTOR_ENG"
+RUN_ID="$(node -e 'process.stdout.write(JSON.parse(require("fs").readFileSync(process.argv[1])).run_id)' "$RUN_DIR/reproduction-manifest.json")"
 
 # 7. Compile OpenRocketDriver into isolated classes directory (max 2 jobs, -Xmx512m)
 echo -n "Compiling OpenRocketDriver.java... "
@@ -90,6 +91,7 @@ xvfb-run -a "$JAVA_BIN" -Xmx512m -XX:ActiveProcessorCount=2 \
   -cp "$CLASSES_DIR:$OR_JAR" \
   OpenRocketDriver \
   --manifest "$SCRIPT_DIR/reference-vehicle.json" \
+  --run-id "$RUN_ID" \
   --motor "$MOTOR_ENG" \
   --artifacts-dir "$RUN_DIR" \
   --mode "controlled_cd" \
@@ -101,6 +103,7 @@ xvfb-run -a "$JAVA_BIN" -Xmx512m -XX:ActiveProcessorCount=2 \
   -cp "$CLASSES_DIR:$OR_JAR" \
   OpenRocketDriver \
   --manifest "$SCRIPT_DIR/reference-vehicle.json" \
+  --run-id "$RUN_ID" \
   --motor "$MOTOR_ENG" \
   --artifacts-dir "$RUN_DIR" \
   --mode "native_aero" \

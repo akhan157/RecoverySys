@@ -2,6 +2,7 @@ import fs from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { execSync } from 'node:child_process'
+import crypto from 'node:crypto'
 import { validateManifest } from './guards.mjs'
 import { runSimulation, computeDescentRate } from '../../src/lib/simulation.js'
 
@@ -55,6 +56,18 @@ export function pctDelta(valA, valB) {
   return ((valA - valB) / valB) * 100
 }
 
+export function validateRunIdentity(metadata, props, mode, manifestSha) {
+  if (!metadata.run_id || !metadata.input_hashes?.motor ||
+      metadata.input_hashes['reference-vehicle.json'] !== manifestSha ||
+      props.manifest_sha256 !== manifestSha ||
+      props.motor_sha256 !== metadata.input_hashes.motor ||
+      props.run_id !== metadata.run_id || props.mode !== mode ||
+      props.simulator !== 'OpenRocket' || props.version !== '23.09' ||
+      props.git_commit !== '6c89a3c60118226e562e19625d8fd439854b1246') {
+    throw new Error(`OpenRocket run identity mismatch (${mode}): manifest, motor, run or simulator differs`)
+  }
+}
+
 export function runComparison({
   manifestPath = path.resolve(__dirname, 'reference-vehicle.json'),
   targetArtifactsDir = artifactsDir,
@@ -64,6 +77,12 @@ export function runComparison({
     throw new Error(`Manifest file not found: ${manifestPath}`)
   }
   const manifest = validateManifest(JSON.parse(fs.readFileSync(manifestPath, 'utf8')))
+  const metadata = JSON.parse(fs.readFileSync(path.resolve(targetArtifactsDir, 'reproduction-manifest.json'), 'utf8'))
+  const manifestSha = crypto.createHash('sha256').update(fs.readFileSync(manifestPath)).digest('hex')
+  const orControlledProps = parseProperties(path.resolve(targetArtifactsDir, 'or-reference-controlled-cd-summary.properties'))
+  const orNativeProps = parseProperties(path.resolve(targetArtifactsDir, 'or-reference-native-aero-summary.properties'))
+  validateRunIdentity(metadata, orControlledProps, 'controlled_cd', manifestSha)
+  validateRunIdentity(metadata, orNativeProps, 'native_aero', manifestSha)
 
   // 1. Prepare RecoverySys Inputs from Shared Manifest
   const specs = {
@@ -134,12 +153,6 @@ export function runComparison({
   const rsAggregateFpsLaunchSeaLevel = computeDescentRate(aggregateChuteSpecs, manifest.mass.total_launch_mass_kg, 0)
 
   // 4. Load & Validate OpenRocket Results
-  const controlledPropsPath = path.resolve(targetArtifactsDir, 'or-reference-controlled-cd-summary.properties')
-  const nativePropsPath = path.resolve(targetArtifactsDir, 'or-reference-native-aero-summary.properties')
-
-  const orControlledProps = parseProperties(controlledPropsPath)
-  const orNativeProps = parseProperties(nativePropsPath)
-
   const requiredProps = [
     'observed_apogee_ft',
     'observed_max_velocity_m_s',
@@ -310,6 +323,7 @@ export function runComparison({
 
   const outputData = {
     timestamp: new Date().toISOString(),
+    reference_run: { run_id: metadata.run_id, manifest_sha256: manifestSha, motor_sha256: metadata.input_hashes.motor },
     benchmark: 'OpenRocket-23.09 vs RecoverySys (Corrected)',
     reference_vehicle: manifest.name,
     manifest_path: manifestPath,

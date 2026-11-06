@@ -22,6 +22,9 @@ The script also works by absolute path from other working directories.
 a new `run-*` directory under the external artifact directory; `RUNS_DIR` can
 select another parent. Existing output directories are never reused by the
 runner. Comparison-only invocation refuses to overwrite its JSON output.
+Comparison also requires matching manifest/motor hashes, run IDs and simulator
+modes from the run metadata and both Java summaries. Earlier unstamped runs
+remain historical artifacts and must be rerun for use with this comparator.
 
 The runner verifies assets and shared manifest consistency, serializes runtime
 and clean/dirty source metadata, compiles with a 512 MiB heap and two processors,

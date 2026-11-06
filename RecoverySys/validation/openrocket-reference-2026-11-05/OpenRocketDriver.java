@@ -28,6 +28,10 @@ import net.sf.openrocket.util.Coordinate;
  */
 public class OpenRocketDriver {
 
+    private static String sha256(Path file) throws Exception {
+        return HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(Files.readAllBytes(file)));
+    }
+
     public static class MatchedEnvironmentListener extends AbstractSimulationListener {
         private final double gravity;
 
@@ -60,6 +64,7 @@ public class OpenRocketDriver {
         String motorPathStr = null;
         String mode = "controlled_cd"; // "controlled_cd" or "native_aero"
         String outputPrefix = "or-reference-controlled-cd";
+        String runId = UUID.randomUUID().toString();
 
         for (int i = 0; i < args.length; i++) {
             if ("--artifacts-dir".equals(args[i]) && i + 1 < args.length) {
@@ -72,6 +77,8 @@ public class OpenRocketDriver {
                 mode = args[++i];
             } else if ("--output-prefix".equals(args[i]) && i + 1 < args.length) {
                 outputPrefix = args[++i];
+            } else if ("--run-id".equals(args[i]) && i + 1 < args.length) {
+                runId = args[++i];
             }
         }
 
@@ -243,7 +250,7 @@ public class OpenRocketDriver {
             TrapezoidFinSet fins = new TrapezoidFinSet();
             fins.setName("Fins");
             fins.setFinCount(finCount);
-            fins.setFinShape(finRootM, finTipM, finHeightM, finSweepM, finThicknessM);
+            fins.setFinShape(finRootM, finTipM, finSweepM, finHeightM, finThicknessM);
             body.addChild(fins);
             fins.setAxialMethod(AxialMethod.TOP);
             fins.setAxialOffset(bodyLengthM - finRootM);
@@ -467,6 +474,11 @@ public class OpenRocketDriver {
             Path summaryPath = artifactsPath.resolve(outputPrefix + "-summary.properties");
             Properties props = new Properties();
             props.setProperty("simulator", "OpenRocket");
+            props.setProperty("run_id", runId);
+            props.setProperty("manifest_sha256", sha256(manifestFile));
+            props.setProperty("motor_sha256", sha256(motorPath));
+            props.setProperty("configured_fin_sweep_m", Double.toString(fins.getSweep()));
+            props.setProperty("configured_fin_height_m", Double.toString(fins.getHeight()));
             props.setProperty("velocity_definition", "Legacy terminal keys contain pre-main / pre-landing samples; equilibrium not asserted");
             props.setProperty("drogue_sample_time_s", Double.toString(timeCol.get(mainDeployIndex - 1)));
             props.setProperty("drogue_sample_altitude_m", Double.toString(altCol.get(mainDeployIndex - 1)));

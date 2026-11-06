@@ -12,6 +12,7 @@ const {spawnSync}=await import('node:child_process')
 const runtime=spawnSync(process.env.JAVA_BIN||'java',['-version'],{encoding:'utf8'})
 if(runtime.status!==0) throw new Error('Cannot identify Java runtime')
 const metadata={
+  run_id: crypto.randomUUID(),
   timestamp:new Date().toISOString(),git_commit:git('rev-parse','HEAD'),
   git_status:git('status','--porcelain')?'dirty':'clean',
   runtime_identity:{node:process.version,java:runtime.stdout+runtime.stderr,platform:process.platform,arch:process.arch},
