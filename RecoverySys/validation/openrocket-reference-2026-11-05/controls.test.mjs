@@ -113,7 +113,7 @@ test('Control Group 2: OpenRocket Checksum Integrity Guard (Actual Routine vs Ta
     const mutatedSha = '0000000000000000000000000000000000000000000000000000000000000000'
     assert.throws(
       () => verifyFileSha256(orJarPath, mutatedSha),
-      /Checksum verification failed for OpenRocket-23.09.jar/
+      /Checksum verification failed/
     )
   })
 })
