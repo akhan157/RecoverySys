@@ -58,3 +58,11 @@ is author-verified: 243 assertions from three primary checkout working
 directories and 11 tests pass. No production engineering changes or final
 independent checker verdict is claimed. Physics and OpenRocket execution
 assignments remain outstanding; no result has been received at this checkpoint.
+
+Analytic source `90b8ce19f557e74e5b8b3f4bc46557135560c6b8` is now integrated.
+ANALYTIC-REVIEW.md records independent core review, with author-verified small
+runner/metadata follow-ups at `4fa4e7187cfaa8a715cdd00d10467b306ff4147c`.
+All four bounded checks, five mutation-control groups and eleven guard tests
+pass from the primary checkout; three cwd invocations retain unique reports.
+ANALYTIC-EVIDENCE.json records exact hashes and limits. Canonical promotion is
+zero. Node22 CI execution is prepared; OpenRocket results remain outstanding.

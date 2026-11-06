@@ -21,10 +21,15 @@ independent final-checker verdict.
 Physics design `96d4252fe4fe07062982c5d68c56b141660b78f9` is now
 merged for revision. PHYSICS-GATE-1.md records arithmetic/provenance objections
 and authorizes four bounded executable analytic checks; coast/flight are
-excluded or blocked. Gemini high analytic implementation and a separate
-version-pinned OpenRocket execution attempt are outstanding. Next: receive,
-review and independently verify those outputs; then publish the bounded
-validation increment. No production physics or catalog values have changed.
+excluded or blocked. Analytic implementation `90b8ce1` is integrated, with
+author-verified guard/report follow-up `4fa4e7187cfaa8a715cdd00d10467b306ff4147c`.
+Four checks (ten comparisons), five mutation-control groups and eleven guard
+tests pass; three cwd invocations retain distinct clean-source reports. See
+ANALYTIC-REVIEW.md / ANALYTIC-EVIDENCE.json for exact scope and paths. A new
+Node22 CI step is prepared but has not run remotely. No canonical corpus case
+was promoted. The separate version-pinned OpenRocket execution attempt is
+outstanding. Next: receive/review/reproduce it, then publish the bounded
+validation increment and inspect CI. Production physics/catalog are unchanged.
 Do not ask again before choosing another available Antigravity model.
 
 ## Qualified release-candidate checkpoint
