@@ -26,16 +26,17 @@ jobs:
       - name: Check independent analytic references
         if: matrix.node == '22'
         run: |
+          echo "ANALYTIC_ARTIFACT_ROOT=$(realpath -m "$GITHUB_WORKSPACE/../RecoverySys-artifacts/online-validation-2026-11-05/physics")" >> "$GITHUB_ENV"
           python3 --version
           node --test --test-concurrency=2 validation/online-benchmarks-2026-11-05/adapter.test.js
           node validation/online-benchmarks-2026-11-05/run-benchmarks.js
       - name: Upload analytic comparison evidence
-        if: ${{ always() && matrix.node == '22' }}
+        if: ${{ always() && matrix.node == '22' && env.ANALYTIC_ARTIFACT_ROOT != '' }}
         uses: actions/upload-artifact@v4
         with:
           name: analytic-comparisons-${{ github.run_id }}
           if-no-files-found: warn
-          path: ${{ github.workspace }}/../RecoverySys-artifacts/online-validation-2026-11-05/physics/run-*/
+          path: ${{ env.ANALYTIC_ARTIFACT_ROOT }}/run-*/
       - run: npx playwright install --with-deps chromium
         if: matrix.node == '22'
       - run: npm run e2e
