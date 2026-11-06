@@ -40,6 +40,12 @@ flight validation, no physics/catalog/release decision. All three Antigravity
 lanes (catalog, analytic, OpenRocket) are now delivered, parent-verified and
 recorded. Production physics/catalog are unchanged; the branch remains
 evidence-only ahead of qualified rc.2.
+Two later review findings were fixed at `63190097e2c25e4253f969efa747e38823180257`:
+comparison manifest/run identity is now enforced, and OpenRocket fin sweep/height
+mapping is corrected. The full runner passed 21/21 controls and both reference
+executions from that clean commit. OPENROCKET-REVIEW-FIXES.md records hashes and
+the fresh run; these small follow-ups are author-verified, with no independent
+final-code acceptance claimed.
 Do not ask again before choosing another available Antigravity model.
 
 ## Qualified release-candidate checkpoint
