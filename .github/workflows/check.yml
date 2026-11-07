@@ -92,7 +92,12 @@ jobs:
           $files = @(Get-ChildItem -LiteralPath $extract -File -Recurse | ForEach-Object { $_.FullName.Substring($extract.Length + 1).Replace('\', '/') })
           if ($files -notcontains 'RecoverySys.exe' -or $files -notcontains 'README.txt') { throw 'Required files missing.' }
           if ($files | Where-Object { $_ -match '\.zip$' }) { throw 'Nested ZIP found.' }
+          $marker = 'RECOVERYSYS_E2E_WEBDRIVER_MARKER'
+          $exeBytes = [System.IO.File]::ReadAllBytes((Join-Path $extract 'RecoverySys.exe'))
+          $exeAscii = [System.Text.Encoding]::ASCII.GetString($exeBytes)
+          if ($exeAscii.Contains($marker)) { throw 'Shipped portable exe contains the E2E WebDriver marker.' }
           New-Item -ItemType Directory -Force platform-evidence | Out-Null
+          'Release exe does not contain the E2E WebDriver marker.' | Out-File platform-evidence/windows-e2e-marker.txt
           Get-FileHash -Algorithm SHA256 $archive | Format-List | Out-File platform-evidence/windows-sha256.txt
           $process = Start-Process -FilePath (Join-Path $extract 'RecoverySys.exe') -PassThru
           try {
@@ -103,6 +108,48 @@ jobs:
           } finally {
             if (-not $process.HasExited) { Stop-Process -Id $process.Id }
           }
+      - name: Detect installed WebView2 runtime version
+        shell: pwsh
+        run: |
+          $productKeys = @(
+            'HKLM:\SOFTWARE\WOW6432Node\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}',
+            'HKLM:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}',
+            'HKCU:\SOFTWARE\Microsoft\EdgeUpdate\Clients\{F3017226-FE2A-4295-8BDF-00C3A9A7E4C5}'
+          )
+          $version = $null
+          foreach ($key in $productKeys) {
+            if (Test-Path -LiteralPath $key) {
+              $candidate = (Get-ItemProperty -LiteralPath $key -Name pv -ErrorAction SilentlyContinue).pv
+              if ($candidate) { $version = $candidate; break }
+            }
+          }
+          if (-not $version) { throw 'Could not detect the installed WebView2 Evergreen runtime version.' }
+          "EDGEDRIVER_VERSION=$version" | Out-File -FilePath $env:GITHUB_ENV -Append
+          "Detected WebView2 runtime $version; msedgedriver will be pinned to this version."
+      - name: Install pinned tauri-driver
+        run: cargo install tauri-driver --version 2.1.0 --locked
+      - name: Install desktop E2E dependencies
+        working-directory: ${{ github.workspace }}/RecoverySys/e2e-desktop
+        run: npm ci
+      - name: Run desktop E2E against the shipped Windows portable exe
+        shell: pwsh
+        env:
+          RECOVERYSYS_E2E_APP: ${{ github.workspace }}\RecoverySys\portable-verify\RecoverySys.exe
+        run: |
+          New-Item -ItemType Directory -Force e2e-desktop/artifacts | Out-Null
+          Push-Location e2e-desktop
+          try {
+            npx wdio run wdio.conf.js 2>&1 | Tee-Object -FilePath artifacts/wdio-run.log
+            if ($LASTEXITCODE -ne 0) { throw "Desktop E2E failed with exit code $LASTEXITCODE" }
+          } finally {
+            Pop-Location
+          }
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: desktop-e2e-windows-${{ github.run_id }}
+          if-no-files-found: warn
+          path: RecoverySys/e2e-desktop/artifacts/
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
@@ -139,11 +186,16 @@ jobs:
           app="$verify_dir/RecoverySys.app"
           test -d "$app"
           codesign --verify --deep --strict "$app"
+          if strings "$app/Contents/MacOS/RecoverySys" | grep -q 'RECOVERYSYS_E2E_WEBDRIVER_MARKER'; then
+            echo "Shipped universal app contains the E2E WebDriver marker" >&2
+            exit 1
+          fi
           archs="$(lipo -archs "$app/Contents/MacOS/RecoverySys")"
           [[ " $archs " == *" arm64 "* ]] || { echo "arm64 slice missing: $archs"; exit 1; }
           [[ " $archs " == *" x86_64 "* ]] || { echo "x86_64 slice missing: $archs"; exit 1; }
 
           mkdir -p platform-evidence
+          printf '%s\n' 'Release app does not contain the E2E WebDriver marker.' > platform-evidence/macos-e2e-marker.txt
           shasum -a 256 RecoverySys-macos-universal.zip > platform-evidence/macos-sha256.txt
           printf '%s\n' "$archs" > platform-evidence/macos-architectures.txt
           "$app/Contents/MacOS/RecoverySys" > platform-evidence/macos-launch.log 2>&1 &
@@ -152,6 +204,32 @@ jobs:
           sleep 15
           kill -0 "$app_pid"
           printf '%s\n' 'Process remained alive for 15 seconds on the runner architecture; manual workflow review remains open.' > platform-evidence/macos-launch.txt
+      - name: Build macOS feature-flagged E2E app
+        run: |
+          npm run tauri:build -- --no-bundle --features e2e
+          test -x src-tauri/target/release/RecoverySys
+          if ! strings src-tauri/target/release/RecoverySys | grep -q 'RECOVERYSYS_E2E_WEBDRIVER_MARKER'; then
+            echo "E2E test build is missing the embedded WebDriver marker" >&2
+            exit 1
+          fi
+          printf '%s\n' 'E2E test build contains the embedded WebDriver marker; this binary is not shipped.' > platform-evidence/macos-e2e-build.txt
+      - name: Install desktop E2E dependencies
+        working-directory: ${{ github.workspace }}/RecoverySys/e2e-desktop
+        run: npm ci
+      - name: Run desktop E2E against the feature-flagged macOS test build
+        env:
+          RECOVERYSYS_E2E_APP: ${{ github.workspace }}/RecoverySys/src-tauri/target/release/RecoverySys
+        run: |
+          mkdir -p e2e-desktop/artifacts
+          cd e2e-desktop
+          set -o pipefail
+          npx wdio run wdio.conf.js 2>&1 | tee artifacts/wdio-run.log
+      - uses: actions/upload-artifact@v4
+        if: ${{ always() }}
+        with:
+          name: desktop-e2e-macos-${{ github.run_id }}
+          if-no-files-found: warn
+          path: RecoverySys/e2e-desktop/artifacts/
       - uses: actions/upload-artifact@v4
         if: ${{ always() }}
         with:
