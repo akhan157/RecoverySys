@@ -1,0 +1,11 @@
+--- a/RecoverySys/src/data/parts.js
++++ b/RecoverySys/src/data/parts.js
+@@ -858,7 +858,7 @@
+     specs: {
+       diameter_in: 96,
+       cd: 2.2,
+-      weight_g: 46,
++      weight_g: 462,
+       packed_diam_in: 4.9,
+       packed_length_in: 4.8,
+       shape: 'flat',

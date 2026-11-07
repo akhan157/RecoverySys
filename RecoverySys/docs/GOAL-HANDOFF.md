@@ -15,7 +15,14 @@ the three hosted ZIPs and SHA256SUMS.txt. It has not been published. Source,
 archive hashes, review fixes and checks are recorded in the release-preparation
 packet. No stable tag or approval is inferred.
 
-Next: catalog variant/source review; actual Windows/macOS and observed user
+Catalog review packet `e89099e` is now integrated with parent dispositions in
+`history/catalog-review-2026-11-07/REVIEW.md`. All 35 historical rows have a
+disposition; identity/source conflicts remain open. A source-supported
+IFC-96-S weight correction (46 to 462 g) is prepared as an unapplied patch,
+awaiting the catalog contract's explicit human review action. No production
+engineering value changed.
+
+Next: obtain the mass decision and address source holds; actual Windows/macOS and observed user
 workflows remain unavailable until actual testers are available. Publishing
 the prepared candidate is a distinct final release action.
 

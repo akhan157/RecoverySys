@@ -1,3 +1,9 @@
+> Parent review qualification (2026-11-07): this is a recommendation packet,
+> not manufacturer verification. The three CFC-30-S/CFC-36-S retain-current
+> rows have unresolved source-unit discrepancies; no measured ± uncertainty or
+> catalog-wide rounding policy was established. Author summaries below are
+> retained as history; parent dispositions are in the review record.
+
 # Historical Fruity catalog review — 2026-11-07
 
 Status: bounded research packet. Recommendations only. This author cannot

@@ -1,0 +1,40 @@
+{
+  "recordedAt": "2026-11-07",
+  "authorCommit": "e89099e6137e8d7e9ac75eee06bf5666af33b552",
+  "reviewer": "Codex gpt-6.1-sol",
+  "scope": "research packet reviewed; no production change",
+  "rows": 35,
+  "parentDispositions": {
+    "retain-current-rounded": 21,
+    "reject-substitution": 3,
+    "retain-pending-source-unit-clarification": 3,
+    "hold-identity": 6,
+    "hold-source": 1,
+    "await-human-mass-decision": 1
+  },
+  "checks": {
+    "integratedValidator": {
+      "passed": 1647,
+      "failed": 0
+    },
+    "mutationTests": {
+      "passed": 9,
+      "failed": 0
+    },
+    "proposalPatchApplyCheck": "PASS"
+  },
+  "proposal": {
+    "id": "ifc-096-s",
+    "category": "main_chute",
+    "field": "weight_g",
+    "old": 46,
+    "proposed": 462,
+    "applied": false,
+    "approvalRequiredBy": "docs/catalog-sourcing-contract.md"
+  },
+  "limitations": [
+    "No field data or manual platform qualification",
+    "No engineering status promotion",
+    "Captured hash is not semantic source verification"
+  ]
+}

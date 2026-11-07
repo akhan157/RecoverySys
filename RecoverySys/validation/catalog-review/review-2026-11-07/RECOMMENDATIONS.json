@@ -276,11 +276,11 @@
         "The page and catalog agree on 1.9 in x 4.1 in packing, 1.1 oz ripstop canopy, 400 lb Spectra lines; the 1 g difference is a display-rounding conflict, not a variant mismatch."
       ],
       "disposition": "retain-rounded",
-      "reason": "Retain 60 g under the catalog integer-rounding convention; record the page's 59 g display and ±1 g uncertainty. No catalog edit recommended.",
+      "reason": "Retain current 60 g pending clarification of the page's ounce/gram display discrepancy. The difference is not a measured uncertainty bound or an established catalog-wide rounding policy.",
       "resolutionStatus": "reviewed-2026-11-07",
       "priorDecision": null,
       "recommendedCatalogValue": null,
-      "recommendedAction": "none (retain current integer; note ±1 g source display rounding)",
+      "recommendedAction": "retain current; source-unit conflict remains pending clarification",
       "inferenceNotes": []
     },
     {
@@ -351,11 +351,11 @@
         "The page and catalog agree on 1.9 in x 4.1 in packing, 1.1 oz ripstop canopy, 400 lb Spectra lines; the 1 g difference is a display-rounding conflict, not a variant mismatch."
       ],
       "disposition": "retain-rounded",
-      "reason": "Retain 60 g under the catalog integer-rounding convention; record the page's 59 g display and ±1 g uncertainty. No catalog edit recommended.",
+      "reason": "Retain current 60 g pending clarification of the page's ounce/gram display discrepancy. The difference is not a measured uncertainty bound or an established catalog-wide rounding policy.",
       "resolutionStatus": "reviewed-2026-11-07",
       "priorDecision": null,
       "recommendedCatalogValue": null,
-      "recommendedAction": "none (retain current integer; note ±1 g source display rounding)",
+      "recommendedAction": "retain current; source-unit conflict remains pending clarification",
       "inferenceNotes": []
     },
     {
@@ -1153,11 +1153,11 @@
         "Packing, SKU family (CFC-36-S) and material match; the difference is a source rounding conflict, not a variant mismatch."
       ],
       "disposition": "retain-rounded",
-      "reason": "Retain 94 g as the rounded 3.3 oz value; record the page's 92 g display and ±2 g uncertainty. No catalog edit recommended.",
+      "reason": "Retain current 94 g pending clarification of the page's ounce/gram display discrepancy. The difference is not a measured uncertainty bound or an established catalog-wide rounding policy.",
       "resolutionStatus": "reviewed-2026-11-07",
       "priorDecision": null,
       "recommendedCatalogValue": null,
-      "recommendedAction": "none (retain current integer; note ±2 g source display rounding)",
+      "recommendedAction": "retain current; source-unit conflict remains pending clarification",
       "inferenceNotes": []
     },
     {
