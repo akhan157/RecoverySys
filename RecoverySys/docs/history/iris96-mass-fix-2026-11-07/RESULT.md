@@ -119,7 +119,7 @@ Log: `/tmp/opencode/evidence/iris96/npm-run-check.log`
 - Entered rocket mass 2500 g, selected the catalog part in `Main Chute`,
   opened `RECOVERY_BRIEF`.
 - Card spec text `96" Ø Cd 2.2 462g flat / nylon`; row `Main Chute |
-  96" Iris Ultra Compact (Spectra) | 462 g`; known total `462 g`; share
+96" Iris Ultra Compact (Spectra) | 462 g`; known total `462 g`; share
   `18.5%`; no limit or warning mislabeled; zero console/page errors.
 - Result JSON: `/tmp/opencode/evidence/iris96/browser-check.json`
   (SHA-256 `c0364afac6b0d69e15af619b1c8836e9f3aa44f3ad5c41b15fcaab1fc931bc08`),
@@ -152,3 +152,14 @@ value are unaffected either way.
 - No manufacturer-wide verification, source re-capture, or catalog version
   change.
 - No saved, imported or custom part snapshot was rewritten.
+
+## Parent verification (merged `d7f3a33`)
+
+- `npm run check`: pass — 51 files / 482 unit tests, format, lint, catalog,
+  corpus, build, build identity (1.3.0-rc.2).
+- Persistence probe: saved catalog selection reloads at 462 g; a saved custom
+  copy keeps its entered 46 g.
+- Production-build Chromium check (preview on 4174, deterministic routing):
+  catalog card and Recovery Brief show 462 g, 18.5% of 2,500 g, no 46 g; no
+  console/page errors.
+- Evidence kept outside the repo in `RecoverySys-artifacts/iris96-mass-fix-2026-11-07/`.

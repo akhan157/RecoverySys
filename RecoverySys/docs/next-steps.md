@@ -54,7 +54,7 @@ Verified candidate preparation:
 Remaining external/review evidence:
 1. Manual Windows/macOS workflow trials and 10–15 observed rocketeer workflows using `v1-field-trial.md`.
 2. Independent physics review: the current 21 cases remain review-only; zero accepted comparison cases and zero real-flight cases. Review the new standalone analytic report, including its tolerance findings.
-3. The 35 historical manufacturer field proposals now have parent dispositions in `history/catalog-review-2026-11-07/REVIEW.md`. Source/identity holds remain; the IFC-96-S mass correction is prepared but awaits explicit human review action before any production catalog change. Expand supplier coverage only when exact product/variant identity is established.
+3. The 35 historical manufacturer field proposals now have parent dispositions in `history/catalog-review-2026-11-07/REVIEW.md`. Source/identity holds remain; the owner-approved IFC-96-S mass correction is integrated from `f072909`. Saved catalog selections pick up the new weight on reload; custom copies retain entered values. Archived rc.2 downloads predate that correction and are flagged in the draft release notes. Expand supplier coverage only when exact product/variant identity is established.
 4. Recheck dependency advisories immediately before stable promotion. The 2026-11-05 rc.2 lockfile patches `fast-uri` to 3.1.9; full and production npm audits report zero advisories.
 
 Model changes and a Python-engine decision remain evidence-led follow-up work. Browser JavaScript remains authoritative. Revisit visualization only after a useful assembly-review task and prototype have been reviewed.
