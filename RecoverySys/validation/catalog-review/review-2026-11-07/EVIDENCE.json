@@ -1,0 +1,157 @@
+{
+  "packet": "review-2026-11-07",
+  "generatedAt": "2026-11-07T17:53:31.233Z",
+  "baseSha": "56a3ea865b782547cc09ee72aeeb398e34ebdef9",
+  "branch": "t3/fruity-catalog-review",
+  "author": "research sub-agent",
+  "authorSelfAcceptance": "PROHIBITED: recommendations only; parent reviews and decides any catalog edit.",
+  "inputHashes": {
+    "diff": "56b925dde02bea3d0097715bd315ee24c4f275d38124a308bb588820625620bc",
+    "historical": "488c6f469a82886a3fd01b66de85a0af2508d96dab772ee6c01ff21e4efbdd6f",
+    "priorProposals": "a74d41f1677fd15702ae272303c9cb16fc2ac1de94c656041638671e1648f448",
+    "priorSources": "0fccb8c947464e88f95a57b86bb01fc13dbbcb11a51dfb1947ccec6c5e4eb6d0",
+    "priorEvidence": "1b3171da3b14a58579f250f4075dbf2b156e0087ba08146f9db9c687dc3414b0",
+    "parts": "520ef5ccb3b2115bdc6dc0cab5e29c83ae34b2f1e5686cfe38d16f6b04d08f20",
+    "mappings": "7fc6c20d28645206ab84a4a7dc790884ed0a22a1c46f80ec3bc6500e2f2155c6"
+  },
+  "outputHashes": {
+    "packet": {
+      "RECOMMENDATIONS.json": {
+        "sha256": "2bb51f30db41121e26e76c7e0e679f4871e262c544b11b06bd8c441839acbfa2",
+        "bytes": 143750
+      },
+      "sources.json": {
+        "sha256": "b4c0e711f912d6d786456f65101f57fb44a8c778d003fa7e13410d6113cb9234",
+        "bytes": 58345
+      },
+      "validate-review.mjs": {
+        "sha256": "83c66f6ff41d002d801dcfebdaf11355895b4b243a8923da564ecb3495262690",
+        "bytes": 18186
+      },
+      "validate-review.test.mjs": {
+        "sha256": "ef3015670eeff462b512072ac7aa0a697099aeea7cb0aae5e4e60c39c893a90e",
+        "bytes": 4366
+      },
+      "README.md": {
+        "sha256": "b6d05d1227da58807aa520b4b5f448cd1ddd327dd96c42759a506d19e4cffef0",
+        "bytes": 8014
+      },
+      "RESULT.md": {
+        "sha256": "fda93b00e44b9c7532bf835735e63cdec690f620708dc4168061cfa867e84933",
+        "bytes": 5255
+      }
+    },
+    "history": {
+      "SCOPE.md": {
+        "sha256": "76bb483fa4c4a452874855ad324c67def24af6f8d5b8f2d22d67c7526e60c941",
+        "bytes": 10303
+      },
+      "RESULT.md": {
+        "sha256": "e01d2a0f87b973b78ce3a6ccd1fa8202571c20accf3ca6bfc675a57c42a55105",
+        "bytes": 2759
+      }
+    }
+  },
+  "captures": {
+    "artifactRoot": "RecoverySys-artifacts/catalog-review-2026-11-07/",
+    "directAttempts": 22,
+    "directHttp200": 2,
+    "directHttp429": 20,
+    "directParsed": 1,
+    "direct200Handles": [
+      "_shop-root",
+      "36-elliptical-parachute-4-8lb-20fps"
+    ],
+    "readerCaptures": 24,
+    "readerHttp200": 24,
+    "readerParsed": 24,
+    "readerSources": 23,
+    "unusedReaderCaptureHandles": [
+      "36-elliptical-parachute-4-8lb-20fps"
+    ],
+    "sourceEntries": 24,
+    "manifests": {
+      "capture-manifest.json": "fb8a190d057cf2b908eb61885164cb0baa38f494e0562f8e73973b93e7baf365",
+      "reader-proxy-manifest.json": "582a5fc6d36e993f104abfd68d3199a7a9ab67981ccc7d32f77643f9d331ff31"
+    },
+    "notes": "20/21 direct shop product requests returned HTTP 429 on 2026-11-07. One direct HTTP 200 raw HTML capture exists (36 in standard). The other pages use r.jina.ai as a read-only reader; every target reported a 403 warning but returned the manufacturer page text. Hashes verify captured bytes only, not live freshness."
+  },
+  "validation": {
+    "command": "node RecoverySys/validation/catalog-review/review-2026-11-07/validate-review.mjs",
+    "exitCode": 0,
+    "passed": 1647,
+    "failed": 0,
+    "counts": {
+      "totalRows": 35,
+      "alreadyResolved": 8,
+      "reviewedHere": 27,
+      "byDisposition": {
+        "retain-rounded": 24,
+        "hold-identity": 6,
+        "reject-substitution": 3,
+        "recommend-change-rounded": 1,
+        "hold-source": 1
+      },
+      "priorOverlap": {
+        "total": 8,
+        "retainRounded": 2,
+        "holdIdentity": 6
+      },
+      "remaining": {
+        "total": 27,
+        "byDisposition": {
+          "retain-rounded": 22,
+          "reject-substitution": 3,
+          "recommend-change-rounded": 1,
+          "hold-source": 1
+        }
+      },
+      "recommendedCatalogEdits": 1,
+      "rowsWithoutCapturedSource": 0,
+      "currentMatchesHistoricalOld": 35
+    }
+  },
+  "tests": {
+    "command": "node --test --test-concurrency=2 RecoverySys/validation/catalog-review/review-2026-11-07/validate-review.test.mjs",
+    "exitCode": 0,
+    "pass": 9,
+    "fail": 0
+  },
+  "counts": {
+    "totalRows": 35,
+    "alreadyResolved": 8,
+    "reviewedHere": 27,
+    "byDisposition": {
+      "retain-rounded": 24,
+      "hold-identity": 6,
+      "reject-substitution": 3,
+      "recommend-change-rounded": 1,
+      "hold-source": 1
+    },
+    "priorOverlap": {
+      "total": 8,
+      "retainRounded": 2,
+      "holdIdentity": 6
+    },
+    "remaining": {
+      "total": 27,
+      "byDisposition": {
+        "retain-rounded": 22,
+        "reject-substitution": 3,
+        "recommend-change-rounded": 1,
+        "hold-source": 1
+      }
+    },
+    "recommendedCatalogEdits": 1,
+    "rowsWithoutCapturedSource": 0,
+    "currentMatchesHistoricalOld": 35
+  },
+  "boundaries": [
+    "No production PARTS, physics, threshold, catalog version, historical capture, release/qualification record, register, task board or handoff edit.",
+    "No re-decision of the 2026-11-05 decisions.",
+    "No manufacturer-verified promotion; identity confidence is limited to exact SKU + published specs.",
+    "No push, tag, PR, release, deploy or external contact.",
+    "No canopy area fabricated; area_published is null with a note on every row.",
+    "Parent reviews and decides any later catalog edit."
+  ]
+}

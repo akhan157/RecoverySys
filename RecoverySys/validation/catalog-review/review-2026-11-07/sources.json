@@ -1,0 +1,948 @@
+{
+  "packet": "review-2026-11-07",
+  "accessed": "2026-11-07",
+  "artifactRoot": "RecoverySys-artifacts/catalog-review-2026-11-07/",
+  "captureNote": "Most direct shop product URLs returned HTTP 429 on 2026-11-07 (20 of 21 product attempts); one page was captured directly with HTTP 200. The remaining sources use r.jina.ai as a read-only page reader; the reader reported a target 403 warning but returned the manufacturer page text. Each artifact hash verifies the captured bytes, not live freshness beyond the access date.",
+  "sources": [
+    {
+      "sourceId": "fruity-cfc-030-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "30\" Compact Elliptical Parachute - 3.3lb at 20fps",
+      "manufacturerSKU": "CFC-30-S-ST",
+      "manufacturerSkuFamily": "CFC-30-S",
+      "capturedVariantSku": "CFC-30-S-ST",
+      "url": "https://shop.fruitychutes.com/products/30-compact-elliptical-parachute-3-3lb-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/30-compact-elliptical-parachute-3-3lb-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/30-compact-elliptical-parachute-3-3lb-20fps.md",
+        "sha256": "6c30edd16d60817c8bc296f710580d54cad97ed2c8443a55f15b51181c524ee4",
+        "bytes": 8275,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 30,
+        "shape_published": "Compact Elliptical",
+        "type_published": "Mid-power / high-power main or drogue",
+        "weight_published": "2.1 oz (59 grams)",
+        "packing_published": "1.9\" D x 4.1\" L : 11.6 cu\" (assumes a tight pack)",
+        "packing_conditions_published": "Assumes a tight pack.",
+        "material_published": "1.1 oz ripstop, 400 lb Spectra lines, 600 lb swivel",
+        "rating_published": "3.3 lb at 20 fps",
+        "cd_published": "1.5 - 1.6",
+        "gores_published": 8,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "cfc-030-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-030-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 30\" Compact Parachute - 5lb @ 20fps; 2.26lb @ 15fps",
+      "manufacturerSKU": "IFC-30-S-CC",
+      "manufacturerSkuFamily": "IFC-30-S",
+      "capturedVariantSku": "IFC-30-S-CC",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-30-compact-parachute-5lb-20fps-2-26lb-15fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-30-compact-parachute-5lb-20fps-2-26lb-15fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-30-compact-parachute-5lb-20fps-2-26lb-15fps.md",
+        "sha256": "048b6ddb2c06a10353d51a3650896bc3e68148edbaa052b60ffaac3d3cea4857",
+        "bytes": 35758,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 30,
+        "shape_published": "Iris Ultra Compact (Toroidal/Annular)",
+        "type_published": "Ultra Compact Toroidal (Annular)",
+        "weight_published": "1.88 oz (53.4 grams)",
+        "packing_published": "1.9\" D x 3.7\" L : 10.5 cu\"",
+        "packing_conditions_published": "Iris Ultra Compact parachutes are perfect for applications where ultra low weight and compact packing volume are important, such as UAV applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Ultra Compact Toroidal (Annular); Bridal: 725 lb Spectra, no swivel; Shroud Lines: 200 lb Spectra",
+        "rating_published": "5 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 8,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-030-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-cfc-036-n-direct-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "36\" Elliptical Parachute - 4.8lb at 20fps",
+      "manufacturerSKU": "CFC-36-N-OW",
+      "manufacturerSkuFamily": "CFC-36-N",
+      "capturedVariantSku": "CFC-36-N-OW",
+      "url": "https://shop.fruitychutes.com/products/36-elliptical-parachute-4-8lb-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "direct-shop-200",
+      "readerUrl": null,
+      "directHttpStatus": 200,
+      "readerReportedTargetStatus": null,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/raw/36-elliptical-parachute-4-8lb-20fps.html",
+        "sha256": "0de95b8d2d4e6542b99f84f383cdc1e8a53f5f3d852044b9146b428f0bdb8432",
+        "bytes": 171756,
+        "captureFormat": "raw-shopify-html"
+      },
+      "specs": {
+        "diameter_nominal_in": 36,
+        "shape_published": "Elliptical",
+        "type_published": "Mid-power / high-power",
+        "weight_published": "4.5 oz",
+        "packing_published": "2.6\"D x 4.0\" L : 21.2 cu\" (assumes a tight pack)",
+        "packing_conditions_published": "Assumes a tight pack.",
+        "material_published": "1.1 oz ripstop, 400 lb braided nylon shroud lines, 1/2\" nylon bridle, 1000 lb swivel",
+        "rating_published": "4.8 lb at 20 fps",
+        "cd_published": "1.5 - 1.6",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "cfc-036-n"
+      ],
+      "notes": "Direct shop capture 2026-11-07 (HTTP 200); variant shipping weights [128] g. Raw Shopify HTML archived outside git."
+    },
+    {
+      "sourceId": "fruity-cfc-036-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "36\" Compact Elliptical Parachute - 4.8lb at 20fps",
+      "manufacturerSKU": "CFC-36-S-OW",
+      "manufacturerSkuFamily": "CFC-36-S",
+      "capturedVariantSku": "CFC-36-S-OW",
+      "url": "https://shop.fruitychutes.com/products/36-compact-elliptical-parachute-4-8lb-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/36-compact-elliptical-parachute-4-8lb-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/36-compact-elliptical-parachute-4-8lb-20fps.md",
+        "sha256": "f4e5080e1ca0606eac3a19bfee649894828827457eeddc151e40375db5dff4bc",
+        "bytes": 32500,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 36,
+        "shape_published": "Compact Elliptical",
+        "type_published": "Mid-power /high-power main parachute",
+        "weight_published": "3.3 oz (92 grams)",
+        "packing_published": "2.6\" D x 3.4\" L : 18.0 cu\" (assumes a tight pack)",
+        "packing_conditions_published": "Assumes a tight pack.",
+        "material_published": "1.1 oz ripstop, 400 lb Spectra lines, 1000 lb swivel",
+        "rating_published": "4.8 lb at 20 fps",
+        "cd_published": "1.5 - 1.6",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "cfc-036-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-036-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 36\" Standard Parachute - 7lb @ 20fps",
+      "manufacturerSKU": "IFC-36-N-OW",
+      "manufacturerSkuFamily": "IFC-36-N",
+      "capturedVariantSku": "IFC-36-N-OW",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-36-standard-parachute-7lb-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-36-standard-parachute-7lb-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-36-standard-parachute-7lb-20fps.md",
+        "sha256": "1e9a23d337783c9823ef5330466f601a8ef2dd91c0f5b4fb2e7662ad313aff64",
+        "bytes": 34720,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 36,
+        "shape_published": "Iris Ultra Standard (Toroidal/Annular)",
+        "type_published": "Standard Nylon Toroidal (Annular)",
+        "weight_published": "5 oz",
+        "packing_published": "2.6\" D x 5.2\" L : 27.6 cu\"",
+        "packing_conditions_published": "The Iris Ultra Standard parachutes are ideal where high efficiency and small packing volume are important. These parachutes are ideal for high power rocketry, research projects or other general purpose applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Standard Nylon Toroidal (Annular); Bridal: 1/2\" Webbing, 1000 lb swivel; Shroud Lines: 400 lb Flat Nylon",
+        "rating_published": "7 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 8,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-036-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-036-sl-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris 36\" Light Parachute - 4lb @ 15fps",
+      "manufacturerSKU": "IFC-36-SL-OB",
+      "manufacturerSkuFamily": "IFC-36-SL",
+      "capturedVariantSku": "IFC-36-SL-OB",
+      "url": "https://shop.fruitychutes.com/products/iris-36-light-parachute-4lbs-15fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-36-light-parachute-4lbs-15fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-36-light-parachute-4lbs-15fps.md",
+        "sha256": "f593589412ab70af15eca3b49e151c20529d0bb718ef5138de71f56af91b864d",
+        "bytes": 6322,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 36,
+        "shape_published": "Iris Light (Toroidal/Annular)",
+        "type_published": "Ultra Compact Toroidal (Annular)",
+        "weight_published": "2.1 oz (60.8 grams)",
+        "packing_published": "1.9\" D x 4.2\" L : 11.9 cu\"",
+        "packing_conditions_published": "Iris Light parachutes are perfect for applications where ultra low weight and compact packing volume are important, such as UAV applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Ultra Compact Toroidal (Annular); Bridal: Spectra Loop; Shroud Lines: 200 lb Spectra",
+        "rating_published": "4 lb @ 15 fps",
+        "cd_published": "2.2",
+        "gores_published": 6,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-036-sl"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-cfc-042-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "42\" Elliptical Parachute - 6.5lb at 20fps",
+      "manufacturerSKU": "CFC-42-N-OW",
+      "manufacturerSkuFamily": "CFC-42-N",
+      "capturedVariantSku": "CFC-42-N-OW",
+      "url": "https://shop.fruitychutes.com/products/42-elliptical-parachute-6-5lb-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/42-elliptical-parachute-6-5lb-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/42-elliptical-parachute-6-5lb-20fps.md",
+        "sha256": "7be5c412980741cf0cf687af7c241df8234597ef2226ec5d2d60d7f6abfaa63d",
+        "bytes": 8165,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 42,
+        "shape_published": "Elliptical",
+        "type_published": "Mid-power / high-power",
+        "weight_published": "5.7 oz",
+        "packing_published": "2.6\" D x 6.0\" L : 31.9 cu\" (assumes a tight pack)",
+        "packing_conditions_published": "Assumes a tight pack.",
+        "material_published": "1.1 oz ripstop, 400 lb braided nylon shroud lines, 5/8\" nylon bridle, 1500 lb swivel",
+        "rating_published": "6.5 lb at 20 fps",
+        "cd_published": "1.5 - 1.6",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "cfc-042-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-cfc-048-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "48\" Elliptical Parachute - 8.6lb at 20fps",
+      "manufacturerSKU": "CFC-48-N-OB",
+      "manufacturerSkuFamily": "CFC-48-N",
+      "capturedVariantSku": "CFC-48-N-OB",
+      "url": "https://shop.fruitychutes.com/products/48-elliptical-parachute-8-6lb-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/48-elliptical-parachute-8-6lb-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/48-elliptical-parachute-8-6lb-20fps.md",
+        "sha256": "5f52174e6c0222f837bf25c0a76b8f0c7638806c76cae4676d51bd7007510f12",
+        "bytes": 7808,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 48,
+        "shape_published": "Elliptical",
+        "type_published": "Mid-power / high-power",
+        "weight_published": "7.3 oz",
+        "packing_published": "2.6\" D x 7.0\" L : 37.2 cu\" (assumes a tight pack)",
+        "packing_conditions_published": "Assumes a tight pack.",
+        "material_published": "1.1 oz ripstop, 400 lb braided nylon shroud lines, 5/8\" nylon bridle, 1500 lb swivel",
+        "rating_published": "8.6 lb at 20 fps",
+        "cd_published": "1.5 - 1.6",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "cfc-048-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-048-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 48\" Standard Parachute - 12.5lb @ 20fps",
+      "manufacturerSKU": "IFC-48-N-OB",
+      "manufacturerSkuFamily": "IFC-48-N",
+      "capturedVariantSku": "IFC-48-N-OB",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-48-standard-parachute-12-5lbs-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-48-standard-parachute-12-5lbs-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-48-standard-parachute-12-5lbs-20fps.md",
+        "sha256": "8825b022ec560310d2e68041de5a68f4c6723da817f1aa5d3e996d062b2e4591",
+        "bytes": 34693,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 48,
+        "shape_published": "Iris Ultra Standard (Toroidal/Annular)",
+        "type_published": "Standard Nylon Toroidal (Annular)",
+        "weight_published": "7.5oz",
+        "packing_published": "2.6\" D x 7.8\" L : 41.4 cu\"",
+        "packing_conditions_published": "The Iris Ultra Standard parachutes are ideal where high efficiency and small packing volume are important. These parachutes are ideal for high power rocketry, research projects or other general purpose applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Standard Nylon Toroidal (Annular); Bridal: 5/8\" Webbing, 1500lb swivel; Shroud Lines: 400lb Flat Nylon",
+        "rating_published": "12.5 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 8,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-048-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-048-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 48\" Compact Parachute - 12.5lb @ 20fps; 7lb @ 15fps",
+      "manufacturerSKU": "IFC-48-S-YB",
+      "manufacturerSkuFamily": "IFC-48-S",
+      "capturedVariantSku": "IFC-48-S-YB",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-48-compact-parachute-12-5lbs-20fps-7lbs-15fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-48-compact-parachute-12-5lbs-20fps-7lbs-15fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-48-compact-parachute-12-5lbs-20fps-7lbs-15fps.md",
+        "sha256": "21b62937c2c02079d2e5490d0bea12727503960a28e0bd7f8151933c68cac09b",
+        "bytes": 35383,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 48,
+        "shape_published": "Iris Ultra Compact (Toroidal/Annular)",
+        "type_published": "Ultra Compact Toroidal (Annular)",
+        "weight_published": "4.3 oz",
+        "packing_published": "2.6\" D x 4.9\" L : 26 cu\"",
+        "packing_conditions_published": "Iris Ultra Compact parachutes are perfect for applications where ultra low weight and compact packing volume are important, such as UAV applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Ultra Compact Toroidal (Annular); Bridal: 1/4\" Kevlar, no swivel; Shroud Lines: 400 lb Spectra",
+        "rating_published": "12.5 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 8,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-048-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-cfc-060-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "60\" Elliptical Parachute - 13lb at 20fps",
+      "manufacturerSKU": "CFC-60-N-OW",
+      "manufacturerSkuFamily": "CFC-60-N",
+      "capturedVariantSku": "CFC-60-N-OW",
+      "url": "https://shop.fruitychutes.com/products/60-elliptical-parachute-13lb-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/60-elliptical-parachute-13lb-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/60-elliptical-parachute-13lb-20fps.md",
+        "sha256": "b4a31681c6452c17fcac20f9b078a7262fcc36f963da603cf2b3c2432769fb8c",
+        "bytes": 7519,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 60,
+        "shape_published": "Elliptical",
+        "type_published": "Mid-power / high-power",
+        "weight_published": "10.0 oz",
+        "packing_published": "4\" D x 5.3\" L : 66.0 cu\" (assumes a tight pack)",
+        "packing_conditions_published": "Assumes a tight pack.",
+        "material_published": "1.1 oz ripstop, 400 lb braided nylon shroud lines, 5/8\" nylon bridle, 1500 lb swivel",
+        "rating_published": "13 lb at 20 fps",
+        "cd_published": "1.5 - 1.6",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "cfc-060-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-060-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 60\" Standard Parachute - 19lb @ 20fps",
+      "manufacturerSKU": "IFC-60-N-OB",
+      "manufacturerSkuFamily": "IFC-60-N",
+      "capturedVariantSku": "IFC-60-N-OB",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-60-standard-parachute-19lbs-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-60-standard-parachute-19lbs-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-60-standard-parachute-19lbs-20fps.md",
+        "sha256": "8d040bd390bfe64efc9bfe33c4baa1de6ca2fc2eb58f3981902e843b083fae11",
+        "bytes": 35093,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 60,
+        "shape_published": "Iris Ultra Standard (Toroidal/Annular)",
+        "type_published": "Standard Nylon Toroidal (Annular)",
+        "weight_published": "10.9 oz",
+        "packing_published": "3.9\" D x 5.1\" L : 60.9 cu\"",
+        "packing_conditions_published": "The Iris Ultra Standard parachutes are ideal where high efficiency and small packing volume are important. These parachutes are ideal for high power rocketry, research projects or other general purpose applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Standard Nylon Toroidal (Annular); Bridal: 5/8\" Webbing, 1500 lb swivel; Shroud Lines: 400 lb Flat Nylon",
+        "rating_published": "19 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-060-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-060-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 60\" Compact Parachute - 19lb @ 20fps; 12lb @ 15fps",
+      "manufacturerSKU": "IFC-60-S-OB",
+      "manufacturerSkuFamily": "IFC-60-S",
+      "capturedVariantSku": "IFC-60-S-OB",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-60-compact-parachute-19lbs-20fps-12lbs-15fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-60-compact-parachute-19lbs-20fps-12lbs-15fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-60-compact-parachute-19lbs-20fps-12lbs-15fps.md",
+        "sha256": "30ce74a14ce8639f3abaf0bb068c7f82d3d592b41b5e7d9f31d82e16389787e3",
+        "bytes": 38007,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 60,
+        "shape_published": "Iris Ultra Compact (Toroidal/Annular)",
+        "type_published": "Ultra Compact Toroidal (Annular)",
+        "weight_published": "6.8 oz",
+        "packing_published": "3.9\" D x 3.2\" L : 38.2 cu\"",
+        "packing_conditions_published": "Iris Ultra Compact parachutes are perfect for applications where ultra low weight and compact packing volume are important, such as UAV applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Ultra Compact Toroidal (Annular); Bridal: 1/4\" Kevlar, no swivel; Shroud Lines: 400 lb Spectra",
+        "rating_published": "19 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-060-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-072-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 72\" Standard Parachute - 28lb @ 20fps",
+      "manufacturerSKU": "IFC-72-N-OW",
+      "manufacturerSkuFamily": "IFC-72-N",
+      "capturedVariantSku": "IFC-72-N-OW",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-72-standard-parachute-28lbs-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-72-standard-parachute-28lbs-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-72-standard-parachute-28lbs-20fps.md",
+        "sha256": "119430d2bac932b359d59ea9ff9e2b1a5b320d306cc2157442c4b5c971d9a7e2",
+        "bytes": 34622,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 72,
+        "shape_published": "Iris Ultra Standard (Toroidal/Annular)",
+        "type_published": "Standard Nylon Toroidal (Annular)",
+        "weight_published": "13.4 oz",
+        "packing_published": "3.9\" D x 6.2\" L : 74.1 cu\"",
+        "packing_conditions_published": "The Iris Ultra Standard parachutes are ideal where high efficiency and small packing volume are important. These parachutes are ideal for high power rocketry, research projects or other general purpose applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Standard Nylon Toroidal (Annular); Bridal: 5/8\" Webbing, 1500 lb swivel; Shroud Lines: 400 lb Flat Nylon",
+        "rating_published": "28 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-072-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-072-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 72\" Compact Parachute - 28lb @ 20fps; 15lb @ 15fps",
+      "manufacturerSKU": "IFC-72-S-YB",
+      "manufacturerSkuFamily": "IFC-72-S",
+      "capturedVariantSku": "IFC-72-S-YB",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-72-compact-parachute-28lbs-20fps-15lbs-15fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-72-compact-parachute-28lbs-20fps-15lbs-15fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-72-compact-parachute-28lbs-20fps-15lbs-15fps.md",
+        "sha256": "eb24415d42ac75711f3e975bb7f3d97aa38983045755a9313f54afa21fd6d591",
+        "bytes": 35389,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 72,
+        "shape_published": "Iris Ultra Compact (Toroidal/Annular)",
+        "type_published": "Ultra Compact Toroidal (Annular)",
+        "weight_published": "8.8 oz",
+        "packing_published": "3.9\" D x 4.1\" L : 49.0 cu\"",
+        "packing_conditions_published": "Iris Ultra Compact parachutes are perfect for applications where ultra low weight and compact packing volume are important, such as UAV applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Ultra Compact Toroidal (Annular); Bridal: 1/4\" Kevlar, no swivel; Shroud Lines: 400 lb Spectra",
+        "rating_published": "28 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-072-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-084-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 84\" Standard Parachute - 39lb @ 20fps",
+      "manufacturerSKU": "IFC-84-N-RW",
+      "manufacturerSkuFamily": "IFC-84-N",
+      "capturedVariantSku": "IFC-84-N-RW",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-84-standard-parachute-39lbs-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-84-standard-parachute-39lbs-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-84-standard-parachute-39lbs-20fps.md",
+        "sha256": "b83338890a4536bfcb0c98567ba7808be02a479d47315e234ca0edf3f0d2b934",
+        "bytes": 29464,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 84,
+        "shape_published": "Iris Ultra Standard (Toroidal/Annular)",
+        "type_published": "Standard Nylon Toroidal (Annular)",
+        "weight_published": "19 oz",
+        "packing_published": "3.9\" D x 8.8\" L : 105.1 cu\"",
+        "packing_conditions_published": "The Iris Ultra Standard parachutes are ideal where high efficiency and small packing volume are important. These parachutes are ideal for high power rocketry, research projects or other general purpose applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Standard Nylon Toroidal (Annular); Bridal: 11/16\" Webbing, 3000 lb swivel; Shroud Lines: 400 lb Flat Nylon",
+        "rating_published": "39 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-084-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-084-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 84\" Compact Parachute - 39lb @ 20fps; 22lb @ 15fps",
+      "manufacturerSKU": "IFC-84-S-YB",
+      "manufacturerSkuFamily": "IFC-84-S",
+      "capturedVariantSku": "IFC-84-S-YB",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-84-compact-parachute-39lbs-20fps-22lbs-15fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-84-compact-parachute-39lbs-20fps-22lbs-15fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-84-compact-parachute-39lbs-20fps-22lbs-15fps.md",
+        "sha256": "dce47608c8ac77aaeb13c1279c217a96baeece3da60d1cb6628ae4ec4354acb8",
+        "bytes": 29910,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 84,
+        "shape_published": "Iris Ultra Compact (Toroidal/Annular)",
+        "type_published": "Ultra Compact Toroidal (Annular)",
+        "weight_published": "13.4 oz",
+        "packing_published": "3.9\" D x 6.2\" L : 74.1 cu\"",
+        "packing_conditions_published": "Iris Ultra Compact parachutes are perfect for applications where ultra low weight and compact packing volume are important, such as UAV applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Ultra Compact Toroidal (Annular); Bridal: 1/4\" Kevlar, no swivel; Shroud Lines: 400 lb Spectra",
+        "rating_published": "39 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-084-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-096-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 96\" Standard Parachute - 50lb @ 20fps",
+      "manufacturerSKU": "IFC-96-N-YB",
+      "manufacturerSkuFamily": "IFC-96-N",
+      "capturedVariantSku": "IFC-96-N-YB",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-96-standard-parachute-50lbs-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-96-standard-parachute-50lbs-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-96-standard-parachute-50lbs-20fps.md",
+        "sha256": "5665c3a95a6451ae196864a37b424bf20e23162f9894557f15a241ea29c0604b",
+        "bytes": 35170,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 96,
+        "shape_published": "Iris Ultra Standard (Toroidal/Annular)",
+        "type_published": "Standard Nylon Toroidal (Annular)",
+        "weight_published": "25 oz",
+        "packing_published": "4.9\" D x 7.4\" L : 139.5 cu\"",
+        "packing_conditions_published": "The Iris Ultra Standard parachutes are ideal where high efficiency and small packing volume are important. These parachutes are ideal for high power rocketry, research projects or other general purpose applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Standard Nylon Toroidal (Annular); Bridal: 9/16\" Webbing, 3000 lb swivel; Shroud Lines: 400 lb Flat Nylon",
+        "rating_published": "50 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-096-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-096-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 96\" Compact Parachute - 50lb @ 20fps; 28lb @ 15fps",
+      "manufacturerSKU": "IFC-96-S-YB",
+      "manufacturerSkuFamily": "IFC-96-S",
+      "capturedVariantSku": "IFC-96-S-YB",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-compact-parachute-96inch-50lbs-20fps-28lbs-15fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-compact-parachute-96inch-50lbs-20fps-28lbs-15fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-compact-parachute-96inch-50lbs-20fps-28lbs-15fps.md",
+        "sha256": "14941d71bfda686e8ebdf4623a0c62f2c66402d7ec4f5af7f2112b83a950ac66",
+        "bytes": 35634,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 96,
+        "shape_published": "Iris Ultra Compact (Toroidal/Annular)",
+        "type_published": "Ultra Compact Toroidal (Annular)",
+        "weight_published": "16.3 oz",
+        "packing_published": "4.9\" D x 4.8\" L : 90.5 cu\"",
+        "packing_conditions_published": "Iris Ultra Compact parachutes are perfect for applications where ultra low weight and compact packing volume are important, such as UAV applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Ultra Compact Toroidal (Annular); Bridal: 1/4\" Kevlar, no swivel; Shroud Lines: 400 lb Spectra, 600 lb Spectra optional",
+        "rating_published": "50 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-096-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-120-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 120\" Standard Parachute - 79lb @ 20fps",
+      "manufacturerSKU": "IFC-120-N-OW",
+      "manufacturerSkuFamily": "IFC-120-N",
+      "capturedVariantSku": "IFC-120-N-OW",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-120-standard-parachute-79lbs-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-120-standard-parachute-79lbs-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-120-standard-parachute-79lbs-20fps.md",
+        "sha256": "3d706fba4b8eddb398a1f8e0f085e1023bd74ce2ac340099679f17f2c898cf43",
+        "bytes": 29879,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 120,
+        "shape_published": "Iris Ultra Standard (Toroidal/Annular)",
+        "type_published": "Standard Nylon Toroidal (Annular)",
+        "weight_published": "36 oz",
+        "packing_published": "4.9\" D x 10.6\" L : 199.9 cu\"",
+        "packing_conditions_published": "The Iris Ultra Standard parachutes are ideal where high efficiency and small packing volume are important. These chutes are ideal for high power rocketry, research projects or other general purpose applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Standard Nylon Toroidal (Annular); Bridal: 9/16\" Webbing, 3000 lb swivel; Shroud Lines: 400 lb Paraline.",
+        "rating_published": "79 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-120-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-120-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris Ultra 120\" Compact Parachute - 79lb @ 20fps; 44lb @ 15fps",
+      "manufacturerSKU": "IFC-120-S-YB",
+      "manufacturerSkuFamily": "IFC-120-S",
+      "capturedVariantSku": "IFC-120-S-YB",
+      "url": "https://shop.fruitychutes.com/products/iris-ultra-120-compact-parachute-79lbs-20fps-44lbs-15fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-ultra-120-compact-parachute-79lbs-20fps-44lbs-15fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-ultra-120-compact-parachute-79lbs-20fps-44lbs-15fps.md",
+        "sha256": "b657e2cf6ca9756fe99b3770c3636eedf21cb863899125894301da12569d6ffb",
+        "bytes": 35373,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 120,
+        "shape_published": "Iris Ultra Compact (Toroidal/Annular)",
+        "type_published": "Ultra Compact Toroidal (Annular)",
+        "weight_published": "22 oz",
+        "packing_published": "4.9\" D x 6.8\" L : 128.2 cu\"",
+        "packing_conditions_published": "Iris Ultra Compact parachutes are perfect for applications where ultra low weight and compact packing volume are important, such as UAV applications. Packing volume assumes a packing density of 0.18 oz/cu\" which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Ultra Compact Toroidal (Annular); Bridal: 1/4\" Kevlar, no swivel; Shroud Lines: 400 lb Spectra, optional 725 lb Microline (contact us)",
+        "rating_published": "79 lb @ 20 fps",
+        "cd_published": "2.2",
+        "gores_published": 12,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-120-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-cfc-012-s-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "12\" Compact Elliptical Parachute - 0.5lb @ 20fps",
+      "manufacturerSKU": "CFC-12-S-ST",
+      "manufacturerSkuFamily": "CFC-12-S",
+      "capturedVariantSku": "CFC-12-S-ST",
+      "url": "https://shop.fruitychutes.com/products/12-compact-elliptical-parachute-0-5lb-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/12-compact-elliptical-parachute-0-5lb-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/12-compact-elliptical-parachute-0-5lb-20fps.md",
+        "sha256": "a6afbd93d5062c6cbb4735a27a2a3eabd082d925077fb237910cb4079cff6c5b",
+        "bytes": 7089,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 12,
+        "shape_published": "Compact Elliptical",
+        "type_published": "Mid-power / high-power drogue",
+        "weight_published": "0.85 oz (24.2 grams)",
+        "packing_published": "1.6\" D x 2.4\" L : 4.7 cu\" (assumes a tight pack)",
+        "packing_conditions_published": "Assumes a tight pack.",
+        "material_published": "1.1 oz ripstop, 400 lb Spectra lines, 600 lb swivel",
+        "rating_published": "0.5 lb at 20 fps",
+        "cd_published": "1.5 - 1.6",
+        "gores_published": 8,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "cfc-012-s"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-cfc-018-n-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "18\" Elliptical Parachute - 1.2lb at 20fps",
+      "manufacturerSKU": "CFC-18-N-ST",
+      "manufacturerSkuFamily": "CFC-18-N",
+      "capturedVariantSku": "CFC-18-N-ST",
+      "url": "https://shop.fruitychutes.com/products/18-elliptical-parachute-1-2-lb-20fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/18-elliptical-parachute-1-2-lb-20fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/18-elliptical-parachute-1-2-lb-20fps.md",
+        "sha256": "18492c33d51cd3829d9f3fe929ffc632f9df28618831639d9ddc6861ad55675d",
+        "bytes": 7796,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 18,
+        "shape_published": "Elliptical",
+        "type_published": "mid-power / high-power drogue",
+        "weight_published": "1.7 oz (60 grams)",
+        "packing_published": "1.9\" D x 3.5\" L : 9.67 cu\" (assumes a tight pack)",
+        "packing_conditions_published": "Assumes a tight pack.",
+        "material_published": "1.1 oz ripstop, 220 lb nylon shroud lines, 1000 lb swivel",
+        "rating_published": "1.2 lb at 20 fps",
+        "cd_published": "1.5 - 1.6",
+        "gores_published": 8,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "cfc-018-n"
+      ],
+      "notes": "Reader-proxy capture of the exact manufacturer product page. The direct shop URL returned HTTP 429 on 2026-11-07; the reader reported a target 403 warning but returned the manufacturer page text. Hash proves captured bytes only, not freshness beyond the access date."
+    },
+    {
+      "sourceId": "fruity-ifc-036-sl-historical-mapping-20261107",
+      "manufacturer": "Fruity Chutes",
+      "productTitle": "Iris 36\" Ultralight Parachute - 4lb @ 15fps",
+      "manufacturerSKU": "IFC-36-SUL-OW",
+      "manufacturerSkuFamily": "IFC-36-SUL",
+      "capturedVariantSku": "IFC-36-SUL-OW",
+      "url": "https://shop.fruitychutes.com/products/iris-36-ultra-light-parachute-4lbs-15fps",
+      "accessed": "2026-11-07",
+      "sourceType": "manufacturer-spec",
+      "captureMethod": "reader-proxy (r.jina.ai) because direct shop product URLs returned HTTP 429",
+      "readerUrl": "https://r.jina.ai/https://shop.fruitychutes.com/products/iris-36-ultra-light-parachute-4lbs-15fps",
+      "directHttpStatus": 429,
+      "readerReportedTargetStatus": 403,
+      "artifact": {
+        "homeRelativePath": "RecoverySys-artifacts/catalog-review-2026-11-07/reader-proxy/iris-36-ultra-light-parachute-4lbs-15fps.md",
+        "sha256": "f026de5ea47fc5b6ab452fe87e804f3b7c194bbbb198bd15179e40ce17fb9694",
+        "bytes": 31340,
+        "captureFormat": "reader-proxy-markdown"
+      },
+      "specs": {
+        "diameter_nominal_in": 36,
+        "shape_published": "Iris Ultralight (Toroidal/Annular)",
+        "type_published": "Ultra Compact Toroidal (Annular)",
+        "weight_published": "1.73 oz (49 grams)",
+        "packing_published": "1.8\" D x 3.6\" L : 9.2 cu\"",
+        "packing_conditions_published": "Iris Ultralight parachutes are perfect for applications where ultra low weight and compact packing volume are important, such as UAV applications. Packing volume assumes a packing density of 0.18 oz/cu\", which is typical of a deployment bag. Traditional fold and wrap has a packing density of about 0.13.",
+        "material_published": "Ultra Compact Toroidal (Annular); Bridal: Spectra Loop; Shroud Lines: 200 lb Spectra",
+        "rating_published": "4 lb @ 15 fps",
+        "cd_published": "2.2",
+        "gores_published": 8,
+        "area_published": null,
+        "area_note": "No canopy area is published on the captured product page; nominal diameter is recorded and no area is inferred."
+      },
+      "candidateCatalogIds": [
+        "ifc-036-sl"
+      ],
+      "notes": "This is the Iris 36 Ultralight (IFC-36-SUL-OB) page that supplierMappings.json used for ifc-036-sl. It is retained as conflict evidence: the exact IFC-36-SL page is a distinct product."
+    }
+  ],
+  "priorSourcesUsed": [
+    "online-2026-11-05:fruitychutes-cfc-30-n-standard",
+    "online-2026-11-05:fruitychutes-ifc-30-sul-ultralight"
+  ]
+}
