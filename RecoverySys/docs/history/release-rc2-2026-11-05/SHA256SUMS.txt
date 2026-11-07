@@ -1,0 +1,3 @@
+775381299b1abad67429c0dff13d5ea450a12e10302c23c93aa05df3bfbc4538  RecoverySys-web.zip
+ba06af039213b18fe4c4219e92fb78dbecec581aaaa395af03e0053e75185399  RecoverySys-Portable.zip
+b09d19741ba461683a96929880edbe06fe11d26a9fb05be30a9f3dbb7ce37c1b  RecoverySys-macos-universal.zip
