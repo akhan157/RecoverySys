@@ -128,6 +128,32 @@ jobs:
           "Detected WebView2 runtime $version; msedgedriver will be pinned to this version."
       - name: Install pinned tauri-driver
         run: cargo install tauri-driver --version 2.1.0 --locked
+      - name: Reset desktop app processes and webview data
+        shell: pwsh
+        run: |
+          Get-Process -Name RecoverySys,msedgewebview2 -ErrorAction SilentlyContinue |
+            Stop-Process -Force -ErrorAction SilentlyContinue
+          Start-Sleep -Seconds 2
+          $data = Join-Path $env:LOCALAPPDATA 'com.recoverysys.desktop'
+          if (Test-Path -LiteralPath $data) {
+            Remove-Item -LiteralPath $data -Recurse -Force -ErrorAction SilentlyContinue
+          }
+      - name: Configure WebView2 remote debugging policy
+        shell: pwsh
+        run: |
+          # WebView2 Runtime 150+ drops WEBVIEW2_ADDITIONAL_BROWSER_ARGUMENTS
+          # when the host process is elevated, which GitHub Windows runners are.
+          # msedgedriver enables the DevTools port through that environment
+          # variable, so grant it through the HKLM policy instead. This runner
+          # is throwaway; no developer machine or shipped app is changed.
+          $policy = 'HKLM:\Software\Policies\Microsoft\Edge\WebView2\AdditionalBrowserArguments'
+          New-Item -Path $policy -Force | Out-Null
+          New-ItemProperty -Path $policy -Name 'RecoverySys.exe' `
+            -Value '--remote-debugging-port=0 --enable-automation --disable-features=msWebOOUI,msPdfOOUI,msSmartScreenProtection' `
+            -PropertyType String -Force | Out-Null
+          $value = (Get-ItemProperty -Path $policy -Name 'RecoverySys.exe').'RecoverySys.exe'
+          if (-not $value) { throw 'WebView2 policy was not written.' }
+          "WebView2 policy for RecoverySys.exe: $value"
       - name: Install desktop E2E dependencies
         working-directory: ${{ github.workspace }}/RecoverySys/e2e-desktop
         run: npm ci
