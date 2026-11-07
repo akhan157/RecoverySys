@@ -1,0 +1,21 @@
+{
+  "version": "1.3.0-rc.3",
+  "date": "2026-11-07",
+  "source_commit": "6aa8f2a2095270305d0acd83c95a4deadae224d0",
+  "ci_run": "https://github.com/akhan157/RecoverySys/actions/runs/42414482799",
+  "ci_jobs": {
+    "check (22)": "success",
+    "check (24)": "success",
+    "check (26)": "success",
+    "Windows portable build": "success",
+    "macOS universal portable build": "success"
+  },
+  "local_check": "npm run check: 51 files / 482 tests, format, lint, catalog, corpus, build, identity 1.3.0-rc.3 / V1.3 RC3",
+  "archives_sha256": {
+    "RecoverySys-web.zip": "f919e5f18efc0806ec20acfca271b312ab38e068d75f1b1020714ab819aa3604",
+    "RecoverySys-Portable.zip": "c3fa8a03621fd69915db02ac96c99d828d29136ee830f89474a052ac1c540f58",
+    "RecoverySys-macos-universal.zip": "7af2554699e9d0b942b26a371c77040cbebcd9ff5832c00b7d8f45e1cd4f0a5d"
+  },
+  "archive_checks": "unzip -t clean for all three; web bundle catalog entry ifc-096-s weight_g:462. Desktop binaries embed the same built web bundle; not inspected inside the binaries.",
+  "not_established": ["manual Windows/macOS workflows", "Intel Mac launch", "observed user trials", "physics acceptance"]
+}

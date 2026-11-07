@@ -1,9 +1,8 @@
 # RecoverySys Product Roadmap
 
-**Roadmap revision:** 2026-11-05
+**Roadmap revision:** 2026-11-07
 **Release target:** `main`
-**Working candidate:** `1.3.0-rc.2` (2026-11-05; see dated qualification; manual/user evidence open)
-**Published candidate:** `1.3.0-rc.1` (2026-10-19)
+**Published candidate:** `1.3.0-rc.3` (2026-11-07; supersedes the unpublished rc.2 draft; manual/user evidence open)
 
 This is the high-level source of truth for product direction and progress. The
 detailed implementation plans remain useful, but they are subordinate to this
@@ -75,18 +74,18 @@ M0-M6 in parallel. Crossed-out bullets inside a milestone represent verified
 increments, not a completed milestone. A milestone remains partial until its
 full exit criteria and evidence gates pass.
 
-| Milestone | Status | Verified progress | Main remaining gate |
-| --- | --- | --- | --- |
-| M0 | Partial | ~~Formatting/lint restoration, clean-install checks, ledger reconciliation, contract inventory, transparency decision, and dependency audit~~ | Full supported-runtime matrix and clean working tree |
-| M1 | Partial | ~~Deterministic corpus summaries, seeded dispersion summary, catalog provenance shape/report, and source contract~~ | Broader corpus, per-part review, and independent evidence |
-| M2 | Partial | ~~Canonical assessments, authored findings, threshold policy, stale-result withholding, per-output sensitivity, and prohibited-label cleanup~~ | Full cross-artifact semantic parity |
-| M3 | Partial | ~~Cause-to-consequence Analysis surface, canonical model responses, Simulation ownership, keyboard/mobile/focus/contrast/reduced-motion closure~~ | Broader application redesign remains deferred |
-| M4 | Partial | ~~On-screen Brief, separate Brief/Checklist print artifacts, stale withholding, static checklist boundary, and candidate-evidence transfer contract~~ | Full transfer matrix and independent evidence loop |
-| M5 | Partial | ~~Guided new/resume/import/invalid/pause/start-fresh/stale/insufficient paths, explicit input posture, demo separation, and desktop/mobile keyboard qualification~~ | No additional code-reachable M5 gate; release evidence remains bounded |
-| M6 | Partial | ~~Node 22 focused clean-install gates, representative workflows, targeted transfer/print/accessibility/copy/privacy/provenance review, and release documentation~~ | Full CI matrix, Windows launch/hash, macOS host run, and independent evidence |
-| M7 | Deferred | No promoted model changes | Evidence-backed model decision |
-| M8 | Deferred research | Python research engine exists but remains disconnected | M6, M7, comparison, security, privacy, and packaging gates |
-| M9 | Deferred | No committed expansion work | Future product decision after trust-centered workflow stabilizes |
+| Milestone | Status            | Verified progress                                                                                                                                                   | Main remaining gate                                                           |
+| --------- | ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| M0        | Partial           | ~~Formatting/lint restoration, clean-install checks, ledger reconciliation, contract inventory, transparency decision, and dependency audit~~                       | Full supported-runtime matrix and clean working tree                          |
+| M1        | Partial           | ~~Deterministic corpus summaries, seeded dispersion summary, catalog provenance shape/report, and source contract~~                                                 | Broader corpus, per-part review, and independent evidence                     |
+| M2        | Partial           | ~~Canonical assessments, authored findings, threshold policy, stale-result withholding, per-output sensitivity, and prohibited-label cleanup~~                      | Full cross-artifact semantic parity                                           |
+| M3        | Partial           | ~~Cause-to-consequence Analysis surface, canonical model responses, Simulation ownership, keyboard/mobile/focus/contrast/reduced-motion closure~~                   | Broader application redesign remains deferred                                 |
+| M4        | Partial           | ~~On-screen Brief, separate Brief/Checklist print artifacts, stale withholding, static checklist boundary, and candidate-evidence transfer contract~~               | Full transfer matrix and independent evidence loop                            |
+| M5        | Partial           | ~~Guided new/resume/import/invalid/pause/start-fresh/stale/insufficient paths, explicit input posture, demo separation, and desktop/mobile keyboard qualification~~ | No additional code-reachable M5 gate; release evidence remains bounded        |
+| M6        | Partial           | ~~Node 22 focused clean-install gates, representative workflows, targeted transfer/print/accessibility/copy/privacy/provenance review, and release documentation~~  | Full CI matrix, Windows launch/hash, macOS host run, and independent evidence |
+| M7        | Deferred          | No promoted model changes                                                                                                                                           | Evidence-backed model decision                                                |
+| M8        | Deferred research | Python research engine exists but remains disconnected                                                                                                              | M6, M7, comparison, security, privacy, and packaging gates                    |
+| M9        | Deferred          | No committed expansion work                                                                                                                                         | Future product decision after trust-centered workflow stabilizes              |
 
 ## Current Baseline
 
@@ -353,6 +352,7 @@ complete the critical path; guided completion never implies approval or flight
 readiness.~~
 
 ### M6 - Release Qualification
+
 **Priority:** P0 at release boundary
 
 **Status:** Partial; local qualification gates pass, including print artifact media
@@ -390,7 +390,6 @@ verification above:
 - **Supported-runtime full matrix:** focused Node 22 gates pass; the complete
   clean-install `npm run check` plus full `npm run e2e` matrix remains a CI
   release gate.
-
 
 ### M7 - Evidence-Led Model Decisions
 
@@ -452,12 +451,12 @@ not by itself establish physical accuracy. This track must not be marketed as a
 
 #### Architecture Options To Evaluate
 
-| Option | Best use | Main cost or risk |
-|---|---|---|
-| Browser JavaScript remains authoritative | Default web, offline, and current desktop behavior | Limited fidelity until the browser model is expanded and validated |
-| Optional hosted Python service | Connected web users needing heavier computation | Privacy, service availability, free-tier limits, cold starts, abuse controls, and no offline support |
-| Tauri local Python sidecar | Desktop users needing the same higher-fidelity engine offline | Per-platform binaries, packaging size, runtime dependencies, signing, lifecycle, and security hardening |
-| Rust/WASM shared engine | Long-term web/desktop code sharing | Significant rewrite and a new validation surface |
+| Option                                   | Best use                                                      | Main cost or risk                                                                                       |
+| ---------------------------------------- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| Browser JavaScript remains authoritative | Default web, offline, and current desktop behavior            | Limited fidelity until the browser model is expanded and validated                                      |
+| Optional hosted Python service           | Connected web users needing heavier computation               | Privacy, service availability, free-tier limits, cold starts, abuse controls, and no offline support    |
+| Tauri local Python sidecar               | Desktop users needing the same higher-fidelity engine offline | Per-platform binaries, packaging size, runtime dependencies, signing, lifecycle, and security hardening |
+| Rust/WASM shared engine                  | Long-term web/desktop code sharing                            | Significant rewrite and a new validation surface                                                        |
 
 The roadmap does not assume that Supabase or Vercel can solve desktop
 distribution. A hosted service and a downloadable application are separate

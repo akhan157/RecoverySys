@@ -2,7 +2,7 @@
 
 ### Build a recovery plan you can review.
 
-Working source prepares **1.3.0-rc.2**; the published download remains rc.1 until qualification completes. See [qualification](RecoverySys/docs/release-qualification-2026-11-05.md).
+Test candidate **1.3.0-rc.3** supersedes the unpublished rc.2 draft and includes the 96" Iris catalog mass correction. See [release notes](RecoverySys/docs/releases/1.3.0-rc.3.md).
 
 A local-first recovery-planning tool for high-power rocketry. Bring in a rocket, choose recovery hardware, explore flight estimates, and keep the inputs, assumptions and unresolved findings together. No account or application backend required.
 
@@ -19,15 +19,15 @@ A local-first recovery-planning tool for high-power rocketry. Bring in a rocket,
 
 ## What is available
 
-| Capability | What you can do |
-| --- | --- |
-| OpenRocket import | Review bounded local imports from formats **1.4–1.11**. Accepted source identity persists through saves, JSON and share links. |
-| Recovery hardware | Browse **225 catalog entries** or enter custom parts; review provenance and unresolved specifications. |
+| Capability         | What you can do                                                                                                                                                                |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| OpenRocket import  | Review bounded local imports from formats **1.4–1.11**. Accepted source identity persists through saves, JSON and share links.                                                 |
+| Recovery hardware  | Browse **225 catalog entries** or enter custom parts; review provenance and unresolved specifications.                                                                         |
 | Supplier budgeting | See timestamped price/stock for **103 distinct IDs** across Fruity Chutes, Rocketman and Spherachutes. Unknown and stale data stays visible; incomplete subtotals are labeled. |
-| Motor inputs | Search ThrustCurve.org or import a RASP `.eng` thrust curve. |
-| Flight estimates | Review ascent, descent, drift, load screening, landing energy and deterministic sensitivity. |
-| Dispersion | Explore modeled landing scatter and drift, with assumptions visible. |
-| Plan continuity | Save, reopen, compare, export, share and print the plan; simulation results stay session-scoped and require a rerun after reload. |
+| Motor inputs       | Search ThrustCurve.org or import a RASP `.eng` thrust curve.                                                                                                                   |
+| Flight estimates   | Review ascent, descent, drift, load screening, landing energy and deterministic sensitivity.                                                                                   |
+| Dispersion         | Explore modeled landing scatter and drift, with assumptions visible.                                                                                                           |
+| Plan continuity    | Save, reopen, compare, export, share and print the plan; simulation results stay session-scoped and require a rerun after reload.                                              |
 
 Packing checks are heuristic screens. They do not measure occupied space or establish physical fit. The experimental 2D/3D viewer is deferred and is not part of V1.
 
