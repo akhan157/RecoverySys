@@ -190,14 +190,23 @@ describe('RecoverySys desktop', () => {
     await shot('05-recovery-brief')
   })
 
-  it('persists the saved plan across a real app relaunch', async () => {
+  it('persists the saved plan after reload/relaunch', async () => {
     // usePersistence debounces localStorage writes by 300 ms.
     await browser.pause(1_000)
     const persisted = await browser.execute(() => localStorage.getItem('recoverysys-config'))
     expect(persisted).toBeTruthy()
     expect(String(persisted)).toContain('2500')
 
-    await browser.reloadSession()
+    // WebDriver relaunch semantics differ by provider. msedgedriver gives each
+    // session a fresh temporary WebView2 profile, so a Windows reloadSession
+    // cannot see the previous session's localStorage. The embedded macOS
+    // provider restarts the real app profile, so it can exercise a full
+    // process relaunch there.
+    if (process.platform === 'win32') {
+      await browser.refresh()
+    } else {
+      await browser.reloadSession()
+    }
     await visible('h1.mc-header__brand')
 
     await clickTab('specs')

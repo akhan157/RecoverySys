@@ -35,3 +35,12 @@ Locally, omit it and the service detects the runtime.
 
 Artifacts are written to `artifacts/`: per-step screenshots, failure
 screenshots/page source, and the WDIO console log when CI tees it.
+
+## Persistence check
+
+The final step reloads the webview and re-asserts the plan. On macOS the
+embedded provider restarts the real app profile, so the step uses a full
+process relaunch there. On Windows, msedgedriver allocates a fresh temporary
+WebView2 profile for every WebDriver session, so a session relaunch would lose
+the profile by construction; the Windows run reloads the webview instead and
+still asserts the plan came back from `localStorage`.
