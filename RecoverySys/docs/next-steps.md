@@ -1,6 +1,12 @@
 # RecoverySys next steps
 
 Working candidate: **1.3.0-rc.2** (2026-11-05; qualification in progress).
+
+2026-11-07: rc.2 is live on Pages, verified against deployment `60b9864`.
+A private rc.2 draft prerelease now contains the tested archives from `dafec8d`
+and their checksum manifest. Further accuracy rework is deferred by the owner;
+no physics gate is relabeled as passed. See
+[release preparation review](history/release-prep-2026-11-07/REVIEW.md).
 Published candidate: **1.3.0-rc.1**. Stable promotion remains open.
 
 Current execution records:

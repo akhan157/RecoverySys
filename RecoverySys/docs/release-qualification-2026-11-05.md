@@ -1,5 +1,10 @@
 # Release qualification — 2026-11-05
 
+2026-11-07 addendum: rc.2 Pages verification passed at deployed `60b9864`;
+the qualified `dafec8d` archives are staged in a private draft prerelease.
+No public candidate download or stable promotion is declared. The dated
+measurements below remain tied to their recorded commits.
+
 Working candidate: `1.3.0-rc.2`. This record supersedes current-state statements
 in the historical rc.1 qualification; historical evidence remains tied to rc.1.
 No stable release or manual/flight qualification is declared here.

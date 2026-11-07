@@ -116,7 +116,8 @@ gh release create v1.3.0-rc.2 \
   --notes-file RecoverySys/docs/releases/1.3.0-rc.2.md \
   "$ARTIFACTS/RecoverySys-web.zip" \
   "$ARTIFACTS/RecoverySys-Portable.zip" \
-  "$ARTIFACTS/RecoverySys-macos-universal.zip"
+  "$ARTIFACTS/RecoverySys-macos-universal.zip" \
+  RecoverySys/docs/history/release-rc2-2026-11-05/SHA256SUMS.txt
 ```
 
 Preflight immediately before running it, from the repository root:

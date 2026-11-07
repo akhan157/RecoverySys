@@ -1,3 +1,26 @@
+# Current checkpoint — 2026-11-07
+
+Application state is on GitHub main through `ad67fea`; release preparation
+`36e09a213145d106848c6053bb7c49d091e769d6` is integrated. The live Pages
+rc.2 deployment at `60b9864` passed verification on this date. Supplier-only
+commits after that deployment have newer timestamps; their data is not part
+of the historical rc.2 archives. See `history/release-prep-2026-11-07/REVIEW.md`.
+
+The owner deferred further accuracy rework and asked to proceed with the other
+remaining items. This is a scope deferral, not acceptance of the 21 review-only
+cases or flight validation. Historical release-gate counts are unchanged.
+
+A private draft prerelease `v1.3.0-rc.2` now targets tested head `dafec8d` with
+the three hosted ZIPs and SHA256SUMS.txt. It has not been published. Source,
+archive hashes, review fixes and checks are recorded in the release-preparation
+packet. No stable tag or approval is inferred.
+
+Next: catalog variant/source review; actual Windows/macOS and observed user
+workflows remain unavailable until actual testers are available. Publishing
+the prepared candidate is a distinct final release action.
+
+## Historical checkpoint (retained below)
+
 # RecoverySys qualification checkpoint — 2026-11-05
 
 ## New online-validation work

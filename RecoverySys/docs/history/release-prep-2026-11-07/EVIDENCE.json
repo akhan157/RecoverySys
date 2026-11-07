@@ -1,0 +1,51 @@
+{
+  "recordedAt": "2026-11-07",
+  "authorCommit": "36e09a213145d106848c6053bb7c49d091e769d6",
+  "author": "opencode-go/deepseek-v4.1-flash variant max",
+  "reviewer": "Codex gpt-6.1-sol",
+  "disposition": "accepted-bounded-release-preparation",
+  "sourcePin": "dafec8d1985d863169d1ba275c46ea74a7da4ea3",
+  "sourceRun": 42123690801,
+  "release": {
+    "tagName": "v1.3.0-rc.2",
+    "isDraft": true,
+    "isPrerelease": true,
+    "url": "https://github.com/akhan157/RecoverySys/releases/tag/untagged-a4d44b33d4417ba06897"
+  },
+  "draftRedownloadAssets": [
+    {
+      "name": "RecoverySys-Portable.zip",
+      "bytes": 2733669,
+      "sha256": "ba06af039213b18fe4c4219e92fb78dbecec581aaaa395af03e0053e75185399"
+    },
+    {
+      "name": "RecoverySys-macos-universal.zip",
+      "bytes": 5965736,
+      "sha256": "b09d19741ba461683a96929880edbe06fe11d26a9fb05be30a9f3dbb7ce37c1b"
+    },
+    {
+      "name": "RecoverySys-web.zip",
+      "bytes": 297550,
+      "sha256": "775381299b1abad67429c0dff13d5ea450a12e10302c23c93aa05df3bfbc4538"
+    },
+    {
+      "name": "SHA256SUMS.txt",
+      "bytes": 275,
+      "sha256": "4c23566ab48e85371f98e28d9c4f2dbbcc89bac6b98083f9ffdd8475740eb55f"
+    }
+  ],
+  "checks": {
+    "archiveSha256": "PASS",
+    "archiveCrc": "PASS",
+    "draftRedownloadSha256": "PASS",
+    "pagesIdentity": "PASS V1.3 RC2, deployment 60b9864",
+    "npmAudit": "0 advisories",
+    "catalogPacketAuditor": "243 passed; packet integrity only"
+  },
+  "limitations": [
+    "No public release or stable approval",
+    "No manual platform or actual user trials",
+    "Accuracy rework deferred by owner; no physics acceptance",
+    "Catalog field/source decisions remain open"
+  ]
+}
