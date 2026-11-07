@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { SLOT_IDS } from '../data/parts.js'
+import { PARTS, SLOT_IDS } from '../data/parts.js'
 import { checkCompatibility } from '../lib/compatibility.js'
 import { buildRecoveryBrief } from '../lib/recoveryBrief.js'
 import { computeRecoveryMass, RECOVERY_MASS_MODEL } from '../lib/recoveryMass.js'
@@ -88,6 +88,26 @@ describe('computeRecoveryMass', () => {
     expect(
       computeRecoveryMass({ config, specs: { rocket_mass_g: '299' } }).exceeds_rocket_mass
     ).toBe(true)
+  })
+})
+
+describe('catalog recovery mass integration', () => {
+  it('reports the corrected IFC-96-S mass from the real catalog entry', () => {
+    const part = PARTS.find((entry) => entry.id === 'ifc-096-s' && entry.category === 'main_chute')
+    expect(part).toBeDefined()
+    expect(part.specs.weight_g).toBe(462)
+
+    const result = computeRecoveryMass({
+      config: { main_chute: part },
+      specs: { rocket_mass_g: '2500' },
+    })
+
+    expect(result.status).toBe('evaluated')
+    expect(result.items).toHaveLength(1)
+    expect(result.items[0]).toMatchObject({ slot: 'main_chute', weight_g: 462 })
+    expect(result.total_g).toBe(462)
+    expect(result.fraction_of_rocket).toBeCloseTo(0.1848)
+    expect(result.exceeds_rocket_mass).toBe(false)
   })
 })
 
