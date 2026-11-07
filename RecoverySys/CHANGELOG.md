@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+### Fixed
+
+- Correct the 96" Iris Ultra Compact (Spectra) main-chute catalog mass from 46 g to 462 g, matching the manufacturer's 16.3 oz (462.097 g) specification. Hardware mass remains informational; simulated and user-entered rocket mass are unchanged.
+
 ## [1.3.0-rc.2] - 2026-11-05 (working candidate)
 
 ### Qualification and evidence
