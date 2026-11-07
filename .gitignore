@@ -1,3 +1,6 @@
+# Local external release artifacts (raw logs, archives, checks)
+/RecoverySys-artifacts/
+
 # Local gstack config
 .gstack/
 

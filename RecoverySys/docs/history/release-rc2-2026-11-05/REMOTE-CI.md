@@ -37,3 +37,24 @@ These automated results close the hosted software gate only. No actual manual
 Windows/Mac workflow, participant observation, independent physics acceptance,
 catalog approval or stable release is inferred from a green build or a live
 process. This records evidence; it is not author self-approval of those gates.
+
+## Addendum — 2026-11-07: fresh artifact re-download
+
+The measurements above are unchanged. A second download of run `42123690801`
+on 2026-11-07 into an external
+`RecoverySys-artifacts/1.3.0-rc.2/release-prep-2026-11-07/raw-download/`
+directory reproduced all three archives byte for byte:
+
+| Archive | Fresh SHA-256 | Historical match | CRC |
+| --- | --- | --- | --- |
+| `RecoverySys-web.zip` | `775381299b1abad67429c0dff13d5ea450a12e10302c23c93aa05df3bfbc4538` | yes | `unzip -t` OK |
+| `RecoverySys-Portable.zip` | `ba06af039213b18fe4c4219e92fb78dbecec581aaaa395af03e0053e75185399` | yes | `unzip -t` OK |
+| `RecoverySys-macos-universal.zip` | `b09d19741ba461683a96929880edbe06fe11d26a9fb05be30a9f3dbb7ce37c1b` | yes | `unzip -t` OK |
+
+Download was `gh run download 42123690801 -R akhan157/RecoverySys --dir
+<external-path>`; hashes were compared with this file and `EVIDENCE.json`.
+Runner-side hashes agreed, including the uppercase Windows PowerShell output.
+No archive was rebuilt or modified. The fresh download also retained the E2E
+report and platform launch/slice evidence, but those do not close manual
+workflow gates. See `SHA256SUMS.txt` and `RELEASE-PREP.md` for the staged
+release-asset manifest and prepared (not executed) draft-release command.
