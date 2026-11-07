@@ -5,6 +5,10 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ## [Unreleased]
 
+## [1.3.0-rc.3] - 2026-11-07 (test candidate)
+
+Supersedes the unpublished rc.2 draft, whose archives carry the old 46 g mass.
+
 ### Fixed
 
 - Correct the 96" Iris Ultra Compact (Spectra) main-chute catalog mass from 46 g to 462 g, matching the manufacturer's 16.3 oz (462.097 g) specification. Hardware mass remains informational; simulated and user-entered rocket mass are unchanged.
@@ -23,7 +27,6 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Prepare rc.2 version identities with cross-file build checks and an explicit manual/field/independent-evidence gate record. Stable promotion remains open.
 
 ### Previously unreleased changes
-
 
 ### Added
 
@@ -124,11 +127,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.2.0.1] - 2026-07-19
 
 ### Changed
+
 - Enforced LF source formatting to keep release and development artifacts consistent across platforms.
 
 ## [1.2.0.0] - 2026-04-09
 
 ### Added
+
 - **`lib/schema.js`** — single source of truth for the SPECS object shape. Exports `SPECS_SCHEMA` (per-field type, unit, default, label, min/max), `getDefaultSpecs()`, `SPEC_KEYS`, `coerceSpec()`, and `parseSpec()` (coerce + clamp to schema range). Future field changes are a one-file edit instead of a six-file scavenger hunt.
 - **`lib/migrations.js`** — versioned payload migrations. `runMigrations(payload)` walks ordered migrators keyed by `from` version; share links from a newer schema are rejected via `isPayloadFromFuture()` rather than silently corrupting fields.
 - **Schema-versioned persisted payloads** — both localStorage CONFIG and share links now include `schemaVersion` so future schema changes are detectable on load.
@@ -140,6 +145,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **Custom motor persistence** — `customMotor` survives localStorage save/load and round-trips through share links (base64 payload grows ~2-5 KB per curve, still well under practical URL limits).
 
 ### Changed
+
 - `runSimulation({ specs, config })` now accepts an optional `customMotor` parameter. Backwards compatible — omitting the param keeps the scalar `integrated` path.
 - `integrateAscent` signature extended with optional `curve` and `propMass_kg_override` parameters. When `propMass_kg_override` is provided (from an imported motor's measured propellant mass), it's used instead of the Isp heuristic.
 - **`ejection_g_factor` handling unified across `compatibility.js`, `simulation.js`, and `SuggestPanel.jsx`** via `parseSpec`. Previously the three files disagreed on what to do with negative input — sim clamped `-50` to 1, compatibility fell back to 20G, SuggestPanel used `-50` directly. All three now route through `parseSpec` which returns `null` for ≤0, letting consumers fall through to the same auto-default (20G for <10kg, 30G for ≥10kg).
@@ -147,6 +153,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **UI brand badge** reads `VERSION_DISPLAY` from `constants.js` instead of a hardcoded `RECOVERYSYS_V1.1` literal.
 
 ### Fixed
+
 - **Landing page scroll** — removed `html, body { height: 100% }` from `landing/assets/colors_and_type.css` that was making body a fixed-height scroll container competing with Lenis's window scroller. Wheel events were captured but the page never moved.
 - **`engParser` now strips `;` inline comments anywhere on a line** (per the RASP spec — previously only handled full-line comments).
 - **Leaflet CSS** loaded from CDN now has SRI integrity attribute + `crossorigin=anonymous` to fail closed if the CDN is compromised.
@@ -156,13 +163,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - **`PrintChecklist`** uses `WARN_LEVELS.ERROR` constant instead of magic string literal `'error'`.
 
 ### Removed
+
 - **`lib/engineApi.js`** — 229-line module deleted. Had zero callers in `src/` (was a future-Python-engine integration that was never wired up). Reading an attacker-controllable URL from `localStorage('recoverysys-engine-url')` and POSTing config data to it was a real exfiltration vector with no rent-paying use.
 - **`flight_computer` and `battery` cases in `format.js`** — neither category exists in the parts catalog.
 
 ### Security
+
 - Share-link decoder now rejects payloads from a newer `schemaVersion` rather than silently dropping fields the receiver doesn't understand.
 
 ### Added
+
 - **ThrustCurve motor search** — live search field in Rocket Specs queries ThrustCurve.org API; selecting a motor auto-fills total impulse and burn time; AbortController prevents stale results from overwriting fresh ones
 - **Suggest Parts panel** — collapsible panel above SimPanel ranks main chutes, drogue chutes, and shock cords against user-specified target descent rates; "Use" button applies the part in one click
 - **Dispersion Map** — Leaflet-powered interactive map shows predicted landing zone given wind speed/direction and launch coordinates; drift distance, compass bearing, and ±20% uncertainty circle displayed
@@ -171,12 +181,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `computeDrift()` exported from `simulation.js` — Great Circle landing coordinate prediction from apogee, descent rates, and wind vector
 
 ### Changed
+
 - `computeDescentRate()` density-corrects at actual deployment altitude (main at deploy\_ft, drogue at mid-phase average) — descent rates at high-altitude sites are now faster and more accurate
 - Deployment bag and swivel packed heights now count toward bay volume utilization
 - Tiered harness length minimums added to compatibility engine (5 ft L1, 10 ft L2, 15 ft L3)
 - `bearing_deg` in `computeDrift` is `null` when wind direction is unspecified — prevents the map from defaulting to a misleading due-north bearing
 
 ### Fixed
+
 - `airframe_od_in` → `airframe_id_in` field rename migrated automatically on load — returning users' saved configs and share links work without re-entry
 - `computeShockLoad` now returns `null` for zero or negative G-factor inputs (safety-critical guard against silent PASS rating)
 - MotorSearch `clear()` now aborts any in-flight ThrustCurve request — prevents stale API responses from reopening the dropdown after clear
@@ -188,6 +200,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.1.1.0] - 2026-03-25
 
 ### Added
+
 - Custom parachute builder — add, select, and delete custom chutes (name, diameter, Cd, packed dims, weight) stored in `localStorage` under `recoverysys-custom-parts`; appear in a dedicated CUSTOM group above catalog entries in the PartsBrowser
 - Deployment bag and swivel parts catalog entries (21 new parts); deployment bag packing check and swivel ejection-load check in compatibility engine
 - Ejection G-factor input in RocketSpecs — overrides the auto-default (20G L1/L2, 30G L3); applied to shock cord, quick link, and swivel load checks
@@ -204,12 +217,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Post-sim sanity warnings — high-drift alert (>3000 ft), subsonic burnout note, and velocity context in SimPanel
 
 ### Changed
+
 - Parts browser redesigned — manufacturer-grouped collapsible sections with `aria-pressed` selection state; CUSTOM group always shown first when custom parts exist
 - `RocketSpecs` expanded with ejection G-factor and bay obstruction fields
 - Share link decoder now searches `allParts` (custom + catalog) instead of `PARTS` only — custom parts on the same device resolve correctly; separate toast for custom parts that cannot be shared vs. catalog parts that are missing
 - Mobile PartsBrowser was missing `parts={allParts}`, `customParts`, `onAddCustomPart`, and `onDeleteCustomPart` props — custom chutes are now visible on mobile
 
 ### Fixed
+
 - Custom part IDs switched from `Date.now()` to `crypto.randomUUID()` — prevents silent collision if two parts are created in the same millisecond
 - Negative bay obstruction input was accepted and silently inflated usable bay length; now clamped to `Math.max(0, ...)`
 - Ejection G-factor values below 5G (e.g., a typo of `0.1` instead `10`) now floored at 5G — prevents all hardware load checks from returning near-zero required strength
@@ -222,12 +237,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.1.0.0] - 2026-03-24
 
 ### Added
+
 - Inter font as body/UI font (previously system-ui only); loaded via `<link>` to avoid render-blocking CSS `@import`
 - Dark mode FOUC prevention — blocking inline script in `<head>` reads `localStorage('recoverysys-theme')` and applies `data-theme="dark"` before first paint
 - RecoverySys/DESIGN.md decisions log — 10 entries covering all major design decisions with date and rationale
 - New CSS tokens: `--bg-right`, `--input-bg`, `--accent`, `--accent-text`, `--accent-tint`, `--accent-ring`, `--header-bg`, `--header-border`, `--radius`
 
 ### Changed
+
 - **Slate palette redesign** — all CSS custom properties updated to the Slate palette: desaturated blue-grey tones replacing warm-grey; dark header `#1a1d23` replaces `#1a1a1a`
 - **2-column desktop layout** — left column (Config Builder + Rocket Specs) / right column (Parts Browser + Sim Panel) with distinct background tones
 - Category pills updated to use `--accent` token for active state
@@ -237,6 +254,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - TODOS.md rewritten — phantom FastAPI/Supabase backend items replaced with accurate frontend v2 items (wind model P2, thrust-curve apogee P1, parts catalog tooling P3)
 
 ### Fixed
+
 - `--text-tertiary` WCAG AA compliance: `#8c94a3` (3.05:1) → `#636c7e` (5.28:1 on white) in light mode; `#5a6070` (2.79:1) → `#7b8496` (4.66:1 on `#171a1f`) in dark mode
 - `--chart-label` and `--chart-marker` WCAG AA compliance: same fix applied to chart axis and event-marker labels
 - PartsBrowser `max-height` catalog truncation: `1000px` → `9999px` (Rocketman has 66 parts ≈ 1650px; old value clipped catalog)
@@ -248,6 +266,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ## [1.0.0.0] - 2026-03-24
 
 ### Added
+
 - Complete recovery bay configuration tool for high-power rocketry (HPR)
 - Parts Browser with 189 parachutes and recovery components sourced from the OpenRocket database (b2 Rocketry, Fruity Chutes, Rocketman, Top Flight, SkyAngle, and more)
 - Config Builder with six slot categories: main chute, drogue chute, shock cord, chute protector, quick links, and chute-mounted device
@@ -264,12 +283,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - `safeTimeout` utility — timers are tracked in a ref and cleaned up on unmount, so background state updates never fire after the component is gone
 
 ### Changed
+
 - All timer callbacks in `App.jsx` now use `safeTimeout`, eliminating a class of unmount-after-timer race conditions
 - Export button disabled when `airframe_od_in` is blank (regression: was silently exporting with `|| 4` fallback)
 - `×` remove buttons on config slots now have 44×44 px touch targets and `aria-label="Remove {name}"`
 - `--text-tertiary` color token raised from `#888` (3.5:1) to `#767676` (4.5:1) to pass WCAG AA contrast
 
 ### Fixed
+
 - Export state machine was stuck in `done` state permanently; now resets to `idle` after 3 s via `safeTimeout`
 - Part action buttons missing `aria-label` and `aria-pressed` attributes
 - SimPanel not passed to mobile tab view when simulation fails
