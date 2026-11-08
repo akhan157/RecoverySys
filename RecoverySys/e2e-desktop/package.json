@@ -1,0 +1,22 @@
+{
+  "name": "recoverysys-e2e-desktop",
+  "version": "0.0.0",
+  "private": true,
+  "description": "WebDriver desktop E2E for the shipped Windows portable build and the macOS feature-flagged test build",
+  "type": "module",
+  "engines": {
+    "node": "^22.13.0 || ^24.0.0 || ^26.0.0"
+  },
+  "scripts": {
+    "test:desktop": "wdio run wdio.conf.js"
+  },
+  "devDependencies": {
+    "@wdio/cli": "9.31.9",
+    "@wdio/globals": "9.31.3",
+    "@wdio/local-runner": "9.31.9",
+    "@wdio/mocha-framework": "9.31.9",
+    "@wdio/spec-reporter": "9.31.2",
+    "@wdio/tauri-service": "1.5.1",
+    "webdriverio": "9.31.9"
+  }
+}
