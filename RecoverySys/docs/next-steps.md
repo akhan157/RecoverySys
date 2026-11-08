@@ -10,6 +10,7 @@ no physics gate is relabeled as passed. See
 Published candidate: **1.3.0-rc.1**. Stable promotion remains open.
 
 Current execution records:
+
 - [Release gates and manual platform template](release-gates-1.3.0.md)
 - [Current qualification](release-qualification-2026-11-05.md)
 - [Primary-source research](online-evidence-2026-11-05.md)
@@ -39,6 +40,7 @@ The current `main` contains unreleased review fixes beyond the tagged rc.1 artif
 - The latest verified application deployment is `3a98e9a` (2026-11-04; supplier-only commits followed) and carries the rc.1 version label; it is not a qualification of these changes. `npm run verify:pages` passes against the live site, and the deploy workflow runs the same check after publishing.
 
 Implemented in this candidate:
+
 - Bounded OpenRocket 1.4–1.11 import, with accepted source identity preserved through storage, JSON and share links.
 - 38 import fixtures, including 26 real-world files. Many share a design lineage; these are not independent user trials or physics validation.
 - Timestamped supplier price/stock and budgeting, explicit unknown/stale data, and commercial refresh tooling. Engineering changes remain read-only review proposals.
@@ -46,13 +48,15 @@ Implemented in this candidate:
 - The rejected 2D/3D prototype is archived under `experiments/bay-view`; it is absent from the V1 interface and production bundle.
 
 Verified candidate preparation:
+
 - Clean supported Node 22 install, 386 tests, formatting/lint/catalog/corpus checks and production build.
 - All 62 desktop/mobile browser workflows, locally and in remote Linux CI.
 - Windows portable and macOS universal artifacts, SHA-256 hashes and 15-second process-launch smoke checks in CI. Manual platform workflows remain open.
 - PR #15 merged; the web candidate is deployed and verified. Test-release downloads have matching local/CI/GitHub SHA-256 digests. Supplier automation passed its first remote refresh.
 
 Remaining external/review evidence:
-1. Manual Windows/macOS workflow trials and 10–15 observed rocketeer workflows using `v1-field-trial.md`.
+
+1. Automated desktop workflows now run on every push (see `history/desktop-e2e-2026-11-07/`): the shipped Windows portable exe and a feature-flagged macOS test build of the same source. Still open: a human Windows/macOS walkthrough, Intel Mac launch, Windows signing (owner to apply to SignPath Foundation; macOS stays ad-hoc signed), and 10–15 observed rocketeer workflows using `v1-field-trial.md`.
 2. Independent physics review: the current 21 cases remain review-only; zero accepted comparison cases and zero real-flight cases. Review the new standalone analytic report, including its tolerance findings.
 3. The 35 historical manufacturer field proposals now have parent dispositions in `history/catalog-review-2026-11-07/REVIEW.md`. Source/identity holds remain; the owner-approved IFC-96-S mass correction is integrated from `f072909`. Saved catalog selections pick up the new weight on reload; custom copies retain entered values. Archived rc.2 downloads predate that correction and are flagged in the draft release notes. Expand supplier coverage only when exact product/variant identity is established.
 4. Recheck dependency advisories immediately before stable promotion. The 2026-11-05 rc.2 lockfile patches `fast-uri` to 3.1.9; full and production npm audits report zero advisories.
