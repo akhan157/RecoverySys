@@ -1,72 +1,106 @@
+<div align="center">
+
 # RecoverySys
 
-### Build a recovery plan you can review.
+**Plan, check and review a high-power rocket recovery system before launch day.**
 
-Test candidate **1.3.0-rc.3** supersedes the unpublished rc.2 draft and includes the 96" Iris catalog mass correction. See [release notes](RecoverySys/docs/releases/1.3.0-rc.3.md).
+[![Node checks](https://github.com/akhan157/RecoverySys/actions/workflows/check.yml/badge.svg)](https://github.com/akhan157/RecoverySys/actions/workflows/check.yml)
+[![Deploy](https://github.com/akhan157/RecoverySys/actions/workflows/deploy.yml/badge.svg)](https://github.com/akhan157/RecoverySys/actions/workflows/deploy.yml)
+[![Latest release](https://img.shields.io/github/v/release/akhan157/RecoverySys?include_prereleases&label=release)](https://github.com/akhan157/RecoverySys/releases/latest)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-A local-first recovery-planning tool for high-power rocketry. Bring in a rocket, choose recovery hardware, explore flight estimates, and keep the inputs, assumptions and unresolved findings together. No account or application backend required.
+**[Open the web app](https://akhan157.github.io/RecoverySys/)** ·
+**[Download for Windows / macOS](https://github.com/akhan157/RecoverySys/releases/latest)** ·
+**[Overview](https://akhan157.github.io/RecoverySys/landing/)**
 
-**[Open the app](https://akhan157.github.io/RecoverySys/)** · **[Explore the overview](https://akhan157.github.io/RecoverySys/landing/)** · **[Download v1.3.0-rc.1](https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.1)**
+![RecoverySys dashboard with a sample L3 recovery plan](assets/screenshots/dashboard.jpg)
 
-![RecoverySys: configure, check, estimate and review a recovery plan](assets/recoverysys-overview.svg)
+</div>
 
-## From rocket file to reviewable plan
+RecoverySys is a free, local-first tool for high-power rocketry. Bring in a
+rocket, pick parachutes and hardware, run flight estimates, and keep every
+input, assumption and open finding together in one reviewable plan. There is
+no account and no backend. Plans stay in your browser unless you export or
+share them.
 
-1. **Start with your rocket.** Import an OpenRocket `.ork` file or enter the vehicle manually. Review the configuration, stage, geometry and mass before accepting suggestions.
-2. **Choose your hardware.** Select catalog or custom parachutes, cords, protection and connection hardware. Review source information, compatibility findings and missing data.
-3. **Run and compare estimates.** Explore ascent, descent, drift, deployment-load screening and landing energy. Input changes mark existing results stale until you rerun.
-4. **Keep the review with the plan.** Save locally, transfer JSON, share a link, compare configurations or print a recovery brief/checklist. Record actual observations separately in the Flight Log.
+## What it does
 
-## What is available
+| Feature                               | What you get                                                                                                                           |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| **Import your rocket**                | Import OpenRocket `.ork` files (formats 1.4–1.11) or enter the vehicle by hand.                                                        |
+| **Choose hardware**                   | Choose from 225 catalog parachutes, cords, links, swivels, bags and devices, or add your own. Source and unverified data are labelled. |
+| **Check compatibility**               | Screen packing, descent rate, landing energy, ejection, snatch and opening-shock loads across the whole cord–link–swivel chain.        |
+| **Estimate the flight**               | Get ascent with ThrustCurve.org motors or a `.eng` thrust curve, plus descent, drift, Monte Carlo dispersion and sensitivity.          |
+| **Follow the deployment sequence**    | See liftoff → apogee → main → landing with altitude, time and speed, taken from the current result.                                    |
+| **Check hardware mass and load path** | See per-part recovery mass, the governing load case, each element's margin and the weakest link.                                       |
+| **Budget**                            | See timestamped price and stock for 103 parts from Fruity Chutes, Rocketman and Spherachutes.                                          |
+| **Review and share**                  | Compare configurations, print a recovery brief or checklist, export JSON, share a link and log real flights.                           |
 
-| Capability         | What you can do                                                                                                                                                                |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| OpenRocket import  | Review bounded local imports from formats **1.4–1.11**. Accepted source identity persists through saves, JSON and share links.                                                 |
-| Recovery hardware  | Browse **225 catalog entries** or enter custom parts; review provenance and unresolved specifications.                                                                         |
-| Supplier budgeting | See timestamped price/stock for **103 distinct IDs** across Fruity Chutes, Rocketman and Spherachutes. Unknown and stale data stays visible; incomplete subtotals are labeled. |
-| Motor inputs       | Search ThrustCurve.org or import a RASP `.eng` thrust curve.                                                                                                                   |
-| Flight estimates   | Review ascent, descent, drift, load screening, landing energy and deterministic sensitivity.                                                                                   |
-| Dispersion         | Explore modeled landing scatter and drift, with assumptions visible.                                                                                                           |
-| Plan continuity    | Save, reopen, compare, export, share and print the plan; simulation results stay session-scoped and require a rerun after reload.                                              |
+<table>
+<tr>
+<td width="50%"><img src="assets/screenshots/simulation.jpg" alt="Flight profile and simulation data"></td>
+<td width="50%"><img src="assets/screenshots/dispersion.jpg" alt="Monte Carlo landing dispersion map"></td>
+</tr>
+<tr>
+<td><img src="assets/screenshots/sequence.jpg" alt="Deployment sequence in the recovery brief"></td>
+<td><img src="assets/screenshots/load-path.jpg" alt="Load-path margins and weakest link"></td>
+</tr>
+</table>
 
-Packing checks are heuristic screens. They do not measure occupied space or establish physical fit. The experimental 2D/3D viewer is deferred and is not part of V1.
+## Get it
 
-## Current test release
+- **Web:** <https://akhan157.github.io/RecoverySys/>. It works in any modern
+  browser and tracks `main`.
+- **Desktop:** the portable Windows and macOS universal ZIPs are on the
+  [latest release](https://github.com/akhan157/RecoverySys/releases/latest).
+  No installer is needed. The macOS app is not notarized, so on first launch
+  right-click it and choose **Open**. See the
+  [desktop guide](RecoverySys/DESKTOP.md).
 
-**[v1.3.0-rc.1](https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.1)** includes the web build, portable Windows ZIP, macOS universal ZIP and `SHA256SUMS.txt`. See [desktop instructions](RecoverySys/DESKTOP.md) before using a portable build.
+## How it is tested
 
-The tagged candidate passed **386 tests and 62 desktop/mobile browser workflows**, plus Windows/macOS build and process-launch smoke checks. Post-tag `main` adds review fixes and now passes 414 tests and 92 desktop/mobile browser runs locally, but it is **not** a new qualified release even though the deployed web build tracks `main`. These are software checks. Manual platform workflows, observed rocketeer trials and independent engineering/flight evidence remain open. The physics corpus has no accepted comparison or real-flight cases. See the [qualification record](RecoverySys/docs/release-qualification-2026-10-19.md) for evidence and limitations, including remaining development-tool advisories.
+Every push runs 482 unit and component tests on Node 22, 24 and 26, and 96
+desktop and mobile browser workflows. It also builds the Windows and macOS apps
+and drives the real desktop apps through a full plan: inputs, hardware,
+simulation, Recovery Brief and saved-plan reload.
 
-Trying your own rocket? Use the [field-trial guide](RecoverySys/docs/v1-field-trial.md) and [results template](RecoverySys/docs/field-trial-results.csv).
-
-## Local first, with explicit network features
-
-Plans and Flight Log entries stay in browser storage unless you export or share them. Motor searches use ThrustCurve.org; map tiles use OpenStreetMap; checking supplier data downloads the published commercial snapshot. Supplier refreshes never rewrite engineering specifications or saved simulation inputs. The landing page and fonts also load public CDN resources. See [privacy and model details](RecoverySys/README.md).
-
-RecoverySys is a planning aid. Results depend on simplified models and input quality; they do not authorize a launch or replace independent engineering review, manufacturer guidance or range procedures.
+These are software checks. RecoverySys is a planning aid built on simplified
+models. Its results have not been validated against accepted comparison cases
+or real flights, and they do not replace independent engineering review,
+manufacturer guidance or range safety procedures. See
+[next steps](RecoverySys/docs/next-steps.md) for the open evidence.
 
 ## Run locally
-
-Use Node 22 for the CI-qualified development path. The package supports Node `^22.13.0 || ^24.0.0 || ^26.0.0` and npm `>=10`.
 
 ```bash
 cd RecoverySys
 npm ci
-npm run dev
+npm run dev      # http://localhost:5173
+npm run check    # format, catalog/corpus validation, lint, tests and build
+npm run e2e      # production desktop/mobile browser workflows
 ```
 
-```bash
-npm run check   # formatting, catalog/corpus validation, lint, tests and build
-npm run e2e     # production desktop/mobile browser workflows
-npm run preview # preview the built application
-```
+The supported runtimes are Node `^22.13.0 || ^24.0.0 || ^26.0.0` and npm 10 or
+later.
 
-## Project documentation
+## Privacy and network use
 
-- [User guide](RecoverySys/README.md) · [Desktop downloads and builds](RecoverySys/DESKTOP.md)
-- [Current next steps](RecoverySys/docs/next-steps.md) · [Roadmap](RecoverySys/ROADMAP.md) · [Changelog](RecoverySys/CHANGELOG.md)
-- [Product strategy](RecoverySys/PRODUCT-STRATEGY-BRIEF.md)
-- [Supplier refresh and engineering review](RecoverySys/docs/supplier-refresh.md)
-- [Contributing](CONTRIBUTING.md) · [MIT license](LICENSE)
+Your plans and Flight Log stay in browser storage. The app goes online only to
+search ThrustCurve.org for motors, load OpenStreetMap tiles for the dispersion
+map, fetch the published supplier price snapshot, and load fonts from Google
+Fonts. Supplier refreshes never
+change engineering specifications. See the
+[user guide](RecoverySys/README.md).
 
-Third-party regression fixtures retain their own [source attribution and licenses](RecoverySys/src/test/fixtures/openrocket/README.md).
+## Documentation
+
+[User guide](RecoverySys/README.md) ·
+[Desktop](RecoverySys/DESKTOP.md) ·
+[Changelog](RecoverySys/CHANGELOG.md) ·
+[Roadmap](RecoverySys/ROADMAP.md) ·
+[Field-trial guide](RecoverySys/docs/v1-field-trial.md) ·
+[Contributing](CONTRIBUTING.md) ·
+[MIT license](LICENSE)
+
+Third-party regression fixtures keep their own
+[source attribution and licenses](RecoverySys/src/test/fixtures/openrocket/README.md).

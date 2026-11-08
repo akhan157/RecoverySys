@@ -2,9 +2,7 @@
 
 RecoverySys is a local-first recovery-bay configuration and flight-estimation tool for high-power rocketry. It helps you assemble recovery hardware, review configuration warnings, and explore simulated flight and landing behavior before a launch.
 
-**Current test candidate: [1.3.0-rc.3](https://github.com/akhan157/RecoverySys/releases/tag/v1.3.0-rc.3)**
-
-Test candidate **1.3.0-rc.3** supersedes the unpublished rc.2 draft and includes the 96" Iris catalog mass correction. See [release notes](docs/releases/1.3.0-rc.3.md).
+**Current release: [1.3.0-rc.3](https://github.com/akhan157/RecoverySys/releases/latest)** ([release notes](docs/releases/1.3.0-rc.3.md))
 
 The complete product strategy, requirements outline, feature breakdown, acceptance criteria, metrics, risks, release strategy, and six-phase roadmap are in [`PRODUCT-STRATEGY-BRIEF.md`](PRODUCT-STRATEGY-BRIEF.md).
 
@@ -23,7 +21,8 @@ The browser JavaScript implementation in `src/lib/simulation.js` is the sole
 production simulation authority. Python engine material is research and
 deferred-only; it is not used by the application or release builds.
 
-- Review compatibility checks and warnings for the selected configuration.
+- Review compatibility checks and warnings for the selected configuration, including series-chain load-path margins and the weakest link.
+- See recovery hardware mass and the deployment sequence (liftoff to landing) in the Recovery Brief.
 - Generate a Monte Carlo dispersion map with predicted drift vectors and uncertainty circles. This is an estimate of modeled dispersion, not a statistical confidence guarantee.
 - Compare a saved Config A with the current Config B.
 - Save and restore configurations in the browser, copy share links, import/export JSON, and print a recovery checklist.
